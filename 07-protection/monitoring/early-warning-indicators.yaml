@@ -1,0 +1,28 @@
+# SGC TECH AI — Early Warning Indicators
+# Checked monthly alongside the portfolio-limits review. Each indicator
+# maps to a response tier in graduated-response.md.
+version: 1.0
+effective_from: 2026-08-03
+
+indicators:
+  runway_below_1_month:
+    threshold: "liquid reserves / monthly opex < 1"
+    tier: critical
+  aggregate_cash_exposure_above_80pct_of_cap:
+    threshold: "aggregate peak cash exposure > 0.8 x portfolio-limits.yaml max_aggregate_peak_cash_exposure_aed"
+    tier: high
+  client_payment_more_than_7_days_late:
+    threshold: "any active client invoice unpaid 7+ days past due"
+    tier: medium
+  concurrent_deferred_builds_at_cap:
+    threshold: "active deferred builds = portfolio-limits.yaml max_concurrent_deferred_builds"
+    tier: medium
+  single_client_concentration_above_15pct:
+    threshold: "one client approaching (not yet breaching) the 20% concentration limit"
+    tier: low
+  new_deal_priced_below_target_margin:
+    threshold: "a signed deal's actual margin lands below 35% target, even if above the 30%/25% floors"
+    tier: low
+
+notes:
+  - "Indicators are leading signals, not gates — they don't block a deal on their own, but two or more concurrent medium+ indicators should trigger a Commercial Desk review before the next deal is priced."

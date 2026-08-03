@@ -1,0 +1,22 @@
+# SGC TECH AI — Portfolio Exposure Limits
+# Absolute AED values, not percentages — a percentage of a shrinking
+# number gives false comfort at low reserves. See doctrine.md.
+version: 1.0
+effective_from: 2026-08-03
+
+max_peak_cash_exposure_single_deal_aed: 1000
+max_aggregate_peak_cash_exposure_aed: 2000
+max_concurrent_deferred_builds: 2
+max_zero_mobilisation_deals_per_quarter: 0     # withdrawn — see pricing/payment-plans.yaml: withdrawn.option_b_zero_mobilisation
+
+concentration:
+  single_client_max_pct_of_recurring_revenue: 0.20
+  single_vertical_max_pct_of_recurring_revenue: 0.50
+
+runway:
+  status: rebuild_target_not_gate    # this is a target to work toward, not itself a hard gate that blocks a deal
+  current_months: 1.5
+  target_months: 3
+  note: "At 33% mobilisation and quarterly billing, roughly 3 signed deals of representative size reaches the 3-month target from current reserves."
+
+review: "monthly, Commercial Desk + Finance — reassess current_months and re-check every active deal's cash exposure against the limits above."
