@@ -1,0 +1,27 @@
+# Exposure Calculator — MRD-2026-SUB-01_Rev3
+# Delivery curve weighted, not straight-lined — see 07-protection/exposure/exposure-model.md
+
+delivery_curve_pct_by_week:
+  week_1: 0.30
+  week_2: 0.30
+  week_3: 0.15
+  week_4: 0.10
+  week_5: 0.10
+  week_6: 0.05
+
+weekly_ledger:
+  - { week: 0, cumulative_internal_cost_aed: 0,    cumulative_collected_aed: 4888, gap_aed: -4888 }   # mobilisation collected at kickoff
+  - { week: 1, cumulative_internal_cost_aed: 2070,  cumulative_collected_aed: 4888, gap_aed: -2818 }   # 6900 x 0.30
+  - { week: 2, cumulative_internal_cost_aed: 4140,   cumulative_collected_aed: 4888, gap_aed: -748 }    # 6900 x 0.60
+  - { week: 3, cumulative_internal_cost_aed: 5175,    cumulative_collected_aed: 9838, gap_aed: -4663 }   # +quarter payment (4950) lands ahead of week 3, per quarterly-in-advance cadence
+  - { week: 4, cumulative_internal_cost_aed: 5865,     cumulative_collected_aed: 9838, gap_aed: -3973 }
+  - { week: 5, cumulative_internal_cost_aed: 6555,      cumulative_collected_aed: 9838, gap_aed: -3283 }
+  - { week: 6, cumulative_internal_cost_aed: 6900,       cumulative_collected_aed: 9838, gap_aed: -2938 }
+
+peak:
+  week: 1
+  cash_exposure_aed: 0    # gap_aed never turns positive at any week — collections lead cost accrual throughout, so peak cash exposure is 0, not negative-as-cost-owed; SGC is cash-ahead for the entire build
+
+check_against_portfolio_limits:
+  single_deal_within_cap: true       # 0 <= 1000 (portfolio-limits.yaml max_peak_cash_exposure_single_deal_aed)
+  aggregate_still_within_cap: true    # this deal contributes 0 to aggregate peak exposure

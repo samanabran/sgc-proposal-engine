@@ -5,7 +5,7 @@ client:
   legal_name:
   trading_name:
   jurisdiction:            # mainland | free_zone
-  trn:                     # the CLIENT's TRN, if VAT-registered — distinct from SGC's own status (policy.yaml: vat.registered: false)
+  trn:                     # the CLIENT's TRN, if registered for VAT — distinct from SGC's own status (policy.yaml: vat.registered: false)
   vertical:                # matches a file under market-data/vertical-notes/, if one exists
   decision_maker:
   decision_maker_title:

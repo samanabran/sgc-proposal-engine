@@ -1,0 +1,40 @@
+client:
+  legal_name: "Meridianview Realty LLC"
+  trading_name: "Meridianview Realty"
+  jurisdiction: mainland
+  trn: "100987654300004"          # the CLIENT is VAT-registered — distinct from SGC's own status (policy.yaml: vat.registered: false)
+  vertical: uae-real-estate
+  decision_maker: "Omar Al Farsi"
+  decision_maker_title: "Owner / Principal Broker"
+
+scale:
+  users_now: 5
+  users_12mo: 6
+  segment: startup_boutique        # 5 users, within policy.yaml segments.startup_boutique.max_users (10)
+
+edition:
+  requested_or_assumed: unstated    # client did not ask for a specific edition; original sales history wrongly implied "Odoo Enterprise licences" — see known-defects.md #18
+  trigger_conditions_met: []          # none — Community is correct
+
+scope_signals:
+  work_packages_requested: [discovery, property_unit_register, tenancies_contracts_reminders, invoicing_trn, maintenance_invoice_from_request, crm_leads, reports_dashboard]
+  modules_requested: []
+  incumbent_system: "PropSpace"
+  incumbent_benchmark_aed_mo: 1760    # PropSpace benchmark range AED 1,100-1,760/mo; using the upper end as the comparison point — see 02-calc/pricing-worksheet.yaml notes for why
+  portal_integrations_requested: [portal_sync_property_finder, portal_sync_bayut_dubizzle]
+  migration_records: 480
+  migration_files: 210
+  data_quality_confidence: medium
+
+commercial_signals:
+  budget_rejected_aed: 30000          # client verbally rejected a prior AED 30,000+ quote before this proposal
+  preferred_term_months: 24
+  mobilisation_appetite: partial
+
+model:
+  proposal_model: SUB
+
+notes:
+  verbal_promises_logged: true
+  call_transcript_ref: "00-intake/call-transcript-2026-06-10.md"
+  adoption_deal_breaker: true          # explicitly stated by the client — see known-defects.md #15 for what happens when this goes unaddressed

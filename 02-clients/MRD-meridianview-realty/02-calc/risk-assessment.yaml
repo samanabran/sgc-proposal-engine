@@ -1,0 +1,21 @@
+# Risk Assessment — MRD-2026-SUB-01_Rev3
+# Run per pricing/risk-security-matrix.yaml, before the pricing worksheet.
+
+inputs:
+  entity_age_years: "2-5"
+  jurisdiction: mainland_llc
+  vat_registered: "yes"          # the client's own status — distinct from SGC's
+  trade_licence_valid: ">6mo"
+  payment_history_sgc: none        # new client, no prior history with SGC
+  decision_maker: owner
+  incumbent_churn_signal: none      # PropSpace is actively used, not abandoned
+  peak_exposure_aed_band: "<5000"    # confirmed after exposure-calculator.yaml — see notes below
+
+scoring:
+  raw_score: 10   # jurisdiction(0) + vat_registered(0) + entity_age(5) + trade_licence(0) + payment_history(5) + decision_maker(0) + churn_signal(0) + peak_exposure(0)
+  band: low
+  required_instruments: [mobilisation_33pct]
+
+notes: >
+  Low band — only the standard 33% mobilisation instrument is required.
+  No security deposit or PDC set needed for this deal.

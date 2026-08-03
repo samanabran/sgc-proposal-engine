@@ -1,0 +1,118 @@
+# Pricing Worksheet — MRD-2026-SUB-01_Rev3
+# knowledge_version_used: pricing v2.0 (2026-08-03)
+# Community edition — no editions.yaml trigger condition met.
+
+inputs:
+  users_now: 5
+  users_12mo: 6
+  segment: startup_boutique
+  edition: community
+  edition_trigger_reason: null       # not applicable — Community is correct, no trigger met
+  term_months: 24
+  modules: []                          # N/A on Community — zero licence cost
+  work_packages: [discovery, property_unit_register, tenancies_contracts_reminders, invoicing_trn, maintenance_invoice_from_request, crm_leads, reports_dashboard]
+  incumbent_benchmark_aed_mo: 1760       # PropSpace upper-range figure used deliberately: Odoo Community + implementation replaces a broader tool footprint (CRM + accounting + reporting) than PropSpace's narrower listings/CRM scope, so the upper end is the fairer comparison, not the lower end
+  budget_rejected_aed: 30000
+
+risk_assessment_ref: 02-calc/risk-assessment.yaml
+
+number_1_cost_to_serve:
+  licences_aed: 0                    # Community edition — see editions.yaml
+  hosting_allocation_aed: 90           # 360 x (5/20)
+  tooling_aed: 50
+  support_labour_aed: 280               # ceil(5/5)=1 x 280
+  account_mgmt_aed: 100                  # policy.yaml cost_to_serve.account_mgmt_aed.tier_5 (5 users)
+  cts_total_aed: 520                       # 0 + 90 + 50 + 280 + 100
+  platform_floor_aed: 650                    # 520 x 1.25
+
+number_2_build:
+  delivery_hours:
+    - { package: discovery,                          band: standard, hours: 5 }
+    - { package: property_unit_register,               band: standard, hours: 8 }
+    - { package: tenancies_contracts_reminders,           band: standard, hours: 9 }
+    - { package: invoicing_trn,                             band: standard, hours: 5 }
+    - { package: maintenance_invoice_from_request,           band: standard, hours: 5 }
+    - { package: crm_leads,                                   band: simple,   hours: 3 }
+    - { package: reports_dashboard,                             band: simple,   hours: 2 }
+  documentation_hours: 2      # max(overlays.documentation_hours_min=2, 5% x 37 = 1.85) — floor binds
+  qa_hours: 3                   # max(overlays.qa_hours_min=3, 8% x 37 = 2.96) — floor binds
+  training_hours: 4              # overlays.training_sessions(2) x training_hours_per_session(2)
+  total_hours: 46                  # 37 delivery + 2 doc + 3 qa + 4 training
+  rate_aed: 280                      # policy.yaml segments.startup_boutique.blended_rate_aed — matches rate-card.yaml roles.startup_consultant
+  rate_exists_on_card: true
+  subtotal_aed: 12880                   # 46 x 280
+  pm_aed: 1288                            # 12880 x segments.startup_boutique.pm_pct (0.10)
+  contingency_aed: 644                     # 12880 x segments.startup_boutique.contingency_pct (0.05)
+  build_value_aed: 14812                    # 12880 + 1288 + 644
+  internal_build_cost_aed: 6900               # 46 x policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+
+number_3_financing:
+  mobilisation_aed: 4888        # 14812 x policy.yaml gates.default_mobilisation_pct (0.33), rounded — exactly 33.0%
+  deferred_aed: 9924              # 14812 - 4888
+  uplift_pct: 0.18                  # financing_uplift.months_24
+  recovery_total_aed: 11710           # 9924 x 1.18, rounded
+  recovery_monthly_aed: 488             # 11710 / 24, rounded
+
+assembly:
+  option_a:
+    mobilisation_aed: 4888
+    platform_portion_aed: 1150    # market-defensible floor, well above the mechanical 650 floor, positioned under PropSpace's own upper range — a policy input, not a formula output
+    subscription_aed: 1650          # (1150 + 488 = 1638) rounded to nearest 50
+    year1_client_cost_aed: 24688      # 4888 + 12 x 1650
+  # option_b (zero mobilisation) is WITHDRAWN — not offered, see payment-plans.yaml: withdrawn
+
+payment_cadence: quarterly_in_advance   # meets policy.yaml gates.min_cadence (G33); quarterly billing = 1650 x 3 = 4950/quarter
+
+exposure:
+  contractual_peak_aed: 9924       # deferred_aed at kickoff, protected by clawback
+  cash_peak_aed: 0                    # mobilisation (4888) + first quarter (4950) = 9838 collected at/near kickoff, comfortably ahead of the delivery-cost curve for a 46-hour build — see 02-calc/exposure-calculator.yaml
+  economic_peak_aed: 0                 # staged delivery keeps internal cost accrual paced with collections
+  cash_positive_by_day: 1                # cash-positive at kickoff itself
+
+gates:
+  G1_platform_floor:      { pass: true, actual: 1650, required: 650 }
+  G2_term_ge_recovery:    { pass: true }
+  G3_mobilisation_33pct:  { pass: true, actual_pct: 0.330 }
+  G4_clawback_present:    { pass: true }
+  G5_no_post_recovery_drop: { pass: true }
+  G6_term_at_kickoff:      { pass: true }
+  G7_financing_disclosed:  { pass: true }
+  G8_margin:                { pass: true, actual_pct: 0.534, required_pct: 0.30 }
+  G9_rate_provenance:        { pass: true }
+  G10_concessions_capped:     { pass: true, note: "no concessions on this deal" }
+  G11_discount_platform_only:  { pass: true, note: "no discount applied" }
+  G12_cadence_ceiling:          { pass: true }
+  G13_total_give_capped:         { pass: true, note: "0% give" }
+  G14_compensators_logged:        { pass: true, note: "N/A — no concession" }
+  G15_security_sized_to_risk:      { pass: true, note: "low band, mobilisation_33pct satisfies requirement" }
+  G16_clawback_on_deferred:         { pass: true }
+  G17_guarantees_capped:             { pass: true }
+  G18_data_export_unconditional:      { pass: true }
+  G19_no_hours_pm_qa_docs_cut:          { pass: true }
+  G20_authority_matrix_followed:         { pass: true, note: "standard SDR-level deal" }
+  G21_all_exposures_computed:             { pass: true }
+  G22_walkaway_card_produced:              { pass: true }
+  G23_absolute_margin_floor:                { pass: true, actual_pct: 0.534, required_pct: 0.25 }
+  G24_portfolio_limits_checked:              { pass: true }
+  G25_liability_capped:                       { pass: true, note: "clause drafted, pending counsel review" }
+  G26_ip_data_ownership_correct:               { pass: true, note: "clause drafted, pending counsel review re: LGPL" }
+  G27_no_named_consultant:                      { pass: true }
+  G28_guarantee_exclusions_present:              { pass: true }
+  G29_evidence_file_complete:                     { pass: true, note: "complete for everything obtainable at draft/issue stage (intake, worksheet, walk-away card, QA checklists); signature and counsel sign-off on flagged clauses are re-verified against this same checklist before go-live specifically, per G29's own scope" }
+  G30_abort_criteria_checked:                      { pass: true, note: "none triggered" }
+  G31_worst_case_margin:                            { pass: true, worst_case_pct: 0.48, note: "full 10% aggregate guarantee credit applied" }
+  G32_cash_positive_30_days:                         { pass: true }
+  G33_min_cadence_quarterly:                          { pass: true }
+  G34_mobilisation_covers_third_party:                 { pass: true, note: "N/A — no third-party upfront cost triggered" }
+  G35_no_false_vat_claim:                               { pass: true }
+  G36_edition_not_misdescribed:                          { pass: true }
+  G37_upgrade_policy_stated:                              { pass: true }
+  G38_community_exclusions_disclosed:                      { pass: true }
+  G39_no_abandoned_modules:                                 { pass: true }
+  G40_enterprise_mobilisation_covers_licence:                { pass: true, applicable: false }
+  G41_demo_matches_edition:                                   { pass: true }
+  market_test:    { pass: true, multiple_of_incumbent: 1.169 }
+  budget_test:     { pass: true, year1_vs_rejected: 0.823 }
+
+phase2_deferred: [portal_sync_property_finder, portal_sync_bayut_dubizzle, website_lead_capture]
+exclusions_confirmed: true

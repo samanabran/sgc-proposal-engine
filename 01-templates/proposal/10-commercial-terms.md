@@ -24,7 +24,7 @@ All figures **exclusive of VAT — no VAT is charged** (see below).
 
 ## VAT
 
-<!-- clause-library/vat-uae.md, verbatim — SGC is not VAT-registered, no VAT charged -->
+<!-- clause-library/vat-uae.md, verbatim — SGC holds no VAT registration, no VAT charged -->
 
 ## VAT gross-up
 

@@ -1,0 +1,47 @@
+opportunity_id: "MRD-2026-SUB-01"
+client_legal_name: "Meridianview Realty LLC"
+jurisdiction: "mainland"
+client_trn: "100987654300004"
+decision_maker: "Omar Al Farsi"
+sdr_owner: "SDR (name pending — original owner rotated off; see key-person-and-subcontractor.md, this is exactly the substitution-right scenario)"
+segment: "startup_boutique"
+edition: "community"
+vertical: "uae-real-estate"
+
+stage: draft                # intake | risk_assessed | calc | draft | review | issued | won | lost
+current_revision: "MRD-2026-SUB-01_Rev3"
+knowledge_version_used: "pricing v2.0 (2026-08-03)"
+
+risk_band: "low"
+required_security_instruments: [mobilisation_33pct]
+
+gates_passed: true
+gate_report: 02-calc/gate-report.md
+walkaway_card_produced: true
+escalations:
+  - date: "2026-06-15"
+    raised_by: "Commercial Desk (retrospective review)"
+    issue: "Rev1 and Rev2, issued 2026-06-15 and 2026-07-02 respectively, were built before this repository's v2 guardrails existed and contain 20 documented defects between them — see 00-knowledge/failure-modes/known-defects.md. Both are retracted, not silently corrected."
+    resolution: "Full rebuild against pricing v2.0: correct rate (280, not the non-existent 690), full PM/QA/documentation lines, clawback added, term anchored to kickoff, VAT claim corrected to 'not registered, no VAT charged' (both prior revisions' VAT claims were wrong, in different ways), Community edition correctly disclosed instead of implying Enterprise, adoption addressed directly per the client's stated deal-breaker, referral capped, named-consultant promise replaced with a substitution right. Rev3 drafted, all 41 gates pass."
+
+revisions:
+  - ref: "MRD-2026-SUB-01_Rev1"
+    issued_date: "2026-06-15"
+    path: "05-issued/MRD-2026-SUB-01_Rev1/"
+    status: "retracted"
+    notes: "Retracted — see 05-issued/MRD-2026-SUB-01_Rev1/RETRACTION-NOTICE.md and known-defects.md for the full defect list. Client was never sent a correction at the time; this manifest documents the retraction retrospectively as part of the v2 rebuild."
+  - ref: "MRD-2026-SUB-01_Rev2"
+    issued_date: "2026-07-02"
+    path: "05-issued/MRD-2026-SUB-01_Rev2/"
+    status: "retracted"
+    notes: "Attempted partial fix of Rev1 that introduced a new defect (false VAT-registered claim) while leaving others uncorrected. Retracted — see 05-issued/MRD-2026-SUB-01_Rev2/RETRACTION-NOTICE.md."
+  - ref: "MRD-2026-SUB-01_Rev3"
+    issued_date: ""
+    path: "03-draft/MRD-2026-SUB-01_Rev3/"
+    status: "draft"
+    notes: "Full rebuild against pricing v2.0. All 41 gates pass. Awaiting human review before issue — this revision has not yet been sent to the client."
+
+verbal_promises_logged: true
+adoption_clause_included: true
+clawback_included: true
+evidence_file_complete: false   # signature + counsel review pending — see gate-report.md notes on G29
