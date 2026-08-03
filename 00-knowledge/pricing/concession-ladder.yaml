@@ -1,0 +1,51 @@
+# SGC TECH AI — Concession Ladder (v2, new)
+# Method: price the concession in AED over the full term -> select
+# compensators until their sum >= the concession value -> re-run ALL
+# gates -> log both sides in manifest.yaml, or the concession is void
+# (G14). An unlogged concession never happened as far as the gate report
+# is concerned — draft it back out.
+version: 2.0
+effective_from: 2026-08-03
+
+concessions:
+  waive_mobilisation:       { value_formula: "build_value_aed * 0.33" }
+  discount_platform:          { value_formula: "platform_portion_aed * pct * term_months" }
+  defer_first_payment:          { value_formula: "subscription_aed * months_deferred" }
+  add_module_free:                { value_formula: "module list price * users * term_months" }
+  add_users_free:                    { value_formula: "250 * additional_users * term_months" }
+  shorten_term_to_12:                  { value_formula: "forgone margin, months 13-24 of the original term" }
+  no_term_commitment:                    { value_formula: "full build_value_aed treated as at-risk" }
+  expedite_golive:                          { value_formula: "hours * rate_aed * 0.5" }
+  upgrade_sla_free:                            { value_formula: "(1650 - 650) * term_months" }
+
+compensators:
+  extend_term_6mo:            { effect: "extends recovery window and platform-portion revenue base" }
+  extend_term_12mo:             { effect: "extends recovery window and platform-portion revenue base" }
+  annual_prepay:                  { value_formula: "per payment-plans.yaml cadences.annual_in_advance" }
+  increase_mobilisation:             { effect: "reduces peak cash exposure directly" }
+  add_uplift_pp:                        { effect: "raises financing_uplift by the stated percentage points" }
+  security_deposit_2mo:                    { effect: "cash security instrument, see risk-security-matrix.yaml" }
+  pdc_full_balance:                           { effect: "legal security instrument, see risk-security-matrix.yaml" }
+  reduce_scope_phase2:                           { effect: "moves a work package to phase2-catalogue.yaml, priced separately" }
+  downgrade_review_cadence:                         { value_formula: "100 * term_months" }
+  reduce_sla_tier:                                     { value_formula: "650 * term_months" }
+  reference_and_case_study:                               { value_formula: 2500, max_per_deal: 1 }
+  referral_commitment_2:                                     { value_formula: 3000, conditional_on: "referred client's invoice actually collected" }
+
+forbidden_compensators:
+  - reduce_estimated_hours
+  - remove_qa_or_documentation
+  - remove_pm
+  - waive_clawback
+  - drop_below_platform_floor
+
+procedure: >
+  1. Price the requested concession in AED over the full term using the
+  formula above. 2. Select compensators from the list until their summed
+  value is >= the concession value — never substitute a forbidden
+  compensator for a real one. 3. Re-run G1-G41 against the resulting
+  worksheet. 4. If all gates still pass, log both the concession and its
+  compensators in manifest.yaml: escalations, with the AED value of each
+  side shown. 5. If gates fail, or if the concession was not logged with
+  matching compensators, the concession is void — the worksheet reverts to
+  its pre-concession state.

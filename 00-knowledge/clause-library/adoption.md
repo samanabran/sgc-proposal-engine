@@ -1,29 +1,24 @@
 # Clause: Adoption
 
-Use verbatim in §09 Partnership Terms whenever `manifest.yaml:
-adoption_clause_included: true`. Standard on any deal where the bundled
-training sessions (`pricing/policy.yaml: overlays.training_sessions`) are a
-material part of the value case — see `03-library/objection-handling/
-team-wont-adopt.md` for the sales conversation this clause supports.
+**Purpose**: give adoption a concrete, checkable mechanism instead of a
+vague aspiration — `failure-modes/known-defects.md` #15 documents a case
+where adoption was the client's stated deal-breaker and went completely
+unaddressed in the proposal.
+
+**requires_counsel_review**: false.
+
+**When mandatory**: every proposal, always — adoption risk exists on
+every deal regardless of whether the client raises it explicitly.
+
+**When it must NOT be used**: never omit; never promise unlimited
+remediation (see `service-credit-guarantee.md` for the cap).
 
 ---
 
-SGC TECH AI's implementation fee includes **[training_sessions] training
-session(s)** of **[training_hours_per_session] hour(s)** each, delivered
-during or immediately following go-live, intended to establish baseline
-user competency across the Client's team. Adoption of the delivered
-solution by the Client's end users beyond this baseline training is a
-shared responsibility: SGC TECH AI will deliver the training and
-documentation described in this proposal, and the Client is responsible
-for internal change management, user onboarding cadence, and ongoing
-process compliance following go-live.
+## Approved verbatim text
 
-Additional training beyond the sessions included in this proposal, or
-recurring adoption-support engagements, may be scoped and quoted
-separately under `support-training.yaml` and are not included by default
-in the fees quoted here.
-
----
-
-**Do not edit the substance of this clause without Commercial Desk +
-legal sign-off.**
+> The Client nominates a named data-entry owner responsible for day-to-day
+> system use. SGC TECH AI checks agreed activity thresholds at day 30
+> following go-live. If those thresholds are not met by day 60, SGC TECH
+> AI provides one remediation and retraining session at no additional
+> charge.

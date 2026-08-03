@@ -3,7 +3,14 @@
 # Per user/month, per site/month, or per terminal/month as noted. Annual
 # figure is list price for reference only — quote monthly unless the client
 # has explicitly opted into annual billing.
-version: 1.0
+#
+# EDITION SCOPE (v2): every price in this file is an Odoo ENTERPRISE
+# licence fee — see editions.yaml. Odoo Community, the default edition,
+# has zero per-user licence cost. Do not apply any figure in this file to
+# a Community-edition worksheet; doing so double-charges a licence fee
+# that Community doesn't carry. Only reference this file once a client
+# brief has triggered one of editions.yaml: editions.enterprise.trigger_conditions.
+version: 2.0
 effective_from: 2026-08-03
 
 modules:

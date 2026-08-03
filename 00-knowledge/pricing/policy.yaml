@@ -1,24 +1,30 @@
-# SGC TECH AI — Pricing Policy
-# Every gate and coefficient lives here. No agent hardcodes a percentage —
-# every number a proposal uses must trace to this file (or a sibling in
-# pricing/*.yaml) by key.
+# SGC TECH AI — Pricing Policy (v2, cash-risk hardened)
+# Every gate and coefficient lives here. No agent hardcodes a percentage.
 #
-# segments.*.blended_rate_aed is pinned to rate-card.yaml, not restated
-# independently:
-#   startup_boutique -> roles.startup_consultant (280)
-#   smb              -> roles.consultant (395)
-#   mid_market        -> roles.senior_consultant (525)
-# If rate-card.yaml changes, update the pin here in the same commit — see
-# failure-modes/known-defects.md #1 for why this file and rate-card.yaml
-# drifted apart once already, before this repo existed.
-version: 1.0
+# v2 changes from v1 (see failure-modes/known-defects.md for the full
+# case study): mobilisation raised 25% -> 33%; 24-month financing uplift
+# raised 12% -> 18% pending reserve rebuild; vat.charge_vat flipped to
+# false — SGC is NOT VAT-registered and has no TRN as of this version.
+version: 2.0
 effective_from: 2026-08-03
-source_sheet: commercial-pricing-revised-v2.xlsx
+source: "v2 hardening pass — see CHANGELOG.md"
 
+# FLAGGED (see failure-modes/known-defects.md #21): smb.blended_rate_aed
+# (425) and mid_market.blended_rate_aed (550) do not cleanly pin to a
+# single named role on rate-card.yaml the way startup_boutique's 280 pins
+# to roles.startup_consultant. 425 happens to coincidentally match
+# roles.qa_engineer (a different role's rate, not a generalist blended
+# rate) and 550 matches no role at all — the nearest are
+# roles.senior_consultant (525) and roles.project_manager (600). This is
+# the exact drift pattern known-defects.md #1 documented and this build's
+# own source spec reintroduced it verbatim. Left as specified per this
+# revision's "do not invent numbers" instruction; escalate to the
+# Commercial Desk to either re-pin these to real roles or confirm they are
+# deliberately independent blended figures, not role citations.
 segments:
   startup_boutique:  { max_users: 10,  blended_rate_aed: 280, pm_pct: 0.10, contingency_pct: 0.05 }
-  smb:               { max_users: 30,  blended_rate_aed: 395, pm_pct: 0.15, contingency_pct: 0.05 }
-  mid_market:        { max_users: 999, blended_rate_aed: 525, pm_pct: 0.15, contingency_pct: 0.05 }
+  smb:               { max_users: 30,  blended_rate_aed: 425, pm_pct: 0.15, contingency_pct: 0.05 }
+  mid_market:        { max_users: 999, blended_rate_aed: 550, pm_pct: 0.15, contingency_pct: 0.05 }
 
 overlays:
   documentation_hours_min: 2
@@ -29,8 +35,8 @@ overlays:
   training_hours_per_session: 2
 
 cost_to_serve:
-  hosting_node_true_cost_aed: 360        # internal COGS, not the sell price — see hosting.yaml for list price
-  hosting_node_user_capacity: 20         # matches hosting.yaml tiers.foundation.max_users
+  hosting_node_true_cost_aed: 360        # NOT the 990 list price — see hosting.yaml note
+  hosting_node_user_capacity: 20
   tooling_flat_aed: 50
   support_hours_per_5_users: 1
   support_rate_aed: 280
@@ -40,19 +46,26 @@ cost_to_serve:
 financing_uplift:
   months_12: 0.06
   months_18: 0.09
-  months_24: 0.12
+  months_24: 0.18                          # RAISED from 0.12 — capital scarcity, see review_trigger
   zero_mobilisation_surcharge: 0.03
+  review_trigger: "reduce months_24 to 0.12 when liquid reserves reach 3 months opex — see 07-protection/exposure/portfolio-limits.yaml runway.target_months"
 
 gates:
   platform_floor_multiplier: 1.25
   min_gross_margin: 0.30
+  absolute_margin_floor: 0.25              # G23 — no approver may go below this, ever
   target_gross_margin: 0.35
-  default_mobilisation_pct: 0.25
+  default_mobilisation_pct: 0.33           # RAISED from 0.25 — see known-defects.md
   max_multiple_of_incumbent: 1.30
   review_cadence_monthly_threshold_aed: 2500
+  cash_positive_within_days: 30            # G32
+  min_cadence: quarterly_in_advance         # G33 — until reserves reach 3mo opex, see portfolio-limits.yaml
 
 vat:
   standard_rate: 0.05
+  registered: false                          # LOCKED until a TRN is actually issued — do not flip this speculatively
   mandatory_threshold_aed: 375000
   voluntary_threshold_aed: 187500
-  free_zone_exempt: false      # DO NOT CHANGE — see market-data/vertical-notes/uae-tax-vat.md
+  late_registration_penalty_aed: 10000       # plus retroactive liability from the date registration became mandatory
+  free_zone_exempt: false                     # DO NOT CHANGE — Designated Zone treatment applies to GOODS only, services are standard-rated even inside one; see market-data/vertical-notes/uae-tax-vat.md
+  charge_vat: false                            # illegal to charge VAT while unregistered — see clause-library/vat-uae.md and vat-gross-up.md

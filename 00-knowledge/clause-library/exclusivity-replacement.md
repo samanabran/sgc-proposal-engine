@@ -1,28 +1,24 @@
-# Clause: Exclusivity Replacement (Incumbent Displacement)
+# Clause: Exclusivity / Non-Transferability
 
-Use verbatim in §08 Implementation & Recovery whenever the client brief
-names an incumbent system or vendor being replaced (see
-`03-library/objection-handling/incumbent-is-cheaper.md` for the
-accompanying sales framing, and `market-data/benchmarks.yaml:
-market_positioning` for the pricing context).
+**Purpose**: prevent a client from treating deal-specific pricing as a
+market-wide commitment. `failure-modes/known-defects.md` #13 documents an
+unenforceable exclusivity promise ("will not be extended to any other
+brokerage") — this clause replaces that framing with a narrower, accurate
+one: pricing is scope-specific, not client-exclusive.
 
----
+**requires_counsel_review**: false.
 
-This proposal assumes replacement of the Client's incumbent system(s) as
-identified in the Client's brief. SGC TECH AI's scope and pricing are based
-on this replacement being exclusive — that is, the delivered Odoo
-environment becomes the Client's system of record for the modules and
-processes covered by this proposal, and the incumbent system is
-decommissioned or restricted to read-only/archive access following a
-mutually agreed cutover date.
+**When mandatory**: every proposal.
 
-Where the Client intends to run the incumbent system in parallel with the
-delivered solution beyond an agreed cutover/validation period, or to
-maintain the incumbent as system of record for any in-scope process, this
-constitutes a change to the assumptions underlying this proposal's pricing
-and timeline, and must be raised as a change request prior to acceptance.
+**When it must NOT be used**: never promise pricing exclusivity to a
+client, i.e. never state or imply this pricing won't be offered to
+another client. See `failure-modes/known-defects.md` #13 and
+`concession-ladder.yaml` — exclusivity is not a valid concession under any
+circumstance (G10).
 
 ---
 
-**Do not edit the substance of this clause without Commercial Desk +
-legal sign-off.**
+## Approved verbatim text
+
+> This pricing is specific to the scope, user count, and term set out in
+> this proposal and is not transferable to other scopes or entities.

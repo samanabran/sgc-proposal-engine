@@ -1,0 +1,51 @@
+# SGC TECH AI — Odoo Edition Policy
+# Community is the default. Enterprise is a priced, conditional upgrade —
+# never the assumed baseline. See G36-G38, G40, G41.
+version: 1.0
+effective_from: 2026-08-03
+
+default_edition: community
+
+editions:
+  community:
+    licence_cost_per_user_mo: 0
+    included:
+      - crm
+      - sales
+      - invoicing
+      - basic_accounting
+      - project
+      - maintenance
+      - contacts
+      - website
+      - responsive_web_ui
+    excluded:
+      - official_mobile_app          # mobile-optimised browser access only — see clause-library/edition-and-upgrades.md
+      - bank_reconciliation_automation
+      - studio_no_code
+      - advanced_tax_config
+      - multi_currency
+      - odoo_upgrade_service
+      - odoo_official_support
+    upgrade_policy: version_pinned    # alternative: upgrade_included_priced — must be stated explicitly per deal, never left silent (G37)
+    upgrade_cost_estimate_hours: 12    # per major version; 8-16 range depending on customization depth
+    third_party_module_risk: true
+    lgpl_note: "Configuration/custom modules carry LGPL obligations. Verify G26 IP claim compatibility with counsel before asserting SGC owns configuration IP."
+
+  enterprise:
+    licence_cost_per_user_mo: 72       # saas-modules.yaml: erp.odoo_enterprise_full_suite
+    billing: annual_in_advance
+    mobilisation_must_cover_licence: true   # G40 — mobilisation must cover the full annual licence prepayment, not just build value
+    trigger_conditions:
+      - requires_bank_reconciliation
+      - requires_official_mobile_app
+      - requires_studio
+      - requires_vendor_upgrade_sla
+      - users_above_15
+      - multi_entity
+      - multi_currency
+
+notes:
+  - "G36: edition is declared at intake and never described as the other edition, in writing or verbally, regardless of which edition the client assumes or hopes for."
+  - "G41: the demo environment shown to a prospect must match the edition being sold — never demo Enterprise features to close a Community deal."
+  - "A Community deal only moves to Enterprise when the client brief explicitly triggers one of the trigger_conditions above — never as a default upsell assumption."

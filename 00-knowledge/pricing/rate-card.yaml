@@ -3,8 +3,12 @@
 # UAE specialist-boutique band — 15% below mid-tier agency rates.
 # Reference bands: specialist boutique 180-300 AED/hr; mid-tier agencies
 # 350-550 AED/hr; Big-4 600-900 AED/hr. SGC plays in the specialist band.
-version: 1.0
+version: 2.0
 effective_from: 2026-08-03
+
+forbidden_rates:
+  - rate_aed_hr: 690
+    note: "AED 690/hr appeared in the original VGE-2026-SUB-01 draft and exists on no rate card, at any level. Any proposal using it is non-compliant — see failure-modes/known-defects.md #2. validate must reject any worksheet or draft containing this figure."
 
 roles:
   startup_consultant:  { level: L0, rate_aed_hr: 280 }

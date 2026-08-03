@@ -1,8 +1,17 @@
 # SGC TECH AI — Revised Cloud Hosting
 # Source: commercial-pricing-revised-v2.xlsx, sheet "Cloud Hosting"
 # Managed Odoo hosting on Contabo / Hetzner + 24/7 monitoring.
-version: 1.0
+version: 2.0
 effective_from: 2026-08-03
+
+# COST BASIS NOTE — read before using this file in a cost-to-serve
+# calculation: the prices below are LIST prices, used only when hosting
+# is sold as its own separate line item. When hosting is bundled into a
+# subscription platform_portion (the normal case), cost it in
+# number_1_cost_to_serve at TRUE infrastructure cost —
+# policy.yaml: cost_to_serve.hosting_node_true_cost_aed (360/node) — not
+# the list price here. Using list price inside a bundled cost-to-serve
+# calculation overstates cost and silently erodes the margin gate (G8).
 
 tiers:
   foundation:

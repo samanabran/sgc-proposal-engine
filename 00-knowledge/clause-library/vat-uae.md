@@ -1,29 +1,44 @@
-# Clause: VAT (UAE)
+# Clause: VAT (UAE) — v2, corrected
 
-Use verbatim in §10 Commercial Terms. Do not paraphrase. See
-`market-data/vertical-notes/uae-tax-vat.md` for the reasoning behind the
-pinned values this clause reflects (`pricing/policy.yaml: vat`).
+**Purpose**: state SGC's actual VAT registration status accurately. SGC
+TECH AI (Scholarix Global Consultants FZE) is **not** currently registered
+for UAE VAT and holds no TRN as of this version — see
+`pricing/policy.yaml: vat.registered: false`. Charging VAT while
+unregistered is illegal; claiming free-zone exemption is factually wrong
+(Designated Zone treatment applies to goods, not services — see
+`market-data/vertical-notes/uae-tax-vat.md`).
 
----
+**requires_counsel_review**: false (fact-stating clause, not a legal
+construction — but re-verify against `policy.yaml: vat.registered`
+immediately before every issue, since this is the one fact in the repo
+most likely to change without the clause library being updated in step).
 
-All fees quoted in this proposal are exclusive of Value Added Tax (VAT).
-VAT is chargeable at the UAE standard rate of five percent (5%) on all
-taxable supplies under this engagement, in accordance with UAE Federal
-Decree-Law No. 8 of 2017 on Value Added Tax and its executive regulations,
-as amended. VAT will be itemized separately on all invoices issued under
-this agreement.
+**When mandatory**: every proposal, always, while `vat.registered: false`.
 
-Where the Client is registered, or is required to be registered, for VAT,
-the Client shall provide its Tax Registration Number (TRN) prior to the
-issuance of the first invoice. Registration in a UAE free zone does not, by
-itself, exempt the Client or SGC TECH AI from the application of VAT on
-services rendered under this agreement; VAT-free treatment applies only to
-qualifying supplies meeting the specific conditions set out under
-Designated Zone rules, and no such treatment is assumed by this proposal
-unless separately confirmed in writing following legal review.
+**When it must NOT be used**: the moment SGC obtains a TRN. At that point
+this clause is replaced by a VAT-registered version (not yet drafted —
+`RESOLVE` once registration happens) and every proposal must charge VAT
+from the effective registration date.
 
 ---
 
-**Do not edit the substance of this clause without Commercial Desk +
-legal sign-off.** Formatting to match document style is fine; the
-obligations above are not.
+## Approved verbatim text
+
+> All fees are quoted in AED. SGC TECH AI is not currently registered for
+> UAE VAT, and no VAT is charged on this proposal.
+
+---
+
+## FORBIDDEN WORDING
+
+Never write, and never say aloud on a call:
+
+- **"No VAT applies — we operate from a free zone."** Factually wrong.
+  Free zone status does not exempt services from VAT; only specific
+  Designated Zone goods transactions get special treatment. See
+  `market-data/vertical-notes/uae-tax-vat.md`.
+- **"SGC TECH AI is VAT-registered."** Currently false. Do not say this
+  even if a client assumes it, even to sound more established.
+
+Every proposal using this clause must also carry `vat-gross-up.md` — the
+two are a pair, not alternatives.

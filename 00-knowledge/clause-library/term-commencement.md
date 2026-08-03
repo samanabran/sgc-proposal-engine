@@ -1,25 +1,21 @@
 # Clause: Term Commencement
 
-Use verbatim in §09 Partnership Terms. Insert the specific term length from
-the client's worksheet.
+**Purpose**: anchor the term and first invoice to kickoff, not go-live
+(G6) — closes the gap `failure-modes/known-defects.md` #9 documents,
+where a term silently started 4–6 weeks after delivery had already begun.
+
+**requires_counsel_review**: false.
+
+**When mandatory**: every subscription proposal.
+
+**When it must NOT be used**: never anchor the term to go-live or
+signature date — only kickoff.
 
 ---
 
-The initial term of this agreement is **[term_months] months**, commencing
-on the date of the first invoice issued following signature of this
-proposal ("Commencement Date"), and not on the signature date itself where
-the two differ. Where implementation mobilisation precedes the
-Commencement Date, work performed during mobilisation is governed by this
-agreement's terms from the date such work begins, notwithstanding that
-formal Commencement has not yet occurred.
+## Approved verbatim text
 
-Following the initial term, this agreement renews automatically for
-successive terms of equal length unless either party provides written
-notice of non-renewal at least thirty (30) days prior to the end of the
-then-current term, subject to `post-recovery-continuation.md` where
-applicable.
-
----
-
-**Do not edit the substance of this clause without Commercial Desk +
-legal sign-off.**
+> The initial term commences on the date of kickoff, and the first
+> invoice — including mobilisation, where applicable — is issued on that
+> date. Where kickoff and signature fall on different dates, the term
+> commences at kickoff, not at signature.

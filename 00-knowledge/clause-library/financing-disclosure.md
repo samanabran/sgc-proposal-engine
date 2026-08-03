@@ -1,32 +1,20 @@
 # Clause: Financing Disclosure
 
-Use verbatim in §10 Commercial Terms whenever a proposal offers a financed
-/ deferred mobilisation structure (`pricing/policy.yaml: financing_uplift`).
-Insert the bracketed term length and uplift percentage from the client's
-completed `02-calc/pricing-worksheet.yaml`.
+**Purpose**: disclose the financing uplift on deferred build value in one
+plain sentence (G7) — the client should never discover the uplift by
+doing their own arithmetic.
+
+**requires_counsel_review**: false.
+
+**When mandatory**: any worksheet where `deferred_aed > 0`.
+
+**When it must NOT be used**: omit only when mobilisation covers the full
+build value (no deferred amount, no uplift).
 
 ---
 
-Where the Client elects to defer full mobilisation payment and recover the
-implementation investment through the subscription term, the recurring
-subscription fee includes a financing uplift of **[uplift_pct]%**, applied
-to reflect the cost of capital and delivery risk associated with deferred
-payment over a **[term_months]-month** term. This uplift is calculated per
-`pricing/policy.yaml: financing_uplift` and does not vary by negotiation —
-it varies only by the term length and mobilisation percentage the Client
-selects.
+## Approved verbatim text
 
-Where the Client elects zero mobilisation at commencement, an additional
-surcharge of **[zero_mobilisation_surcharge]%** applies to the recurring
-fee, reflecting the increased delivery risk of commencing implementation
-work with no client-funded mobilisation.
-
-This financing structure is separate from, and not to be confused with,
-any third-party payment plan the Client may offer to its own end
-customers. SGC TECH AI is not a party to, and assumes no liability under,
-any such third-party financing arrangement.
-
----
-
-**Do not edit the substance of this clause without Commercial Desk +
-legal sign-off.**
+> Deferring the build carries a [uplift_pct]% financing component,
+> reflected in the recovery portion of your subscription fee. Settling the
+> build in full at kickoff removes this component entirely.

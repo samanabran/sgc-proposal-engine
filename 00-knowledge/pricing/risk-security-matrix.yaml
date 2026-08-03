@@ -1,0 +1,36 @@
+# SGC TECH AI — Client Risk Score & Security Instruments (v2, new)
+# Score 0-100, additive. Run at intake, before the walk-away deal card.
+version: 2.0
+effective_from: 2026-08-03
+
+weights:
+  entity_age_years:        { ">5": 0, "2-5": 5, "1-2": 12, "<1": 20 }
+  jurisdiction:              { mainland_llc: 0, free_zone: 5, offshore: 20 }
+  vat_registered:              { "yes": 0, "no": 10 }
+  trade_licence_valid:          { ">6mo": 0, "<6mo": 8, expired: reject }
+  payment_history_sgc:           { clean: -5, none: 5, late: 15, default: reject }
+  decision_maker:                  { owner: 0, manager: 5, committee: 10 }
+  incumbent_churn_signal:            { none: 0, abandoned_systems: 8 }
+  peak_exposure_aed:                  { "<5000": 0, "5-15k": 5, "15-40k": 12, ">40k": 20 }
+
+bands:
+  low:      { range: [0, 20],  instruments: [mobilisation_33pct] }
+  moderate: { range: [21, 40], instruments: [mobilisation_33pct, deposit_1_month] }
+  elevated: { range: [41, 60], instruments: [mobilisation_40pct, deposit_2_months, pdc_set] }
+  high:     { range: [61, 75], instruments: [mobilisation_50pct, pdc_full_balance, guarantee] }
+  refuse:   { range: [76, 100], action: escalate_or_decline }
+
+instrument_types:
+  cash: [mobilisation_33pct, mobilisation_40pct, mobilisation_50pct, deposit_1_month, deposit_2_months]
+  legal: [pdc_set, pdc_full_balance, clawback, guarantee]
+  self_help:
+    - term_length_provisioning        # size term so cost recovery precedes cash exposure peak
+    - staged_configuration_release      # release later-phase config only once prior invoices clear
+    - suspension_right_14_days           # service access suspension on non-payment, 14 days' notice
+    - config_ip_handover_withheld_until_recovery_complete
+
+absolute_rule: "Never withhold client DATA as a security instrument — data export is unconditional (G18). Self-help instruments above apply to service access and configuration/IP handover only, never to the client's own data."
+
+notes:
+  - "reject/expired outcomes on any single weight override the additive score — do not average past a reject signal."
+  - "elevated and above cannot proceed with zero security regardless of any other factor — see protection-guardrails.md G15."
