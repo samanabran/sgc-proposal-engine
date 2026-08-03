@@ -14,6 +14,8 @@ it's meant to be enforced mechanically, not just by convention.
 | `03-library/` | Any SDR, reviewed | Append, via review |
 | `04-governance/` | Sales leadership | Read only |
 | `05-ops/` | Commercial Desk | Read only |
+| `06-brand/` | Commercial Desk only | Read only |
+| `07-protection/` | Commercial Desk + Finance | Read only |
 
 ## Rationale, per layer
 
@@ -83,13 +85,37 @@ reinterpret. Read access is unrestricted (everyone needs to follow the
 procedure); write access is restricted to the team that owns process
 consistency.
 
+### `06-brand/` — Commercial Desk only, read-only to everyone else
+
+`entity/legal-identity.yaml` is the single source for every legal name,
+address, and contact detail on every issued document. `known-defects.md`
+#12 documents what happens without one: two different registered
+addresses across two revisions of the same deal, weeks apart, because
+nothing forced a single source of truth. Tokens (`color`, `type`, `grid`,
+`decor`) exist for the same reason applied to visual identity — an SDR
+picking an off-registry colour under deadline pressure is a smaller
+version of the same drift problem `00-knowledge/` exists to prevent for
+pricing.
+
+### `07-protection/` — Commercial Desk + Finance, read-only to everyone else
+
+Portfolio limits, exposure methodology, and abort criteria protect the
+company's actual solvency (`doctrine.md` — 1–2 months' runway), not just
+deal-level margin. If any SDR could quietly raise
+`portfolio-limits.yaml: max_peak_cash_exposure_single_deal_aed` to close
+one more deal under pressure, the limit stops meaning anything at the
+exact moment it matters most. This layer changes only by joint Commercial
+Desk + Finance review, logged in `review-log.md` like any other
+knowledge-layer change.
+
 ## Enforcement mechanism
 
 **Primary: git branch protection.** In a environment with real git
 remotes and branch protection rules, the correct enforcement is a
 protected-branch policy: `00-knowledge/`, `01-templates/`, `04-governance/`,
-and `05-ops/` changes require a PR reviewed and merged by an authorized
-Commercial Desk / Sales leadership account, with CODEOWNERS routing
+`05-ops/`, `06-brand/`, and `07-protection/` changes require a PR
+reviewed and merged by an authorized Commercial Desk / Sales leadership
+account, with CODEOWNERS routing
 enforcing *who* can approve which paths. This is the mechanism to
 implement first if/when the repo moves to a git host that supports it.
 
@@ -104,7 +130,8 @@ those environments, enforcement falls back to:
    is the enforcement when tooling can't be.
 2. **A `.readonly-marker` file** (a plain marker file, e.g.
    `.readonly-marker` at the root of `00-knowledge/`, `01-templates/`,
-   `04-governance/`, and `05-ops/`) as a machine-checkable signal that
+   `04-governance/`, `05-ops/`, `06-brand/`, and `07-protection/`) as a
+   machine-checkable signal that
    tooling or a pre-commit hook can look for, even without branch
    protection — a script that refuses to stage changes under a directory
    containing this marker is a cheap, portable enforcement layer that

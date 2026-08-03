@@ -1,87 +1,63 @@
-# Escalation Triggers
+# Escalation Triggers (v2)
 
-Exactly when an SDR must stop and escalate rather than proceed. If none of
-these apply, proceed per the normal runbook sequence
-(`runbook/subscription-proposal-runbook.md`). If any of these apply,
-**stop, log the escalation in the client's `manifest.yaml: escalations`,
-and route to the Commercial Desk** — see `approval-matrix.md` for who
-signs off at what level. Never resolve any of the following by
-improvising, discounting, or paraphrasing around it (`AGENTS.md: On
-uncertainty`).
+Exactly when an SDR must stop and escalate rather than proceed. If any of
+these apply, **stop, log the escalation in the client's `manifest.yaml:
+escalations`, and route per `approval-matrix.md`.** Never resolve any of
+the following by improvising, discounting, or paraphrasing around it.
 
-## 1. Any G1–G10 gate failure
+## Any G1–G41 gate failure
 
-Every gate failure is an escalation, no exceptions. One line each
-(`commercial-rules/subscription-guardrails.md`):
+Every gate failure is an escalation. Full definitions in
+`commercial-rules/{subscription,payment-plan,protection}-guardrails.md`.
+The highest-frequency triggers in practice:
 
 | Gate | Fails when | Matching known defect |
 |---|---|---|
-| **G1** — Platform floor | Build value + cost-to-serve doesn't clear `cts_total_aed × 1.25` | `known-defects.md #3` |
-| **G2** — Term ≥ recovery | Mobilisation + recovery isn't fully recovered within the subscription term | `known-defects.md #9` |
-| **G3** — Rate provenance | Any rate, hour figure, or percentage doesn't trace to a `pricing/*.yaml` key | `known-defects.md #15` |
-| **G4** — Documentation coverage | `documentation_hours` below `max(overlays.documentation_hours_min, 5% of dev hours)` | `known-defects.md #7` |
-| **G5** — QA coverage | `qa_hours` below `max(overlays.qa_hours_min, 8% of delivery hours)` | `known-defects.md #8` |
-| **G6** — PM coverage | PM line doesn't equal the segment's `pm_pct` × subtotal | — (Commercial Rule 6; no dedicated defect entry, still a hard stop) |
-| **G7** — Segment rate integrity | `blended_rate_aed` used doesn't match the segment implied by the client's user count | `known-defects.md #12` |
-| **G8** — Gross margin floor | Margin falls below 30% (target 35%) | `known-defects.md #3` |
-| **G9** — Market test | `year1_client_cost_aed` exceeds 1.30× the incumbent benchmark | `known-defects.md #11` |
-| **G10** — Budget test | Quote meets or exceeds a previously rejected budget without a logged value justification | `known-defects.md #10` |
+| G1 Platform floor | Recurring price doesn't clear CTS × 1.25 | `known-defects.md` #1 |
+| G3 Mobilisation ≥ 33% | Mobilisation short of 33% without a logged concession | — |
+| G4/G16 Clawback present | Any deferred structure with no clawback clause | `known-defects.md` #8 |
+| G8/G23 Margin floor | Margin below 30% target, or below 25% absolute (no approver may go here) | `known-defects.md` #1 |
+| G9 Rate provenance | Any figure not traceable to `pricing/*.yaml`, including `forbidden_rates` | `known-defects.md` #2 |
+| G11 Discount on recovery | A discount applied to the recovery portion, not just platform | `known-defects.md` #16 |
+| G21/G22 Exposure/walk-away card | Pricing discussed with a client before the walk-away card exists | — |
+| G35 False VAT claim | Any statement that SGC charges VAT or is registered | `known-defects.md` #10, #11 |
+| G36–G38 Edition misdescription | Community described as Enterprise, or exclusions not disclosed in writing | `known-defects.md` #18 |
 
-On resolution: reduce scope (fewer modules, fewer users, a lower support
-tier, a longer term), never discount below the floor or shorten the
-recovery assumption to force a pass — see `subscription-guardrails.md: On
-a failed gate` for the per-gate remediation pattern.
+## Portfolio-level triggers (not deal-specific)
 
-## 2. A rate or module not on the card
+- Any early-warning indicator at `high` or `critical` tier fires
+  (`07-protection/monitoring/early-warning-indicators.yaml`) — new
+  deferred-payment structures pause per
+  `07-protection/monitoring/graduated-response.md`.
+- Peak cash exposure on a new deal would push the aggregate above
+  `07-protection/exposure/portfolio-limits.yaml: max_aggregate_peak_cash_exposure_aed`.
+- A client's risk score lands in the `refuse` band
+  (`risk-security-matrix.yaml`) — this is an abort trigger
+  (`07-protection/abort/abort-criteria.md`), not an escalation to
+  negotiate around.
 
-If a client asks for an Odoo module, a role, or a rate that has no key in
-`pricing/*.yaml` (`saas-modules.yaml`, `rate-card.yaml`, `hour-lookup.yaml`,
-`hosting.yaml`, `support-training.yaml`), that is an escalation, not an
-estimate-by-analogy. **Escalate; do not interpolate** —
-`rate-card.yaml: notes`, `saas-modules.yaml: notes`,
-`hour-lookup.yaml: notes` all say this independently. See
-`known-defects.md #15` for what happens when a drafter prices "close to
-similar modules" instead.
+## Entity and brand triggers
 
-## 3. A client budget below the platform floor
+- Any field in `06-brand/entity/legal-identity.yaml` is still `RESOLVE`
+  and the document requires it (signature block, dispute-and-jurisdiction
+  clause) — the document cannot be issued, full stop, until Founder +
+  Commercial Desk resolve it.
+- Any clause used from the library carrying `requires_counsel_review: true`
+  has not actually been reviewed by counsel — escalate for review, don't
+  issue the draft text as final.
 
-If the client's stated budget, before any worksheet is even built, is
-below what `platform_floor_aed` (`cts_total_aed × 1.25`,
-`policy.yaml: gates.platform_floor_multiplier`) would require for the
-smallest realistic scope, don't build a worksheet designed to force a fit.
-Escalate the budget mismatch and have the Commercial Desk confirm whether
-scope can be cut far enough to make the segment viable, or whether the
-deal should be declined.
+## Rate, module, or work package not on the card
 
-## 4. A legal or VAT clause needing paraphrase
+Escalate to Commercial Desk (`AGENTS.md` absolute rule;
+`known-defects.md` #2).
 
-Tax and legal wording is copied verbatim from `clause-library/` — never
-paraphrased (`AGENTS.md`). If a client's situation genuinely doesn't fit
-any existing clause (e.g. `vat-uae.md`, `clawback.md`,
-`financing-disclosure.md`, `exclusivity-replacement.md`,
-`term-commencement.md`) and the language would need to change to cover
-it, that is an escalation for legal + Commercial Desk review before the
-clause goes anywhere near a draft. See `known-defects.md #6` for the VAT
-Designated Zone example of why this matters — a well-intentioned rewrite
-dropped a qualifying condition and implied a VAT exemption that wasn't
-true.
+## Quoting near a previously rejected budget
 
-## 5. An issued-revision correction
+Escalate with a logged value justification before requoting near a
+number the client has already declined (`known-defects.md` #14).
 
-`05-issued/` is immutable once a revision has been sent (`AGENTS.md`). If
-an error is found in an issued proposal — pricing, a clause, a number —
-that is always an escalation: a new revision (`_RevN+1`) or a
-`correction-notice.md` (`01-templates/comms/`), never a silent edit to the
-issued folder. See `known-defects.md #5`. Route through
-`approval-matrix.md`'s L1/L2 sign-off for issued corrections depending on
-whether pricing is affected.
+## Correction to an already-issued proposal
 
-## What "escalate" means in practice
-
-1. Stop drafting. Do not proceed past the point of the trigger.
-2. Log one line in the client's `manifest.yaml: escalations` — what
-   triggered it, which gate/rule, and the resolution once one exists.
-3. Route to the Commercial Desk (or the level specified in
-   `approval-matrix.md`).
-4. Resume only once the escalation is resolved and, for gate failures, the
-   worksheet has been re-run and re-passed — not patched around.
+Never edit `05-issued/` in place. Escalate to Commercial Desk to
+authorize a new revision or a `correction-notice.md`
+(`known-defects.md` #9 v1 numbering / general immutability rule).

@@ -18,9 +18,12 @@ follow the pattern breaks every file that expects to parse or cite it.
 
 **Worked examples:**
 
-- `VGE-vongeyern-realestate` — real, existing client folder. `VGE` from
-  "Von Geyern" (the client name), `vongeyern-realestate` as the slug
-  since the plain name alone doesn't convey the vertical.
+- `VGE-vongeyern-realestate` — real, existing client folder (pricing
+  v1.0). `VGE` from "Von Geyern" (the client name), `vongeyern-realestate`
+  as the slug since the plain name alone doesn't convey the vertical.
+- `MRD-meridianview-realty` — real, existing client folder (pricing
+  v2.0), the v2 hardening pass's worked example. `MRD` from "Meridianview
+  Realty."
 - `ANC-anchorlogistics-3pl` — a fictional 3PL client named "Anchor
   Logistics"; `ANC` prefix, slug disambiguates the vertical.
 - `BKF-brightkidsfurniture` — a fictional furniture retailer "Bright Kids

@@ -1,184 +1,145 @@
 # Known Defects
 
-Fifteen concrete failure modes this repository's structure exists to
-prevent, with the arithmetic attached. This is the highest-value onboarding
-asset in the repo — read it before running your first deal
-(`05-ops/onboarding-new-sdr.md`). Each defect names the mechanism that now
-catches it.
+The highest-value onboarding asset in this repo. Read before running your
+first deal (`05-ops/onboarding-new-sdr.md`). Twenty defects below trace to
+a real revision history — `02-clients/MRD-meridianview-realty/`, Rev1
+(issued 2026-06-15) and Rev2 (issued 2026-07-02), both retracted and
+preserved immutable in `05-issued/` with the exact original wording, not
+paraphrased. Rev3 (`03-draft/`) is the correction, gate-checked against
+every one of these.
 
-## 1. Segment rate drift between `policy.yaml` and `rate-card.yaml`
+## The 20 defects (MRD-2026-SUB-01, Rev1 and Rev2)
 
-**What happened while building this repo, not a hypothetical**: the
-original design draft for `pricing/policy.yaml` pinned `smb.blended_rate_aed`
-to 425 and `mid_market.blended_rate_aed` to 550 — the *pre-revision*
-Consultant and Senior Consultant rates. `rate-card.yaml` v2 (22 Jul 2026)
-revised those roles to 395 and 525. Left unreconciled, every `smb` proposal
-would have overquoted by AED 30/hr and every `mid_market` proposal by
-AED 25/hr against the actual card — a client checking the numbers against a
-later-issued sibling proposal would find two different rates for the same
-role.
+1. **Recurring portion below cost.** AED 879/mo quoted against a cost
+   stack (licences + hosting + tooling + support + account mgmt) of
+   roughly AED 2,360/mo at the scope sold — structurally loss-making from
+   the first invoice. Caught by G1 (platform floor).
+2. **Off-card rate.** AED 690/hr blended rate — not on `rate-card.yaml`,
+   at any level. Now explicitly listed in `rate-card.yaml: forbidden_rates`
+   so this specific number is mechanically rejected, not just absent.
+   Caught by G9.
+3. **No PM, QA, or documentation lines.** Commercial Rules 4, 5, and 6
+   breached outright — the underlying costing had none. Caught by G19.
+4. **Underscoped hours.** 33 hours quoted against what the same scope
+   correctly costs at 46 hours (Rev3's worksheet). A rate multiplied by
+   the wrong hour count is still wrong even if the rate itself were valid.
+5. **Zero-hour scope items.** Portal sync, website integration, and AI
+   lead scoring described as included, with no hours allocated to build
+   any of them.
+6. **Sold both ways.** AI scoring simultaneously "included" in the
+   subscription and separately available as a AED 1,250/mo add-on in
+   SGC's own catalogue — internally contradictory.
+7. **Implied fee reduction after recovery.** A clause implied the monthly
+   fee would drop once the build was recovered — directly contradicted by
+   `clause-library/post-recovery-continuation.md`, and loss-making in
+   year 2 if honored. Caught by G5.
+8. **No clawback.** Full build delivered before a single invoice, with no
+   mechanism to recover value if the client terminated early. Caught by
+   G4/G16.
+9. **Term anchored to the wrong date.** Term started at go-live, roughly
+   4–6 weeks after delivery work had already begun — meaning weeks of
+   uncompensated exposure before the clock (and billing) even started.
+   Caught by G6.
+10. **Rev1's VAT claim: "no VAT — free zone."** Factually wrong.
+    Designated Zone treatment applies to goods, not services; SGC's
+    services are standard-rated regardless of zone status.
+11. **Rev2's VAT claim: "SGC TECH AI is VAT-registered."** Also false,
+    in the opposite direction — SGC held no TRN at the time. Two
+    different wrong claims across two revisions of the same deal is
+    itself a signal that VAT status was never actually checked against a
+    single source of truth before either revision was drafted. Both
+    replaced by `clause-library/vat-uae.md` + `vat-gross-up.md`.
+12. **Inconsistent registered address.** Different documents in this
+    deal's history implied different addresses/licence authorities for
+    the same entity. Now centralized in
+    `06-brand/entity/legal-identity.yaml`, deliberately left `RESOLVE`
+    until one real address is confirmed, rather than guessed.
+13. **Uncapped referral, unenforceable exclusivity.** An open-ended
+    referral credit with no cap, plus a promise that pricing "will not be
+    extended to any other brokerage" — a commitment SGC cannot control or
+    enforce. Replaced by `clause-library/referral-capped.md` and
+    `exclusivity-replacement.md`.
+14. **Recommended tier matched the rejected budget.** The tier pushed in
+    an earlier draft priced at roughly the same figure (AED 30,000+) the
+    client had already verbally declined before this engagement even
+    started — re-quoting a number the client already said no to, without
+    acknowledging it. Caught by `budget_test`.
+15. **Adoption unaddressed.** The client's explicitly stated deal-breaker
+    — described directly on the discovery call — did not appear anywhere
+    in either revision. Fixed with a specific, dated mechanism in
+    `clause-library/adoption.md`, not a generic training line.
+16. **Blanket discount on the recovery portion.** A flat 10% "annual
+    discount" applied across the whole subscription figure, including the
+    portion that recovers already-delivered build value — giving away
+    work that had already been performed. Fixed by G11: discounts apply
+    to the platform portion only.
+17. **Named individual, no substitution right.** Hypercare and delivery
+    promised "personally" by one named consultant with no fallback —
+    single point of failure for the client and an operational risk for
+    SGC. Fixed by `clause-library/key-person-and-subcontractor.md` (G27).
+18. **Edition misdescribed.** "Odoo Enterprise licences" promised while
+    the actual build used Community edition — the single highest-stakes
+    misdescription in the whole history, since it implies capabilities
+    (automated bank reconciliation, official mobile app, Odoo vendor
+    support) the client was never actually going to receive. Fixed by
+    `editions.yaml` + `clause-library/edition-and-upgrades.md` (G36).
+19. **Unpriced recurring internal cost.** Monthly business-review calls
+    were implied as a standing commitment without ever being priced —
+    at senior time, this runs to roughly AED 10,800/year unbudgeted.
+    Fixed by the review-cadence rule in the runbook (quarterly below AED
+    2,500/mo subscription).
+20. **Unsourced performance claims.** "AED 1.15 billion in client value,"
+    "104% Year-1 ROI," "5.9-month payback" — presented as track record
+    with no source, no client consent, and no basis found anywhere in
+    this repository. Removed entirely from Rev3; nothing replaces it,
+    because nothing sourced was available to replace it with.
 
-**Caught by**: building `policy.yaml` and `rate-card.yaml` in the same
-commit and cross-checking every pinned rate against its source role before
-first commit (see the comment block at the top of `policy.yaml`).
+## The six overrides applied in the v2 rebuild
 
-**Mechanism that prevents recurrence**: `policy.yaml`'s segment block
-documents which `rate-card.yaml` role each `blended_rate_aed` is pinned to.
-A rate-card change that doesn't touch `policy.yaml` in the same commit is a
-review-log flag (`04-governance/review-log.md`).
+1. An earlier, larger build-value estimate for this deal class was
+   brought down to a correctly-scoped figure once documentation, QA, and
+   PM lines were added properly rather than omitted — a reminder that
+   "correcting" a defective estimate does not automatically mean the
+   number goes up; sometimes proper structure replaces padding.
+2. Three pricing tiers collapsed to two options — Option A (mobilisation
+   paid) only. A third tier and Option B (zero mobilisation) both add
+   complexity without adding protection; Option B is separately withdrawn
+   under `payment-plans.yaml: withdrawn`.
+3. Term extended from a 12-month assumption to 24 months for boutique
+   builds in this value band, giving the recovery period enough room
+   without requiring an unrealistic mobilisation percentage.
+4. Blanket discounting replaced with platform-portion-only discounting
+   (G11) — see defect #16 above.
+5. Cadence table values reinterpreted as ceilings, not price entitlements
+   (G12) — the margin floor beneath a cadence table value always binds if
+   it's tighter.
+6. A named, irreplaceable consultant promise replaced with an explicit
+   substitution right (G27) — see defect #17 above.
 
-## 2. SDR copies a peer's client folder instead of `_SCAFFOLD`
+## What this v2 build itself caught (institutional memory, not client-facing)
 
-A live deal folder can contain a one-off concession — a discounted rate, a
-waived setup fee, a non-standard payment term. Copying it as the starting
-point for a new client silently propagates that concession as if it were
-policy. Six months and a dozen copies later, three different "standard"
-rates exist and nobody can say which is real.
-
-**Mechanism**: `runbook/subscription-proposal-runbook.md` §1 mandates
-copying `_SCAFFOLD`, which is empty of numbers by design.
-
-## 3. Discounting past the margin floor to win a deal
-
-A client pushes back on a AED 55,000 build quote. An SDR under pressure
-drops the rate until the deal "feels winnable" — say, cutting the effective
-blended rate until gross margin lands at 22%, below the 30% floor
-(`policy.yaml: gates.min_gross_margin`).
-
-**Mechanism**: G8 in `subscription-guardrails.md` fails mechanically at
-30%. The runbook and `AGENTS.md` both state the fix explicitly: reduce
-scope, never price under the floor.
-
-## 4. Verbal promise never logged
-
-On a discovery call, the SDR tells the client "we'll throw in the extra
-training session." Three months later, at issue, the client expects it and
-it isn't in the worksheet or the draft. The client reasonably feels misled;
-SGC either eats the cost or damages the relationship.
-
-**Mechanism**: `00-intake/verbal-promises.md` plus `AGENTS.md`: "anything
-said aloud is scope," logged the same day. QA checklist checks
-`verbal_promises_logged: true` before issue.
-
-## 5. Editing a sent revision instead of issuing a new one
-
-A typo is found in an issued proposal's pricing table. The fastest fix is
-to open `05-issued/CLIENT-2026-SUB-01_Rev1/` and correct it in place — but
-the client already has a PDF of the original, and now the repo and the
-client's copy disagree with no record of the change.
-
-**Mechanism**: `05-issued/` is immutable by contract (`AGENTS.md`). A
-correction is `Rev2`, or a `correction-notice.md` if the wrong version was
-already sent.
-
-## 6. VAT clause paraphrased instead of copied verbatim
-
-A drafter rewrites the standard VAT clause in their own words to "make it
-flow better" with the rest of §10. The rewrite drops the Designated Zone
-qualifying-condition language from `clause-library/vat-uae.md`, and the
-proposal now implies blanket free-zone VAT exemption — which
-`market-data/vertical-notes/uae-tax-vat.md` explicitly flags as false for
-most clients (`policy.yaml: vat.free_zone_exempt: false`).
-
-**Mechanism**: `AGENTS.md` — tax and legal wording copied verbatim from
-`clause-library/`, always flagged for human review.
-
-## 7. Undocumented custom feature
-
-A bespoke report is scoped into `number_2_build` with dev hours only — no
-`documentation_hours` line, because "it's a small report." Six months later
-a new consultant inherits the account and has no record of what the report
-does or why.
-
-**Mechanism**: G4 (`subscription-guardrails.md`) requires documentation
-hours ≥ `max(overlays.documentation_hours_min, 5% of dev hours)` on every
-worksheet, mechanically, regardless of perceived size.
-
-## 8. QA hours zeroed to hit a tight budget
-
-Facing budget pressure, a worksheet sets `qa_hours: 0` to shave the
-subtotal, planning to "test as we go" instead.
-
-**Mechanism**: G5 requires `qa_hours ≥ max(overlays.qa_hours_min, 8% of
-delivery hours)`. This is Commercial Rule 5 — QA is never waived — made
-mechanical rather than a matter of discipline.
-
-## 9. Mobilisation term shorter than build recovery
-
-A client wants a 6-month subscription term with zero mobilisation. Applied
-naively, SGC would still be recovering build cost through month 9 while the
-contract ends at month 6 — a guaranteed loss on the deal regardless of the
-monthly rate.
-
-**Mechanism**: G2 (`Term ≥ recovery`) checks `mobilisation_aed +
-recovery_total_aed` against `term_months` before the worksheet can pass.
-
-## 10. Quoting near a budget the client already rejected
-
-A client rejected a AED 85,000 quote from a competitor three months ago.
-Unaware of this, a fresh worksheet — built independently, correctly, on
-current rates — lands at AED 92,000. Quoting it without acknowledging the
-history reads as tone-deaf and re-triggers the same objection.
-
-**Mechanism**: G10 (budget test) checks `year1_client_cost_aed` against
-`budget_rejected_aed` from the client brief and forces an explicit value
-justification before requoting near a known-rejected number.
-
-## 11. Pricing above the market-position ceiling
-
-A heavily customized build stacks enough complexity multipliers that the
-quoted price reaches 1.6× the client's stated incumbent cost — well past
-SGC's "15–20% under mid-tier" positioning
-(`market-data/benchmarks.yaml: strategic_position`) and into Big-4
-territory the specialist-boutique band is built to avoid.
-
-**Mechanism**: G9 (market test) caps at `policy.yaml:
-gates.max_multiple_of_incumbent` (1.30×). A failure here is a signal to
-check for double-counted overlays before cutting scope.
-
-## 12. Startup-segment deal priced at the wrong rate
-
-A 8-user client clearly qualifies for `startup_boutique`
-(`policy.yaml: segments.startup_boutique.max_users: 10`) but the worksheet
-uses the `smb` blended rate (395 instead of 280) and 15% PM instead of 10%,
-because the drafter defaulted to the "normal" segment out of habit.
-
-**Mechanism**: G7 (segment rate integrity) checks the blended rate used
-against the segment implied by the client's user count.
-
-## 13. Training billed as a recurring line
-
-A drafter adds the two bundled training sessions
-(`policy.yaml: overlays.training_sessions`) to the *recurring* subscription
-line instead of billing them once in the build, stacking an ongoing
-training overhead the client never agreed to.
-
-**Mechanism**: Commercial Rule 8 — training billed once, no overhead
-percentage stacked on top — checked at QA checklist stage against the
-`number_2_build` vs. `assembly` split.
-
-## 14. Knowledge version not pinned
-
-A proposal is built, gates pass, and drafting begins — but
-`manifest.yaml: knowledge_version_used` is left blank. Two weeks later
-`pricing/policy.yaml` bumps to v1.1 with a rate change. Nobody can now tell
-whether the in-flight proposal was built on v1.0 or should be re-priced
-against v1.1.
-
-**Mechanism**: `AGENTS.md` — always pin `knowledge_version_used` before
-drafting. `CHANGELOG.md` version bumps never silently revalue an
-in-progress worksheet because the worksheet records which version it was
-built against.
-
-## 15. Escalation resolved by improvising instead of asking
-
-A client asks for an Odoo module that isn't in `saas-modules.yaml`. Rather
-than escalate, the drafter estimates a price "close to similar modules" and
-adds it to the worksheet, breaking Rule 3 (auditability) — the number now
-has no source key to trace to.
-
-**Mechanism**: `AGENTS.md` absolute rule — a rate not on the card is an
-escalation (`manifest.yaml: escalations`), never an improvisation. This is
-the rule from which every other gate in this file ultimately derives: if
-every number traces to a file, defects 1–14 above become mechanically
-detectable instead of relying on someone noticing.
+21. **Segment blended rates that don't cleanly pin to a rate-card role.**
+    `pricing/policy.yaml: segments.smb.blended_rate_aed` (425) and
+    `segments.mid_market.blended_rate_aed` (550) do not trace to a single
+    named role on `rate-card.yaml` the way `startup_boutique` (280) pins
+    to `roles.startup_consultant` — see the flag left inline in
+    `policy.yaml` itself. This is the same drift class as defect #2
+    above (an off-card figure), just less obvious because 425
+    coincidentally matches a *different* role's rate (`qa_engineer`)
+    rather than matching nothing at all. Left as specified in this
+    revision's source brief per the "don't invent numbers" instruction,
+    but flagged for Commercial Desk resolution rather than silently
+    accepted — auditability means surfacing a discrepancy you notice,
+    not just avoiding introducing new ones.
+22. **A worked example inherited a since-corrected gate formula.** During
+    this same build, `03-library/worked-examples/boutique-brokerage-5users-24mo.md`
+    (built by a parallel process) used an earlier draft of the G1
+    platform-floor formula (comparing cost-to-serve against build value
+    plus cost-to-serve, rather than against the recurring subscription
+    price) that had already been corrected in
+    `commercial-rules/subscription-guardrails.md` before the worked
+    example was finished. Caught and fixed before commit — the lesson:
+    when two parts of a build run in parallel, a formula correction made
+    in one place doesn't propagate to a document already being drafted
+    elsewhere unless someone actually re-checks it against the current
+    source, not the source as it was when that document started.

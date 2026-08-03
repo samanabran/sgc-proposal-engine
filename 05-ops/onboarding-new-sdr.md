@@ -8,40 +8,51 @@ supervision on every deal after the first.
 
 Read `runbook/subscription-proposal-runbook.md` start to finish, alongside
 `AGENTS.md` (the operating contract it sits under). Don't skim — the
-runbook's sequence (`intake → calc → gate check → draft → QA checklist →
-human review → issue`) is the spine of every proposal this repo produces,
-and the absolute rules in `AGENTS.md` (never write to `00-knowledge/`,
-never invent a number, never edit `05-issued/`) are non-negotiable, not
+runbook's sequence (`intake → risk assessment → calc → exposure → gate
+check → walk-away card → draft → QA checklist → brand QA → human review →
+issue`) is the spine of every proposal this repo produces, and the
+absolute rules in `AGENTS.md` (never write to `00-knowledge/`,
+`01-templates/`, or `06-brand/`; never invent a number; never edit
+`05-issued/`; never discount the recovery portion; never misstate SGC's
+VAT status or misdescribe the Odoo edition) are non-negotiable, not
 suggestions to be reinterpreted under deadline pressure.
 
 **Done looks like**: the new SDR can explain, without looking it up, what
-the seven stages of the sequence are, what the three model codes (`SUB`,
-`PRJ`, `RET`) mean, and why `05-issued/` is immutable.
+the eleven stages of the sequence are, what the three model codes (`SUB`,
+`PRJ`, `RET`) mean, why `05-issued/` is immutable, and why a walk-away
+deal card must exist *before* any pricing conversation with a client.
 
 ## Step 2 — Read the known defects
 
-Read `failure-modes/known-defects.md` in full — all fifteen entries. This
-is described in that file itself as "the highest-value onboarding asset in
+Read `failure-modes/known-defects.md` in full — the 20 numbered defects
+from a real revision history (`02-clients/MRD-meridianview-realty/`
+Rev1/Rev2, both retracted), plus the six overrides and the two
+institutional-memory entries from this repo's own build process. This is
+described in that file itself as "the highest-value onboarding asset in
 the repo," and it's not exaggeration: every gate, every access
 restriction, and every naming convention in this repo exists because one
-of these fifteen things happened or was identified as a real risk before
-it happened. Reading the mechanisms without reading the failure they
-prevent makes the mechanisms feel like arbitrary bureaucracy; reading the
+of these things happened or was identified as a real risk before it
+happened. Reading the mechanisms without reading the failure they prevent
+makes the mechanisms feel like arbitrary bureaucracy; reading the
 failures first makes them make sense.
 
-**Done looks like**: the new SDR can, for any of the ten gates (G1–G10),
-name the specific known-defect scenario that gate exists to catch —
-without re-reading the file to answer. See
-`04-governance/escalation-triggers.md` for the gate-to-defect mapping if
-a check is needed.
+**Done looks like**: the new SDR can, for any of several of the 41 gates
+(G1–G41), name the specific known-defect scenario that gate exists to
+catch — without re-reading the file to answer. See
+`04-governance/escalation-triggers.md` for the highest-frequency
+gate-to-defect mapping if a check is needed.
 
-## Step 3 — Walk the worked example end to end
+## Step 3 — Walk both worked examples end to end
 
-Work through `03-library/worked-examples/boutique-brokerage-5users-24mo.md`
-by hand — not by reading it passively, but by reproducing the arithmetic
-yourself with a calculator or spreadsheet, section by section: cost-to-
-serve, build hours, financing, assembly, then all ten gates. Compare your
-numbers to the file's at each step before moving to the next.
+Work through `02-clients/MRD-meridianview-realty/` first — read the
+retracted Rev1/Rev2 in `05-issued/` alongside their `RETRACTION-NOTICE.md`
+files, then reproduce Rev3's arithmetic by hand from
+`02-calc/pricing-worksheet.yaml`: cost-to-serve, build hours, financing,
+assembly, exposure, then all 41 gates. Compare your numbers at each step.
+Then read `02-clients/VGE-vongeyern-realestate/` (pricing v1.0) as a
+second, differently-structured example — a clean revision history with no
+retractions, on the older gate count, useful for seeing how the same
+discipline applies at a different segment and term length.
 
 This is the single best way to internalize how the pieces connect —
 reading the runbook tells you the *order* of the calc; doing this exercise

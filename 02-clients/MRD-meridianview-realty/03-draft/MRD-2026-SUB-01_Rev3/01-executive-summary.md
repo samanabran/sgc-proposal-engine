@@ -22,7 +22,7 @@ for 5 users today, growing to 6 within 12 months. Built on Odoo
 | Term | 24 months |
 | Timeline to go-live | 6 weeks from mobilisation |
 
-Full detail, including why no VAT applies to this invoice, is in §10.
+Full detail, including why this invoice carries no VAT charge, is in §10.
 
 ## Why now
 

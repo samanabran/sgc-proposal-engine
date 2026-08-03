@@ -1,102 +1,75 @@
-# Validate — Running the G1–G10 Gate Check
+# Running the Gate Check
 
-The exact procedure for running the gate check against a completed
-`02-calc/pricing-worksheet.yaml` and writing `02-calc/gate-report.md`.
-Use this as a literal checklist. Gate definitions are in
-`commercial-rules/subscription-guardrails.md` — this file is the
-*procedure*, that file is the *definitions*; don't duplicate the gate
-logic here, reference it.
+`validate.py` (Python, stdlib + PyYAML only) implements the 18 checks
+below against a client folder. Run it before every human review, and
+before every issue.
 
-## Preconditions
+```
+python 05-ops/validate.py 02-clients/{client}/
+```
 
-- [ ] `02-calc/pricing-worksheet.yaml` is complete: `number_1_cost_to_serve`,
-      `number_2_build`, `number_3_financing`, and `assembly` are all filled,
-      in that order (`runbook/subscription-proposal-runbook.md` §2). Do not
-      run gates against a partially-filled worksheet.
-- [ ] `manifest.yaml: knowledge_version_used` is pinned to the current
-      `CHANGELOG.md` version before you start — the gate check is only
-      meaningful against a specific, recorded pricing version.
+Exit code 0 means clean. Non-zero means at least one check failed — the
+script prints which one and why, then exits.
 
-## Procedure
+## The 18 checks
 
-Work through the gates in order (G1 → G10), writing each result directly
-into `02-calc/gate-report.md` as you go — don't batch them at the end,
-since an early failure changes what's worth checking later.
+1. All pricing YAMLs parse; no `forbidden_rates` (690) anywhere in the
+   client folder.
+2. `pricing-worksheet.yaml` complete; every rate traces to `rate-card.yaml`.
+3. PM, QA, documentation, and contingency lines all present in
+   `number_2_build`.
+4. Total hours meet or exceed a comparable benchmark (roughly 9.2 hours
+   per user at `startup_boutique` scale — derived from the reference
+   worksheet, not an external source; recalibrate as more deals close).
+5. Every capability named in §06 has corresponding hours in
+   `number_2_build.delivery_hours` — cross-reference check.
+6. All 41 named gates evaluated in `pricing-worksheet.yaml: gates`, each
+   with a recorded `pass` value; any `false` blocks issue.
+7. Worst-case gate (G31): concessions plus maximum guarantee-credit
+   exposure, applied together, still clears the 25% absolute margin floor.
+8. Cash-positive within 30 days (G32) — `exposure.cash_positive_by_day`
+   must be ≤ `policy.yaml: gates.cash_positive_within_days`.
+9. Cadence at or above quarterly-in-advance (G33), unless a logged
+   exception exists.
+10. Mobilisation ≥ 33% and ≥ any triggered third-party upfront cost (G34).
+11. No VAT charged; `vat-gross-up.md` referenced; no VAT-registration
+    claim anywhere in the draft (G35).
+12. Edition declared; if Community, upgrade policy stated and exclusions
+    listed (G36–G38).
+13. Clawback present on any deferred structure (G16).
+14. All entity fields resolved in `06-brand/entity/legal-identity.yaml`
+    — **this check is expected to fail until real entity facts are
+    supplied.** It is not a bug in the client folder; it is the entity
+    file doing its job. A client folder can have all 41 commercial gates
+    pass and still correctly fail this check.
+15. Brand tokens only from `06-brand/registry.yaml`; no off-palette
+    colour.
+16. `verbal-promises.md` exists; every entry classified PRICED / DEFERRED
+    / EXCLUDED.
+17. Evidence file checklist complete before a `go-live` flag is set
+    (`07-protection/evidence/evidence-file-standard.md`).
+18. No forbidden phrase anywhere in the draft or issued document (not
+    counted against `04-review/qa-checklist.md`, which is expected to
+    name them): `bargain`, `not on our public list`, `will not be
+    extended to any other brokerage`, `no VAT applies`, `VAT-registered`,
+    `Odoo Enterprise` (if edition = community), `iOS / Android app` (if
+    edition = community).
 
-1. **G1 — Platform floor.** Pull `cts_total_aed` from
-   `number_1_cost_to_serve`. Compute `platform_floor_aed = cts_total_aed ×
-   policy.yaml: gates.platform_floor_multiplier (1.25)`. Check
-   `cts_total_aed × 1.25 ≤ build_value_aed + cts_total_aed`. Record pass/
-   fail with the actual numbers, not just "pass" — the arithmetic is the
-   audit trail.
-2. **G2 — Term ≥ recovery.** From `number_3_financing`, confirm
-   `mobilisation_aed + recovery_total_aed` is fully recovered within
-   `term_months`. If mobilisation is spread with uplift over the term,
-   confirm the recovery schedule completes at or before the final month,
-   not after it.
-3. **G3 — Rate provenance.** Walk every rate, hour figure, and percentage
-   in the worksheet and confirm each one cites a specific key in
-   `pricing/*.yaml`. Any figure that doesn't have a citable source key
-   fails this gate — see `AGENTS.md`: "if you cannot cite the source file
-   and key, delete the number."
-4. **G4 — Documentation coverage.** Check `documentation_hours ≥
-   max(overlays.documentation_hours_min, 5% of dev hours)` using the
-   values from `policy.yaml: overlays` and the worksheet's dev-hour total.
-5. **G5 — QA coverage.** Check `qa_hours ≥ max(overlays.qa_hours_min, 8%
-   of delivery hours)`, same source.
-6. **G6 — PM coverage.** Confirm the PM line in the worksheet equals the
-   segment's `pm_pct` × subtotal (10% startup, 15% smb/mid_market per
-   `policy.yaml: segments`).
-7. **G7 — Segment rate integrity.** Confirm the segment used matches the
-   client's user count against `policy.yaml: segments.*.max_users`, and
-   that `blended_rate_aed` used matches that segment's pinned rate exactly
-   (280 / 395 / 525).
-8. **G8 — Gross margin floor.** Compute `(assembly value −
-   internal_build_cost_aed) / assembly value` using
-   `cost_to_serve.internal_consultant_cost_aed_hr` for the cost side.
-   Check ≥ `gates.min_gross_margin` (0.30); flag if below
-   `gates.target_gross_margin` (0.35) even if it still passes the floor —
-   worth a note even on a pass.
-9. **G9 — Market test.** Pull `incumbent_benchmark_aed_mo` from the
-   client brief. Check `year1_client_cost_aed ≤ incumbent_benchmark_aed_mo
-   × 12 × gates.max_multiple_of_incumbent (1.30)`.
-10. **G10 — Budget test.** Check the client brief for
-    `budget_rejected_aed`. If none is present, record G10 as
-    **pass (not triggered)** — this is a valid pass state, not a skipped
-    gate. If present, check `year1_client_cost_aed` doesn't meet or exceed
-    it without a logged value justification.
+## Reading the output
 
-## Writing `gate-report.md`
+The script separates **gate failures** (checks 1–13, 16–18 — these block
+a deal from being commercially or legally sound) from the **entity
+resolution blocker** (check 14 — this blocks issue specifically because
+a real fact is genuinely still unknown, not because anything about the
+deal itself is wrong). A client folder that passes checks 1–13 and 15–18
+but fails check 14 is commercially clean and administratively blocked —
+report it that way, don't conflate the two.
 
-For each gate, record:
+## Testing validate itself
 
-- Gate ID and name.
-- The formula, with the actual numbers substituted (not just the
-  worksheet's abstract keys — a reviewer should be able to verify the
-  arithmetic without opening the worksheet).
-- Pass / fail.
-- If fail: which remediation path applies (`subscription-guardrails.md:
-  On a failed gate`) and the escalation logged in `manifest.yaml`.
-
-Close with a summary line: `gates_passed: true` only if all 10 gates
-passed. If any gate failed and was subsequently resolved by a scope
-change, keep the original failing run in the report (don't overwrite it)
-and add the re-run below it — the failure and its resolution are both
-part of the audit trail (`04-governance/review-log.md` conventions apply
-the same way here).
-
-## On any failure
-
-**Stop. Do not proceed to draft.** Follow
-`04-governance/escalation-triggers.md` §1 and log the escalation in
-`manifest.yaml: escalations` before doing anything else. Reduce scope and
-re-run the full gate check from G1 — a partial re-check after a scope
-change isn't sufficient, since a change made to fix one gate can affect
-others (e.g. cutting a module changes `build_value_aed`, which affects
-G1, G8, and G9 simultaneously).
-
-## After all 10 gates pass
-
-Set `manifest.yaml: gates_passed: true`. Only at this point does the
-runbook allow moving from calc to draft
-(`runbook/subscription-proposal-runbook.md` §3–4).
+Run it against a deliberately broken copy to confirm each defect is
+caught independently: a rate of 690 anywhere, a missing clawback, an
+edition claiming Enterprise capability with zero licence cost recorded,
+or the string "VAT-registered" appearing outside the QA checklist file.
+See `05-ops/validate.py`'s own `if __name__ == "__main__"` block for how
+to point it at a fixture directory.
