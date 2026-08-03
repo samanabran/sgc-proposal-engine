@@ -1,66 +1,107 @@
-# Pricing Worksheet — copy to 02-clients/{client}/02-calc/pricing-worksheet.yaml
-# Complete in order: inputs -> number_1 -> number_2 -> number_3 -> assembly
-# -> gates. Do not skip to assembly. Every value traces to a
+# Pricing Worksheet (v2) — copy to 02-clients/{client}/02-calc/pricing-worksheet.yaml
+# Complete in order: inputs -> risk -> number_1 -> number_2 -> number_3 ->
+# assembly -> exposure -> gates. Every value traces to a
 # 00-knowledge/pricing/*.yaml key — if it doesn't, escalate, don't estimate.
-# See runbook/subscription-proposal-runbook.md §2 for the full procedure.
+# See runbook/subscription-proposal-runbook.md for the full procedure.
 
 inputs:
   users_now:
   users_12mo:
   segment:                       # startup_boutique | smb | mid_market
+  edition:                        # community | enterprise — community unless a trigger condition is met, see editions.yaml
+  edition_trigger_reason:          # required if edition: enterprise — cite the specific editions.yaml trigger_condition
   term_months:
-  modules: []                     # keys from pricing/saas-modules.yaml
-  integrations_requested: []
-  migration_records:
-  migration_files:
+  modules: []                       # keys from pricing/saas-modules.yaml — only relevant if edition: enterprise
+  work_packages: []                  # keys from pricing/hour-lookup.yaml
   incumbent_benchmark_aed_mo:
   budget_rejected_aed:
 
+risk_assessment_ref: 02-calc/risk-assessment.yaml   # completed before this worksheet, per risk-assessment.template.yaml
+
 number_1_cost_to_serve:
-  licences_aed:                   # sum of modules x users, from saas-modules.yaml
-  hosting_allocation_aed:          # from hosting.yaml, tier matched to users_now
-  tooling_aed:                     # policy.yaml: cost_to_serve.tooling_flat_aed
-  support_labour_aed:               # policy.yaml: cost_to_serve.support_hours_per_5_users x support_rate_aed
-  account_mgmt_aed:                 # policy.yaml: cost_to_serve.account_mgmt_aed, tier matched to users_now
+  licences_aed:                   # 0 if edition: community; else sum of saas-modules.yaml x users
+  hosting_allocation_aed:          # policy.yaml cost_to_serve.hosting_node_true_cost_aed x (users / hosting_node_user_capacity)
+  tooling_aed:                      # policy.yaml cost_to_serve.tooling_flat_aed
+  support_labour_aed:                # ceil(users/5) x policy.yaml cost_to_serve.support_rate_aed
+  account_mgmt_aed:                   # policy.yaml cost_to_serve.account_mgmt_aed, tier matched to users
   cts_total_aed:
-  platform_floor_aed:               # cts_total_aed x policy.yaml: gates.platform_floor_multiplier (1.25)
+  platform_floor_aed:                  # cts_total_aed x policy.yaml gates.platform_floor_multiplier (1.25)
 
 number_2_build:
-  delivery_hours: []                # [{package, hours, complexity}] — packages from pricing/hour-lookup.yaml
-  documentation_hours:               # >= max(overlays.documentation_hours_min, 5% of dev hours)
-  qa_hours:                          # >= max(overlays.qa_hours_min, 8% of delivery hours)
-  training_hours:                     # overlays.training_sessions x overlays.training_hours_per_session
+  delivery_hours: []                    # [{package, band: simple|standard, hours}] — from pricing/hour-lookup.yaml
+  documentation_hours:                   # >= max(overlays.documentation_hours_min, 5% of dev hours)
+  qa_hours:                               # >= max(overlays.qa_hours_min, 8% of delivery hours)
+  training_hours:                          # overlays.training_sessions x overlays.training_hours_per_session
   total_hours:
-  rate_aed:                           # segment's blended_rate_aed from policy.yaml — must match segment exactly (G7)
-  rate_exists_on_card:                 # true/false — must be true (G3)
+  rate_aed:                                 # segment's blended_rate_aed from policy.yaml
+  rate_exists_on_card:                       # true/false — must be true, and not in rate-card.yaml forbidden_rates (G9)
   subtotal_aed:
-  pm_aed:                              # subtotal_aed x segment pm_pct
-  contingency_aed:                     # subtotal_aed x segment contingency_pct
+  pm_aed:                                     # subtotal_aed x segment pm_pct
+  contingency_aed:                             # subtotal_aed x segment contingency_pct
   build_value_aed:
-  internal_build_cost_aed:              # total_hours x policy.yaml: cost_to_serve.internal_consultant_cost_aed_hr (150)
+  internal_build_cost_aed:                      # total_hours x policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
 
 number_3_financing:
-  mobilisation_aed:                     # default: build_value_aed x policy.yaml: gates.default_mobilisation_pct (0.25)
+  mobilisation_aed:                              # default: build_value_aed x policy.yaml gates.default_mobilisation_pct (0.33)
   deferred_aed:
-  uplift_pct:                            # policy.yaml: financing_uplift.months_{term}, + zero_mobilisation_surcharge if mobilisation_aed is 0
+  uplift_pct:                                      # policy.yaml financing_uplift.months_{term}, + zero_mobilisation_surcharge if applicable (Option B currently withdrawn)
   recovery_total_aed:
   recovery_monthly_aed:
 
 assembly:
-  option_a: { mobilisation_aed: , subscription_aed: , year1_client_cost_aed: }
-  option_b: { mobilisation_aed: 0, subscription_aed: , year1_client_cost_aed: }
+  option_a: { mobilisation_aed: , platform_portion_aed: , subscription_aed: , year1_client_cost_aed: }
+  # option_b (zero mobilisation) is WITHDRAWN — do not populate, see payment-plans.yaml: withdrawn
+
+exposure:
+  contractual_peak_aed:
+  cash_peak_aed:
+  economic_peak_aed:
+  cash_positive_by_day:                             # must be <= policy.yaml gates.cash_positive_within_days (30) — G32
 
 gates:
-  G1_platform_floor:     { pass: , actual: , required:  }
-  G2_term_ge_recovery:   { pass:  }
-  G3_rate_provenance:    { pass:  }
-  G4_documentation:      { pass:  }
-  G5_qa_coverage:        { pass:  }
-  G6_pm_coverage:        { pass:  }
-  G7_segment_rate:       { pass:  }
-  G8_margin:             { pass: , actual_pct: , required_pct: 0.30 }
-  market_test:            { pass: , multiple_of_incumbent:  }   # G9
-  budget_test:             { pass: , year1_vs_rejected:  }      # G10
+  G1_platform_floor:      { pass: , actual: , required:  }
+  G2_term_ge_recovery:    { pass:  }
+  G3_mobilisation_33pct:  { pass:  }
+  G4_clawback_present:    { pass:  }
+  G5_no_post_recovery_drop: { pass:  }
+  G6_term_at_kickoff:      { pass:  }
+  G7_financing_disclosed:  { pass:  }
+  G8_margin:                { pass: , actual_pct: , required_pct: 0.30 }
+  G9_rate_provenance:        { pass:  }
+  G10_concessions_capped:     { pass:  }
+  G11_discount_platform_only:  { pass:  }
+  G12_cadence_ceiling:          { pass:  }
+  G13_total_give_capped:         { pass:  }
+  G14_compensators_logged:        { pass:  }
+  G15_security_sized_to_risk:      { pass:  }
+  G16_clawback_on_deferred:         { pass:  }
+  G17_guarantees_capped:             { pass:  }
+  G18_data_export_unconditional:      { pass:  }
+  G19_no_hours_pm_qa_docs_cut:          { pass:  }
+  G20_authority_matrix_followed:         { pass:  }
+  G21_all_exposures_computed:             { pass:  }
+  G22_walkaway_card_produced:              { pass:  }
+  G23_absolute_margin_floor:                { pass: , actual_pct: , required_pct: 0.25 }
+  G24_portfolio_limits_checked:              { pass:  }
+  G25_liability_capped:                       { pass:  }
+  G26_ip_data_ownership_correct:               { pass:  }
+  G27_no_named_consultant:                      { pass:  }
+  G28_guarantee_exclusions_present:              { pass:  }
+  G29_evidence_file_complete:                     { pass:  }
+  G30_abort_criteria_checked:                      { pass:  }
+  G31_worst_case_margin:                            { pass: , worst_case_pct:  }
+  G32_cash_positive_30_days:                         { pass:  }
+  G33_min_cadence_quarterly:                          { pass:  }
+  G34_mobilisation_covers_third_party:                 { pass:  }
+  G35_no_false_vat_claim:                               { pass:  }
+  G36_edition_not_misdescribed:                          { pass:  }
+  G37_upgrade_policy_stated:                              { pass:  }
+  G38_community_exclusions_disclosed:                      { pass:  }
+  G39_no_abandoned_modules:                                 { pass:  }
+  G40_enterprise_mobilisation_covers_licence:                { pass: , applicable:  }
+  G41_demo_matches_edition:                                   { pass:  }
+  market_test:    { pass: , multiple_of_incumbent:  }
+  budget_test:     { pass: , year1_vs_rejected:  }
 
 phase2_deferred: []
 exclusions_confirmed: false

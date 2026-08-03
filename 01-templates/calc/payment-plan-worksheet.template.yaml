@@ -1,0 +1,23 @@
+# Payment Plan Worksheet — copy to 02-clients/{client}/02-calc/payment-plan-worksheet.yaml
+# Only needed when the client requests a non-baseline cadence or a
+# concession. Baseline (monthly_in_advance, no concession) doesn't need
+# this file — the pricing-worksheet.yaml assembly block is sufficient.
+
+selected_cadence:                    # key from pricing/payment-plans.yaml: cadences.*
+cadence_ceiling_pct:                  # payment-plans.yaml value for the selected cadence — a ceiling, not the applied value
+margin_floor_max_give_aed:              # from the ceiling calculation in the runbook — G12
+applied_give_pct:                        # min(cadence_ceiling_pct, margin_floor_max_give_aed) — record which one bound
+
+concession_requested:
+  type:                                    # key from pricing/concession-ladder.yaml: concessions
+  value_aed:                                 # priced per that concession's value_formula, over the full term
+
+compensators_selected: []                     # [{type, value_aed}] — from concession-ladder.yaml: compensators, summing >= concession value_aed
+
+compensator_sum_aed:
+concession_covered:                             # true only if compensator_sum_aed >= concession_requested.value_aed
+
+gates_rerun_after_concession:
+  all_pass:                                       # true/false — every gate in pricing-worksheet.yaml re-evaluated after applying the concession + compensators
+
+logged_in_manifest: false                          # must be true, both sides shown (G14) — otherwise this concession is void

@@ -1,41 +1,49 @@
-# Pre-Send QA Checklist — copy to 02-clients/{client}/04-review/qa-checklist.md
-
-Complete before requesting human review. Every box must be checked before
-`04-review/reviewer-notes.md` is opened; an unchecked box is a blocker, not
-a note for later.
+# Pre-Send QA Checklist (v2) — copy to 02-clients/{client}/04-review/qa-checklist.md
 
 ## Calc integrity
 
-- [ ] `02-calc/pricing-worksheet.yaml` fully completed, no blank fields
-- [ ] `02-calc/gate-report.md` exists and all ten gates (G1–G10) show `pass: true`
-- [ ] `manifest.yaml: gates_passed` is `true`
-- [ ] `manifest.yaml: knowledge_version_used` is pinned to a real `CHANGELOG.md` version
-- [ ] Every number in the draft matches the worksheet exactly — spot-check §10 against `assembly`
+- [ ] `00-intake/client-brief.yaml`, `02-calc/risk-assessment.yaml`, `02-calc/pricing-worksheet.yaml` all fully completed
+- [ ] `02-calc/gate-report.md` exists and all 41 gates (G1–G41) plus `market_test`/`budget_test` show `pass: true`
+- [ ] `manifest.yaml: gates_passed` is `true`, `knowledge_version_used` pinned
+- [ ] Every number in the draft matches the worksheet exactly
 
-## Scope integrity
+## Scope, edition, and exposure integrity
 
-- [ ] Every module/work package in §06 also appears in `number_2_build.delivery_hours`
-- [ ] No module or work package appears in the draft that isn't in the worksheet
-- [ ] `phase2_deferred` items appear in §07, not §06
-- [ ] `exclusions_confirmed: true` in the worksheet, and `clause-library/exclusions-standard.md` is present verbatim in §07
+- [ ] Every capability described in §06 has corresponding hours in `number_2_build.delivery_hours`
+- [ ] `phase2_deferred` items appear in §07, not §06 — never sold both ways at once (`known-defects.md` #6)
+- [ ] Edition (`community`/`enterprise`) declared and matches `client-brief.yaml`; if `community`, upgrade policy and capability exclusions are stated in §06, in writing (G36–G38)
+- [ ] All three exposures computed and recorded (G21); walk-away deal card was produced before this draft existed (G22)
 
 ## Commitments
 
-- [ ] `verbal_promises_logged: true` in `manifest.yaml`, and every logged promise appears somewhere in the draft
-- [ ] `adoption_clause_included` matches whether §09 contains the adoption clause
-- [ ] `clawback_included` matches whether §09 contains the clawback clause
+- [ ] `verbal_promises_logged: true`, every entry classified PRICED / DEFERRED / EXCLUDED and reflected accordingly in the draft
+- [ ] Adoption clause included (G-series, `clause-library/adoption.md`)
+- [ ] Clawback present on any deferred structure (G4, G16)
+- [ ] Referral, if offered, is capped per `clause-library/referral-capped.md` — never uncapped
 
 ## Legal / tax
 
-- [ ] VAT clause in §10 is `clause-library/vat-uae.md` verbatim, unedited
-- [ ] Any other clause-library content used is verbatim, unedited
-- [ ] Vertical-specific compliance notes (if any) flagged for human legal review, not resolved in the draft
+- [ ] VAT clause is `clause-library/vat-uae.md` verbatim — states SGC is **not** VAT-registered, charges **no** VAT
+- [ ] `vat-gross-up.md` present
+- [ ] No clause used outside the library; every clause flagged `requires_counsel_review: true` carries the flag and header, and is not treated as final text
+- [ ] No named individual consultant promised as a guarantee (G27)
 
-## Format
+## Cover letter and cross-references
 
-- [ ] All 13 sections present, in order, matching `01-templates/proposal/_section-map.md`
-- [ ] Cover page has client name, proposal ref, revision number, date, confidentiality marking
-- [ ] Proposal ref follows `05-ops/naming-conventions.md` exactly
+- [ ] Cover letter states what the client **asked for**, not what was "agreed" — these can differ, especially after a concession or scope change
+- [ ] Cross-references point to the correct section numbers
+- [ ] Every performance claim is sourced, client-consented, or removed — no unsourced figures (`known-defects.md` #20)
+
+## Cadence and review
+
+- [ ] Payment cadence stated explicitly, meets or exceeds `payment-plans.yaml: min_cadence_current` (quarterly in advance) unless an approved exception is logged
+- [ ] If subscription < AED 2,500/mo: review cadence stated as quarterly, not monthly
+
+## Forbidden phrases — confirm NONE of these appear anywhere in the draft
+
+`bargain` · `not on our public list` · `will not be extended to any other brokerage`
+· `no VAT applies` · `VAT-registered` · `Odoo Enterprise` (if edition = community)
+· `iOS / Android app` (if edition = community)
 
 ## Sign-off
 

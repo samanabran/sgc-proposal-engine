@@ -1,7 +1,4 @@
-<!--
-Section 11 — Support & SLA
-Source: pricing/support-training.yaml
--->
+<!-- Section 11 — Support & SLA (v2). Source: support-training.yaml, service-credit-guarantee.md -->
 
 # Support & SLA
 
@@ -11,15 +8,15 @@ Source: pricing/support-training.yaml
 |---|---|---|
 | [tier name] | [SLA] | AED [price]/mo — `support-training.yaml` |
 
+## Service credit guarantees
+
+<!-- clause-library/service-credit-guarantee.md, verbatim table + mandatory exclusions -->
+
 ## Training included
 
-[training_sessions] session(s) of [training_hours_per_session] hours each,
-included in the implementation fee (billed once — Commercial Rule 8, see
-`clause-library/adoption.md`). Additional training available at
-`support-training.yaml: training.*` rates.
+[training_sessions] session(s) of [training_hours_per_session] hours,
+included in the implementation fee.
 
 ## What's covered
 
-[Scope of the support tier — bug fixes, configuration questions, minor
-adjustments. Reference `clause-library/exclusions-standard.md` for what
-falls outside support and becomes a change request instead.]
+[Scope of the support tier. Reference `clause-library/exclusions-standard.md` for what's a change request instead.]

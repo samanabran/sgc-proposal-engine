@@ -1,0 +1,33 @@
+# Exposure Calculator — copy to 02-clients/{client}/02-calc/exposure-calculator.yaml
+# Computes the week-by-week cost/collection curve behind the peak cash
+# exposure figure in pricing-worksheet.yaml: exposure.cash_peak_aed.
+# See 07-protection/exposure/exposure-model.md — do NOT straight-line the
+# delivery curve; roughly 2/3 of build effort lands in the first 3 weeks.
+
+delivery_curve_pct_by_week:
+  # sum should total 1.0 across the build timeline. Default shape for a
+  # typical boutique brokerage build below — override per deal if the
+  # work-package mix differs materially.
+  week_1: 0.25
+  week_2: 0.25
+  week_3: 0.15
+  week_4: 0.10
+  week_5: 0.10
+  week_6: 0.10
+  week_7_plus: 0.05
+
+weekly_ledger:
+  # [{week, cumulative_internal_cost_aed, cumulative_collected_aed, gap_aed}]
+  # cumulative_internal_cost_aed(week) = internal_build_cost_aed x sum(delivery_curve_pct_by_week up to that week)
+  #                                       + CTS accrued to that point
+  # cumulative_collected_aed(week) = mobilisation (at week 0/1) + any cadence
+  #                                    payments that have landed by that week
+  - {}
+
+peak:
+  week:
+  cash_exposure_aed:           # the maximum gap_aed across weekly_ledger — this is exposure.cash_peak_aed in pricing-worksheet.yaml
+
+check_against_portfolio_limits:
+  single_deal_within_cap:        # cash_exposure_aed <= portfolio-limits.yaml max_peak_cash_exposure_single_deal_aed
+  aggregate_still_within_cap:     # this deal's peak + all other active deals' peaks <= max_aggregate_peak_cash_exposure_aed

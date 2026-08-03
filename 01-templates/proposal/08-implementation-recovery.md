@@ -1,30 +1,20 @@
-<!--
-Section 08 — Implementation & Recovery
-Source: clause-library/exclusivity-replacement.md, worksheet timeline inputs
--->
+<!-- Section 08 — Implementation & Recovery. Source: clause-library/exclusivity-replacement.md -->
 
 # Implementation & Recovery
 
 ## Timeline
 
-| Milestone | Target date | Deliverable |
+| Milestone | Target | Deliverable |
 |---|---|---|
-| Kickoff | [date] | Governance pack, plan, RAID log |
+| Kickoff (term and first invoice both start here — G6) | [date] | Plan, RAID log |
 | [milestone] | [date] | [deliverable] |
-| Go-live | [date] | [from §06 "what done looks like"] |
-| Hypercare close | [date] | Handover to §11 support tier |
+| Go-live | [date] | §06 "what done looks like" criteria met |
 
 ## Incumbent system replacement
 
-<!-- Insert clause-library/exclusivity-replacement.md verbatim if an
-incumbent system is being replaced per §04. Omit this subsection entirely
-if there is no incumbent. -->
-
-[clause-library/exclusivity-replacement.md content here, if applicable]
+<!-- clause-library/exclusivity-replacement.md, verbatim, if an incumbent is being replaced. -->
 
 ## Recovery basis
 
-This proposal's financing structure (§10, §09) assumes the implementation
-investment is recovered over [term_months] months per
-`pricing-worksheet.yaml: number_3_financing`. This has been checked against
-G2 (Term ≥ recovery) in this deal's gate report.
+This proposal's financing structure (§10, §09) assumes recovery over
+[term_months] months. Checked against G2 in the gate report.

@@ -1,35 +1,30 @@
 <!--
-Section 06 — Solution: Phase 1
-Source: 02-calc/pricing-worksheet.yaml (number_2_build), pricing/hour-lookup.yaml,
-pricing/saas-modules.yaml
-This is the scope section. Every module and work package listed here MUST
-appear in the worksheet's number_2_build.delivery_hours — no scope creep
-between this section and the calc.
+Section 06 — Solution: Phase 1 (v2)
+Source: pricing-worksheet.yaml (number_2_build), hour-lookup.yaml,
+clause-library/edition-and-upgrades.md
+EVERY capability listed here MUST have hours in the worksheet — cross-
+reference check in validate.py. Edition disclosure is MANDATORY here,
+in writing, before signature (G38) — not in an appendix.
 -->
 
 # Solution — Phase 1
 
-## Modules
+## Edition
 
-| Module | Source | Included |
-|---|---|---|
-| [module name] | `saas-modules.yaml: erp.[key]` | ✓ |
+<!-- clause-library/edition-and-upgrades.md — positioning text, then the
+Community-specific OR Enterprise-specific block, verbatim. -->
 
 ## Work packages
 
-| Work package | Deliverable | Hours | Complexity |
+| Work package | Deliverable | Hours | Band |
 |---|---|---|---|
-| [package name] | [from hour-lookup.yaml] | [hours] | [low/med/high] |
+| [package name] | [from hour-lookup.yaml] | [hours] | [simple/standard] |
 
 ## What "done" looks like for Phase 1
 
-[3-5 bullet acceptance criteria — concrete, testable, tied to the
-deliverables column above. This is what the QA checklist and the client's
-own UAT will check against at go-live.]
+[3-5 concrete, testable acceptance criteria tied to the deliverables above.]
 
 ## Migration scope
 
-[Records/files count from client-brief.yaml `migration_records` /
-`migration_files`. State explicitly if migration quality is uncertain —
-per runbook §2, this should trigger a remediation allowance or discovery
-prerequisite, not a silent assumption.]
+[Record count from client-brief.yaml. State data-quality confidence
+explicitly if less than high.]

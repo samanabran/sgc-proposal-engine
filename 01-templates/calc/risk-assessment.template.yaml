@@ -1,0 +1,23 @@
+# Risk Assessment — copy to 02-clients/{client}/02-calc/risk-assessment.yaml
+# Complete BEFORE the pricing worksheet — the resulting band and security
+# instrument feed straight into number_3_financing and the walk-away card.
+# See pricing/risk-security-matrix.yaml for every weight and band.
+
+inputs:
+  entity_age_years:            # >5 | 2-5 | 1-2 | <1
+  jurisdiction:                  # mainland_llc | free_zone | offshore
+  vat_registered:                  # yes | no  (the CLIENT's status, not SGC's — SGC's own status lives in pricing/policy.yaml)
+  trade_licence_valid:               # >6mo | <6mo | expired
+  payment_history_sgc:                 # clean | none | late | default
+  decision_maker:                        # owner | manager | committee
+  incumbent_churn_signal:                  # none | abandoned_systems
+  peak_exposure_aed_band:                    # <5000 | 5-15k | 15-40k | >40k — filled after a first-pass exposure estimate
+
+scoring:
+  raw_score:                                   # sum of weights per risk-security-matrix.yaml
+  band:                                          # low | moderate | elevated | high | refuse
+  required_instruments: []                        # from risk-security-matrix.yaml bands.<band>.instruments
+
+notes: >
+  If any single input hits a "reject" or "expired" outcome, the deal is in
+  the refuse band regardless of the additive total — see abort-criteria.md.
