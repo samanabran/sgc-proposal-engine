@@ -1,0 +1,81 @@
+# Pricing Worksheet — VGE-2026-SUB-01_Rev3
+# Scope unchanged from Rev2 (CRM + Sales + Accounting); term extended
+# 18 -> 24 months per 00-intake/call-transcript-2026-08-03.md.
+# knowledge_version_used: pricing v1.0 (2026-08-03)
+
+inputs:
+  users_now: 12
+  users_12mo: 18
+  segment: smb
+  term_months: 24
+  modules: [odoo_crm, odoo_sales, odoo_accounting]
+  integrations_requested: []
+  migration_records: 850
+  migration_files: 400
+  incumbent_benchmark_aed_mo: 9500
+  budget_rejected_aed: 165000
+
+number_1_cost_to_serve:
+  # licences_aed is pass-through: SGC's module sell price *is* the cost
+  # basis here (no separate markup layer on licensing itself — margin is
+  # captured in hosting, support, and the build fee instead).
+  licences_aed: 720            # saas-modules.yaml: (odoo_crm 18 + odoo_sales 20 + odoo_accounting 22) x 12 users
+  hosting_allocation_aed: 360   # policy.yaml cost_to_serve.hosting_node_true_cost_aed — 1 node covers up to 20 users (hosting_node_user_capacity), users_12mo=18 fits
+  tooling_aed: 50                # policy.yaml cost_to_serve.tooling_flat_aed
+  support_labour_aed: 840         # policy.yaml: ceil(12 users / support_hours_per_5_users) x support_rate_aed = 3 x 280
+  account_mgmt_aed: 350            # policy.yaml cost_to_serve.account_mgmt_aed.tier_20 (11-20 user band)
+  cts_total_aed: 2320               # 720 + 360 + 50 + 840 + 350
+  platform_floor_aed: 2900           # 2320 x gates.platform_floor_multiplier (1.25)
+
+number_2_build:
+  delivery_hours:
+    - { package: discovery_workshop,          hours: 12, complexity: medium }
+    - { package: business_process_assessment, hours: 24, complexity: medium }
+    - { package: solution_blueprint,           hours: 32, complexity: medium }
+    - { package: project_kickoff,               hours: 8,  complexity: medium }
+    - { package: requirements_workshops,         hours: 26, complexity: medium }
+    - { package: finance_setup,                   hours: 60, complexity: high }    # trust/commission accounting — see vertical-notes/uae-real-estate.md
+    - { package: uae_vat_localization,             hours: 14, complexity: medium }
+    - { package: sales_crm_configuration,           hours: 24, complexity: medium }
+  documentation_hours: 10       # max(overlays.documentation_hours_min=2, 5% x 200 delivery hours = 10)
+  qa_hours: 16                   # max(overlays.qa_hours_min=3, 8% x 200 delivery hours = 16)
+  training_hours: 4               # overlays.training_sessions(2) x training_hours_per_session(2)
+  total_hours: 230                 # 200 delivery + 10 doc + 16 qa + 4 training
+  rate_aed: 395                     # policy.yaml segments.smb.blended_rate_aed — matches rate-card.yaml roles.consultant
+  rate_exists_on_card: true
+  subtotal_aed: 90850                # 230 x 395
+  pm_aed: 13628                       # 90850 x segments.smb.pm_pct (0.15), rounded
+  contingency_aed: 4543                # 90850 x segments.smb.contingency_pct (0.05), rounded
+  build_value_aed: 109021               # 90850 + 13628 + 4543
+  internal_build_cost_aed: 34500          # 230 x policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+
+number_3_financing:
+  mobilisation_aed: 27255        # build_value_aed x gates.default_mobilisation_pct (0.25), rounded
+  deferred_aed: 81766             # 109021 - 27255
+  uplift_pct: 0.12                 # financing_uplift.months_24
+  recovery_total_aed: 91578         # 81766 x 1.12, rounded
+  recovery_monthly_aed: 3816         # 91578 / 24, rounded
+
+assembly:
+  option_a: { mobilisation_aed: 27255, subscription_aed: 7176, year1_client_cost_aed: 113367 }
+  # subscription_aed = base subscription (licences 720 + hosting sell 990 + support Priority-4hr sell 1650 = 3360) + recovery_monthly_aed (3816)
+  # year1 = 27255 + 12 x 7176
+  option_b: { mobilisation_aed: 0, subscription_aed: 8584, year1_client_cost_aed: 103008 }
+  # zero-mobilisation path: deferred_aed_b = 109021 (full build), uplift_pct_b = 0.12 + zero_mobilisation_surcharge (0.03) = 0.15
+  # recovery_total_b = 109021 x 1.15 = 125374; recovery_monthly_b = 125374 / 24 = 5224
+  # subscription_aed = 3360 + 5224 = 8584; year1 = 12 x 8584 (no mobilisation)
+
+gates:
+  G1_platform_floor:     { pass: true, actual: 7176, required: 2900 }
+  G2_term_ge_recovery:   { pass: true }
+  G3_rate_provenance:    { pass: true }
+  G4_documentation:      { pass: true }
+  G5_qa_coverage:        { pass: true }
+  G6_pm_coverage:        { pass: true }
+  G7_segment_rate:       { pass: true }
+  G8_margin:             { pass: true, actual_pct: 0.684, required_pct: 0.30 }
+  market_test:            { pass: true, multiple_of_incumbent: 0.995 }   # G9: 113367 / (9500 x 12) = 0.995
+  budget_test:             { pass: true, year1_vs_rejected: 0.687 }       # G10: 113367 / 165000 = 0.687
+
+phase2_deferred: [ai_lead_scorer.lite, ai_chatbot.lite]
+exclusions_confirmed: true

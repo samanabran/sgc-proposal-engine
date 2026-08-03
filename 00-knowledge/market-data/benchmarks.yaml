@@ -1,0 +1,51 @@
+# SGC TECH AI — Market Benchmarks
+# Sources dated and cited in sources.md. VERIFIED = live directory/official
+# source; MARKET BENCHMARK = synthesized from public references;
+# SGCTECH ESTIMATE = internal operating policy, not an external fact.
+version: 1.0
+effective_from: 2026-08-03
+
+partner_density_gcc:
+  # VERIFIED, live Odoo directory, 18 Jul 2026 [S1-S6]
+  uae:          { total: 119, gold: 9,  silver: 24, ready: 86 }
+  saudi_arabia: { total: 182, gold: 23, silver: 54, ready: 105 }
+  qatar:        { total: 24,  gold: 1,  silver: 4,  ready: 19 }
+  bahrain:      { total: 12,  gold: 1,  silver: 5,  ready: 6 }
+  oman:         { total: 24,  gold: 2,  silver: 7,  ready: 15 }
+  kuwait:       { total: 14,  gold: 1,  silver: 6,  ready: 7 }
+
+regional_rate_comparison_aed_hr:
+  # MARKET BENCHMARK [S12][S14][S15]
+  uae_ksa:     { low: 294, high: 661 }
+  europe:      { low_usd_hr: 110, high_usd_hr: 250 }
+  singapore:   { note: "SGD 5k-15k for small/basic implementations; mid-tier Asia pricing" }
+  australia:   { low_aud_hr: 120, high_aud_hr: 200 }
+  united_states: { low_usd_hr: 120, high_usd_hr: 300 }
+
+sgc_packages:
+  # VERIFIED, commercial-pricing-revised-v2.xlsx, sheet "Packages"
+  starter:        { users: 5,  modules: "CRM, Sales, Accounting", list_price_aed: 12900, bundle_discount_vs_ala_carte: 0.25 }
+  growth_bundle:  { users: 10, modules: "CRM, Sales, Accounting, HR, Inventory", extras: "AI Lead Scorer Lite, SGC Cloud Foundation hosting, 5 training sessions", list_price_aed: 19900, bundle_discount_vs_ala_carte: 0.32 }
+  scale:          { users: 20, modules: "Full Odoo Operations Suite (Sales, CRM, Acct, HR, Payroll, Project, Inventory, Helpdesk)", extras: "AI Lead Scorer Standard, SGC Cloud Growth hosting, dedicated PM, priority support", list_price_aed: 38500, bundle_discount_vs_ala_carte: 0.38 }
+
+industry_pricing_bands_aed:
+  # MARKET BENCHMARK, pricing playbook Part 7 (weeks and price range by
+  # vertical). "premium_plus" = "AED Xk+" ceiling reference from the same
+  # table, used as an upper anchor, not a target.
+  real_estate_developer:   { weeks_low: 10, weeks_high: 20, price_low: 180000, price_high: 520000, premium_plus: 950000, note: "Installments, property-specific reporting" }
+  trading_conglomerate:    { weeks_low: 16, weeks_high: 32, price_low: 350000, price_high: 1100000, premium_plus: 2200000 }
+  logistics_3pl:            { weeks_low: 12, weeks_high: 20, price_low: 220000, price_high: 500000, premium_plus: 900000 }
+  hospitality:               { weeks_low: 10, weeks_high: 18, price_low: 160000, price_high: 420000, premium_plus: 700000 }
+  manufacturing_mrp:        { weeks_low: 24, weeks_high: 90, note: "hours, not weeks — see pricing/hour-lookup.yaml manufacturing_mrp_setup" }
+
+market_positioning:
+  # VERIFIED, commercial-pricing-revised-v2.xlsx, sheet "Market Positioning" — June 2026 rates
+  senior_consultant_hr_aed:        { big4: [600, 900], mid_tier: [350, 550], sgc: [280, 525] }
+  implementation_10_30_users_aed:  { big4: [80000, 150000], mid_tier: [45000, 75000], sgc: [22000, 55000] }
+  penetration_test_aed:             { big4: [25000, 60000], mid_tier: [15000, 25000], sgc: 12500 }
+  pdpl_compliance_aed:               { big4: [60000, 120000], mid_tier: [35000, 50000], sgc: 28500 }
+  erp_rollout_bundle_c_plus_y1_aed:  { big4: "500000+", mid_tier: [180000, 350000], sgc: [70000, 150000] }
+  ai_lead_scoring_predictive_mo_aed: { big4: "12000+ (vendor mgmt)", mid_tier: [5000, 8000], sgc: 4950 }
+  managed_hosting_50_users_mo_aed:   { big4: "4500+", mid_tier: [2800, 4200], sgc: 1950 }
+
+strategic_position: "Specialist boutique band. 15-20% below mid-tier, well below Big-4. See policy.yaml gates.max_multiple_of_incumbent (1.30) as the mechanical ceiling this position implies."

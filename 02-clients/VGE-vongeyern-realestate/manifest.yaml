@@ -1,0 +1,45 @@
+opportunity_id: "VGE-2026-SUB-01"
+client_legal_name: "Von Geyern Real Estate Brokerage LLC"
+jurisdiction: "mainland"
+client_trn: "100123456700003"
+decision_maker: "Elena von Geyern, Managing Partner"
+sdr_owner: "Farah Haddad"
+segment: "smb"
+vertical: "uae-real-estate"
+
+stage: draft                # intake | calc | draft | review | issued | won | lost
+current_revision: "VGE-2026-SUB-01_Rev3"
+knowledge_version_used: "pricing v1.0 (2026-08-03)"
+
+gates_passed: true
+gate_report: 02-calc/gate-report.md
+escalations:
+  - date: "2026-06-28"
+    raised_by: "Farah Haddad"
+    issue: "Client asked mid-negotiation to bring trust/commission accounting into SGC scope, previously deferred to their own bookkeeper in Rev1. Not a gate failure — scope addition requested by client. Logged per AGENTS.md 'anything said aloud is scope.'"
+    resolution: "Added odoo_accounting module + finance_setup work package to the worksheet; re-ran gates (all pass); reflected in Rev2."
+  - date: "2026-08-03"
+    raised_by: "Farah Haddad"
+    issue: "Client requested extending term from 18 to 24 months for cash-flow reasons, per 2026-08-03 call. Not a gate failure — client-requested financing change."
+    resolution: "Re-ran number_3_financing at months_24 uplift (0.12); all gates re-verified pass; drafting as Rev3."
+
+revisions:
+  - ref: "VGE-2026-SUB-01_Rev1"
+    issued_date: "2026-06-15"
+    path: "05-issued/VGE-2026-SUB-01_Rev1/"
+    status: "superseded"
+    notes: "Initial proposal — CRM + Sales only, 12-month term, mobilisation 25%. Superseded when client requested trust/commission accounting be brought into scope (see escalations 2026-06-28)."
+  - ref: "VGE-2026-SUB-01_Rev2"
+    issued_date: "2026-07-10"
+    path: "05-issued/VGE-2026-SUB-01_Rev2/"
+    status: "superseded"
+    notes: "Added odoo_accounting + finance_setup. CRM + Sales + Accounting, 18-month term. Superseded when client requested a 24-month term for cash-flow reasons (see escalations 2026-08-03)."
+  - ref: "VGE-2026-SUB-01_Rev3"
+    issued_date: ""
+    path: "03-draft/VGE-2026-SUB-01_Rev3/"
+    status: "draft"
+    notes: "Same scope as Rev2 (CRM + Sales + Accounting), term extended to 24 months. Awaiting human review before issue."
+
+verbal_promises_logged: true
+adoption_clause_included: true
+clawback_included: true

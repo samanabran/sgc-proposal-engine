@@ -1,0 +1,6 @@
+.omc/
+.claude/settings.local.json
+*.tmp
+~$*
+.DS_Store
+Thumbs.db

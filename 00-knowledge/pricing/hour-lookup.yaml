@@ -1,0 +1,42 @@
+# SGC TECH AI — Work Package -> Hours, by Complexity
+# Source: "Odoo Implementation Pricing Strategy, Proposal Architecture, and
+# Market Benchmarks for Dubai & the Middle East (2025-2026)", Part 6
+# (Market Pricing Guide, Excel-ready service catalog). The playbook gives a
+# single hour range per package; low/medium/high below are that range's
+# low end, midpoint, and high end respectively — pick medium unless the
+# client brief gives a specific reason (see "When to increase" column,
+# Part 5.1 of the same source) to move up or down.
+version: 1.0
+effective_from: 2026-08-03
+
+work_packages:
+  discovery_workshop:          { deliverable: "Agenda, findings, priorities",        hours_low: 8,  hours_medium: 12, hours_high: 16 }
+  business_process_assessment: { deliverable: "As-is maps, pain-point log",          hours_low: 16, hours_medium: 24, hours_high: 32 }
+  solution_blueprint:          { deliverable: "Scope, architecture, roadmap",         hours_low: 24, hours_medium: 32, hours_high: 40 }
+  project_kickoff:             { deliverable: "Governance pack, plan, RAID log",     hours_low: 6,  hours_medium: 8,  hours_high: 10 }
+  requirements_workshops:      { deliverable: "Process requirements by module",      hours_low: 12, hours_medium: 26, hours_high: 40 }
+  finance_setup:               { deliverable: "COA, taxes, journals, controls",      hours_low: 20, hours_medium: 40, hours_high: 60 }
+  uae_vat_localization:        { deliverable: "VAT mapping, test cases",              hours_low: 8,  hours_medium: 14, hours_high: 20 }
+  ksa_zatca_advisory:          { deliverable: "Compliance design, gap list",          hours_low: 12, hours_medium: 21, hours_high: 30 }
+  sales_crm_configuration:     { deliverable: "Pipeline, quotations, approvals",      hours_low: 12, hours_medium: 24, hours_high: 36 }
+  purchase_configuration:      { deliverable: "RFQ, approvals, vendor rules",         hours_low: 10, hours_medium: 20, hours_high: 30 }
+  inventory_warehouse_setup:   { deliverable: "Locations, routes, operations",        hours_low: 16, hours_medium: 33, hours_high: 50 }
+  barcode_enablement:          { deliverable: "Barcode flows, labels, testing",       hours_low: 10, hours_medium: 19, hours_high: 28 }
+  manufacturing_mrp_setup:     { deliverable: "BOM, routing, work centers",           hours_low: 24, hours_medium: 57, hours_high: 90 }
+  quality_management:          { deliverable: "Quality points, checks, NCR flow",     hours_low: 16, hours_medium: 29, hours_high: 42 }
+  maintenance_module:          { deliverable: "Assets, preventive schedules",         hours_low: 12, hours_medium: 21, hours_high: 30 }
+  project_module:              { deliverable: "Tasks, milestones, profitability",     hours_low: 10, hours_medium: 17, hours_high: 24 }
+
+complexity_multiplier_reference:
+  # From the same source, Part 5.1 factor model — applied to the blended
+  # build subtotal in the calc worksheet, not to individual work-package
+  # hours above. Keep the two separate: hours are effort, multipliers are
+  # commercial loading.
+  complexity: { low: 1.00, medium: 1.15, high: 1.35 }
+  risk:       { low: 1.00, medium: 1.10, high: 1.20 }
+  industry:   { low: 1.00, medium: 1.12, high: 1.25 }
+  customization: { low: 1.00, medium: 1.20, high: 1.40 }
+
+notes:
+  - "A work package not listed here does not exist. Escalate rather than estimate by analogy."
+  - "documentation_hours and qa_hours are computed from overlays in policy.yaml, not looked up here."

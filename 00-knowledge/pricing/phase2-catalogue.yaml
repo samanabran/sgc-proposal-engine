@@ -1,0 +1,33 @@
+# SGC TECH AI — Phase 2 / Deferred Scope Catalogue
+# Source: commercial-pricing-revised-v2.xlsx, sheet "AI Solutions (AED)".
+# These are the items a proposal should list under §07 Options & Inclusions
+# as deferred, not bundled into the Phase 1 build. Undercuts global AI
+# vendors (MadKudu / Salesloft / Drift run 3-5x these rates).
+version: 1.0
+effective_from: 2026-08-03
+
+ai_solutions:
+  ai_lead_scorer:
+    lite:       { desc: "Rule-based, 500 leads/mo cap", unit: month, price_aed: 495 }
+    standard:   { desc: "Configurable rules",            unit: month, price_aed: 1250 }
+    ml_model:   { desc: "Trained ML model",               unit: month, price_aed: 2950 }
+    predictive: { desc: "Real-time + A/B",                 unit: month, price_aed: 4950 }
+  ai_chatbot:
+    lite:     { desc: "FAQ only, 1k conversations/mo",     unit: month, price_aed: 750 }
+    standard: { desc: "FAQ + knowledge base",               unit: month, price_aed: 2100 }
+    advanced: { desc: "Multi-intent + CRM integration",     unit: month, price_aed: 4250 }
+  ai_document_ocr:
+    standard: { desc: "Per 100 documents",                  unit: "100 docs", price_aed: 175 }
+  ai_predictive_analytics:
+    enterprise: { desc: "Enterprise tier",                   unit: month, price_aed: 6500 }
+
+other_deferred_scope:
+  # Not costed in this catalogue — flag as an escalation if a client asks,
+  # do not price by analogy to the AI Solutions items above.
+  - ksa_zatca_e_invoicing_rollout   # KSA-specific; see hour-lookup.yaml ksa_zatca_advisory for advisory-only scope
+  - multi_entity_consolidation
+  - custom_third_party_integrations_beyond_standard_connectors
+
+notes:
+  - "Growth Bundle and Scale packages (see market-data/benchmarks.yaml packages) come pre-bundled with AI Lead Scorer Lite/Standard respectively — do not double-charge if the client is on one of those packages."
+  - "SDRs may quote ala-carte from this sheet when a client wants an AI add-on outside a package. A tier not listed here does not exist."

@@ -1,0 +1,23 @@
+# SGC TECH AI — Revised Support & Cybersecurity
+# Source: commercial-pricing-revised-v2.xlsx, sheet "Support & Security"
+version: 1.0
+effective_from: 2026-08-03
+
+support:
+  email_24hr_sla:      { unit: month, price_aed: 650 }
+  priority_4hr_sla:    { unit: month, price_aed: 1650 }
+  dedicated_24_7:      { unit: month, price_aed: 3750 }
+
+training:
+  end_user_standard:   { unit: session, hours: 5, price_aed: 1750 }
+  admin_advanced:       { unit: session, hours: 5, price_aed: 2750 }
+  executive_workshop:   { unit: session, hours: 4, price_aed: 3500 }
+
+security:
+  pentest_web_app_owasp: { unit: per_test,        price_aed: 12500 }
+  security_audit_infra:  { unit: per_audit,        price_aed: 21000 }
+  pdpl_compliance_assessment: { unit: per_assessment, price_aed: 28500 }
+
+notes:
+  - "policy.yaml overlays.training_sessions (2) × overlays.training_hours_per_session (2) = 4 standard hours of training bundled into every Phase 1 build by default — use end_user_standard as the reference rate when converting bundled training hours to a standalone line."
+  - "Security services are one-time, not subscription — do not fold into the recurring subscription_aed line in the calc worksheet."

@@ -1,0 +1,34 @@
+client:
+  legal_name: "Von Geyern Real Estate Brokerage LLC"
+  trading_name: "Von Geyern Real Estate"
+  jurisdiction: mainland
+  trn: "100123456700003"
+  vertical: uae-real-estate
+  decision_maker: "Elena von Geyern"
+  decision_maker_title: "Managing Partner"
+
+scale:
+  users_now: 12
+  users_12mo: 18
+  segment: smb        # 12 users, within policy.yaml segments.smb.max_users (30)
+
+scope_signals:
+  modules_requested: [odoo_crm, odoo_sales, odoo_accounting]
+  incumbent_system: "Spreadsheet-based deal tracking + a legacy desktop accounting tool, no CRM"
+  integrations_requested: []
+  migration_records: 850       # historical deals/contacts
+  migration_files: 400          # signed contracts, ID docs, title deeds (PDF)
+  data_quality_confidence: medium
+
+commercial_signals:
+  incumbent_benchmark_aed_mo: 9500   # a competing mid-tier agency's quoted monthly-equivalent for a comparable subscription bundle, per client's own vendor search
+  budget_rejected_aed: 165000         # a Big-4-style quote the client received and rejected before approaching SGC
+  preferred_term_months: 24            # as of 2026-08-03 call — was 18 in Rev2
+  mobilisation_appetite: partial
+
+model:
+  proposal_model: SUB
+
+notes:
+  verbal_promises_logged: true
+  call_transcript_ref: "00-intake/call-transcript-2026-08-03.md"

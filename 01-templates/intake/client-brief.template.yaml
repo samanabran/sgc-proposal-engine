@@ -1,0 +1,39 @@
+# Client Brief — copy to 02-clients/{client}/00-intake/client-brief.yaml
+# and fill from the discovery call / initial materials. Every field here is
+# read by the runbook before calc begins — do not skip fields to save time.
+
+client:
+  legal_name:
+  trading_name:
+  jurisdiction:            # mainland | free_zone
+  trn:                     # Tax Registration Number, if the client has one
+  vertical:                # matches a file under market-data/vertical-notes/, if one exists
+  decision_maker:
+  decision_maker_title:
+
+scale:
+  users_now:
+  users_12mo:
+  segment:                 # startup_boutique | smb | mid_market — derive from
+                            # users_now against pricing/policy.yaml: segments.*.max_users
+
+scope_signals:
+  modules_requested: []     # names as they'll appear in pricing/saas-modules.yaml
+  incumbent_system:          # what's being replaced, if anything — see clause-library/exclusivity-replacement.md
+  integrations_requested: []
+  migration_records:
+  migration_files:
+  data_quality_confidence:   # high | medium | low — low triggers a discovery prerequisite, see runbook §1
+
+commercial_signals:
+  incumbent_benchmark_aed_mo:   # what they currently pay, if known
+  budget_rejected_aed:           # a prior number they said no to, if any — feeds gate G10
+  preferred_term_months:
+  mobilisation_appetite:         # full | partial | zero
+
+model:
+  proposal_model:            # SUB | PRJ | RET — see 05-ops/naming-conventions.md
+
+notes:
+  verbal_promises_logged:    # true only once 00-intake/verbal-promises.md exists and is current
+  call_transcript_ref:       # path to 00-intake/call-transcript-{date}.md, if one exists

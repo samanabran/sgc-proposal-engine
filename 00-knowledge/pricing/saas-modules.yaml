@@ -1,0 +1,38 @@
+# SGC TECH AI — Revised SaaS Module Pricing
+# Source: commercial-pricing-revised-v2.xlsx, sheet "SaaS Modules (AED)"
+# Per user/month, per site/month, or per terminal/month as noted. Annual
+# figure is list price for reference only — quote monthly unless the client
+# has explicitly opted into annual billing.
+version: 1.0
+effective_from: 2026-08-03
+
+modules:
+  erp:
+    odoo_crm:                  { unit: user_mo,    price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_sales:                { unit: user_mo,    price_aed_mo: 20, price_aed_yr: 216 }
+    odoo_accounting:           { unit: user_mo,    price_aed_mo: 22, price_aed_yr: 238 }
+    odoo_inventory:            { unit: user_mo,    price_aed_mo: 20, price_aed_yr: 216 }
+    odoo_purchasing:           { unit: user_mo,    price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_hr:                   { unit: user_mo,    price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_payroll_wps:          { unit: user_mo,    price_aed_mo: 22, price_aed_yr: 240 }
+    odoo_project:              { unit: user_mo,    price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_manufacturing:        { unit: user_mo,    price_aed_mo: 26, price_aed_yr: 281 }
+    odoo_marketing:            { unit: user_mo,    price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_helpdesk:             { unit: agent_mo,   price_aed_mo: 18, price_aed_yr: 194 }
+    odoo_field_service:        { unit: worker_mo,  price_aed_mo: 20, price_aed_yr: 216 }
+    odoo_maintenance:          { unit: user_mo,    price_aed_mo: 15, price_aed_yr: 162 }
+    odoo_fleet:                { unit: vehicle_mo, price_aed_mo: 12, price_aed_yr: 130 }
+    odoo_website_builder:      { unit: site_mo,    price_aed_mo: 28, price_aed_yr: 302 }
+    odoo_ecommerce:            { unit: site_mo,    price_aed_mo: 32, price_aed_yr: 346 }
+    odoo_pos:                  { unit: terminal_mo,price_aed_mo: 24, price_aed_yr: 259 }
+    odoo_enterprise_full_suite: { unit: user_mo,   price_aed_mo: 72, price_aed_yr: 778 }
+  microsoft:
+    m365_business_basic:       { unit: user_mo, price_aed_mo: 15, price_aed_yr: 180 }
+    m365_business_premium:     { unit: user_mo, price_aed_mo: 34, price_aed_yr: 408 }
+    power_bi_pro:               { unit: user_mo, price_aed_mo: 28, price_aed_yr: 336 }
+    dynamics_365_sales_enterprise: { unit: user_mo, price_aed_mo: 88, price_aed_yr: 950 }
+
+notes:
+  - "Rule 7: Startup segment (AED 280/hr) pairs with rate-card.yaml startup_consultant (L0)."
+  - "Enterprise Full Suite remains the best value for 4+ modules or 10+ users — prefer it over ala-carte stacking above that threshold."
+  - "A module not listed here does not exist. Escalate to the Commercial Desk rather than pricing by analogy."

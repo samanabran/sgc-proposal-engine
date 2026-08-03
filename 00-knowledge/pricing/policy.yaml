@@ -1,0 +1,58 @@
+# SGC TECH AI — Pricing Policy
+# Every gate and coefficient lives here. No agent hardcodes a percentage —
+# every number a proposal uses must trace to this file (or a sibling in
+# pricing/*.yaml) by key.
+#
+# segments.*.blended_rate_aed is pinned to rate-card.yaml, not restated
+# independently:
+#   startup_boutique -> roles.startup_consultant (280)
+#   smb              -> roles.consultant (395)
+#   mid_market        -> roles.senior_consultant (525)
+# If rate-card.yaml changes, update the pin here in the same commit — see
+# failure-modes/known-defects.md #1 for why this file and rate-card.yaml
+# drifted apart once already, before this repo existed.
+version: 1.0
+effective_from: 2026-08-03
+source_sheet: commercial-pricing-revised-v2.xlsx
+
+segments:
+  startup_boutique:  { max_users: 10,  blended_rate_aed: 280, pm_pct: 0.10, contingency_pct: 0.05 }
+  smb:               { max_users: 30,  blended_rate_aed: 395, pm_pct: 0.15, contingency_pct: 0.05 }
+  mid_market:        { max_users: 999, blended_rate_aed: 525, pm_pct: 0.15, contingency_pct: 0.05 }
+
+overlays:
+  documentation_hours_min: 2
+  documentation_pct_of_dev: 0.05
+  qa_pct_of_delivery: 0.08
+  qa_hours_min: 3
+  training_sessions: 2
+  training_hours_per_session: 2
+
+cost_to_serve:
+  hosting_node_true_cost_aed: 360        # internal COGS, not the sell price — see hosting.yaml for list price
+  hosting_node_user_capacity: 20         # matches hosting.yaml tiers.foundation.max_users
+  tooling_flat_aed: 50
+  support_hours_per_5_users: 1
+  support_rate_aed: 280
+  account_mgmt_aed: { tier_5: 100, tier_10: 200, tier_20: 350 }
+  internal_consultant_cost_aed_hr: 150
+
+financing_uplift:
+  months_12: 0.06
+  months_18: 0.09
+  months_24: 0.12
+  zero_mobilisation_surcharge: 0.03
+
+gates:
+  platform_floor_multiplier: 1.25
+  min_gross_margin: 0.30
+  target_gross_margin: 0.35
+  default_mobilisation_pct: 0.25
+  max_multiple_of_incumbent: 1.30
+  review_cadence_monthly_threshold_aed: 2500
+
+vat:
+  standard_rate: 0.05
+  mandatory_threshold_aed: 375000
+  voluntary_threshold_aed: 187500
+  free_zone_exempt: false      # DO NOT CHANGE — see market-data/vertical-notes/uae-tax-vat.md

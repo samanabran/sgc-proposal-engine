@@ -1,0 +1,66 @@
+# Pricing Worksheet — copy to 02-clients/{client}/02-calc/pricing-worksheet.yaml
+# Complete in order: inputs -> number_1 -> number_2 -> number_3 -> assembly
+# -> gates. Do not skip to assembly. Every value traces to a
+# 00-knowledge/pricing/*.yaml key — if it doesn't, escalate, don't estimate.
+# See runbook/subscription-proposal-runbook.md §2 for the full procedure.
+
+inputs:
+  users_now:
+  users_12mo:
+  segment:                       # startup_boutique | smb | mid_market
+  term_months:
+  modules: []                     # keys from pricing/saas-modules.yaml
+  integrations_requested: []
+  migration_records:
+  migration_files:
+  incumbent_benchmark_aed_mo:
+  budget_rejected_aed:
+
+number_1_cost_to_serve:
+  licences_aed:                   # sum of modules x users, from saas-modules.yaml
+  hosting_allocation_aed:          # from hosting.yaml, tier matched to users_now
+  tooling_aed:                     # policy.yaml: cost_to_serve.tooling_flat_aed
+  support_labour_aed:               # policy.yaml: cost_to_serve.support_hours_per_5_users x support_rate_aed
+  account_mgmt_aed:                 # policy.yaml: cost_to_serve.account_mgmt_aed, tier matched to users_now
+  cts_total_aed:
+  platform_floor_aed:               # cts_total_aed x policy.yaml: gates.platform_floor_multiplier (1.25)
+
+number_2_build:
+  delivery_hours: []                # [{package, hours, complexity}] — packages from pricing/hour-lookup.yaml
+  documentation_hours:               # >= max(overlays.documentation_hours_min, 5% of dev hours)
+  qa_hours:                          # >= max(overlays.qa_hours_min, 8% of delivery hours)
+  training_hours:                     # overlays.training_sessions x overlays.training_hours_per_session
+  total_hours:
+  rate_aed:                           # segment's blended_rate_aed from policy.yaml — must match segment exactly (G7)
+  rate_exists_on_card:                 # true/false — must be true (G3)
+  subtotal_aed:
+  pm_aed:                              # subtotal_aed x segment pm_pct
+  contingency_aed:                     # subtotal_aed x segment contingency_pct
+  build_value_aed:
+  internal_build_cost_aed:              # total_hours x policy.yaml: cost_to_serve.internal_consultant_cost_aed_hr (150)
+
+number_3_financing:
+  mobilisation_aed:                     # default: build_value_aed x policy.yaml: gates.default_mobilisation_pct (0.25)
+  deferred_aed:
+  uplift_pct:                            # policy.yaml: financing_uplift.months_{term}, + zero_mobilisation_surcharge if mobilisation_aed is 0
+  recovery_total_aed:
+  recovery_monthly_aed:
+
+assembly:
+  option_a: { mobilisation_aed: , subscription_aed: , year1_client_cost_aed: }
+  option_b: { mobilisation_aed: 0, subscription_aed: , year1_client_cost_aed: }
+
+gates:
+  G1_platform_floor:     { pass: , actual: , required:  }
+  G2_term_ge_recovery:   { pass:  }
+  G3_rate_provenance:    { pass:  }
+  G4_documentation:      { pass:  }
+  G5_qa_coverage:        { pass:  }
+  G6_pm_coverage:        { pass:  }
+  G7_segment_rate:       { pass:  }
+  G8_margin:             { pass: , actual_pct: , required_pct: 0.30 }
+  market_test:            { pass: , multiple_of_incumbent:  }   # G9
+  budget_test:             { pass: , year1_vs_rejected:  }      # G10
+
+phase2_deferred: []
+exclusions_confirmed: false

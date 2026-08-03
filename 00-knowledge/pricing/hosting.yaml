@@ -1,0 +1,29 @@
+# SGC TECH AI — Revised Cloud Hosting
+# Source: commercial-pricing-revised-v2.xlsx, sheet "Cloud Hosting"
+# Managed Odoo hosting on Contabo / Hetzner + 24/7 monitoring.
+version: 1.0
+effective_from: 2026-08-03
+
+tiers:
+  foundation:
+    spec: "2 vCPU · 4 GB RAM · 50 GB SSD"
+    max_users: 20
+    price_aed_mo: 990
+  growth:
+    spec: "4 vCPU · 8 GB RAM · 100 GB SSD"
+    max_users: 50
+    price_aed_mo: 1950
+  enterprise:
+    spec: "8 vCPU · 16 GB RAM · 200 GB SSD · HA"
+    max_users: null   # unlimited
+    price_aed_mo: 3490
+
+aws_passthrough_reference:
+  # AWS pass-through pricing is unchanged and billed directly by AWS, not
+  # marked up under SGC hosting tiers above. Use only when a client mandates
+  # AWS for compliance/residency reasons.
+  ec2_t3_medium_aed_mo: 120
+  ec2_r6g_large_aed_mo: 350
+
+notes:
+  - "Foundation caps at 20 users to match cost_to_serve.hosting_node_user_capacity in policy.yaml — do not oversell a tier past its user cap."

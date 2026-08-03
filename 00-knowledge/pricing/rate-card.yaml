@@ -1,0 +1,27 @@
+# SGC TECH AI — Revised Rate Card
+# Source: commercial-pricing-revised-v2.xlsx, sheet "Rate Card (Revised)"
+# UAE specialist-boutique band — 15% below mid-tier agency rates.
+# Reference bands: specialist boutique 180-300 AED/hr; mid-tier agencies
+# 350-550 AED/hr; Big-4 600-900 AED/hr. SGC plays in the specialist band.
+version: 1.0
+effective_from: 2026-08-03
+
+roles:
+  startup_consultant:  { level: L0, rate_aed_hr: 280 }
+  consultant:           { level: L1, rate_aed_hr: 395 }
+  senior_consultant:    { level: L2, rate_aed_hr: 525 }
+  project_manager:      { level: L2, rate_aed_hr: 600 }
+  solution_architect:   { level: L3, rate_aed_hr: 700 }
+  technical_lead:       { level: L3, rate_aed_hr: 800 }
+  developer:            { level: L1, rate_aed_hr: 475 }
+  senior_developer:     { level: L2, rate_aed_hr: 600 }
+  ai_engineer:          { level: L3, rate_aed_hr: 800 }
+  data_engineer:        { level: L2, rate_aed_hr: 650 }
+  business_analyst:     { level: L1, rate_aed_hr: 450 }
+  qa_engineer:          { level: L1, rate_aed_hr: 425 }
+  trainer:               { level: L1, rate_aed_hr: 395 }
+
+notes:
+  - "Rule 7: Startup segment (AED 280/hr) pairs with startup_consultant (L0) above."
+  - "All 12 commercial rules still apply — see commercial-rules/12-commercial-rules.md."
+  - "A rate not listed here does not exist. Escalate; do not interpolate."
