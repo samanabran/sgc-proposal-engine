@@ -1,0 +1,28 @@
+# SGC TECH AI — Decorative Tokens
+version: 1.0
+
+watermark:
+  opacity_range: [0.02, 0.05]
+  hero_opacity_range: [0.06, 0.08]     # cover page only
+  grayscale_contrast: 1.2
+  blend_mode: { light_theme: multiply, dark_theme: screen }
+  rule: "no consecutive landmark repeats — do not use the same watermark motif on two adjacent sections"
+
+gold_corner_geometry:
+  weights_px: [0.5, 0.3, 0.2]
+  usage: "cover page and section-divider corner marks only"
+
+micro_grid:
+  weight_px: 0.15
+  spacing_px: 20
+  color_token: gold
+  opacity: 0.08
+  usage: "subtle background texture on cover and divider pages only — never behind body text"
+
+nav_rails:
+  weight_px: 0.3
+  color_token: gold
+  usage: "running section-indicator rail in page margin"
+
+usage_notes:
+  - "Watermark assets themselves live in assets/watermarks/ — currently empty (.gitkeep only). Do not render a watermark placeholder as if it were a real asset."

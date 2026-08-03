@@ -1,60 +1,71 @@
 # SGC Proposal Engine
 
-A layered repository for building Odoo/ERP subscription (and project /
-retainer) proposals for SGC TECH AI's UAE and GCC clients, with a strict
-separation between pricing truth, document structure, and deal execution.
+A layered repository for building Odoo subscription proposals for SGC
+TECH AI's UAE real estate brokerage clients — commercially defensible,
+cash-risk aware, and unable to lose money if the gates are respected.
 
 ## Start here
 
-- **If you're an agent or SDR about to build a proposal**: read
-  `AGENTS.md` first, in full. It is the operating contract for this
-  repository and overrides default behavior.
-- **If you're a new SDR**: follow `05-ops/onboarding-new-sdr.md`.
-- **If you're the Commercial Desk maintaining pricing**: your changes go
-  in `00-knowledge/` and `01-templates/` only, logged in `CHANGELOG.md`.
+Read `AGENTS.md` in full before touching anything. New SDRs: follow
+`05-ops/onboarding-new-sdr.md`.
+
+## The three-number model (for a new SDR, in one read)
+
+Every proposal reduces to three numbers, computed in order.
+
+**Number 1 — Cost to Serve.** What it costs SGC every month to keep this
+client running: licences (zero on Community edition, the default),
+hosting, tooling, support labour, account management. Multiply by 1.25 —
+that's the platform floor. The recurring subscription price must never
+sit below it.
+
+**Number 2 — Build Value.** The one-time cost of implementation: hours
+from the work-package catalogue, times a rate that must exist on the rate
+card, plus project management and contingency loading. This is what the
+client eventually pays for, whether upfront or over time.
+
+**Number 3 — Financing Uplift.** If the client doesn't pay the full build
+value at kickoff, the deferred portion carries a disclosed financing
+uplift, recovered through the subscription over the term. Settling in
+full at kickoff removes this number entirely.
+
+Assemble: mobilisation (33% of build value, by default) plus a monthly
+subscription of platform floor plus recovery. Two options only —
+mobilisation-paid or nothing else; zero-upfront is currently withdrawn.
+Every deal runs through 41 gates before it can be drafted. If one fails,
+you reduce scope — you never discount past it.
 
 ## Why it's laid out this way
 
-The most common failure in a shared proposal repo is drift — someone
-copies a rate card into a client folder, edits it, and six months later
-three different rate cards exist. This repo is layered strictly to
-prevent that: a read-only knowledge layer (`00-knowledge/`) that only the
-Commercial Desk can change, a template layer (`01-templates/`) that
-renders from it, and a per-client workspace (`02-clients/`) that
-references upward and never duplicates. Change one rate, and every future
-proposal inherits it.
-
-The second design decision: an agent's arithmetic must be auditable and
-separate from the prose. Every client folder keeps a `02-calc/` worksheet
-showing ten gates (G1–G10) passing before a single word of client-facing
-prose gets drafted. That's what makes a proposal defensible when a client
-pushes back, and what lets a human reviewer check an SDR's — or an
-agent's — work in minutes, not hours.
+Drift is the enemy: a copied rate card that gets edited becomes three
+different truths within months. `00-knowledge/` is read-only and single-
+sourced; `02-clients/` references it, never duplicates it. See
+`00-knowledge/failure-modes/known-defects.md` for what happens when this
+discipline slips — twenty defects, with the arithmetic, from a real
+revision history.
 
 ## Layout
 
 | Layer | Who writes | Purpose |
 |---|---|---|
-| `00-knowledge/` | Commercial Desk only | Single source of truth for every rate, gate, and clause |
+| `00-knowledge/` | Commercial Desk only | Every rate, gate, and clause |
 | `01-templates/` | Commercial Desk only | Structure and prose skeletons |
-| `02-clients/` | SDR + agent | Deal execution — one folder per opportunity, `05-issued/` immutable once sent |
-| `03-library/` | Any SDR, reviewed | Shared craft — worked examples, objection handling |
-| `04-governance/` | Sales leadership | Approval authority and escalation |
-| `05-ops/` | Commercial Desk | How to run the repository itself |
+| `02-clients/` | SDR + agent | Deal execution, `05-issued/` immutable |
+| `03-library/` | SDR, reviewed | Shared craft |
+| `04-governance/` | Sales leadership | Approval authority |
+| `05-ops/` | Commercial Desk | How to run the repository |
+| `06-brand/` | Commercial Desk only | Visual identity, entity facts |
+| `07-protection/` | Commercial Desk + Finance | Exposure limits, walk-away pricing |
 
-See `04-governance/access-model.md` for the full rationale, and
-`00-knowledge/failure-modes/known-defects.md` for fifteen concrete
-failures this structure exists to prevent.
+## Live examples
 
-## The live example
-
-`02-clients/VGE-vongeyern-realestate/` is a real, worked-through deal — a
-Dubai real estate brokerage moving from Rev1 (CRM + Sales) through Rev2
-(added trust/commission accounting) to Rev3 (term extended for cash
-flow), with a full passing gate report at every stage. Read it end to end
-before running your first deal.
+`02-clients/VGE-vongeyern-realestate/` — v1, a clean 12-user smb build.
+`02-clients/MRD-meridianview-realty/` — v2, a 5-user Community-edition
+build whose first two revisions were retracted for documented defects,
+corrected in Rev3. Read the second one to see the gates catch a real
+failure pattern, not just pass a clean deal.
 
 ## Starting a new deal
 
-Copy `02-clients/_SCAFFOLD/` — never a peer client's folder — and follow
+Copy `02-clients/_SCAFFOLD/` and follow
 `00-knowledge/runbook/subscription-proposal-runbook.md` from §1.

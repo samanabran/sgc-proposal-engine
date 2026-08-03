@@ -1,0 +1,25 @@
+# SGC TECH AI — Colour Tokens
+version: 1.0
+
+palette:
+  ivory:      "#F7F4EE"
+  navy:       "#0F213D"
+  gold:       "#B79554"
+  charcoal:   "#1C2430"
+  slate:      "#5F6775"
+  champagne:  "#D9C08A"
+  parchment:  "#ECE7DF"
+  midnight:   "#091528"
+  emerald:    "#2C6654"
+  amber:      "#C78F2B"
+  wine:       "#A24949"
+
+saturation_law:
+  xl_surfaces:  { max_saturation: 0.08, note: "backgrounds, full-page fills" }
+  m_elements:   { max_saturation: 0.30, note: "cards, section dividers, table headers" }
+  accents:      { max_saturation: null, note: "XS use only — icons, rules, small badges; unrestricted saturation at this scale" }
+
+usage_notes:
+  - "No colour outside this palette may appear in any issued document. See 05-ops/validate.md check #15."
+  - "gold and champagne are the two accent tones; navy and charcoal carry primary text/structure weight; ivory and parchment are surface tones."
+  - "emerald/amber/wine reserved for status signalling (pass/warning/fail in internal-facing docs like gate-report.md rendering) — not for client-facing decorative use."

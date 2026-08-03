@@ -1,0 +1,22 @@
+# SGC TECH AI — Grid Tokens
+version: 1.0
+
+portrait:
+  page: "A4 210x297mm"
+  columns: 12
+  margin_mm: 20
+  safety_zone_mm: 15
+  content_width_mm: 170
+  gutter_mm: 4
+
+landscape:
+  page: "A4 297x210mm"
+  columns: 16
+  margin_mm: 20
+  safety_zone_mm: 15
+  content_width_mm: 257
+  gutter_mm: 4
+
+usage_notes:
+  - "Use landscape only for the commercial-terms comparison table (§10) and any pricing worksheet appendix — portrait for everything else."
+  - "safety_zone_mm is the minimum clearance from page edge for any text or non-bleed graphic element."

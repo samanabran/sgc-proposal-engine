@@ -1,0 +1,18 @@
+/* SGC TECH AI — Landscape overrides, for §10 commercial-terms comparison
+   tables and pricing worksheet appendices only. Import proposal.pdf.css
+   first, then this file to override page geometry. */
+
+@page {
+  size: A4 landscape;
+  margin: 20mm;
+}
+
+.content-width {
+  max-width: 257mm; /* grid.yaml landscape.content_width_mm */
+}
+
+.grid-16 {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 4mm; /* grid.yaml landscape.gutter_mm */
+}

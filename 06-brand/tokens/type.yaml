@@ -1,0 +1,37 @@
+# SGC TECH AI — Typography Tokens
+version: 1.0
+
+display:
+  family: "IBM Plex Serif"
+  size_px: 38
+  weight: 700
+  tracking_px: -1
+  usage: "cover title only"
+
+section:
+  family: "IBM Plex Serif"
+  size_px: 28
+  weight: 700
+  tracking_px: -0.5
+  usage: "§01-§13 section headers"
+
+subsection:
+  family: "IBM Plex Sans"
+  size_px: 18
+  weight: 600
+  color_token: gold
+  usage: "subheadings within a section"
+
+body:
+  family: "IBM Plex Sans"
+  size_px: 15
+  weight: 400
+  line_height: 1.75
+  usage: "all body prose"
+
+caption:
+  family: "IBM Plex Sans"
+  size_px: 11
+  weight: 400
+  transform: uppercase
+  usage: "table headers, footnotes, page footers"

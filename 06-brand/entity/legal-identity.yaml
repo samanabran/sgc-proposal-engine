@@ -1,0 +1,27 @@
+# SGC TECH AI — Legal Identity
+# Single source for every footer, cover page, and signature block in every
+# issued document. Templates MUST fail loudly (not silently default or
+# guess) if any field below is still "RESOLVE" — see 05-ops/validate.md
+# check #14 and known-defects.md #12 for why: Rev1 said Al Rigga, Rev2
+# said DIFC — two different addresses for the same entity, issued weeks
+# apart, because nothing forced a single source of truth until this file.
+version: 1.0
+effective_from: 2026-08-03
+
+legal_name: "Scholarix Global Consultants FZE"
+trading_as: "SGC TECH AI"
+tagline: "FINANCE · SYSTEM · TECHNOLOGY"
+
+licence_authority: RESOLVE      # IFZA or DIFC — they are NOT the same regime; affects dispute-and-jurisdiction.md directly
+licence_number: RESOLVE
+registered_address: RESOLVE     # ONE address, used everywhere. Do not let a draft proceed with a different address than a prior revision.
+
+vat_registered: false            # mirrors pricing/policy.yaml: vat.registered — keep these two in sync, never edit one without the other
+trn: null
+
+contact:
+  name: RESOLVE
+  email: RESOLVE
+  phone: RESOLVE
+
+resolution_owner: "Commercial Desk + Founder — sign-off required before any field here leaves RESOLVE"

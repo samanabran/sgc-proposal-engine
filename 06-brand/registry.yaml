@@ -1,0 +1,30 @@
+# SGC TECH AI — Brand Registry
+# The index of every approved brand asset. A template or draft may only
+# reference tokens listed here — no off-registry colour, font, or asset
+# path. See 05-ops/validate.md check #15.
+version: 1.0
+effective_from: 2026-08-03
+
+entity: entity/legal-identity.yaml
+
+tokens:
+  color: tokens/color.yaml
+  type: tokens/type.yaml
+  grid: tokens/grid.yaml
+  decor: tokens/decor.yaml
+
+assets:
+  logos: assets/logos/
+  watermarks: assets/watermarks/
+  fonts: assets/fonts/
+
+styles:
+  docx: styles/proposal.docx.style.md
+  pdf_portrait: styles/proposal.pdf.css
+  pdf_landscape: styles/landscape.css
+
+co_brand_rules: co-brand/rules.md
+locale_ar_ae: locale/ar-AE.md
+brand_qa_checklist: brand-qa-checklist.md
+
+status_note: "assets/{logos,watermarks,fonts}/ are empty (.gitkeep only) as of this version — no logo files, watermark images, or font binaries have been supplied yet. Any template referencing an asset path must fail loudly if the referenced file does not exist, not silently render without it."

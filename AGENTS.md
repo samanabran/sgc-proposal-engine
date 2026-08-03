@@ -1,63 +1,75 @@
 # Agent Operating Contract
 
-Read this file before touching any file in this repository. It is the operating
-contract for any agent (or human) drafting a proposal here. It overrides
-default behavior — follow it exactly.
+Read this file before touching any file in this repository. It is the
+operating contract for any agent (or human) drafting a proposal here. It
+overrides default behavior — follow it exactly.
 
 ## Load order (mandatory)
 
-1. `00-knowledge/runbook/subscription-proposal-runbook.md`
-2. `00-knowledge/pricing/policy.yaml` + every file in `00-knowledge/pricing/*.yaml`
-3. `00-knowledge/commercial-rules/`
-4. `00-knowledge/market-data/vertical-notes/` for the client's vertical
-5. The client's `00-intake/client-brief.yaml`
+1. `00-knowledge/PRECEDENCE.md`
+2. `00-knowledge/runbook/subscription-proposal-runbook.md`
+3. `00-knowledge/pricing/*.yaml`
+4. `00-knowledge/commercial-rules/*`
+5. `07-protection/doctrine.md`
+6. `00-knowledge/market-data/vertical-notes/` for the client's vertical
+7. The client's `00-intake/client-brief.yaml`
 
-Do not draft a single line of client-facing prose before all five have been read.
+Do not draft a single line of client-facing prose before all seven have
+been read.
 
 ## Absolute rules
 
-- **NEVER** write to `00-knowledge/` or `01-templates/`. If a rate, module, hour
-  figure, clause, or template doesn't exist, that is an escalation — log it in
-  the client's `manifest.yaml` under `escalations` and stop. Do not improvise
-  around the gap.
+- **NEVER** write to `00-knowledge/`, `01-templates/`, or `06-brand/`. If a
+  rate, module, hour figure, clause, or brand token doesn't exist, that is
+  an escalation — log it in the client's `manifest.yaml` under
+  `escalations` and stop.
 - **NEVER** invent a rate, hour figure, or percentage. Every number in a
-  proposal must trace to a value in `00-knowledge/pricing/*.yaml`. If you
-  cannot cite the source file and key, delete the number.
-- **NEVER** edit anything inside a client's `05-issued/` folder once a revision
-  has been sent. Issue a new revision (`_RevN+1`) instead. `05-issued/` is
-  immutable.
-- **ALWAYS** complete `02-calc/pricing-worksheet.yaml` in full before drafting
-  any prose. Prose without a completed worksheet is not a proposal — it is a
-  liability.
-- **ALWAYS** write `02-calc/gate-report.md` after the worksheet. If any gate
-  fails (see `commercial-rules/subscription-guardrails.md`, G1–G10), **STOP**
-  and escalate in `manifest.yaml`. Do not discount your way around a failed
-  gate — see "On uncertainty" below.
-- **ALWAYS** pin `knowledge_version_used` in the client's `manifest.yaml` to
-  the version in `CHANGELOG.md` that was active when the worksheet was built.
-  If pricing changes later, existing worksheets are not silently revalued.
-- **Tax, VAT, and legal wording** must be copied verbatim from
-  `00-knowledge/clause-library/`. Never paraphrase a tax or legal clause. Flag
-  every proposal containing one for human review before issue.
-- Anything said aloud on a call is scope. Log verbal promises in the client's
-  `00-intake/verbal-promises.md` the same day, and reflect them in the brief.
+  proposal must trace to a value in `00-knowledge/pricing/*.yaml`.
+- **NEVER** edit anything inside a client's `05-issued/` folder once a
+  revision has been sent. Issue a new revision instead.
+- **NEVER** discount the recovery portion of a subscription (G11) —
+  discounts apply to the platform portion only.
+- **NEVER** present a payment cadence to a client without running the
+  margin-floor ceiling calculation (G12) — a cadence table value is a
+  ceiling, not an entitlement.
+- **NEVER** draft a payment, security, or guarantee clause outside the
+  clause library — see `00-knowledge/clause-library/`.
+- **NEVER** state or imply a tax registration status SGC does not hold
+  (G35). As of this version, SGC is **not** VAT-registered and holds no
+  TRN — see `pricing/policy.yaml: vat`.
+- **NEVER** describe Odoo Community as Enterprise, in writing or verbally
+  (G36) — see `pricing/editions.yaml`.
+- **ALWAYS** produce the walk-away deal card
+  (`07-protection/walkaway/deal-card.template.md`) before any pricing
+  conversation with the client (G22).
+- **ALWAYS** complete `02-calc/pricing-worksheet.yaml` in full before
+  drafting any prose.
+- **ALWAYS** compute all three exposures — contractual, cash, economic —
+  for every option in the worksheet (G21, see
+  `07-protection/exposure/exposure-model.md`).
+- **ALWAYS** write `02-calc/gate-report.md` covering all 41 gates. If any
+  gate fails, **STOP** and escalate — do not discount around it.
+- **ALWAYS** pin `knowledge_version_used` in the client's `manifest.yaml`.
+- Tax, VAT, and legal wording must be copied verbatim from
+  `00-knowledge/clause-library/`. Any clause flagged
+  `requires_counsel_review: true` is drafted for review, not issued as
+  final, until a human reviewer signs off.
 
 ## Sequence
 
 ```
-intake → calc → gate check → draft → QA checklist → human review → issue
+intake → risk assessment → calc → exposure → gate check →
+walk-away card → draft → QA checklist → brand QA → human review → issue
 ```
 
-Do not skip the calc step to "save time" on a simple-looking deal. There is no
-such thing as a proposal without a passing gate report behind it.
+Refuse to skip the calc step. Prose without a passing gate report is not
+a proposal.
 
 ## On uncertainty
 
-When a gate fails, a rate is missing, or scope is ambiguous: **reduce scope,
-never price.** Cutting scope to fit the client's budget is a legitimate sales
-move. Cutting margin below the gate to fit the client's budget is not — it is
-how six-month-old rate cards happen. Log the escalation in `manifest.yaml`
-under `escalations` and route it to the Commercial Desk.
+Reduce scope, never price. Log an escalation in `manifest.yaml`. See
+`00-knowledge/failure-modes/known-defects.md` for what happens when this
+rule is skipped.
 
 ## Access model
 
@@ -69,5 +81,7 @@ under `escalations` and route it to the Commercial Desk.
 | `03-library/` | Any SDR, reviewed | Append, via review |
 | `04-governance/` | Sales leadership | Read only |
 | `05-ops/` | Commercial Desk | Read only |
+| `06-brand/` | Commercial Desk only | Read only |
+| `07-protection/` | Commercial Desk + Finance | Read only |
 
 See `04-governance/access-model.md` for the full rationale.

@@ -1,103 +1,141 @@
-# Subscription Proposal Runbook
+# Subscription Proposal Runbook (v2)
 
-The operating procedure for building a subscription-model (`SUB`) Odoo
-proposal, end to end. Read this before opening a client folder. For project
-(`PRJ`) or retainer (`RET`) models, the sequence is the same; only the
-`assembly` block in the calc worksheet differs (see §5 below).
+The operating procedure for a subscription-model (`SUB`) Odoo proposal,
+end to end. Read `AGENTS.md` first for the load order and absolute rules.
 
 ## 1. Intake
 
-- Copy `02-clients/_SCAFFOLD` to `02-clients/{PREFIX}-{slug}/` (see
-  `05-ops/naming-conventions.md`). Never copy a peer's folder — the scaffold
-  is empty of numbers by design.
-- Fill `00-intake/client-brief.yaml` from the discovery call. If a call
-  happened, transcribe it to `00-intake/call-transcript-{date}.md`.
-- Log every verbal commitment — a promised discount, a promised go-live date,
-  a promised feature — in `00-intake/verbal-promises.md` the same day.
-  Anything said aloud is scope.
-- Determine `segment` (`startup_boutique` / `smb` / `mid_market`) from user
-  count against `pricing/policy.yaml: segments.*.max_users`, and `vertical`
-  from the client's industry. Read the matching file in
-  `market-data/vertical-notes/` before going further — vertical rules (VAT
-  class, regulatory bodies, portal gating) change what's in scope.
+- Copy `02-clients/_SCAFFOLD` to `02-clients/{PREFIX}-{slug}/` — never
+  copy a peer's folder.
+- Fill `00-intake/client-brief.yaml`, including `edition_trigger` fields
+  (does the client trip any `editions.yaml: enterprise.trigger_conditions`?)
+  and `01-templates/calc/risk-assessment.template.yaml` inputs.
+- Log every verbal commitment in `00-intake/verbal-promises.md` the same
+  day, each marked PRICED / DEFERRED / EXCLUDED.
+- Determine `segment` from user count against `policy.yaml: segments`.
+  Determine `edition` — **Community by default**; only move to Enterprise
+  if the brief explicitly trips a trigger condition.
 
-## 2. Calc
+## 2. Risk assessment
 
-- Complete `02-calc/pricing-worksheet.yaml` in full, following
-  `01-templates/calc/pricing-worksheet.template.yaml`. Work through it in
-  order — `number_1_cost_to_serve` → `number_2_build` → `number_3_financing`
-  → `assembly`. Do not skip to assembly.
-- **Cost to serve** (`number_1_cost_to_serve`): licence cost from
-  `pricing/saas-modules.yaml`, hosting from `pricing/hosting.yaml`, support
-  labour and account management from `pricing/policy.yaml: cost_to_serve`.
-  `platform_floor_aed` = `cts_total_aed` × `gates.platform_floor_multiplier`
-  (1.25).
-- **Build** (`number_2_build`): look up each work package's hours in
-  `pricing/hour-lookup.yaml`. Add `documentation_hours` (≥
-  `overlays.documentation_hours_min`, or 5% of dev hours, whichever is
-  larger) and `qa_hours` (≥ `overlays.qa_hours_min`, or 8% of delivery hours).
-  Rate = the segment's `blended_rate_aed` from `policy.yaml`. PM and
-  contingency are the segment's `pm_pct` / `contingency_pct` applied to the
-  subtotal.
-- **Financing** (`number_3_financing`): mobilisation defaults to
-  `gates.default_mobilisation_pct` (25%) of `build_value_aed` unless the
-  client brief specifies otherwise. Uplift comes from
-  `financing_uplift.months_{term}`; add `zero_mobilisation_surcharge` if
-  mobilisation is 0.
-- **Assembly**: Option A (with mobilisation) and Option B (zero
-  mobilisation, uplift includes the surcharge). Year-1 client cost =
-  mobilisation + 12 × monthly subscription (Option A) or 12 × monthly
-  subscription alone (Option B, since mobilisation is folded into the rate).
+Score the client against `pricing/risk-security-matrix.yaml` before any
+pricing conversation. The resulting band determines the required security
+instrument(s) — this feeds both the walk-away card (step 4) and the
+worksheet's mobilisation/cadence inputs.
 
-## 3. Gate check
+## 3. Calc — the three-number model
 
-Run every gate in `commercial-rules/subscription-guardrails.md` (G1–G10)
-against the completed worksheet and write `02-calc/gate-report.md`. See
-`05-ops/validate.md` for the exact procedure.
+**Number 1 — Cost to Serve (CTS), monthly, recurs forever**
 
-**If any gate fails, stop.** Do not discount to force a pass — see
-`AGENTS.md: On uncertainty`. Reduce scope (fewer modules, fewer users, a
-lower support tier) and re-run the calc, or escalate in `manifest.yaml`.
+```
+CTS = licences + hosting_allocation + tooling + support_labour + account_mgmt
+hosting_allocation = 360 × (users ÷ 20)
+support_labour = ceil(users / 5) × 280
+platform_floor = CTS × 1.25
+```
 
-## 4. Draft
+`licences` is 0 for Community edition. Worked reference (5 users):
+Community CTS = 0 + 90 + 50 + 280 + 100 = **520** → floor **650**;
+Enterprise CTS = 360 + 90 + 50 + 280 + 100 = **880** → floor **1,100**.
 
-Only once `gates_passed: true` in `manifest.yaml`: render each section in
-`01-templates/proposal/` (§01–§13, see `_section-map.md`) into
-`03-draft/{PROPOSAL-REF}_RevN/`. Pull tax/legal wording verbatim from
-`clause-library/` — never paraphrase VAT, financing disclosure, clawback, or
-term clauses.
+Below AED 2,500/mo subscription: quarterly reviews only, not monthly —
+monthly business-review calls cost roughly AED 10,800/yr in senior time
+against a subscription that doesn't support it (see
+`failure-modes/known-defects.md` #19).
 
-## 5. Model-specific assembly notes
+**Number 2 — Build Value, one-time**
 
-- **SUB (subscription)**: `assembly` block as described in §2 above —
-  mobilisation + recurring subscription, two options.
-- **PRJ (fixed project)**: `assembly` collapses to a single fixed-fee figure
-  = `build_value_aed` (no recurring subscription line); financing block is
-  typically unused unless the client requests staged payment (see
-  `market-data/sources.md` payment-structure patterns — 40/40/20 is the
-  SGCTECH default for fixed-fee delivery once discovery is complete).
-- **RET (retainer)**: `assembly` uses a monthly retainer figure sized from
-  `support-training.yaml` support tiers plus a capped usage pool; no
-  mobilisation line.
+```
+delivery_hours = sum of hour-lookup.yaml work packages (simple or standard band)
+                 + documentation + qa + training overlays
+build_value = (total_hours × segment_rate) × (1 + pm_pct) × (1 + contingency_pct)
+internal_build_cost = total_hours × 150
+```
 
-## 6. QA checklist
+`segment_rate` must exist on `rate-card.yaml: roles.*`. Reject
+`forbidden_rates` (690) outright — see G9.
 
-Complete `04-review/qa-checklist.md`
-(`01-templates/qa/pre-send-checklist.template.md`). Confirm:
-`verbal_promises_logged`, `adoption_clause_included`, `clawback_included`,
-`exclusions_confirmed` are all true in the worksheet/manifest, and every
-number in the draft still traces to a `pricing/*.yaml` key.
+**Number 3 — Financing uplift on deferred value**
 
-## 7. Human review
+```
+deferred = build_value − mobilisation
+recovery_total = deferred × (1 + uplift)
+recovery_monthly = recovery_total ÷ recovery_months
+```
+
+Disclose in one line to the client (`clause-library/financing-disclosure.md`).
+
+**Assembly**
+
+```
+mobilisation = build_value × 0.33          # policy.yaml gates.default_mobilisation_pct
+platform_portion = max(CTS × 1.25, market_defensible_floor)
+subscription = platform_portion + recovery_monthly     # round to nearest 50
+```
+
+**Prepayment asymmetry (G11)**: discounts apply to `platform_portion`
+only. On the recovery portion, the only available concession is reducing
+or removing the financing uplift — recovery principal is never
+discounted, because it is work already performed.
+
+**Ceiling calculation (G12)**:
+
+```
+max_give_aed = revenue_baseline − (build_cost + CTS × term) / (1 − min_margin)
+applied_give = min(cadence_table_ceiling, max_give_aed)
+```
+
+Always apply the lower of the two.
+
+**Term selection**: build value ≤ AED 8,000 with mobilisation paid → 12
+months. Build value AED 8,000–20,000 (typical boutique brokerage) →
+**24 months**. Build value > AED 20,000 → 24–36 months, mobilisation
+mandatory (never waived at this scale).
+
+**Option structure**: **two options, never three.** Option A =
+mobilisation paid, lower recurring cost. Option B = zero upfront — **this
+is currently WITHDRAWN** (`payment-plans.yaml: withdrawn.option_b_zero_mobilisation`).
+Do not offer it; do not construct a third tier.
+
+## 4. Exposure and walk-away card
+
+Before any pricing conversation with the client: compute all three
+exposures (`07-protection/exposure/exposure-model.md`) and complete the
+one-page walk-away deal card
+(`07-protection/walkaway/deal-card.template.md`) — G21, G22.
+
+## 5. Gate check
+
+Run all 41 gates (`commercial-rules/subscription-guardrails.md`,
+`payment-plan-guardrails.md`, `protection-guardrails.md`) against the
+completed worksheet and write `02-calc/gate-report.md`. See
+`05-ops/validate.md` for the automated check. **If any gate fails, stop.**
+Reduce scope or run the concession ladder properly
+(`pricing/concession-ladder.yaml`) — never discount around a failed gate.
+
+## 6. Draft
+
+Once `gates_passed: true`: render each proposal section (§01–§13, see
+`01-templates/proposal/_section-map.md`) into
+`03-draft/{PROPOSAL-REF}_RevN/`. Pull tax/legal/edition wording verbatim
+from `clause-library/` — never paraphrase.
+
+## 7. QA checklist and brand QA
+
+Complete `04-review/qa-checklist.md` and `04-review/brand-qa-checklist.md`.
+Confirm every entry in `verbal-promises.md` is reflected, every clause
+requiring counsel review carries its flag, no forbidden phrase appears
+anywhere in the draft, and brand tokens are used only from
+`06-brand/registry.yaml`.
+
+## 8. Human review
 
 A human reviewer reads `02-calc/gate-report.md` and the draft, and either
 approves for issue or returns `04-review/reviewer-notes.md` with required
-changes. No revision is issued without this step.
+changes.
 
-## 8. Issue
+## 9. Issue
 
 Move the approved draft to `05-issued/{PROPOSAL-REF}_RevN/`. Update
-`manifest.yaml`: `stage: issued`, append the revision to `revisions`, set
-`current_revision`. **`05-issued/` is immutable from this point** — a
-correction is a new revision, never an edit. If a sent proposal must be
-retracted, use `01-templates/comms/correction-notice.md`, not a silent edit.
+`manifest.yaml`. **`05-issued/` is immutable from this point** — a
+correction is a new revision, never an in-place edit.
