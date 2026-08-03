@@ -9,6 +9,8 @@ effective_from: 2026-08-03
 forbidden_rates:
   - rate_aed_hr: 690
     note: "AED 690/hr appeared in the original VGE-2026-SUB-01 draft and exists on no rate card, at any level. Any proposal using it is non-compliant — see failure-modes/known-defects.md #2. validate must reject any worksheet or draft containing this figure."
+  - rate_aed_hr: 550
+    note: "AED 550/hr was mid_market's blended_rate_aed in policy.yaml before it was corrected 2026-08-04 to the pinned senior_consultant rate (525) — see failure-modes/known-defects.md #21. 550 matches no role on this card at any level; it was never a valid figure, only an uncorrected one. Permanent regression guard."
 
 roles:
   startup_consultant:  { level: L0, rate_aed_hr: 280 }

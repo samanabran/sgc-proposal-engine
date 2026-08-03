@@ -25,7 +25,13 @@ except ImportError:
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-FORBIDDEN_RATE = 690
+
+def _forbidden_rates():
+    """All forbidden_rates from rate-card.yaml, not just one hardcoded
+    value — see failure-modes/known-defects.md #2 (690) and #21 (550,
+    added after 425/550 were found reintroduced into policy.yaml)."""
+    rc = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
+    return [r["rate_aed_hr"] for r in rc.get("forbidden_rates", [])]
 
 # Phrases that are unconditionally wrong wherever they appear as an
 # affirmative claim — no legitimate proposal ever needs to assert these.
@@ -114,30 +120,56 @@ def find_worksheet(client_dir):
 
 
 def check_1_forbidden_rate_in_pricing(result):
+    forbidden = _forbidden_rates()
     for f in glob.glob(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "*.yaml")):
+        if "rate-card.yaml" in f:
+            continue  # the guard entries themselves legitimately state the number
         text = open(f, encoding="utf-8").read()
-        if re.search(rf"\b{FORBIDDEN_RATE}\b", text) and "forbidden_rates" not in text.split(str(FORBIDDEN_RATE))[0][-200:]:
-            # crude proximity check: allow the number only inside the
-            # forbidden_rates block of rate-card.yaml itself
-            if "rate-card.yaml" not in f:
-                result.fail("1. forbidden rate", f"{FORBIDDEN_RATE} appears in {f}")
-    result.ok("1. forbidden rate not present in pricing/*.yaml (outside its own guard entry)")
+        for rate in forbidden:
+            if re.search(rf"\b{rate}\b", text):
+                result.fail("1. forbidden rate", f"{rate} appears in {f}")
+    result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries)")
+
+
+def check_1c_segment_pins(result):
+    """Structural guard for known-defects.md #21: each segment's
+    blended_rate_aed must equal the rate_aed_hr of its declared
+    pinned_role, not just be SOME value that happens to exist on the card
+    (425 legitimately exists as qa_engineer's rate, which is why a
+    forbidden_rates entry alone can't catch it being misused as smb's
+    blended rate)."""
+    policy = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    rate_card = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
+    roles = rate_card.get("roles", {})
+    for seg_name, seg in policy.get("segments", {}).items():
+        pinned_role = seg.get("pinned_role")
+        if not pinned_role or pinned_role not in roles:
+            result.fail("1c. segment rate pin", f"segments.{seg_name} has no valid pinned_role on rate-card.yaml")
+            continue
+        expected = roles[pinned_role]["rate_aed_hr"]
+        actual = seg.get("blended_rate_aed")
+        if actual != expected:
+            result.fail("1c. segment rate pin", f"segments.{seg_name}.blended_rate_aed ({actual}) != roles.{pinned_role}.rate_aed_hr ({expected})")
+    result.ok("1c. every segment's blended_rate_aed matches its pinned rate-card role exactly")
 
 
 def check_1b_forbidden_rate_in_client(result, client_dir):
     # Only scan the ACTIVE pricing surface — the worksheet and the current
     # draft. manifest.yaml (escalation narrative) and 05-issued/ (retracted
     # historical record, or an immutable clean-history document like VGE's)
-    # are legitimately allowed to reference the number 690 as a documented
-    # past defect, not a live rate — see check_1_forbidden_rate_in_pricing
-    # for the check that actually guards live pricing data.
+    # are legitimately allowed to reference a forbidden rate as a
+    # documented past defect, not a live figure — see
+    # check_1_forbidden_rate_in_pricing for the check that guards live
+    # pricing data itself.
+    forbidden = _forbidden_rates()
     targets = glob.glob(os.path.join(client_dir, "02-calc", "*.yaml")) + \
         glob.glob(os.path.join(client_dir, "03-draft", "**", "*.md"), recursive=True)
     for f in targets:
         text = open(f, encoding="utf-8").read()
-        if re.search(rf"\b{FORBIDDEN_RATE}\b", text):
-            result.fail("1. forbidden rate in client folder", f"{FORBIDDEN_RATE} appears in {f}")
-    result.ok("1. forbidden rate not present in active client worksheet/draft")
+        for rate in forbidden:
+            if re.search(rf"\b{rate}\b", text):
+                result.fail("1. forbidden rate in client folder", f"{rate} appears in {f}")
+    result.ok(f"1. forbidden rates {forbidden} not present in active client worksheet/draft")
 
 
 def check_2_3_worksheet_complete(result, ws):
@@ -350,6 +382,7 @@ def run(client_dir):
 
     check_1_forbidden_rate_in_pricing(result)
     check_1b_forbidden_rate_in_client(result, client_dir)
+    check_1c_segment_pins(result)
     check_2_3_worksheet_complete(result, ws)
     check_4_hour_benchmark(result, ws)
     check_6_all_gates_recorded(result, ws)
@@ -384,8 +417,78 @@ def run(client_dir):
     return 0
 
 
+# --- Permanent regression corpus -------------------------------------
+# These cases exist because the negation-aware phrase matching in this
+# file already caused real false positives once (flagging this repo's
+# OWN correct, mandatory disclosures — the VAT gross-up clause and the
+# Community mobile-access disclosure — as violations). A validator that
+# cries wolf on correct text is worse than no validator: people start
+# passing --no-verify. Run automatically before every check_11/12/18
+# invocation so a future regex "tightening" can't silently reintroduce
+# the bug without being caught immediately.
+
+SELFTEST_MUST_NOT_FLAG = [
+    ("VAT-registered", "SGC TECH AI is not currently registered for UAE VAT, and no VAT is charged on this proposal."),
+    ("VAT-registered", "Should SGC TECH AI become VAT-registered during the term, VAT at the prevailing rate will be added to invoices."),
+    ("no VAT applies", "Full detail, including why this invoice carries no VAT charge, is in section 10."),
+    ("iOS/Android app", "mobile-optimised browser access — **not** a dedicated\niOS/Android app. It does not include automated bank reconciliation."),
+    ("Odoo Enterprise", "This proposal does not include Odoo Enterprise licensing or Odoo's own vendor upgrade service."),
+]
+
+SELFTEST_MUST_FLAG = [
+    ("VAT-registered", "SGC TECH AI is VAT-registered and this invoice includes VAT."),
+    ("no VAT applies", "No VAT applies — we operate from a free zone."),
+    ("iOS/Android app", "This comes with a native iOS/Android app included at no extra cost."),
+    ("Odoo Enterprise", "Includes full Odoo Enterprise licences at no extra cost."),
+]
+
+
+def self_test():
+    failures = []
+    for label, text in SELFTEST_MUST_NOT_FLAG:
+        if label == "VAT-registered":
+            hit = bool(CONDITIONAL_FORBIDDEN["VAT-registered"].search(text))
+        elif label == "no VAT applies":
+            m = re.search(r"no VAT applies", text, re.IGNORECASE)
+            hit = bool(m and "free zone" in text[max(0, m.start() - 80):m.start() + 80].lower())
+        else:
+            m = re.search(re.escape(label), text, re.IGNORECASE)
+            hit = bool(m and not _has_nearby_negation(text, m.start()))
+        if hit:
+            failures.append(f"FALSE POSITIVE: '{label}' wrongly flagged in correct text: {text!r}")
+    for label, text in SELFTEST_MUST_FLAG:
+        if label == "VAT-registered":
+            hit = bool(CONDITIONAL_FORBIDDEN["VAT-registered"].search(text))
+        elif label == "no VAT applies":
+            m = re.search(r"no VAT applies", text, re.IGNORECASE)
+            hit = bool(m and "free zone" in text[max(0, m.start() - 80):m.start() + 80].lower())
+        else:
+            m = re.search(re.escape(label), text, re.IGNORECASE)
+            hit = bool(m and not _has_nearby_negation(text, m.start()))
+        if not hit:
+            failures.append(f"FALSE NEGATIVE: '{label}' should have been flagged but wasn't: {text!r}")
+    return failures
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "--selftest":
+        failures = self_test()
+        if failures:
+            for f in failures:
+                print(f"[SELFTEST FAIL] {f}")
+            sys.exit(1)
+        print(f"[SELFTEST OK] {len(SELFTEST_MUST_NOT_FLAG)} true-negative + {len(SELFTEST_MUST_FLAG)} true-positive cases pass")
+        sys.exit(0)
+
     if len(sys.argv) != 2:
         print(__doc__)
         sys.exit(2)
+
+    selftest_failures = self_test()
+    if selftest_failures:
+        print("Refusing to run: validate.py's own phrase-matching logic has regressed.", file=sys.stderr)
+        for f in selftest_failures:
+            print(f"[SELFTEST FAIL] {f}", file=sys.stderr)
+        sys.exit(2)
+
     sys.exit(run(sys.argv[1]))

@@ -9,22 +9,24 @@ version: 2.0
 effective_from: 2026-08-03
 source: "v2 hardening pass — see CHANGELOG.md"
 
-# FLAGGED (see failure-modes/known-defects.md #21): smb.blended_rate_aed
-# (425) and mid_market.blended_rate_aed (550) do not cleanly pin to a
-# single named role on rate-card.yaml the way startup_boutique's 280 pins
-# to roles.startup_consultant. 425 happens to coincidentally match
-# roles.qa_engineer (a different role's rate, not a generalist blended
-# rate) and 550 matches no role at all — the nearest are
-# roles.senior_consultant (525) and roles.project_manager (600). This is
-# the exact drift pattern known-defects.md #1 documented and this build's
-# own source spec reintroduced it verbatim. Left as specified per this
-# revision's "do not invent numbers" instruction; escalate to the
-# Commercial Desk to either re-pin these to real roles or confirm they are
-# deliberately independent blended figures, not role citations.
+# RESOLVED 2026-08-04 (see failure-modes/known-defects.md #21): this
+# build's own source spec reintroduced the pre-correction smb and
+# mid_market blended rates verbatim — the exact drift pattern
+# known-defects.md #1 already documented once. On review, "don't invent
+# numbers" governs fabricating market data, not preserving a rate known
+# to be wrong in a live operational config that other SDRs price off
+# without reading this comment. Re-pinned both to real rate-card.yaml
+# roles, same treatment as startup_boutique. mid_market's rejected value
+# is now a permanent regression guard in rate-card.yaml: forbidden_rates;
+# smb's rejected value cannot be blanket-forbidden the same way because
+# it is legitimately roles.qa_engineer's rate — instead, 05-ops/validate.py
+# structurally checks that each segment's blended_rate_aed equals its
+# pinned role's rate_aed_hr below, not just that the number exists
+# somewhere on the card.
 segments:
-  startup_boutique:  { max_users: 10,  blended_rate_aed: 280, pm_pct: 0.10, contingency_pct: 0.05 }
-  smb:               { max_users: 30,  blended_rate_aed: 425, pm_pct: 0.15, contingency_pct: 0.05 }
-  mid_market:        { max_users: 999, blended_rate_aed: 550, pm_pct: 0.15, contingency_pct: 0.05 }
+  startup_boutique:  { max_users: 10,  blended_rate_aed: 280, pm_pct: 0.10, contingency_pct: 0.05, pinned_role: startup_consultant }
+  smb:               { max_users: 30,  blended_rate_aed: 395, pm_pct: 0.15, contingency_pct: 0.05, pinned_role: consultant }
+  mid_market:        { max_users: 999, blended_rate_aed: 525, pm_pct: 0.15, contingency_pct: 0.05, pinned_role: senior_consultant }
 
 overlays:
   documentation_hours_min: 2

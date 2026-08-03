@@ -118,19 +118,31 @@ every one of these.
 
 ## What this v2 build itself caught (institutional memory, not client-facing)
 
-21. **Segment blended rates that don't cleanly pin to a rate-card role.**
-    `pricing/policy.yaml: segments.smb.blended_rate_aed` (425) and
-    `segments.mid_market.blended_rate_aed` (550) do not trace to a single
-    named role on `rate-card.yaml` the way `startup_boutique` (280) pins
-    to `roles.startup_consultant` — see the flag left inline in
-    `policy.yaml` itself. This is the same drift class as defect #2
-    above (an off-card figure), just less obvious because 425
-    coincidentally matches a *different* role's rate (`qa_engineer`)
-    rather than matching nothing at all. Left as specified in this
-    revision's source brief per the "don't invent numbers" instruction,
-    but flagged for Commercial Desk resolution rather than silently
-    accepted — auditability means surfacing a discrepancy you notice,
-    not just avoiding introducing new ones.
+21. **Segment blended rates that didn't cleanly pin to a rate-card role
+    — flagged, then actually resolved after review.** `policy.yaml`'s
+    `smb` and `mid_market` blended rates did not trace to a single named
+    role on `rate-card.yaml` the way `startup_boutique` pins to
+    `roles.startup_consultant` — the same drift class as defect #2, just
+    less obvious because one of the two values coincidentally matched a
+    *different* role's rate rather than matching nothing at all. The
+    first pass on this build left it in place with an inline comment,
+    reasoning that "don't invent numbers" meant not fabricating market
+    data. On review, that reasoning didn't hold: the instruction governs
+    fabricating data, not preserving a rate already known to be wrong
+    inside a live operational config — a comment protects nobody, because
+    the entire inheritance model assumes an SDR copies `_SCAFFOLD` and
+    trusts the numbers in `00-knowledge/`, not that they'll read every
+    inline comment in `policy.yaml` first. **Corrected**: both segments
+    re-pinned to real rate-card roles. The rejected `mid_market` value is
+    now a permanent `rate-card.yaml: forbidden_rates` entry, same
+    treatment as defect #2's off-card rate. The rejected `smb` value
+    couldn't get the same treatment — it's legitimately a different
+    role's real rate — so `validate.py` instead structurally checks that
+    every segment's `blended_rate_aed` matches its declared `pinned_role`
+    exactly, closing the gap a forbidden-value list alone can't cover.
+    The lesson generalizes: a flag that only a human might read is weaker
+    protection than a check that runs by construction — prefer the
+    latter whenever the former is the first draft of a fix, not the last.
 22. **A worked example inherited a since-corrected gate formula.** During
     this same build, `03-library/worked-examples/boutique-brokerage-5users-24mo.md`
     (built by a parallel process) used an earlier draft of the G1
@@ -143,3 +155,20 @@ every one of these.
     in one place doesn't propagate to a document already being drafted
     elsewhere unless someone actually re-checks it against the current
     source, not the source as it was when that document started.
+23. **A validator that flagged its own correct disclosures.** The first
+    version of `validate.py`'s forbidden-phrase check used a plain
+    substring match for `VAT-registered` and `iOS/Android app`. This
+    correctly caught false claims, but also flagged this repo's own
+    mandatory, correct text — the VAT gross-up clause's "Should SGC TECH
+    AI **become** VAT-registered..." and the Community-edition
+    disclosure's "**not** a dedicated iOS/Android app." Discovered only
+    by actually running the validator against real content, not by
+    reading the spec. Fixed with negation-aware matching, and — because a
+    validator that cries wolf on correct text is worse than no validator
+    at all — the two false-positive cases (plus their true-positive
+    counterparts) are now a permanent regression corpus in `validate.py`
+    itself (`SELFTEST_MUST_NOT_FLAG` / `SELFTEST_MUST_FLAG`, run via
+    `python validate.py --selftest`, and automatically before every real
+    run). A future tightening of the phrase-matching regex cannot
+    reintroduce this specific failure without the self-test catching it
+    immediately.
