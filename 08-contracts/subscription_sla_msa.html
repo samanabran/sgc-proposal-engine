@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SGC Tech AI — Master Service Agreement &amp; Service Level Agreement · Subscription Recovery Model · v2026.08</title>
+<style>
+  :root{
+    --ivory:#F7F4EE; --navy:#0F213D; --gold:#8A6D2F; --charcoal:#1C2430;
+    --slate:#5F6775; --parchment:#ECE7DF; --line:#D8D2C4;
+    --warn-bg:#FBEFE6; --warn-border:#B65C1F; --warn-text:#7A3B10;
+    --ph-bg:#EAF1F7; --ph-border:#3E6C93; --ph-text:#1F3F57;
+    --ok-bg:#EAF3EC; --ok-border:#2C6654;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-serif: Georgia, "Times New Roman", Times, serif;
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ivory:#12161f; --navy:#dbe6f4; --gold:#d4b567; --charcoal:#e8e6df;
+      --slate:#a7adb8; --parchment:#1a2030; --line:#333c4d;
+      --warn-bg:#3a2412; --warn-border:#d98a3f; --warn-text:#f0c090;
+      --ph-bg:#152234; --ph-border:#4f83ab; --ph-text:#a9cbe4;
+      --ok-bg:#152a20; --ok-border:#4f9c7f;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; font-family:var(--font-sans); color:var(--charcoal); background:var(--ivory);
+    line-height:1.6; font-size:16px;
+  }
+  a{color:var(--ph-border);}
+  a:visited{color:var(--ph-border);}
+  .layout{display:flex; max-width:1400px; margin:0 auto;}
+  nav.sidebar{
+    width:280px; flex:0 0 280px; padding:24px 16px; position:sticky; top:0;
+    align-self:flex-start; max-height:100vh; overflow-y:auto; border-right:1px solid var(--line);
+  }
+  nav.sidebar h2{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate); margin:0 0 8px;}
+  nav.sidebar ol{list-style:none; margin:0; padding:0;}
+  nav.sidebar li{margin:2px 0;}
+  nav.sidebar a{display:block; padding:4px 8px; border-radius:4px; text-decoration:none; font-size:14px; color:var(--charcoal);}
+  nav.sidebar a:hover{background:var(--parchment);}
+  nav.sidebar .part-link{font-weight:700; margin-top:10px;}
+  main{flex:1 1 auto; min-width:0; padding:24px 40px 80px;}
+  .cover{
+    text-align:center; padding:60px 20px 40px; border-bottom:2px solid var(--gold); margin-bottom:32px;
+  }
+  .cover .kicker{text-transform:uppercase; letter-spacing:.12em; color:var(--slate); font-size:13px; margin-bottom:12px;}
+  .cover h1{font-family:var(--font-serif); font-size:2.1rem; margin:0 0 8px; color:var(--navy);}
+  .cover .subtitle{font-size:1.1rem; color:var(--slate); margin-bottom:20px;}
+  .cover .meta{font-size:14px; color:var(--slate);}
+  .cover .conf-note{
+    max-width:640px; margin:24px auto 0; font-size:13px; color:var(--slate); border:1px solid var(--line);
+    border-radius:6px; padding:12px 16px; background:var(--parchment);
+  }
+  h1,h2,h3,h4{font-family:var(--font-serif); color:var(--navy); scroll-margin-top:16px;}
+  h2{border-bottom:1px solid var(--line); padding-bottom:6px; margin-top:48px;}
+  h3{margin-top:28px;}
+  h4{margin-top:18px; font-family:var(--font-sans); font-size:1.02rem; text-transform:uppercase; letter-spacing:.03em; color:var(--slate);}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14px;}
+  caption{text-align:left; font-weight:600; margin-bottom:6px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--parchment); font-weight:600;}
+  .ph{
+    display:inline-block; background:var(--ph-bg); color:var(--ph-text); border:1px solid var(--ph-border);
+    border-radius:3px; padding:0 5px; font-family:var(--font-mono); font-size:.92em; white-space:nowrap;
+  }
+  .resolve{
+    display:inline-block; background:var(--warn-bg); color:var(--warn-text); border:1px solid var(--warn-border);
+    border-radius:3px; padding:0 6px; font-family:var(--font-mono); font-size:.92em; font-weight:700;
+  }
+  .box{border:1px solid var(--line); border-radius:8px; padding:16px 20px; margin:16px 0; background:var(--parchment);}
+  .box.warn{background:var(--warn-bg); border-color:var(--warn-border); color:var(--warn-text);}
+  .box.ok{background:var(--ok-bg); border-color:var(--ok-border);}
+  .box.example{background:var(--ph-bg); border-color:var(--ph-border);}
+  .open-items{margin:24px 0 40px;}
+  .open-items summary{
+    cursor:pointer; font-weight:700; font-size:1.05rem; padding:12px 16px; background:var(--warn-bg);
+    border:1px solid var(--warn-border); border-radius:8px; color:var(--warn-text);
+  }
+  .open-items[open] summary{border-radius:8px 8px 0 0;}
+  .open-items ul{border:1px solid var(--warn-border); border-top:none; border-radius:0 0 8px 8px; margin:0; padding:14px 14px 14px 34px; background:var(--warn-bg);}
+  .part{counter-increment:partcounter; counter-reset:clausecounter;}
+  body{counter-reset:partcounter;}
+  .part > h2::before{content:"Part " counter(partcounter,upper-alpha) " — ";}
+  .clause{counter-increment:clausecounter; padding-top:4px; scroll-margin-top:16px;}
+  .clause > h3::before{content:counter(partcounter,upper-alpha) "." counter(clausecounter) "  ";}
+  .schedule-note{font-size:14px; color:var(--slate); font-style:italic; border-left:3px solid var(--gold); padding-left:12px; margin:12px 0;}
+  .toc-back{font-size:13px;}
+  .badge{
+    display:inline-block; font-size:11px; text-transform:uppercase; letter-spacing:.04em; font-weight:700;
+    padding:2px 7px; border-radius:10px; margin-left:6px;
+  }
+  .badge.counsel{background:var(--warn-bg); color:var(--warn-text); border:1px solid var(--warn-border);}
+  footer.doc-footer{border-top:1px solid var(--line); margin-top:60px; padding:20px 0; font-size:13px; color:var(--slate); text-align:center;}
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    nav.sidebar{position:relative; width:auto; max-height:none; border-right:none; border-bottom:1px solid var(--line);}
+    main{padding:20px;}
+  }
+  @media print{
+    nav.sidebar{display:none;}
+    .layout{display:block; max-width:none;}
+    main{padding:0;}
+    body{background:#fff; color:#000; font-size:11pt;}
+    a{color:#000; text-decoration:none;}
+    .cover{page-break-after:always; border-bottom:none;}
+    .part{page-break-before:always;}
+    h2,h3{page-break-after:avoid;}
+    table{page-break-inside:avoid;}
+    thead{display:table-header-group;}
+    tr{page-break-inside:avoid;}
+    .clause{page-break-inside:avoid;}
+    .open-items{page-break-inside:avoid;}
+    .open-items ul{display:block;}
+    @page{
+      size:A4; margin:18mm;
+      @bottom-center{
+        content: "SGC Tech AI — MSA & SLA · Subscription Recovery Model · v2026.08 · Page " counter(page);
+        font-size:9pt; color:#555;
+      }
+    }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="sidebar" aria-label="Document navigation">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#how-to-use">How to Use This Document</a></li>
+    <li><a href="#open-items">Open Items</a></li>
+    <li class="part-link"><a href="#part-a">Part A — MSA</a></li>
+    <li class="part-link"><a href="#part-b">Part B — SLA Schedule</a></li>
+    <li class="part-link"><a href="#part-c">Part C — Fees Schedule</a></li>
+    <li class="part-link"><a href="#part-d">Part D — IP Schedule</a></li>
+    <li class="part-link"><a href="#part-e">Part E — Exit &amp; Transition</a></li>
+    <li class="part-link"><a href="#part-f">Part F — AI Schedule</a></li>
+    <li class="part-link"><a href="#appendix-1">Appendix 1 — Consistency Map</a></li>
+    <li class="part-link"><a href="#appendix-2">Appendix 2 — Counsel Review Register</a></li>
+    <li class="part-link"><a href="#appendix-3">Appendix 3 — Execution Block</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section class="cover">
+  <div class="kicker">Confidential — Commercial Template</div>
+  <h1>Master Service Agreement &amp; Service Level Agreement</h1>
+  <div class="subtitle">Subscription Recovery Model — UAE Real Estate Track</div>
+  <div class="meta">
+    Document version <strong>v2026.08</strong> · Model: <strong>Subscription Recovery</strong><br>
+    Client: <span class="ph">{{CLIENT_LEGAL_NAME}}</span> · Order Form ref: <span class="ph">{{ORDER_FORM_REF}}</span><br>
+    Effective Date: <span class="ph">{{EFFECTIVE_DATE}}</span> · Kickoff Date: <span class="ph">{{KICKOFF_DATE}}</span>
+  </div>
+  <div class="conf-note">
+    This document is a commercial contract template generated by SGC Tech AI's
+    proposal engine. It is <strong>not legal advice</strong> and must be
+    reviewed by UAE-qualified counsel before use with a real client — see
+    Appendix 2, Counsel Review Register. It must not be issued while any
+    field marked <span class="resolve">RESOLVE:</span> remains open — see
+    Open Items below.
+  </div>
+</section>
+
+<section id="how-to-use">
+  <h2 style="border-bottom:none; margin-top:0;">Precedence &amp; How to Use This Document</h2>
+  <p>
+    This Agreement is issued together with an Order Form. In the event of
+    conflict, documents rank in this order: (1) the signed Order Form for the
+    specific engagement, (2) this Agreement (Parts A–F and Appendices), (3)
+    any prior written agreement between the parties, which this Agreement
+    supersedes for the engagement described in the Order Form.
+  </p>
+  <p>
+    <strong>Placeholders.</strong> Two visually distinct classes are used
+    throughout. A field styled like <span class="ph">{{THIS}}</span> is a
+    deal-specific merge field populated from the Order Form at issuance. A
+    field styled like <span class="resolve">RESOLVE: this</span> is an
+    internal blocker — a fact SGC Tech AI has not yet confirmed internally.
+    <strong>No document containing a <span class="resolve">RESOLVE:</span>
+    field may be issued to a client.</strong>
+  </p>
+  <p>
+    <strong>Structure.</strong> Part A is the Master Service Agreement
+    (governing terms). Parts B–F are Schedules incorporated by reference:
+    the Service Level Agreement, the Fees Schedule, the Intellectual
+    Property Schedule, the Exit &amp; Transition Schedule, and the AI
+    Schedule. Clauses are numbered automatically by Part and sequence
+    (e.g. <a href="#A7">§A.7</a>) so that inserting or removing a clause in
+    drafting renumbers everything after it without manual renumbering.
+    Every clause has a stable anchor for cross-reference and citation.
+  </p>
+  <p>
+    <strong>The test every clause in this document must survive:</strong>
+    if the Client stops paying in month 6, what does SGC Tech AI actually
+    recover, and is the mechanism enforceable in the UAE for a deal of this
+    size? Part A §<a href="#A16">A.16</a> and §<a href="#A17">A.17</a> are
+    the clauses that answer this directly.
+  </p>
+</section>
+
+<details class="open-items" id="open-items">
+  <summary>Open Items — <span class="resolve" style="background:transparent;border:none;">RESOLVE</span> fields that must be closed before this document may be issued (9)</summary>
+  <ul>
+    <li>SGC Tech AI's licence authority (free zone or mainland authority name) — see <a href="#A1">§A.1</a> and Appendix 3.</li>
+    <li>SGC Tech AI's registered address — see Appendix 3.</li>
+    <li>SGC Tech AI's authorised signatory name, title, email and phone — see Appendix 3.</li>
+    <li>The small-claims / Dubai Courts monetary threshold below which the tiered dispute clause routes to court rather than arbitration — see <a href="#A24">§A.24</a>.</li>
+    <li>Backup retention period stated in Part B §<a href="#B7">B.7</a>.</li>
+    <li>Data residency location(s) referenced in Part A §<a href="#A5">A.5</a> and the Order Form.</li>
+    <li>Annual cap, in hours, on unfunded regulatory/compliance update work — see Part B §<a href="#B9">B.9</a>.</li>
+    <li>Professional indemnity / cyber insurance policy limits and insurer name — see <a href="#A20">§A.20</a>.</li>
+    <li>The small-claims threshold and the insurance limits above both require a Founder-level commercial decision before Appendix 2's counsel review can be considered complete.</li>
+  </ul>
+</details>
+
+<!-- ============================================================ -->
+<!-- PART A — MASTER SERVICE AGREEMENT                             -->
+<!-- ============================================================ -->
+<section class="part" id="part-a">
+<h2>Master Service Agreement</h2>
+
+<div class="clause" id="A1"><h3></h3>
+<p><strong>Parties and Recitals.</strong> This Agreement is entered into
+between <strong>Scholarix Global Consultants FZE</strong>, trading as
+<strong>SGC Tech AI</strong>, a company licensed by
+<span class="resolve">RESOLVE: SGC licence authority</span> ("<strong>SGC
+Tech AI</strong>" or "<strong>SGC</strong>"), and
+<span class="ph">{{CLIENT_LEGAL_NAME}}</span>, licence number
+<span class="ph">{{CLIENT_LICENCE_NO}}</span>, of
+<span class="ph">{{CLIENT_ADDRESS}}</span> ("<strong>Client</strong>",
+together with SGC Tech AI, the "<strong>Parties</strong>"). SGC Tech AI
+provides Odoo-based business system implementation and subscription
+services under a Subscription Recovery commercial model described in
+Part C. The Parties enter this Agreement to govern the engagement
+described in the Order Form referenced on the cover page.</p>
+</div>
+
+<div class="clause" id="A2-tax"><h3>Value Added Tax
+<span class="badge counsel">Verbatim clause</span></h3>
+<p>All fees are quoted in AED and are exclusive of any applicable taxes.
+SGC Tech AI is not currently registered for UAE Value Added Tax, and no
+VAT is charged under this Agreement. Should SGC Tech AI become
+registered for UAE VAT during the Term, VAT at the prevailing rate will
+be added to invoices issued on or after the effective date of
+registration, in accordance with UAE law, and the Client shall pay such
+VAT in addition to the fees stated.</p>
+</div>
+
+<div class="clause" id="A2"><h3>Definitions</h3>
+<table>
+<thead><tr><th style="width:28%;">Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Business Hours</strong></td><td>Sunday to Thursday, 09:00–18:00 Gulf Standard Time, excluding UAE public holidays.</td></tr>
+<tr><td><strong>Kickoff</strong></td><td>The date on which SGC Tech AI begins delivery work following receipt of the Mobilisation Fee, stated on the Order Form as <span class="ph">{{KICKOFF_DATE}}</span>. The Initial Term and all invoicing under this Agreement run from Kickoff, not Go-Live — see §<a href="#A6">A.6</a>.</td></tr>
+<tr><td><strong>Go-Live</strong></td><td>The date on which the Client's system becomes the Client's system of record for the scope described in the Order Form.</td></tr>
+<tr><td><strong>Implementation Value</strong></td><td>The full value of build work for the engagement, disclosed to the Client in the Order Form but not separately invoiced as a line item — it is recovered through the Subscription Fee per Part C.</td></tr>
+<tr><td><strong>Mobilisation Fee</strong></td><td>The non-refundable payment due at Kickoff, of not less than 33% of Implementation Value, and never less than any third-party cost SGC Tech AI pre-pays on the Client's behalf.</td></tr>
+<tr><td><strong>Recovery Component</strong></td><td>The portion of the Subscription Fee that amortises the unpaid balance of Implementation Value, plus the disclosed financing uplift, across the Initial Term.</td></tr>
+<tr><td><strong>Recovery Balance</strong></td><td>The unamortised Recovery Component outstanding at any point in time — a debt owed to SGC Tech AI for value already delivered, not a penalty. See §<a href="#A16">A.16</a>.</td></tr>
+<tr><td><strong>Platform Component</strong></td><td>The genuine recurring service fee funding hosting, backup, monitoring, patching, support and account management under Part B.</td></tr>
+<tr><td><strong>Subscription Fee</strong></td><td>Platform Component plus Recovery Component, billed per the cadence stated in the Order Form.</td></tr>
+<tr><td><strong>Order Form</strong></td><td>The signed deal-specific document stating the Service Tier, Edition, Initial Term, fees, and other variables referenced throughout this Agreement.</td></tr>
+<tr><td><strong>Edition</strong></td><td>The Odoo software edition deployed for the Client — Community or Enterprise — as stated on the Order Form. See §<a href="#A9">A.9</a>.</td></tr>
+<tr><td><strong>Client Data</strong></td><td>All data the Client or its users input into, or that is generated for the Client by, the deployed system.</td></tr>
+<tr><td><strong>Configuration</strong></td><td>The specific setup, workflows, customizations and integrations built for the Client, as distinct from the underlying Odoo software and from SGC Tech AI's reusable modules — see Part D.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="clause" id="A3"><h3>Scope of Services</h3>
+<p>SGC Tech AI shall provide the implementation, configuration, hosting
+and support services described in the Order Form. Scope is limited to
+what is expressly stated there; work outside that scope is a change
+request, quoted separately.</p>
+</div>
+
+<div class="clause" id="A4"><h3>Client Dependencies</h3>
+<p>The Client shall provide timely access to data, decision-makers, and
+any third-party systems or credentials required for delivery, and shall
+nominate a data-entry owner per §<a href="#A11">A.11</a>. Delay caused by
+the Client's failure to meet a dependency extends the relevant timeline
+and suspends any service credit obligation under Part B for the
+corresponding period.</p>
+</div>
+
+<div class="clause" id="A5"><h3>Hosting</h3>
+<p>The Client's system is hosted on reputable cloud infrastructure
+selected by SGC Tech AI, with data residency as stated in the Order Form
+(currently <span class="resolve">RESOLVE: data residency location</span>).
+No specific infrastructure provider or dedicated regional database
+configuration is warranted under this Agreement; where a Client requires
+a named provider or a specific residency guarantee, this is a
+Order-Form-level election that raises the Platform Component to reflect
+the added constraint.</p>
+</div>
+
+<div class="clause" id="A6"><h3>Term Commencement</h3>
+<p>The Initial Term commences at <strong>Kickoff</strong>, not Go-Live.
+The Initial Term stated in the Order Form shall never be shorter than the
+period required to fully amortise the Recovery Component (the "Recovery
+Period") — if a shorter term is requested, the Mobilisation Fee or
+financing uplift is increased so that the Recovery Period does not exceed
+the requested term, per Part C.</p>
+</div>
+
+<div class="clause" id="A7"><h3>Renewal</h3>
+<p>Following the Initial Term, this Agreement renews automatically for
+successive terms of equal length unless either Party gives 30 days'
+written notice of non-renewal before the then-current term ends, subject
+to §<a href="#A17">A.17</a> (Post-Recovery Continuation).</p>
+</div>
+
+<div class="clause" id="A8"><h3>Fees and Payment</h3>
+<p>Fees are as stated in the Order Form and Part C. The Subscription Fee
+is billed <span class="ph">{{BILLING_CADENCE}}</span> in advance, with
+quarterly in advance the standard minimum cadence under current SGC Tech
+AI policy. Invoices are payable within 14 days of issue. Late payment
+accrues interest per §<a href="#C7">C.7</a>.</p>
+</div>
+
+<div class="clause" id="A9"><h3>Edition and Upgrades</h3>
+<p>The Odoo edition deployed for the Client is
+<span class="ph">{{ODOO_EDITION}}</span>, as stated on the Order Form.
+Where the Edition is <strong>Community</strong>: the deployment is
+<strong>version-pinned</strong>; major version upgrades are out of scope
+and separately quoted unless an Upgrade Policy is elected on the Order
+Form (<span class="ph">{{UPGRADE_POLICY}}</span>). Community deployments
+do not include Odoo's official mobile application — access is via a
+mobile-optimised web browser — and do not include Studio (no-code
+customization) or Odoo's own vendor upgrade service; SGC Tech AI provides
+implementation and support directly instead. Where the Edition is
+<strong>Enterprise</strong>, per-user licence fees apply and are stated
+separately in the Order Form, and Mobilisation covers the first year's
+licence prepayment in full per §<a href="#C2">C.2</a>.</p>
+</div>
+
+<div class="clause" id="A10"><h3>Suspension for Non-Payment</h3>
+<p>SGC Tech AI may suspend service access, with 14 days' written notice,
+where any invoice remains unpaid past its due date. Suspension applies to
+service access only; Client Data remains exportable per §<a href="#E1">E.1</a>
+at all times, including during suspension. Service is reinstated promptly
+upon payment of the outstanding balance.</p>
+</div>
+
+<div class="clause" id="A11"><h3>Adoption</h3>
+<p>The Client shall nominate a named data-entry owner responsible for
+day-to-day system use. SGC Tech AI reviews agreed activity thresholds at
+day 30 following Go-Live. Where those thresholds are not met by day 60,
+SGC Tech AI provides one remediation and retraining session at no
+additional charge.</p>
+</div>
+
+<div class="clause" id="A12"><h3>Term and Termination</h3>
+<p>Either Party may terminate this Agreement for the other Party's
+uncured material breach on 30 days' written notice, or immediately upon
+the other Party's insolvency. The Client may terminate for convenience at
+any time, subject to §<a href="#A16">A.16</a>.</p>
+</div>
+
+<div class="clause" id="A13"><h3>Price Lock</h3>
+<p>The Subscription Fee is fixed for the Initial Term and will not
+increase during that period, except for a Client-requested change of
+scope, quoted separately, or the annual adjustment described in
+§<a href="#C8">C.8</a> which applies only after the Initial Term.</p>
+</div>
+
+<div class="clause" id="A14"><h3>Post-Recovery Continuation</h3>
+<p id="A17">Once the Recovery Component is fully amortised by the end of
+the Initial Term, the Subscription Fee continues month-to-month at the
+Platform Component rate alone, with 30 days' written notice of any
+subsequent adjustment. The Subscription Fee does not automatically drop
+to zero, and no reduction beyond removal of the Recovery Component is
+implied by this clause.</p>
+</div>
+
+<div class="clause" id="A15"><h3>Substitution of Personnel</h3>
+<p>SGC Tech AI assigns qualified personnel to this engagement and
+reserves the right to substitute personnel, including subcontracted
+specialists, at its discretion, provided the substitution does not
+materially reduce delivery quality. No individual consultant is
+guaranteed as an irreplaceable, sole point of contact under this
+Agreement.</p>
+</div>
+
+<div class="clause" id="A16"><h3>Consequences of Termination — Recovery Balance
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>Where this Agreement is terminated before the end of the Initial Term
+for any reason other than SGC Tech AI's uncured material breach, the
+Recovery Balance becomes immediately due and payable as a debt. This
+reflects value already delivered to, and financed on behalf of, the
+Client — build work performed and paid for on the Client's behalf ahead
+of full settlement — and is drafted as a debt-recovery mechanism, not as
+a penalty for termination.</p>
+<div class="box example">
+<strong>Worked example.</strong> Implementation Value <span class="ph">{{IMPLEMENTATION_VALUE}}</span>
+(illustrative: AED 14,800); Mobilisation Fee <span class="ph">{{MOBILISATION_FEE}}</span>
+(illustrative: AED 4,900); financed remainder AED 9,900 at 18% uplift,
+amortised over a 24-month Initial Term at approximately AED 487/month
+Recovery Component. If the Client terminates at the end of month 6, the
+Recovery Balance outstanding is approximately <strong>AED 8,760</strong>
+(18 of 24 months' Recovery Component remaining), due immediately under
+this clause.</div>
+</div>
+
+<div class="clause" id="A17b"><h3>Consequences of Termination — Platform Termination Fee
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>In addition to the Recovery Balance under §<a href="#A16">A.16</a>,
+where the Client terminates before the end of the Initial Term for any
+reason other than SGC Tech AI's uncured material breach, the Client
+shall pay a Platform Termination Fee equal to 50% of the remaining
+<strong>Platform Component</strong> for the balance of the Initial Term.
+This fee applies to the Platform Component only — never to the Recovery
+Balance, which is already addressed in full under §<a href="#A16">A.16</a>
+and must not be charged twice.</p>
+</div>
+
+<div class="clause" id="A18"><h3>Liability Cap
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>Except as set out in §<a href="#A19">A.19</a>, SGC Tech AI's aggregate
+liability under this Agreement is capped at the total fees paid by the
+Client in the 12 months preceding the claim. Neither Party is liable to
+the other for indirect, incidental, or consequential damages, including
+loss of profit, loss of revenue, or business interruption.</p>
+</div>
+
+<div class="clause" id="A19"><h3>Confidentiality and Indemnities
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>Each Party shall keep the other's Confidential Information
+confidential and use it only for purposes of this Agreement, for an
+indefinite period in respect of trade secrets and for five years in
+respect of other Confidential Information. Breach of this clause by
+either Party is subject to a separate, finite super-cap of
+<span class="resolve">RESOLVE: confidentiality super-cap amount, to be
+set by Founder + counsel</span>, rather than being excluded from the
+liability cap in §<a href="#A18">A.18</a> entirely — this carve-out
+applies mutually to both Parties, not to SGC Tech AI alone.</p>
+</div>
+
+<div class="clause" id="A20"><h3>Insurance Warranty</h3>
+<p>SGC Tech AI warrants that it maintains professional indemnity and
+cyber liability insurance with limits of not less than
+<span class="resolve">RESOLVE: PI / cyber insurance limits and insurer
+name</span>, and will provide evidence of cover on reasonable request.</p>
+</div>
+
+<div class="clause" id="A21"><h3>Force Majeure</h3>
+<p>Neither Party is liable for delay or failure to perform caused by
+circumstances beyond its reasonable control, including third-party
+system outages, changes to third-party portal or regulatory system
+requirements, or events of force majeure. Affected milestones and any
+associated service credits under Part B are extended or suspended
+accordingly for the duration of the event.</p>
+</div>
+
+<div class="clause" id="A22"><h3>Assignment</h3>
+<p>Neither Party may assign this Agreement without the other's prior
+written consent, except that SGC Tech AI may assign this Agreement in
+connection with a merger, acquisition, or sale of substantially all its
+assets, on written notice to the Client.</p>
+</div>
+
+<div class="clause" id="A23"><h3>Non-Solicitation
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>During the Term and for 12 months thereafter, neither Party shall
+directly solicit for employment the personnel of the other Party who
+were materially involved in this engagement, without that Party's prior
+written consent.</p>
+</div>
+
+<div class="clause" id="A24"><h3>Governing Law and Dispute Resolution
+<span class="badge counsel">Counsel review — Appendix 2</span></h3>
+<p>This Agreement is governed by the laws of the United Arab Emirates.
+Disputes are resolved in tiers, proportionate to claim value: (1) the
+Parties shall first attempt good-faith resolution through escalation
+between named senior representatives for 14 days; (2) claims below
+<span class="resolve">RESOLVE: small-claims / Dubai Courts monetary
+threshold</span> are then referred to the Dubai Courts; (3) claims at or
+above that threshold, and any dispute concerning Part D (Intellectual
+Property) or confidentiality under §<a href="#A19">A.19</a> regardless of
+value, are referred to arbitration under the DIAC Rules, seated in Dubai,
+before a single arbitrator, in English. This tiered structure exists
+because DIAC arbitration costs can exceed the value of a typical
+engagement under this commercial model, and a claim below the threshold
+should not be priced out of a remedy.</p>
+</div>
+
+<div class="clause" id="A25"><h3>Publicity</h3>
+<p>Neither Party shall use the other's name, logo, or reference the
+engagement in marketing materials without prior written consent, except
+that SGC Tech AI may cite the engagement in anonymised or aggregate form
+in case studies once concluded.</p>
+</div>
+
+<div class="clause" id="A26"><h3>Counterparts and Electronic Signature</h3>
+<p>This Agreement may be executed in counterparts, including by
+electronic signature, each of which is deemed an original and all of
+which together constitute one instrument.</p>
+</div>
+
+<div class="clause" id="A27"><h3>Survival</h3>
+<p>Clauses which by their nature are intended to survive termination —
+including §<a href="#A16">A.16</a>, §<a href="#A17b">A.17</a>,
+§<a href="#A18">A.18</a>, §<a href="#A19">A.19</a>, §<a href="#A23">A.23</a>,
+§<a href="#A24">A.24</a>, Part D, and Part E §<a href="#E1">E.1</a> — survive
+termination or expiry of this Agreement.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PART B — SLA SCHEDULE                                         -->
+<!-- ============================================================ -->
+<section class="part" id="part-b">
+<h2>Service Level Agreement Schedule</h2>
+<p class="schedule-note">This Schedule is funded entirely by the Platform
+Component of the Subscription Fee — see §<a href="#A2">A.2</a>. Service
+credits under this Schedule apply against the Platform Component only,
+never against the Recovery Component, which is not a service fee and
+carries no service-level commitment.</p>
+
+<div class="clause" id="B1"><h3>Uptime Commitment</h3>
+<table>
+<thead><tr><th>Service Tier</th><th>Monthly Uptime Target</th></tr></thead>
+<tbody>
+<tr><td>Starter</td><td>99.5%</td></tr>
+<tr><td>Growth</td><td>99.5%</td></tr>
+<tr><td>Professional</td><td>99.7%</td></tr>
+</tbody>
+</table>
+<p>Uptime is measured monthly, excluding scheduled maintenance windows
+(notified at least 48 hours in advance) and any exclusion listed in
+§<a href="#B10">B.10</a>.</p>
+</div>
+
+<div class="clause" id="B2"><h3>Service Credits</h3>
+<table>
+<thead><tr><th>Shortfall Below Target</th><th>Credit</th></tr></thead>
+<tbody>
+<tr><td>Up to 1 percentage point</td><td>10% of that month's Platform Component</td></tr>
+<tr><td>1–3 percentage points</td><td>25% of that month's Platform Component</td></tr>
+<tr><td>More than 3 percentage points</td><td>50% of that month's Platform Component</td></tr>
+</tbody>
+</table>
+<p>Credits are cumulative across the categories in §<a href="#B10">B.10</a>
+(go-live timeliness, adoption, uptime, and any other Platform-Component
+guarantee), capped in aggregate at 10% of the annual Platform Component
+per Contract Year. Credits are applied to a future invoice; they are
+never a cash refund.</p>
+</div>
+
+<div class="clause" id="B3"><h3>Priority Definitions and Response Targets</h3>
+<table>
+<thead><tr><th>Priority</th><th>Definition</th><th>Response Target</th><th>Resolution Target</th></tr></thead>
+<tbody>
+<tr><td>P1 — Critical</td><td>System unavailable or a core business process fully blocked for all users</td><td>2 Business Hours</td><td>8 Business Hours</td></tr>
+<tr><td>P2 — High</td><td>Major function impaired, workaround difficult</td><td>4 Business Hours</td><td>2 Business Days</td></tr>
+<tr><td>P3 — Medium</td><td>Minor function impaired, workaround available</td><td>1 Business Day</td><td>5 Business Days</td></tr>
+<tr><td>P4 — Low</td><td>Cosmetic or non-urgent request</td><td>2 Business Days</td><td>Best effort</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="clause" id="B4"><h3>After-Hours Priority 1 Support</h3>
+<p>The response and resolution targets in §<a href="#B3">B.3</a> apply
+during Business Hours. After-hours P1 coverage is a <strong>paid
+add-on</strong> — see §<a href="#C11">C.11</a> — and is not included by
+default in any Service Tier.</p>
+</div>
+
+<div class="clause" id="B5"><h3>Included Services</h3>
+<p>The Platform Component funds: managed hosting; daily backup (retention
+per §<a href="#B7">B.7</a>); security patching within the pinned
+software version; infrastructure monitoring; a quarterly business review;
+and 30 days of hyper-care support from Go-Live.</p>
+</div>
+
+<div class="clause" id="B6"><h3>Business Review Cadence</h3>
+<p>Where the Subscription Fee is below the review-cadence threshold set
+in SGC Tech AI's internal pricing policy, business reviews are conducted
+quarterly rather than monthly; this is reflected in the Platform
+Component and is not a reduced level of service — it reflects the actual
+cost of senior time relative to the fee at that scale.</p>
+</div>
+
+<div class="clause" id="B7"><h3>Backup Retention</h3>
+<p>Daily backups are retained for
+<span class="resolve">RESOLVE: backup retention period</span>.</p>
+</div>
+
+<div class="clause" id="B8"><h3>Data Residency</h3>
+<p>Data residency for hosted infrastructure is as stated in the Order
+Form and §<a href="#A5">A.5</a>.</p>
+</div>
+
+<div class="clause" id="B9"><h3>Regulatory and Compliance Updates</h3>
+<p>Configuration updates required by changes to existing regulatory
+regimes (e.g. VAT rate changes) are included up to
+<span class="resolve">RESOLVE: annual cap, in hours, on unfunded
+regulatory update work</span> hours per Contract Year; work beyond that
+cap, and any work required by an entirely new regulatory regime, is
+out of scope and quoted separately.</p>
+</div>
+
+<div class="clause" id="B10"><h3>Exclusions</h3>
+<p>The following are excluded from the service-level commitments in this
+Schedule: scheduled maintenance; force majeure events under
+§<a href="#A21">A.21</a>; issues caused by the Client (including data
+supplied by the Client, misuse, or unauthorized modification); outages of
+third-party platforms the system depends on (Odoo's own infrastructure
+where applicable, property portals, payment gateways, or the Client's own
+internet service provider); and any period during which an invoice is
+overdue.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PART C — FEES SCHEDULE                                        -->
+<!-- ============================================================ -->
+<section class="part" id="part-c">
+<h2>Fees Schedule</h2>
+
+<div class="clause" id="C1"><h3>Implementation Value Disclosure</h3>
+<p>Implementation Value for this engagement is
+<span class="ph">{{IMPLEMENTATION_VALUE}}</span>, disclosed to the
+Client in full on the Order Form. It is not invoiced as a separate line
+item; it is recovered through the Subscription Fee per §<a href="#C3">C.3</a>.</p>
+<div class="box example">
+<strong>Illustrative figures</strong> (the Order Form governs actual
+figures for this engagement — do not treat this table as a quote):
+<table>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Implementation Value</td><td>AED 14,800</td></tr>
+<tr><td>Mobilisation Fee (33%)</td><td>AED 4,900</td></tr>
+<tr><td>Financed remainder</td><td>AED 9,900</td></tr>
+<tr><td>Financing uplift</td><td>18% (current policy rate)</td></tr>
+<tr><td>Recovery Component</td><td>AED 487 / month</td></tr>
+<tr><td>Platform Component</td><td>AED 1,163 / month</td></tr>
+<tr><td>Subscription Fee</td><td>AED 1,650 / month</td></tr>
+<tr><td>Billed</td><td>AED 4,950 quarterly in advance</td></tr>
+<tr><td>Initial Term</td><td>24 months from Kickoff</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="clause" id="C2"><h3>Mobilisation Fee</h3>
+<p>The Mobilisation Fee is due at Kickoff, is non-refundable, and is not
+less than 33% of Implementation Value. Where the Edition is Enterprise,
+the Mobilisation Fee is never less than the amount required to cover the
+first year's Enterprise licence fee in full, in addition to the 33% floor
+above.</p>
+</div>
+
+<div class="clause" id="C3"><h3>Recovery Amortisation</h3>
+<p>The financed remainder of Implementation Value (Implementation Value
+less the Mobilisation Fee), plus the financing uplift stated on the Order
+Form, is amortised in equal monthly instalments across the Initial Term
+to produce the Recovery Component. The financing uplift reflects the cost
+of capital and delivery risk associated with deferring settlement of
+Implementation Value; settling Implementation Value in full at Kickoff
+removes the uplift and the Recovery Component entirely.</p>
+</div>
+
+<div class="clause" id="C4"><h3>Platform Component</h3>
+<p>The Platform Component funds Part B in full and is set to clear SGC
+Tech AI's cost to serve the Client with headroom, independent of whether
+Implementation Value has been fully recovered.</p>
+</div>
+
+<div class="clause" id="C5"><h3>Billing Cadence</h3>
+<p>The Subscription Fee is billed <span class="ph">{{BILLING_CADENCE}}</span>
+in advance. Quarterly in advance is the standard minimum cadence under
+current policy; a shorter cadence, where offered, may carry additional
+security requirements stated on the Order Form.</p>
+</div>
+
+<div class="clause" id="C6"><h3>VAT
+<span class="badge counsel">Verbatim clause — see §6 of the drafting brief behind this document</span></h3>
+<p>All fees are quoted in AED and are exclusive of any applicable taxes.
+SGC Tech AI is not currently registered for UAE Value Added Tax, and no
+VAT is charged under this Agreement. Should SGC Tech AI become
+registered for UAE VAT during the Term, VAT at the prevailing rate will
+be added to invoices issued on or after the effective date of
+registration, in accordance with UAE law, and the Client shall pay such
+VAT in addition to the fees stated.</p>
+</div>
+
+<div class="clause" id="C7"><h3>Late Payment</h3>
+<p>Invoices unpaid past their due date accrue interest at 1.5% per month
+or the maximum rate permitted by UAE law, whichever is lower, without
+prejudice to SGC Tech AI's suspension rights under §<a href="#A10">A.10</a>.</p>
+</div>
+
+<div class="clause" id="C8"><h3>Annual Adjustment</h3>
+<p>Following the Initial Term, the Subscription Fee may be adjusted
+annually by no more than the lower of UAE CPI or 7%, on 60 days' written
+notice.</p>
+</div>
+
+<div class="clause" id="C9"><h3>Price Lock During Initial Term</h3>
+<p>See §<a href="#A13">A.13</a> — no adjustment applies during the
+Initial Term other than for Client-requested scope changes.</p>
+</div>
+
+<div class="clause" id="C10"><h3>User Tiers</h3>
+<p>Each Service Tier includes a stated number of users on the Order Form.
+Additional users beyond the included count are billed per
+§<a href="#C11">C.11</a>.</p>
+</div>
+
+<div class="clause" id="C11"><h3>Add-Ons</h3>
+<table>
+<thead><tr><th>Add-on</th><th>Price</th></tr></thead>
+<tbody>
+<tr><td>After-hours Priority 1 support</td><td>AED 1,500 / month</td></tr>
+<tr><td>Source-code escrow (Part D)</td><td>AED 6,000 / year</td></tr>
+<tr><td>Additional user</td><td>AED 250 / user / month</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="clause" id="C12"><h3>Out-of-Scope Rates</h3>
+<p>Work outside the scope stated on the Order Form is quoted as a change
+request at the following hourly rates, whichever role is applicable:
+Junior AED 350/hour; Senior AED 600/hour; Founder AED 850/hour. No other
+hourly rate is valid under this Agreement.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PART D — IP SCHEDULE                                          -->
+<!-- ============================================================ -->
+<section class="part" id="part-d">
+<h2>Intellectual Property Schedule</h2>
+
+<div class="clause" id="D1"><h3>Category A — Odoo Core</h3>
+<p>The underlying Odoo software is licensed under its own terms — LGPL-3
+for Community components, or the Odoo Enterprise licence where the
+Edition is Enterprise. SGC Tech AI grants no rights of its own in
+Category A; the Client's rights are those granted by the applicable Odoo
+licence directly.</p>
+</div>
+
+<div class="clause" id="D2"><h3>Category B — Client Configuration and Client Data</h3>
+<p>The Client owns Client Data unconditionally at all times. The
+Client's rights to Configuration are as stated in §<a href="#A2">A.2</a>
+and §<a href="#D3">D.3</a>; export rights are governed by Part E.</p>
+</div>
+
+<div class="clause" id="D3"><h3>Category C — SGC Reusable Modules</h3>
+<p>SGC Tech AI owns its reusable modules developed independent of any
+single engagement — including commission engine, tenancy, maintenance,
+reporting, AI orchestration, document extraction, and lead scoring
+modules ("<strong>Reusable Modules</strong>"). The Client receives a
+perpetual, non-exclusive, non-transferable, non-sublicensable licence to
+use the Reusable Modules solely as installed for the Client's own
+instance. This licence <strong>vests</strong> — becomes irrevocable —
+only upon full settlement of the Recovery Balance. Before full
+settlement, the licence is provisional and subject to §<a href="#A16">A.16</a>
+on termination.</p>
+</div>
+
+<div class="clause" id="D4"><h3>Category D — SGC Background IP</h3>
+<p>SGC Tech AI owns absolutely all background intellectual property,
+including prompts, orchestration logic, and methods used to deliver the
+engagement, whether or not embedded in the Client's Configuration.</p>
+</div>
+
+<div class="clause" id="D5"><h3>Liquidated Damages for Unauthorized Redistribution</h3>
+<p>Redistribution, resale, or sublicensing of Category C or Category D
+material without SGC Tech AI's prior written consent is subject to
+liquidated damages of 2× the annual Subscription Fee, reflecting the
+genuine pre-estimated loss such conduct causes to SGC Tech AI's
+reusable-module business, not a penalty.</p>
+</div>
+
+<div class="clause" id="D6"><h3>Audit Right</h3>
+<p>SGC Tech AI may audit the Client's use of Category C and D material on
+reasonable notice, no more than once per Contract Year absent a
+reasonable belief of breach.</p>
+</div>
+
+<div class="clause" id="D7"><h3>Source-Code Escrow</h3>
+<p>The Client may elect source-code escrow for Configuration at the
+price stated in §<a href="#C11">C.11</a>, under which SGC Tech AI
+deposits source code with a third-party escrow agent, released to the
+Client only on the triggers stated in the escrow agreement (e.g. SGC Tech
+AI's insolvency). Escrow is optional and not included by default.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PART E — EXIT & TRANSITION SCHEDULE                           -->
+<!-- ============================================================ -->
+<section class="part" id="part-e">
+<h2>Exit &amp; Transition Schedule</h2>
+
+<div class="clause" id="E1"><h3>Data Export — Unconditional</h3>
+<div class="box ok">
+Raw export of Client Data and Configuration in a standard
+machine-readable format is available to the Client <strong>at any time,
+unconditionally</strong>, including during a payment dispute, during
+suspension under §<a href="#A10">A.10</a>, and following termination for
+any reason. This right is never conditioned on payment.
+</div>
+</div>
+
+<div class="clause" id="E2"><h3>Assisted Migration — Conditional</h3>
+<p>Beyond the raw export in §<a href="#E1">E.1</a>, SGC Tech AI provides
+assisted migration support — 30 days of read-only access to the hosted
+system plus 8 hours of consulting time — conditional on the Client's
+account being fully settled, including any Recovery Balance due under
+§<a href="#A16">A.16</a>.</p>
+</div>
+
+<div class="clause" id="E3"><h3>What Is Not Included on Exit</h3>
+<p>Source code is not provided on exit except via an active escrow
+release under §<a href="#D7">D.7</a>. Continued access to SGC Tech
+AI-hosted microservices (including AI orchestration and reusable-module
+services under Part D) does not survive termination.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PART F — AI SCHEDULE                                          -->
+<!-- ============================================================ -->
+<section class="part" id="part-f">
+<h2>AI Schedule</h2>
+
+<div class="clause" id="F1"><h3>Nature of AI Outputs</h3>
+<p>Any AI-assisted feature of the delivered system (including lead
+scoring, document extraction, and AI orchestration) produces
+probabilistic, advisory outputs. SGC Tech AI gives no warranty of
+accuracy, completeness, or fitness for a particular decision.</p>
+</div>
+
+<div class="clause" id="F2"><h3>Required Human Review</h3>
+<p>The Client shall maintain human review of any business decision taken
+on the basis of AI-assisted output. Failure to maintain such review is a
+Client-caused issue for the purposes of §<a href="#B10">B.10</a> and
+§<a href="#A4">A.4</a>, not a defect in the delivered system.</p>
+</div>
+
+<div class="clause" id="F3"><h3>Model Updates</h3>
+<p>SGC Tech AI may update, retrain, or replace underlying AI models with
+reasonable notice to the Client, where such updates are reasonably
+expected to maintain or improve output quality.</p>
+</div>
+
+<div class="clause" id="F4"><h3>No Liability for AI-Assisted Decisions</h3>
+<p>Subject to §<a href="#A18">A.18</a>, SGC Tech AI is not liable for
+business decisions taken by the Client on the basis of AI-assisted
+output, whether or not human review under §<a href="#F2">F.2</a> was
+performed.</p>
+</div>
+
+<div class="clause" id="F5"><h3>Data Handling and Third-Party Model Processors</h3>
+<p>Where an AI feature processes Client Data through a third-party model
+provider, SGC Tech AI shall disclose the identity of that processor to
+the Client on request and shall use commercially reasonable efforts to
+ensure such processing is subject to appropriate data protection
+commitments.</p>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX 1 — CONSISTENCY MAP                                  -->
+<!-- ============================================================ -->
+<section id="appendix-1">
+<h2 style="border-bottom:1px solid var(--line);">Appendix 1 — Consistency Map</h2>
+<p><strong>Rule: the accompanying proposal may not be issued to the Client
+unless every row below reconciles between the proposal, this Agreement,
+and the Order Form.</strong> A mismatch in any row is a drafting defect,
+not a rounding difference to wave through.</p>
+<table>
+<thead><tr><th>Variable</th><th>Stated in Proposal</th><th>Stated in This Agreement</th><th>Order Form Field</th><th>Reconciled?</th></tr></thead>
+<tbody>
+<tr><td>Implementation Value</td><td>Commercial Terms section</td><td>§<a href="#C1">C.1</a></td><td><code>{{IMPLEMENTATION_VALUE}}</code></td><td>☐</td></tr>
+<tr><td>Mobilisation Fee</td><td>Commercial Terms section</td><td>§<a href="#A2">A.2</a>, §<a href="#C2">C.2</a></td><td><code>{{MOBILISATION_FEE}}</code></td><td>☐</td></tr>
+<tr><td>Recovery Component</td><td>Commercial Terms section</td><td>§<a href="#A2">A.2</a>, §<a href="#C3">C.3</a></td><td><code>{{RECOVERY_COMPONENT}}</code></td><td>☐</td></tr>
+<tr><td>Platform Component</td><td>Commercial Terms section</td><td>§<a href="#A2">A.2</a>, §<a href="#C4">C.4</a></td><td><code>{{PLATFORM_COMPONENT}}</code></td><td>☐</td></tr>
+<tr><td>Subscription Fee</td><td>Commercial Terms section</td><td>§<a href="#A2">A.2</a></td><td><code>{{SUBSCRIPTION_FEE}}</code></td><td>☐</td></tr>
+<tr><td>Billing Cadence</td><td>Commercial Terms section</td><td>§<a href="#A8">A.8</a>, §<a href="#C5">C.5</a></td><td><code>{{BILLING_CADENCE}}</code></td><td>☐</td></tr>
+<tr><td>Initial Term (months)</td><td>Commercial Terms section</td><td>§<a href="#A6">A.6</a></td><td><code>{{INITIAL_TERM_MONTHS}}</code></td><td>☐</td></tr>
+<tr><td>Odoo Edition</td><td>Solution section</td><td>§<a href="#A9">A.9</a></td><td><code>{{ODOO_EDITION}}</code></td><td>☐</td></tr>
+<tr><td>Service Tier</td><td>Solution section</td><td>Part B tables</td><td><code>{{SERVICE_TIER}}</code></td><td>☐</td></tr>
+<tr><td>Upgrade Policy (Community only)</td><td>Solution section</td><td>§<a href="#A9">A.9</a></td><td><code>{{UPGRADE_POLICY}}</code></td><td>☐</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX 2 — COUNSEL REVIEW REGISTER                          -->
+<!-- ============================================================ -->
+<section id="appendix-2">
+<h2 style="border-bottom:1px solid var(--line);">Appendix 2 — Counsel Review Register</h2>
+<p>Clauses below require UAE-qualified counsel sign-off before this
+document is used with a real client. This register is not itself a
+substitute for that review.</p>
+<table>
+<thead><tr><th>Clause</th><th>Risk</th><th>Question for Counsel</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>§<a href="#A16">A.16</a> Recovery Balance debt clause</td><td>May be recharacterised as a penalty if not drafted and evidenced as genuine debt recovery</td><td>Does the drafting and the worked example sufficiently evidence this as debt rather than penalty under UAE law?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#A17b">A.17</a> Platform Termination Fee</td><td>Combined with §A.16, could be read as double recovery if not clearly separated</td><td>Is the separation between the two limbs (debt vs. fee) clear and enforceable as drafted?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#A10">A.10</a> Suspension rights</td><td>Notice period and reinstatement terms vary in enforceability</td><td>Is 14 days' notice adequate and standard for this contract value?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>Security instruments / post-dated cheques (referenced by the pricing engine's risk model, not directly in this Agreement)</td><td>Enforceability and criminal-liability regime around dishonoured cheques varies</td><td>Should PDC-based security be referenced in this Agreement or kept purely in internal risk policy?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#A19">A.19</a> Confidentiality liability carve-out</td><td>An uncapped or one-sided carve-out risks disproportionate exposure</td><td>Is the mutual, finite super-cap approach adequate, and what should the cap amount be?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#D5">D.5</a> Liquidated damages for IP breach</td><td>Liquidated damages clauses can be struck down as penalties if disproportionate</td><td>Is 2× annual Subscription Fee defensible as a genuine pre-estimate of loss?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#A24">A.24</a> Tiered dispute resolution</td><td>Threshold-based routing between courts and arbitration must be clearly drafted to be enforceable</td><td>Is the tiered structure enforceable, and what threshold should apply?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#A23">A.23</a> Non-solicitation</td><td>Restrictive covenants have varying enforceability</td><td>Is a 12-month non-solicitation term enforceable in this context?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+<tr><td>§<a href="#E1">E.1</a> vs. lien rights</td><td>Unconditional data export could be read as inconsistent with any implied lien for unpaid fees</td><td>Does making export truly unconditional create any conflict with recovery rights elsewhere in the Agreement?</td><td><span class="resolve">RESOLVE: pending</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX 3 — EXECUTION BLOCK                                  -->
+<!-- ============================================================ -->
+<section id="appendix-3">
+<h2 style="border-bottom:1px solid var(--line);">Appendix 3 — Execution Block</h2>
+<p>By signing below, each Party agrees to be bound by this Agreement,
+including the Order Form referenced on the cover page.</p>
+<table>
+<thead><tr><th style="width:50%;">SGC Tech AI</th><th>Client</th></tr></thead>
+<tbody>
+<tr>
+<td>
+Legal name: Scholarix Global Consultants FZE, trading as SGC Tech AI<br>
+Licence authority: <span class="resolve">RESOLVE: SGC licence authority</span><br>
+Registered address: <span class="resolve">RESOLVE: SGC registered address</span><br>
+Signatory name: <span class="resolve">RESOLVE: SGC signatory name</span><br>
+Title: <span class="resolve">RESOLVE: SGC signatory title</span><br>
+Email: <span class="resolve">RESOLVE: SGC signatory email</span><br>
+Phone: <span class="resolve">RESOLVE: SGC signatory phone</span><br>
+Date: ______________<br>
+Signature: ______________
+</td>
+<td>
+Legal name: <span class="ph">{{CLIENT_LEGAL_NAME}}</span><br>
+Licence number: <span class="ph">{{CLIENT_LICENCE_NO}}</span><br>
+Address: <span class="ph">{{CLIENT_ADDRESS}}</span><br>
+Signatory name: <span class="ph">{{CLIENT_SIGNATORY}}</span><br>
+Title: ______________<br>
+Email: ______________<br>
+Phone: ______________<br>
+Date: ______________<br>
+Signature: ______________
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<footer class="doc-footer">
+  SGC Tech AI — Master Service Agreement &amp; Service Level Agreement · Subscription Recovery Model · v2026.08<br>
+  This document is a commercial template, not legal advice, and must be reviewed by UAE-qualified counsel before use with a real client — see Appendix 2.
+</footer>
+
+</main>
+</div>
+</body>
+</html>
