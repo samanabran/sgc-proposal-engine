@@ -1,0 +1,253 @@
+# Odoo Field Mapping — Signature Pipeline Write-Back
+
+Maps each signature pipeline event to Odoo CRM opportunity fields and ORM operations
+via the Odoo External API (JSON-RPC 2.0).
+
+## Authentication
+
+```
+Provider:  Zoho Sign
+Endpoint:  https://sign.zoho.com/api/v1/   (or https://sign.zoho.com/api/v1/ for Zoho Sign)
+Odoo URL:  https://<odoo-instance>/json/2/   # External JSON-2 API
+Odoo Auth: Bearer <api_key>                  # Odoo External API key
+Database:  <odoo-database-name>              # from Odoo URL path
+```
+
+Credentials are stored in environment variables:
+- `ODOO_URL` — full Odoo instance URL (e.g. `https://mycompany.odoo.com`)
+- `ODOO_DATABASE` — database name
+- `ODOO_API_KEY` — Odoo External API key (User → Preferences → API Keys)
+- `ZOHO_SIGN_API_KEY` — Zoho Sign API key
+- `ZOHO_SIGN_API_SECRET` — Zoho Sign API secret for HMAC verification
+- `ZOHO_SIGN_ACCOUNT_ID` — Zoho Sign account ID
+
+**Never commit credentials to this file or the repository.**
+
+## Odoo model: crm.lead (opportunity)
+
+The opportunity is identified by the SGC proposal reference stored in the Odoo
+opportunity's `name` field (e.g. "VGE-2026-SUB-01") or by a custom field
+`x_envelope_id` once the envelope has been created.
+
+### Custom fields (require Odoo module installation)
+
+The following custom fields must exist on `crm.lead`. If they do not exist,
+install the `sgc_crm_fields` module (to be created by an Odoo developer)
+before the pipeline goes live.
+
+| Field | Type | Description |
+|---|---|---|
+| `x_envelope_id` | Char | Zoho Sign envelope ID |
+| `x_signed_pdf_hash` | Char | SHA-256 of the signed PDF returned by Zoho Sign |
+| `x_frozen_pdf_hash` | Char | SHA-256 of the frozen sent PDF (for hash chain verification) |
+| `x_sent_date` | Datetime | Date/time envelope was sent |
+| `x_completed_date` | Datetime | Date/time both parties signed |
+| `x_signing_actor_client` | Char | Client signatory name |
+| `x_signing_actor_sgc` | Char | SGC authorised signatory name |
+| `x_decline_reason` | Text | Reason for decline if applicable |
+| `x_contract_term_months` | Integer | From Order Form: Initial subscription term in months |
+| `x_subscription_fee` | Float | From Order Form: Total monthly subscription fee (platform + recovery) |
+| `x_platform_fee` | Float | From Order Form: Platform component only |
+| `x_recovery_fee` | Float | From Order Form: Recovery component only |
+| `x_mobilisation_amount` | Float | From Order Form: Mobilisation amount |
+| `x_cadence` | Selection | quarterly_in_advance / monthly_in_advance / annual_in_advance |
+| `x_edition` | Selection | community / enterprise |
+| `x_upgrade_policy` | Text | From Order Form: Community upgrade policy text |
+| `x_kickoff_date` | Date | From Order Form: Kickoff date target |
+| `x_invoice_id` | Many2one (account.move) | Draft mobilisation invoice ID after completion |
+
+## Stage mapping
+
+| Event | Odoo stage | Stage name in default Odoo CRM |
+|---|---|---|
+| `sent` | Proposal Sent | "Proposal Sent" or equivalent pipeline stage |
+| `completed` | Won | "Won" |
+| `declined` | Lost | "Lost" |
+| `expired` | Proposal Sent | "Proposal Sent" — or a "Stalled" stage if defined |
+| `voided` | Proposal Sent | "Proposal Sent" — or a "Stalled" stage if defined |
+
+SDR configurable: which specific stage IDs to use are stored in the webhook
+handler's config, not hardcoded.
+
+## Event: sent
+
+**Trigger**: `sent` event from Zoho Sign webhook.
+
+**Odoo operations (in order)**:
+
+```
+1. Search for opportunity by x_envelope_id or proposal ref in name
+2. If not found by x_envelope_id, search by name = proposal_ref
+3. If still not found: log ERROR, alert human, return (no stage update)
+
+4. write() — update fields:
+   - x_envelope_id: "<envelope_id>"
+   - x_sent_date: "<sent_timestamp>"
+   - x_frozen_pdf_hash: "<stored frozen_sha256>"
+   - stage_id: <Proposal Sent stage ID>
+
+5. ir.attachment — create:
+   - name: "{PROPOSAL-REF}_RevN_Sent.pdf"
+   - type: "binary"
+   - datas: <base64 of frozen PDF>
+   - res_model: "crm.lead"
+   - res_id: <opportunity ID>
+   - mimetype: "application/pdf"
+
+6. mail.activity — create:
+   - activity_type_id: <Follow-up type ID from Odoo>
+   - date_deadline: <sent_date + 3 calendar days>
+   - user_id: <SDR user ID who owns this opportunity>
+   - note: "Day 3 reminder: {PROPOSAL-REF} sent for signature. Check signing status in Zoho Sign."
+   - res_model: "crm.lead"
+   - res_id: <opportunity ID>
+```
+
+## Event: completed
+
+**Trigger**: `completed` event from Zoho Sign (both parties signed).
+
+**Pre-condition**: SHA-256 hash of downloaded signed PDF must match `x_frozen_pdf_hash`.
+
+```
+1. Search for opportunity by x_envelope_id
+
+2. write() — update fields:
+   - x_completed_date: "<completed_timestamp>"
+   - x_signed_pdf_hash: "<hash of downloaded signed PDF>"
+   - stage_id: <Won stage ID>
+   - x_signing_actor_client: "<client_signatory_name>"
+   - x_signing_actor_sgc: "Ali Asghar Teli Muhammad Iqbal Teli"
+
+3. ir.attachment — create (signed PDF):
+   - name: "{PROPOSAL-REF}_RevN_Signed.pdf"
+   - type: "binary"
+   - datas: <base64 of signed PDF from Zoho Sign API>
+   - res_model: "crm.lead"
+   - res_id: <opportunity ID>
+   - mimetype: "application/pdf"
+
+4. ir.attachment — create (audit certificate):
+   - name: "{PROPOSAL-REF}_RevN_AuditCertificate.pdf"
+   - type: "binary"
+   - datas: <base64 of audit certificate from Zoho Sign API>
+   - res_model: "crm.lead"
+   - res_id: <opportunity ID>
+   - mimetype: "application/pdf"
+
+5. Parse Order Form fields from Zoho Sign's document download response:
+   Write the following if the Order Form document contains parseable fields:
+   - x_contract_term_months: <term in months>
+   - x_subscription_fee: <total monthly subscription>
+   - x_platform_fee: <platform component>
+   - x_recovery_fee: <recovery component>
+   - x_mobilisation_amount: <mobilisation amount>
+   - x_cadence: <payment cadence>
+   - x_edition: <community | enterprise>
+   - x_upgrade_policy: <upgrade policy text>
+   - x_kickoff_date: <kickoff date>
+
+6. account.move — create (mobilisation invoice draft):
+   - move_type: "out_invoice"
+   - partner_id: <client partner ID from Odoo>
+   - invoice_date: <completed_date>
+   - invoice_line_ids:
+     - name: "Mobilisation: {PROPOSAL-REF} RevN"
+       - quantity: 1
+       - price_unit: <mobilisation amount>
+       - account_id: <SGC revenue account>
+   - invoice_origin: "{PROPOSAL-REF}_RevN"
+   - state: "draft"    # NOT posted — human posts after review
+   - x_envelope_id: "<envelope_id>"
+   NOTE: Invoice is created as DRAFT. A human reviews and posts it.
+   This is G51: "Mobilisation invoice is created as draft and posted by a human."
+
+7. mail.activity — create (Kickoff activity):
+   - activity_type_id: <Kickoff type ID from Odoo>
+   - date_deadline: <kickoff_date or 30 days from completed_date>
+   - user_id: <delivery/operations user ID>
+   - note: "Mobilisation invoice drafted for {PROPOSAL-REF}. Delivery kickoff due."
+   - res_model: "crm.lead"
+   - res_id: <opportunity ID>
+
+8. In-app notification to SDR:
+   - Use Odoo's mail.message or mail.notification to notify the SDR
+     that the contract is signed and the invoice is drafted.
+   - Email notification via SMTP (see notification-templates/)
+```
+
+## Event: declined
+
+**Trigger**: `declined` event from Zoho Sign.
+
+```
+1. Search for opportunity by x_envelope_id
+2. write():
+   - stage_id: <Lost stage ID>
+   - x_decline_reason: "<reason from provider, or 'declined by signatory'>"
+   - description: append "DECLINED: {reason}. {timestamp}"
+3. mail.activity — create for SDR:
+   - Follow-up activity: "Proposal declined by client."
+   - date_deadline: <today>
+   - user_id: <SDR owner>
+4. Email notification to SDR (see notification-templates/)
+```
+
+## Event: expired
+
+**Trigger**: `expired` event from Zoho Sign.
+
+```
+1. Search for opportunity by x_envelope_id
+2. write():
+   - stage_id: <Stalled or Proposal Sent stage ID>
+   - description: append "ENVELOPE EXPIRED (30-day validity). {timestamp}"
+3. mail.activity — create for SDR:
+   - Follow-up activity: "Proposal envelope expired. Re-send or close."
+   - date_deadline: <today>
+   - user_id: <SDR owner>
+4. Email notification to SDR (see notification-templates/)
+```
+
+## Event: voided
+
+**Trigger**: `voided` event from Zoho Sign.
+
+```
+1. Search for opportunity by x_envelope_id
+2. write():
+   - stage_id: <Stalled or Proposal Sent stage ID>
+   - description: append "ENVELOPE VOIDED by SDR. {timestamp}"
+3. mail.activity — create for SDR:
+   - Follow-up activity: "Envelope voided. Review and re-send or close."
+   - date_deadline: <today>
+   - user_id: <SDR owner>
+4. Email notification to SDR (see notification-templates/)
+```
+
+## CRM search lookup
+
+The webhook handler needs to find the correct Odoo opportunity. Lookup order:
+
+```
+1. Try: search crm.lead WHERE x_envelope_id = <envelope_id>
+2. If not found, try: search crm.lead WHERE name = <proposal_ref>
+   (e.g. name = "VGE-2026-SUB-01")
+3. If multiple found: log ERROR, alert human, return
+4. If not found: log ERROR, alert human, return
+```
+
+The `x_envelope_id` field is set at `sent` time, so `completed`, `declined`,
+and `expired` events will always find the opportunity via step 1.
+
+## Error handling
+
+| Error | Action |
+|---|---|
+| Opportunity not found | Log ERROR, alert human, return 200 |
+| Multiple opportunities found | Log ERROR, alert human, return 200 |
+| Odoo API authentication failure | Log CRITICAL, alert human, do not retry (hard failure) |
+| Hash mismatch on completed | Log CRITICAL, alert human, do NOT write to Odoo, do NOT send emails, return 200 |
+| Invoice creation failure | Write opportunity fields, skip invoice, alert human, return 200 |
+| Activity creation failure | Write opportunity fields, log warning, return 200 |
+| SMTP notification failure | Write all other fields, log warning, retry email 3x with backoff |

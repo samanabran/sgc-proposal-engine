@@ -1,0 +1,6 @@
+{
+  "name": "sgc-proposal-engine",
+  "version": "1.0.0",
+  "description": "SDR-facing proposal-engine plugin. See .claude-plugin/plugin.json for the full manifest.",
+  "schema_version": "1.0"
+}

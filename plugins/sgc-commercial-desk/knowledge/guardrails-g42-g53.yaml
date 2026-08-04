@@ -1,0 +1,158 @@
+# SGC TECH AI — Plugin-Conversion Guardrails (G42–G45, G53)
+# Canonical: sgc-commercial-desk plugin
+# Mirror copy in sgc-proposal-engine plugin for SDR reference.
+#
+# These guardrails close the gap between the in-repo G1–G41 commercial
+# guardrails and the G46–G52 signature-pipeline guardrails. They are the
+# rules that govern the plugin split itself, plus the new approval-gate
+# rule introduced by this build.
+version: 1.0
+effective_from: 2026-08-04
+source: "v1 plugin conversion — see plugins/sgc-proposal-engine/CHANGELOG.md and MIGRATION-NOTES.md"
+
+approver:
+  # The legal-entity-named approver, per the trade licence (Dubai
+  # Integrated Economic Zones Authority, IFZA, Licence No. 45160).
+  # This is the person whose authority binds the entity.
+  named_approver: "Ali Asghar Teli Muhammad Iqbal Teli"
+  named_approver_title: "Company Manager"
+  # The actual signer who countersigns on behalf of the named approver.
+  # Zoho Sign records this name on the audit certificate; the MSA
+  # records the in-behalf-of relationship in the signatory block.
+  actual_signer: "Renbran Anthony Madelo"
+  actual_signer_title: "Founder & CEO"
+  signer_authority: "Renbran Anthony Madelo acts in behalf of Ali Asghar Teli Muhammad Iqbal Teli per the entity's internal authority. All signatures carry the named_approver's authority."
+  organisation: "Scholarix Global Consultants FZCO / SGC TECH AI"
+
+gate_G42:
+  id: G42
+  label: "Published-floor compliance"
+  rule: >
+    Every quoted subscription in a proposal must be at or above the
+    published-floor entry for (user_count × edition × term × cadence) in
+    `published-floor-table.yaml` (sdg-proposal-engine plugin's knowledge/).
+  test: >
+    For each (users, edition, term_months, cadence) in the worksheet, look
+    up the corresponding floor cell. The proposed subscription AED/mo must
+    be >= the floor; otherwise refuse to proceed.
+  why: >
+    The desk publishes a minimum quotable rate per cell so the SDR never
+    has to derive a floor from live inputs. Quoting below the published
+    floor silently transfers margin risk onto SGC and is the equivalent
+    of "discounting around" a failed gate.
+  owner: SDR (enforced by approval-gate skill)
+  enforcement_artifact: 05-approval/approval-request.md
+  failure_action: refuse_to_proceed_to_approval_gate; escalate_to_desk
+
+gate_G43:
+  id: G43
+  label: "Package-rate consistency"
+  rule: >
+    Every rate that appears in a proposal must trace to exactly one entry
+    on `rate-card.yaml` (sdg-proposal-engine plugin's knowledge/). The
+    forbidden_rates block (AED 690, AED 550) applies in full.
+  test: >
+    For every AED/hr figure in the proposal or worksheet: search the
+    rate-card.roles.* keys for an exact match. Reject any figure that is
+    not on the card (G9 carries this at the worksheet level; G43 carries
+    it at the proposal level).
+  why: >
+    A rate not on the card is invented. Defect #2 (AED 690 in the original
+    VGE draft) is the canonical example — once a number is in a draft
+    that is sent, a human wrote it or an agent did. The agent must not.
+  owner: SDR (enforced by validator)
+  enforcement_artifact: 02-calc/pricing-worksheet.yaml
+  failure_action: refuse_to_run; emit RESOLVE if a role is missing on the card
+
+gate_G44:
+  id: G44
+  label: "Edition disclosure"
+  rule: >
+    When the edition is Community: the proposal must say "Odoo Community"
+    (never "Enterprise") if the edition is mentioned. When the edition
+    is Enterprise: the proposal must carry the exclusion list — no Odoo
+    Enterprise mobile app (mobile-optimised browser only), no Studio,
+    limited advanced accounting, major upgrades quoted separately.
+  test: >
+    For Community deals: scan the proposal for "Enterprise" outside of
+    excluded-options context. For Enterprise deals: scan for the four
+    exclusions.
+  why: >
+    G36–G38 require this in the MSA regardless; G44 is the gate that
+    keeps the proposal narrative honest when it is silent on edition
+    by default. Community misdescribed as Enterprise is G36;
+    Enterprise without its exclusions is G38; both block the same way
+    here.
+  owner: SDR
+  enforcement_artifact: 03-draft/<PROPOSAL-REF>_RevN/§06, §A.9
+  failure_action: refuse_to_draft_or_correct; G36 also blocks
+
+gate_G45:
+  id: G45
+  label: "VAT-status disclosure"
+  rule: >
+    Never "VAT inclusive", "VAT exempt", "free zone exempt", or any TRN
+    field anywhere in the proposal narrative. SGC is not registered for
+    UAE VAT and holds no TRN. The MSA §C.6 always carries the accurate,
+    binding position using the gross-up clause from
+    `00-knowledge/clause-library/vat-gross-up.md` verbatim.
+  test: >
+    Scan the draft for the forbidden strings. The MSA/Order Form §C.6
+    must contain the gross-up clause text verbatim.
+  why: >
+    SGC is not VAT-registered; charging VAT or claiming an exemption is
+    a regulatory and reputational risk. G35 covers the same in the
+    commercial guardrails; G45 is the plugin-side enforcement.
+  owner: SDR
+  enforcement_artifact: 03-draft/<PROPOSAL-REF>_RevN/, 08-contracts/msa-sla.html
+  failure_action: refuse_to_draft; G35 also blocks
+
+gate_G53:
+  id: G53
+  label: "No envelope without valid approval record"
+  rule: >
+    The `signature-dispatch` skill refuses to call the Zoho Sign send
+    endpoint unless every one of the following is true:
+    1. `05-approval/approval-record.yaml` exists for this artifact.
+    2. `approval-record.yaml: approval.approved_artifact_sha256` matches
+       the SHA-256 of the PDF on disk at `04-issued/...` (or the
+       equivalent issued path).
+    3. `approval-record.yaml: approval.expires_at` is in the future.
+    4. `approval-record.yaml: approval.decision` is `approved` (not
+       `rejected` or `conditional` with unmet conditions).
+    5. `approval-record.yaml: approval.approver.name` is exactly
+       "Ali Asghar Teli Muhammad Iqbal Teli" — no alternates, no
+       delegation, no "agent on behalf of".
+  test: >
+    The signature-dispatch preflight checks all five. Any single failure
+    is fatal; the skill emits a refusal with the specific failed
+    condition and logs a `RESOLVE:` placeholder to
+    `05-approval/pending-odoo-writes.yaml` noting that no send occurred.
+  why: >
+    This is the heart of the build. Without this gate, an agent could
+    call Zoho Sign directly and SGC would be bound to a document the
+    approver never saw. The SHA-256 binding is what prevents any
+    post-approval drift in HTML, figures, terms, or clauses from going
+    out under the approver's authority.
+  re_approval_required_if:
+    - artifact_html_changes
+    - artifact_pdf_changes
+    - any_figure_changes
+    - any_term_or_cadence_changes
+    - any_clause_substitution
+    - any_new_concession
+    - validity_expires
+    - approved_hash_mismatch
+  validity_days: 30
+  owner: signature-dispatch (enforced at preflight)
+  enforcement_artifact: 05-approval/approval-record.yaml
+  failure_action: refuse_to_send; never auto-retry
+
+# Reference: the in-repo commercial guardrails (G1–G41) and the signature
+# guardrails (G46–G52) are unchanged. The number range G42–G45 was
+# previously empty in this repo's commercial-rules/ files; this file
+# closes that gap.
+related:
+  commercial_guardrails: 00-knowledge/commercial-rules/{subscription,payment-plan,protection}-guardrails.md
+  signature_guardrails: 10-signature/guardrails-G46-G52.md
+  approval_packet_schema: plugins/sgc-proposal-engine/skills/approval-gate/SKILL.md

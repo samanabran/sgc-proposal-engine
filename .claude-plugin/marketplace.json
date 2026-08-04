@@ -1,0 +1,29 @@
+{
+  "name": "sgc-proposal-engine-marketplace",
+  "version": "1.0.0",
+  "description": "Marketplace for the Scholarix Global Consultants FZCO (SGC TECH AI) proposal engine. Two plugins: sgc-proposal-engine (SDR-facing) and sgc-commercial-desk (approver-only).",
+  "owner": {
+    "name": "SGC TECH AI / Scholarix Global Consultants FZCO",
+    "contact": "hello@sgctech.ai"
+  },
+  "plugins": [
+    {
+      "name": "sgc-proposal-engine",
+      "source": "./plugins/sgc-proposal-engine",
+      "version": "1.0.0",
+      "description": "SDR-facing plugin. Six skills (proposal-intake, subscription-pricing, proposal-drafting, contract-assembly, approval-gate, signature-dispatch) and a sanitized knowledge base.",
+      "tags": ["sdr", "proposal-engine", "odoo-subscription"],
+      "rbac_assignment": "All SDRs",
+      "manifest_path": "./plugins/sgc-proposal-engine/.claude-plugin/plugin.json"
+    },
+    {
+      "name": "sgc-commercial-desk",
+      "source": "./plugins/sgc-commercial-desk",
+      "version": "1.0.0",
+      "description": "Approver-only plugin. Five skills (walk-away-authoring, deal-card-review, published-floor-authoring, redacted-derivative-release, signature-handler-monitor) and the full desk-only knowledge base.",
+      "tags": ["desk", "approver-only", "cost-to-serve", "margin-floor", "signature-pipeline"],
+      "rbac_assignment": "Approver (Ali Asghar Teli Muhammad Iqbal Teli) only",
+      "manifest_path": "./plugins/sgc-commercial-desk/.claude-plugin/plugin.json"
+    }
+  ]
+}

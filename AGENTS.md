@@ -4,6 +4,17 @@ Read this file before touching any file in this repository. It is the
 operating contract for any agent (or human) drafting a proposal here. It
 overrides default behavior — follow it exactly.
 
+## Start here for any new client request (mandatory, before anything else)
+
+Before the load order below, before `00-knowledge/PRECEDENCE.md`, before
+anything else in this repository: read `09-agent/step-gate.md`,
+`09-agent/fabrication-rules.md`, and `09-agent/intake-interview.md`, in
+that order. An SDR's request — however vague — must go through the
+intake/orchestration layer in `09-agent/` before a single fact is treated
+as known. The load order below still governs the drafting phase itself
+once intake is complete; `09-agent/` governs everything before that phase
+is allowed to start.
+
 ## Load order (mandatory)
 
 1. `00-knowledge/PRECEDENCE.md`
@@ -83,5 +94,23 @@ rule is skipped.
 | `05-ops/` | Commercial Desk | Read only |
 | `06-brand/` | Commercial Desk only | Read only |
 | `07-protection/` | Commercial Desk + Finance | Read only |
+| `08-contracts/` | Commercial Desk only | Read only, except a per-deal consistency map, which is agent-writable like `02-clients/` |
+| `09-agent/` | Commercial Desk only | Read only |
 
 See `04-governance/access-model.md` for the full rationale.
+
+## Tools
+
+**validate.py** — gate enforcement (18 checks):
+```
+python 05-ops/validate.py 02-clients/{client}/
+```
+Exit 0 = clean (all checks pass, or only the expected entity-resolution blocker).
+Exit 1 = real failure. Exit 2 = usage error. Requires PyYAML: `pip install pyyaml`.
+
+## Skill
+
+The `sgc-proposal-engine` skill auto-loads from `~/.config/opencode/skills/`
+whenever proposal-related keywords are detected. It embeds the full pipeline
+contract and runbook. The skill and this AGENTS.md are kept in sync — if one
+diverges, treat this file as the source of truth and flag the discrepancy.

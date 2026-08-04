@@ -1,0 +1,22 @@
+{
+  "event": {
+    "event_id": "evt_declined_0005",
+    "event_type": "declined",
+    "event_time": "2026-08-07T16:45:00.000Z",
+    "account_id": "604823000000000001",
+    "request_id": "604823000000049040",
+    "request_name": "VGE-2026-SUB-01 Rev1",
+    "reason": "Client chose a competitor with lower setup cost.",
+    "actions": [
+      {
+        "action_id": "604823000000000101",
+        "action_type": "SIGN",
+        "recipient_email": "renbranmadelo@gmail.com",
+        "recipient_name": "Client Signatory",
+        "action_status": "DECLINED",
+        "signing_order": 0,
+        "decline_time": "2026-08-07T16:45:00.000Z"
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+# SGC TECH AI — Concession Ladder (sanitized for SDR plugin)
+# Original: 00-knowledge/pricing/concession-ladder.yaml (desk-only file)
+# Redacted by: plugins/sgc-commercial-desk/skills/redacted-derivative-release
+# Verified by: plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py
+#
+# This derivative carries concession and compensator names, effect
+# descriptions, the forbidden list, and the procedure. The
+# value_formula fields are desk-only and are the structural
+# concession-ladder arithmetic; the SDR names them but does not
+# compute them.
+version: 2.0
+effective_from: 2026-08-03
+
+concessions:
+  waive_mobilisation:       { effect: "removes the upfront cash trigger; reduces peak cash exposure" }
+  discount_platform:          { effect: "reduces recurring platform_portion by the stated percent" }
+  defer_first_payment:          { effect: "pushes the first subscription invoice out by N months" }
+  add_module_free:                { effect: "adds a module from the catalogue to the subscription at no extra cost" }
+  add_users_free:                    { effect: "adds additional users to the subscription at no extra cost" }
+  shorten_term_to_12:                  { effect: "reduces the contract term to 12 months" }
+  no_term_commitment:                    { effect: "removes the term commitment (month-to-month)" }
+  expedite_golive:                          { effect: "compresses the build timeline" }
+  upgrade_sla_free:                            { effect: "upgrades the support/SLA tier at no extra cost" }
+
+compensators:
+  extend_term_6mo:            { effect: "extends recovery window and platform-portion revenue base" }
+  extend_term_12mo:             { effect: "extends recovery window and platform-portion revenue base" }
+  annual_prepay:                  { effect: "client prepays the full year; see payment-plans.yaml cadences.annual_in_advance" }
+  increase_mobilisation:             { effect: "reduces peak cash exposure directly" }
+  add_uplift_pp:                        { effect: "raises financing_uplift by the stated percentage points" }
+  security_deposit_2mo:                    { effect: "cash security instrument, see risk-security-matrix.yaml" }
+  pdc_full_balance:                           { effect: "legal security instrument, see risk-security-matrix.yaml" }
+  reduce_scope_phase2:                           { effect: "moves a work package to phase2-catalogue.yaml, priced separately" }
+  downgrade_review_cadence:                         { effect: "lowers the cadence of business-review calls" }
+  reduce_sla_tier:                                     { effect: "lowers the support/SLA tier" }
+  reference_and_case_study:                               { effect: "client agrees to be a published reference; once per deal" }
+  referral_commitment_2:                                     { effect: "client refers a second client; conditional on second client's invoice collected" }
+
+forbidden_compensators:
+  - reduce_estimated_hours
+  - remove_qa_or_documentation
+  - remove_pm
+  - waive_clawback
+  - drop_below_platform_floor
+
+procedure: >
+  1. Identify the requested concession by name from the list above.
+  2. Select compensators from the list until the SDR and the desk agree
+  the compensators justify the concession; never substitute a forbidden
+  compensator for a real one.
+  3. Re-run G1-G53 against the resulting worksheet. (The desk computes
+  the AED values for both sides and records them in manifest.yaml.)
+  4. If all gates still pass, the desk logs the concession and its
+  compensators in manifest.yaml: escalations, with the AED value of each
+  side shown. The SDR names the concession in the proposal.
+  5. If gates fail, or if the concession was not logged with matching
+  compensators, the concession is void — the worksheet reverts to its
+  pre-concession state.
+
+# NOTE: value_formula fields (the internal concession-ladder true values)
+# live in the desk plugin. The SDR names concessions and compensators;
+# the desk computes and logs the AED balance.

@@ -1,0 +1,33 @@
+opportunity_id: ""
+client_legal_name: ""
+jurisdiction: ""            # mainland | free_zone
+client_trn: ""
+decision_maker: ""
+sdr_owner: ""
+segment: ""                 # startup_boutique | smb | mid_market
+edition: ""                  # community | enterprise — community unless a trigger condition is logged below
+vertical: ""
+
+stage: intake               # intake | risk_assessed | calc | draft | review | issued | won | lost
+current_revision: ""
+knowledge_version_used: ""  # pin the pricing version this was built on
+
+risk_band: ""                 # low | moderate | elevated | high | refuse — from 02-calc/risk-assessment.yaml
+required_security_instruments: []
+
+gates_passed: false
+gate_report: 02-calc/gate-report.md
+walkaway_card_produced: false    # must be true, dated before the first pricing conversation (G22)
+escalations: []
+
+revisions:
+  - ref: ""
+    issued_date: ""
+    path: ""
+    status: ""              # draft | issued | superseded | retracted
+    notes: ""
+
+verbal_promises_logged: false
+adoption_clause_included: false
+clawback_included: false
+evidence_file_complete: false

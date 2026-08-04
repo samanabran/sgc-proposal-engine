@@ -1,0 +1,95 @@
+# Sufficiency Rules — what blocks what.
+# Read alongside question-bank.yaml (the questions) and intake-interview.md
+# (the protocol that asks them in tiered batches).
+
+tier_0:
+  label: "cannot price without"
+  fields:
+    - t0_users_now
+    - t0_users_12mo
+    - t0_modules
+    - t0_integrations
+    - t0_migration
+    - t0_edition
+    - t0_cadence
+    - t0_budget
+    - t0_term
+  blocks:
+    - artifact: 02-calc/pricing-worksheet.yaml
+      action: refuse_to_run
+  on_incomplete: >
+    Refuse to run the pricing worksheet at all. State which Tier 0 field(s)
+    are missing and re-ask once (see on_unknown below) — do not proceed to
+    risk assessment or calc until Tier 0 is closed.
+  on_unknown: >
+    "I don't know" is accepted as a real, terminal answer per
+    intake-interview.md step 3 — record the field as `unknown` in the fact
+    ledger, do not re-ask more than once, and escalate: if still unknown
+    after one retry, the field blocks pricing per this rule until the SDR
+    supplies it or an attached source document resolves it. There is no
+    conservative default for Tier 0 — unlike Tier 2, a missing Tier 0 fact
+    cannot be priced around.
+
+tier_1:
+  label: "cannot issue without"
+  fields:
+    - t1_legal_name
+    - t1_trade_licence_number
+    - t1_jurisdiction
+    - t1_registered_address
+    - t1_contact_authority
+    - t1_decision_timeline
+    - t1_verbal_promises
+  blocks:
+    - artifact: issue-ready state (manifest.yaml: stage: issued)
+      action: draft_with_RESOLVE
+  on_incomplete: >
+    May draft. Every missing Tier 1 fact is written as a RESOLVE: placeholder
+    (see fabrication-rules.md) in the affected proposal section and in
+    manifest.yaml: escalations. The build may proceed through calc, gate
+    check, and draft — but step-gate.md's issue-ready step cannot be reached
+    while any Tier 1 field remains RESOLVE. This mirrors validate.py:
+    check_14_entity's existing behavior for SGC's own entity fields, applied
+    here to client-side Tier 1 facts.
+  on_unknown: >
+    Same "ask once" rule as Tier 0: record `unknown`, escalate to a RESOLVE:
+    placeholder if still unresolved after one retry. t1_verbal_promises is
+    the one exception — it has no unknown_ok path; "none" is itself a
+    complete, loggable answer, so this question is asked until answered, not
+    escalated to RESOLVE.
+
+tier_2:
+  label: "affects risk pricing"
+  fields:
+    - t2_entity_age
+    - t2_payment_history
+    - t2_incumbent
+    - t2_other_bidders
+    - t2_prior_failed_implementation
+    - t2_seasonality
+  blocks: []
+  on_incomplete: >
+    Does not block any artifact. risk-assessment.yaml: scoring.band defaults
+    to the next-more-conservative band from whatever the answered fields
+    alone would produce. 02-calc/gate-report.md and
+    02-calc/deal-card.md must both say in writing which Tier 2 fields were
+    missing and that the conservative-band default was applied because of
+    it — this is a disclosure requirement, not optional color.
+  on_unknown: >
+    Record `unknown` after at most one ask; no further escalation needed —
+    the conservative-band default above is the terminal handling for Tier 2.
+
+shared_rules:
+  ask_once: >
+    No Tier 0/1/2 question is asked more than twice total (initial ask +
+    one retry). A repeated identical question after that is a protocol
+    violation of intake-interview.md.
+  never_ask_supplied_fields: >
+    Any field already present in the SDR's original request, an attached
+    source document, or a prior answer in this session is never asked again
+    — cross-check the fact ledger before batching each tier.
+  batching: >
+    Tier 0 is asked as exactly one batch. Tier 1 is asked as exactly one
+    batch, after Tier 0 closes. Tier 2 is asked as exactly one batch, after
+    Tier 1 closes. Never more than one batch of questions per conversational
+    turn (intake-interview.md).

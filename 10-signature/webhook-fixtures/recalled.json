@@ -1,0 +1,20 @@
+{
+  "event": {
+    "event_id": "evt_recalled_0007",
+    "event_type": "recalled",
+    "event_time": "2026-08-10T08:20:00.000Z",
+    "account_id": "604823000000000001",
+    "request_id": "604823000000049040",
+    "request_name": "VGE-2026-SUB-01 Rev1",
+    "actions": [
+      {
+        "action_id": "604823000000000101",
+        "action_type": "SIGN",
+        "recipient_email": "renbranmadelo@gmail.com",
+        "recipient_name": "Client Signatory",
+        "action_status": "RECALLED",
+        "signing_order": 0
+      }
+    ]
+  }
+}

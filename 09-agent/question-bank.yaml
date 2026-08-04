@@ -1,0 +1,174 @@
+# Question Bank — every question the intake interview may ask, tiered.
+# Read alongside sufficiency-rules.yaml (what blocks what) and
+# intake-interview.md (the protocol that asks these in batches).
+#
+# Each question:
+#   id         — stable identifier, referenced by sufficiency-rules.yaml
+#   question   — asked verbatim to the SDR
+#   reason     — the one-line reason shown alongside the question (per
+#                intake-interview.md step 2: "numbered, with a one-line
+#                reason each")
+#   writes_to  — the exact field path the answer lands in. Most land in
+#                00-intake/client-brief.yaml or 02-calc/risk-assessment.yaml.
+#                A few fields marked (new) don't exist in
+#                01-templates/intake/client-brief.template.yaml yet — that
+#                template is already known to lag real usage (see VGE's
+#                real client-brief.yaml, which has drifted from it), and
+#                client-brief.yaml itself is agent read+write territory, so
+#                adding a field there needs no template edit.
+#   unknown_ok — whether "I don't know" is accepted as a real, terminal
+#                answer per sufficiency-rules.yaml (always true — see
+#                intake-interview.md step 3).
+
+tier_0:
+  description: >
+    Cannot price without these. Asked as a single numbered batch, right
+    after the SDR's request is restated and confirmed. Incomplete Tier 0
+    blocks 02-calc/pricing-worksheet.yaml entirely — see
+    sufficiency-rules.yaml: tier_0.
+  questions:
+    - id: t0_users_now
+      question: "How many users at signature?"
+      reason: "Determines segment (policy.yaml: segments.*.max_users) and drives cost-to-serve."
+      writes_to: client-brief.yaml: scale.users_now
+      unknown_ok: true
+
+    - id: t0_users_12mo
+      question: "How many users expected at 12 months?"
+      reason: "Feeds the risk-assessment growth signal and the term/mobilisation sizing."
+      writes_to: client-brief.yaml: scale.users_12mo
+      unknown_ok: true
+
+    - id: t0_modules
+      question: "Which modules or work packages are in scope?"
+      reason: "Every delivery hour must trace to a named work package (hour-lookup.yaml) — no scope, no hours, no build value."
+      writes_to: client-brief.yaml: scope_signals.work_packages_requested, modules_requested
+      unknown_ok: true
+
+    - id: t0_integrations
+      question: "What integrations are required (portals, payment gateways, other systems)?"
+      reason: "Each integration carries its own dependency checklist (phase2-catalogue.yaml: portal_dependency_note) that changes build hours."
+      writes_to: client-brief.yaml: scope_signals.portal_integrations_requested
+      unknown_ok: true
+
+    - id: t0_migration
+      question: "What data needs migrating, roughly how much, and in what current format?"
+      reason: "Migration volume/format directly sets migration hours and data_quality_confidence risk."
+      writes_to: client-brief.yaml: scope_signals.migration_records, migration_files, data_quality_confidence
+      unknown_ok: true
+
+    - id: t0_edition
+      question: "Odoo edition — Community or Enterprise, or does the client assume one?"
+      reason: "Capture what the client assumes even if wrong (G36) — Community is the default; only an explicit trigger condition moves it to Enterprise."
+      writes_to: client-brief.yaml: edition.requested_or_assumed, edition.trigger_conditions_met
+      unknown_ok: true
+
+    - id: t0_cadence
+      question: "What billing cadence does the client prefer or expect (monthly, quarterly, annual)?"
+      reason: "Cadence has a policy-set minimum (G33) and changes the payment-plan worksheet's structure — this field doesn't exist in the stale brief template yet, so it's added here."
+      writes_to: "client-brief.yaml: commercial_signals.preferred_billing_cadence (new field)"
+      unknown_ok: true
+
+    - id: t0_budget
+      question: "What budget figure or budget objection has the client stated, if any?"
+      reason: "A rejected figure is a hard constraint on the recommended tier (budget_test) — matches VGE's real low/high range schema, not the template's single scalar."
+      writes_to: "client-brief.yaml: commercial_signals.budget_rejected_aed_low, budget_rejected_aed_high"
+      unknown_ok: true
+
+    - id: t0_term
+      question: "What term length does the client prefer or expect?"
+      reason: "Term interacts directly with mobilisation percentage and recovery-period sizing."
+      writes_to: client-brief.yaml: commercial_signals.preferred_term_months
+      unknown_ok: true
+
+tier_1:
+  description: >
+    Cannot issue without these. Asked as a second batch, only after Tier 0
+    is closed. Incomplete Tier 1 permits drafting with RESOLVE, but blocks
+    issue-ready — see sufficiency-rules.yaml: tier_1.
+  questions:
+    - id: t1_legal_name
+      question: "What is the client's legal entity name, exactly as licensed?"
+      reason: "Every cover page, MSA, and Order Form field traces to one exact legal name (known-defects.md #12: two different addresses issued weeks apart for the same reason — nothing forced a single source of truth)."
+      writes_to: client-brief.yaml: client.legal_name
+      unknown_ok: true
+
+    - id: t1_trade_licence_number
+      question: "What is the client's trade licence number, and which authority issued it?"
+      reason: "Distinct from SGC's own entity file (06-brand/entity/legal-identity.yaml) — this is the client's own licence, and has no existing home in the brief."
+      writes_to: "client-brief.yaml: client.trade_licence_number, client.trade_licence_authority (new fields)"
+      unknown_ok: true
+
+    - id: t1_jurisdiction
+      question: "Is the client mainland or free zone?"
+      reason: "Drives VAT/jurisdiction wording (G35) and legal-identity cross-checks."
+      writes_to: client-brief.yaml: client.jurisdiction
+      unknown_ok: true
+
+    - id: t1_registered_address
+      question: "What is the client's registered address?"
+      reason: "Same single-source-of-truth discipline as SGC's own registered_address in legal-identity.yaml, applied to the client side — no field currently exists for it."
+      writes_to: "client-brief.yaml: client.registered_address (new field)"
+      unknown_ok: true
+
+    - id: t1_contact_authority
+      question: "Who is the contact — name, role, and do they have authority to sign?"
+      reason: "An unconfirmed signatory is a contract-execution risk, not just a courtesy detail."
+      writes_to: "client-brief.yaml: client.decision_maker, decision_maker_title, signing_authority_confirmed (new field)"
+      unknown_ok: true
+
+    - id: t1_decision_timeline
+      question: "What is the client's decision timeline?"
+      reason: "Feeds escalation-triggers.md's requoting/timeline checks and the SDR's own follow-up cadence."
+      writes_to: "client-brief.yaml: commercial_signals.decision_timeline (new field)"
+      unknown_ok: true
+
+    - id: t1_verbal_promises
+      question: >
+        Has anyone at SGC told this client anything about price, timeline,
+        inclusions, discounts, or exclusivity that isn't in writing?
+      reason: "Mandatory, cannot be skipped — an unlogged verbal promise that later surfaces is a contract risk. Every answer, including 'none', is logged."
+      writes_to: 00-intake/verbal-promises.md
+      unknown_ok: false   # "none" is a valid, complete answer; silence/skip is not
+
+tier_2:
+  description: >
+    Affects risk pricing only. Asked last, after stating plainly that
+    skipping means conservative risk pricing — see
+    sufficiency-rules.yaml: tier_2.
+  questions:
+    - id: t2_entity_age
+      question: "How long has the client's entity been registered?"
+      reason: "Direct input to risk-security-matrix.yaml scoring."
+      writes_to: risk-assessment.yaml: inputs.entity_age_years
+      unknown_ok: true
+
+    - id: t2_payment_history
+      question: "Any known payment history with SGC, if this is a repeat relationship?"
+      reason: "Direct input to risk-security-matrix.yaml scoring."
+      writes_to: risk-assessment.yaml: inputs.payment_history_sgc
+      unknown_ok: true
+
+    - id: t2_incumbent
+      question: "What incumbent system does the client use today, and roughly what does it cost them?"
+      reason: "Feeds the market_test gate and the walk-away card's incumbent benchmark."
+      writes_to: client-brief.yaml: scope_signals.incumbent_system, incumbent_benchmark_aed_mo
+      unknown_ok: true
+
+    - id: t2_other_bidders
+      question: "Is anyone else bidding on this deal?"
+      reason: "Competitive pressure informs negotiation authority (04-governance/negotiation-authority.md) and concession posture — no existing field for it."
+      writes_to: "client-brief.yaml: commercial_signals.competing_bidders (new field)"
+      unknown_ok: true
+
+    - id: t2_prior_failed_implementation
+      question: "Has the client had a prior failed implementation or abandoned system?"
+      reason: "Direct input to risk-security-matrix.yaml's incumbent_churn_signal — this exact signal (abandoned_systems) has already fired for real on a live client."
+      writes_to: risk-assessment.yaml: inputs.incumbent_churn_signal
+      unknown_ok: true
+
+    - id: t2_seasonality
+      question: "Does the client's business have seasonal cash-flow patterns?"
+      reason: "Informs cadence and mobilisation-timing recommendations even though it isn't a formal gate input — no existing field for it."
+      writes_to: "client-brief.yaml: commercial_signals.cash_flow_seasonality (new field)"
+      unknown_ok: true

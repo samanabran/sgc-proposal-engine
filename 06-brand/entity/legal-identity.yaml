@@ -8,20 +8,38 @@
 version: 1.0
 effective_from: 2026-08-03
 
-legal_name: "Scholarix Global Consultants FZE"
+legal_name: "Scholarix Global Consultants FZCO"   # per govt-issued trade license (DIEZA/IFZA, License No. 45160); corrects prior "FZE" drift — see resolution note below
 trading_as: "SGC TECH AI"
 tagline: "FINANCE · SYSTEM · TECHNOLOGY"
 
-licence_authority: RESOLVE      # IFZA or DIFC — they are NOT the same regime; affects dispute-and-jurisdiction.md directly
-licence_number: RESOLVE
-registered_address: RESOLVE     # ONE address, used everywhere. Do not let a draft proceed with a different address than a prior revision.
+licence_authority: "Dubai Integrated Economic Zones Authority (DIEZA), operating via IFZA — Dubai Silicon Oasis"   # regime confirmed IFZA, not DIFC
+licence_number: "45160"          # License issued 07/05/2024, expires 06/05/2027 — Trade License doc on file
+registered_address: "Maseed Building, Office No. 304, 119/12 St, Al Rigga, Dubai, United Arab Emirates"   # ONE address, used everywhere. Do not let a draft proceed with a different address than a prior revision.
 
 vat_registered: false            # mirrors pricing/policy.yaml: vat.registered — keep these two in sync, never edit one without the other
-trn: null
+trn: null                        # Odoo company record TRN field is blank ("if not applicable") — consistent with vat_registered: false
 
 contact:
-  name: RESOLVE
-  email: RESOLVE
-  phone: RESOLVE
+  named_approver: "Ali Asghar Teli Muhammad Iqbal Teli"   # Company Manager per trade license; the legal-entity-named approver
+  actual_signer: "Renbran Anthony Madelo"                  # Founder & CEO; signs in behalf of the named approver per documented authority
+  signer_authority: "Acting on behalf of the named Company Manager (trade licence Licence No. 45160) per the entity's internal authority to bind. All signatures by the actual_signer carry the named_approver's authority."
+  email: "hello@sgctech.ai"
+  phone: "+971 52 198 5231"
 
 resolution_owner: "Commercial Desk + Founder — sign-off required before any field here leaves RESOLVE"
+
+# Resolution note (2026-08-04): legal_name and registered_address were
+# previously RESOLVE placeholders (or, per this file's original warning,
+# had drifted between revisions — Rev1 used Al Rigga, Rev2 used DIFC).
+# Resolved from two source documents: (1) the government-issued Dubai
+# Integrated Economic Zones Authority trade license (License No. 45160,
+# entity legal status FZCO, registered premises DSO-IFZA / Dubai Silicon
+# Oasis), and (2) the Odoo company record (operational address at Maseed
+# Building, Al Rigga; TRN field blank). Per user decision 2026-08-04: use
+# the license's legal name/status (FZCO, correcting the prior FZE
+# mismatch) but the Odoo operational address (Al Rigga) as the single
+# registered/contractual address, not the free-zone premises address on
+# the license itself. Signatory confirmed as the license's named Company
+# Manager; email/phone default to the company's general listed contact
+# (hello@sgctech.ai / +971 52 198 5231) pending a personal alternative
+# from the user.

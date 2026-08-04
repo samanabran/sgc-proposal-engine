@@ -1,0 +1,21 @@
+{
+  "event": {
+    "event_id": "evt_reassigned_0009",
+    "event_type": "reassigned",
+    "event_time": "2026-08-05T12:00:00.000Z",
+    "account_id": "604823000000000001",
+    "request_id": "604823000000049040",
+    "request_name": "VGE-2026-SUB-01 Rev1",
+    "actions": [
+      {
+        "action_id": "604823000000000103",
+        "action_type": "SIGN",
+        "recipient_email": "newclient@example.com",
+        "recipient_name": "New Client Signatory",
+        "action_status": "NOACTION",
+        "signing_order": 0,
+        "reassigned_from": "renbranmadelo@gmail.com"
+      }
+    ]
+  }
+}

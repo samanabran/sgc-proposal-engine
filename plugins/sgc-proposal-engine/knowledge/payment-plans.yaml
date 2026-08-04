@@ -1,0 +1,49 @@
+# SGC TECH AI — Payment Plans & Cadence (sanitized for SDR plugin)
+# Original: 00-knowledge/pricing/payment-plans.yaml (desk-only file)
+# Redacted by: plugins/sgc-commercial-desk/skills/redacted-derivative-release
+# Verified by: plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py
+version: 2.0
+effective_from: 2026-08-03
+
+baseline: monthly_in_advance
+discount_applies_to: platform_portion_only     # HARD RULE G11
+recovery_portion_discountable: false            # HARD RULE G11
+cadence_values_are_ceilings: true                # HARD RULE G12
+min_cadence_current: quarterly_in_advance         # G33
+
+cadences:
+  full_prepay_term:        { platform_adj_pct: -0.12, financing: remove_entirely, security: none }
+  annual_in_advance:        { platform_adj_pct: -0.10, uplift_reduction_pp: 3.0, security: none }
+  semi_annual_in_advance:    { platform_adj_pct: -0.05, uplift_reduction_pp: 1.0, security: none }
+  quarterly_in_advance:       { platform_adj_pct: -0.03, uplift_reduction_pp: 0.5, security: none }
+  monthly_in_advance:          { platform_adj_pct: 0.00, security: mobilisation_33pct, status: below_min_cadence }
+  monthly_in_arrears:           { platform_adj_pct: 0.02,  uplift_surcharge_pp: 1.0, security: [deposit_1_month, pdc_set] }
+  quarterly_in_arrears:          { platform_adj_pct: 0.05,  uplift_surcharge_pp: 2.0, security: [deposit_2_months, pdc_set] }
+  deferred_start:
+    platform_adj_pct_per_month: 0.01
+    uplift_surcharge_pp_per_month: 1.0
+    max_months: 3
+    security: [pdc_full_deferred, deposit_2_months]
+    approval: commercial_desk
+  milestone_or_usage:            { treatment: escalate, approval: sales_leadership }
+
+one_time_structures:
+  build_full_upfront_platform_monthly: { uplift: 0, note: "cleanest deal available — build settled at kickoff, platform billed monthly thereafter" }
+  build_full_upfront_platform_annual:   { uplift: 0, platform_adj_pct: -0.10, note: "best cash outcome for SGC" }
+  one_time_no_subscription:
+    treatment: refuse_framing
+    reason: "hosting and support are recurring costs and cannot be capitalised into a single one-time fee without SGC absorbing perpetual cost-to-serve with no revenue behind it."
+    counter: "offer build as one-time + platform recurring, minimum 12-month platform term."
+
+# NOTE: the withdrawn structures and the desk-only cash-exposure rationale
+# live in the desk plugin and are intentionally absent here. SDRs see the
+# cadence table, one-time structures, and hard_caps rates (0.10 give cap,
+# 0.12 combined cap) above.
+
+hard_caps:
+  max_total_give_pct_of_contract_value: 0.10
+  combined_give_plus_guarantee_cap_pct: 0.12
+
+notes:
+  - "monthly_in_advance is flagged status: below_min_cadence — it requires the security instrument shown, is not the preferred structure, and is offered only when a client cannot accept quarterly (G33)."
+  - "Every cadence's platform_adj_pct is a ceiling under G12 — the margin-floor ceiling calculation in the runbook may bind tighter than the table value; always apply the lower of the two."

@@ -1,0 +1,91 @@
+{
+  "name": "sgc-proposal-engine",
+  "version": "1.0.0",
+  "description": "SDR-facing proposal-engine plugin. Six skills for the 13-step proposal pipeline, plus a sanitized knowledge base. Does not include the cost-to-serve / margin-floor / liquid-reserve internals — those are in the desk plugin.",
+  "author": {
+    "name": "SGC TECH AI / Scholarix Global Consultants FZCO",
+    "contact": "hello@sgctech.ai"
+  },
+  "license": "Proprietary — internal use only",
+  "rbac_assignment": "All SDRs",
+  "skills": [
+    {
+      "name": "proposal-intake",
+      "path": "skills/proposal-intake/SKILL.md",
+      "step": 1,
+      "owner": "SDR"
+    },
+    {
+      "name": "subscription-pricing",
+      "path": "skills/subscription-pricing/SKILL.md",
+      "step": "3-8",
+      "owner": "SDR"
+    },
+    {
+      "name": "proposal-drafting",
+      "path": "skills/proposal-drafting/SKILL.md",
+      "step": "9-11",
+      "owner": "SDR"
+    },
+    {
+      "name": "contract-assembly",
+      "path": "skills/contract-assembly/SKILL.md",
+      "step": "10-11",
+      "owner": "SDR"
+    },
+    {
+      "name": "approval-gate",
+      "path": "skills/approval-gate/SKILL.md",
+      "step": 12,
+      "owner": "SDR (read-only invocation); sole approver: Ali Asghar Teli Muhammad Iqbal Teli"
+    },
+    {
+      "name": "signature-dispatch",
+      "path": "skills/signature-dispatch/SKILL.md",
+      "step": 13,
+      "owner": "signature-handler (handler lives in the SRE repo, NOT bundled)"
+    }
+  ],
+  "knowledge": {
+    "redacted_derivatives": [
+      "knowledge/policy.yaml",
+      "knowledge/hosting.yaml",
+      "knowledge/payment-plans.yaml",
+      "knowledge/concession-ladder.yaml",
+      "knowledge/phase2-catalogue.yaml",
+      "knowledge/subscription-proposal-runbook.md"
+    ],
+    "verbatim": [
+      "knowledge/rate-card.yaml",
+      "knowledge/editions.yaml",
+      "knowledge/hour-lookup.yaml",
+      "knowledge/saas-modules.yaml",
+      "knowledge/support-training.yaml",
+      "knowledge/risk-security-matrix.yaml",
+      "knowledge/commercial-rules/",
+      "knowledge/clause-library/",
+      "knowledge/step-gate.md",
+      "knowledge/fabrication-rules.md",
+      "knowledge/intake-interview.md",
+      "knowledge/question-bank.yaml",
+      "knowledge/sufficiency-rules.yaml",
+      "knowledge/session-log.template.md",
+      "knowledge/guardrails-g42-g53.yaml"
+    ],
+    "desk_authored": [
+      "knowledge/published-floor-table.yaml"
+    ]
+  },
+  "versioning": {
+    "scheme": "semver",
+    "bump_required_for": [
+      "Any rate, formula, gate, or clause change",
+      "Any redaction change (line set added or removed)",
+      "Any new skill or skill removal"
+    ],
+    "sync_mechanism": "Described in PUBLISHING.md at the repo root"
+  },
+  "forbidden_strings_check": "ci/forbidden-strings.sh runs on every commit to this plugin's path. Failure blocks release.",
+  "secrets_check": "ci/secrets-scan.sh runs on every commit to this plugin's path. Failure blocks release.",
+  "redaction_check": "ci/diff-redacted-derivatives.py runs on every commit to this plugin's path. Failure blocks release."
+}

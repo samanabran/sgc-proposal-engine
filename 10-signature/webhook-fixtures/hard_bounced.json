@@ -1,0 +1,24 @@
+{
+  "event": {
+    "event_id": "evt_hard_bounce_0008",
+    "event_type": "hard_bounced",
+    "event_time": "2026-08-04T10:05:00.000Z",
+    "account_id": "604823000000000001",
+    "request_id": "604823000000049040",
+    "request_name": "VGE-2026-SUB-01 Rev1",
+    "bounce": {
+      "recipient_email": "renbranmadelo@gmail.com",
+      "reason": "550 5.1.1 User unknown"
+    },
+    "actions": [
+      {
+        "action_id": "604823000000000101",
+        "action_type": "SIGN",
+        "recipient_email": "renbranmadelo@gmail.com",
+        "recipient_name": "Client Signatory",
+        "action_status": "BOUNCED",
+        "signing_order": 0
+      }
+    ]
+  }
+}

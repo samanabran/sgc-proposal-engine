@@ -1,0 +1,32 @@
+# SGC TECH AI — Phase 2 / Deferred Scope Catalogue (sanitized for SDR plugin)
+# Original: 00-knowledge/pricing/phase2-catalogue.yaml (desk-only file)
+# Redacted by: plugins/sgc-commercial-desk/skills/redacted-derivative-release
+# Verified by: plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py
+version: 2.0
+effective_from: 2026-08-03
+
+items:
+  portal_sync_property_finder:  { price_aed: 3900, unit: one_time, phase: 2 }
+  portal_sync_bayut_dubizzle:    { price_aed: 3400, unit: one_time, phase: 2 }
+  website_lead_capture:           { price_aed: 2400, unit: one_time, phase: 2 }
+  ai_lead_scorer_lite:             { price_aed: 495,  unit: month }
+  ai_lead_scorer_standard:          { price_aed: 1250, unit: month }
+  extra_training_session:            { price_aed: 1750, unit: session }
+  priority_support_4h:                { price_aed: 1650, unit: month }
+  additional_user:                     { price_aed: 250,  unit: month, discountable: false }
+
+portal_dependency_note: >
+  Every portal_sync_* item is conditional on the client, not SGC. Before
+  quoting any portal integration, confirm: (1) a valid RERA/DLD licence and
+  agency RERA ID; (2) the agency's own portal-side verification is
+  complete; (3) the location-tree mapping between the client's property
+  register and the portal's taxonomy is validated; (4) listing images meet
+  the portal's own image-standard compliance rules; (5) the client's own
+  portal subscription contract includes feed/API access — SGC's fee is for
+  building the sync, not for the client's portal subscription itself,
+  which remains the client's own recurring cost and is never quoted by SGC.
+
+# NOTE: marginal_cost_aed for additional_user and the "more than double its
+# marginal cost" comment are desk-only and are intentionally absent. The
+# published price (AED 250/mo) and the `discountable: false` flag (which
+# G11 enforces) are sufficient for SDR use.

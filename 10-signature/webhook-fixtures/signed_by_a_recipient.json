@@ -1,0 +1,29 @@
+{
+  "event": {
+    "event_id": "evt_signed_partial_0003",
+    "event_type": "signed_by_a_recipient",
+    "event_time": "2026-08-05T09:12:00.000Z",
+    "account_id": "604823000000000001",
+    "request_id": "604823000000049040",
+    "request_name": "VGE-2026-SUB-01 Rev1",
+    "actions": [
+      {
+        "action_id": "604823000000000101",
+        "action_type": "SIGN",
+        "recipient_email": "renbranmadelo@gmail.com",
+        "recipient_name": "Client Signatory",
+        "action_status": "SIGNED",
+        "signing_order": 0,
+        "sign_time": "2026-08-05T09:12:00.000Z"
+      },
+      {
+        "action_id": "604823000000000102",
+        "action_type": "SIGN",
+        "recipient_email": "hello@sgctech.ai",
+        "recipient_name": "Ali Asghar Teli Muhammad Iqbal Teli",
+        "action_status": "NOACTION",
+        "signing_order": 1
+      }
+    ]
+  }
+}

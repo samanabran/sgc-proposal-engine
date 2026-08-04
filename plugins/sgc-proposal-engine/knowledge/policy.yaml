@@ -1,0 +1,60 @@
+# SGC TECH AI — Pricing Policy (sanitized for SDR plugin)
+# Original: 00-knowledge/pricing/policy.yaml (desk-only file)
+# Redacted by: plugins/sgc-commercial-desk/skills/redacted-derivative-release
+# Verified by: plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py
+#
+# This derivative carries the publishable segment rates, gate anchors,
+# financing uplifts, and VAT block. The internal cost basis, absolute
+# margin floor, and review-trigger commentary live in the desk plugin
+# and are not for the SDR.
+version: 2.0
+effective_from: 2026-08-03
+source: "v2 hardening pass — see CHANGELOG.md"
+
+segments:
+  startup_boutique:  { max_users: 10,  blended_rate_aed: 280, pm_pct: 0.10, contingency_pct: 0.05, pinned_role: startup_consultant }
+  smb:               { max_users: 30,  blended_rate_aed: 395, pm_pct: 0.15, contingency_pct: 0.05, pinned_role: consultant }
+  mid_market:        { max_users: 999, blended_rate_aed: 525, pm_pct: 0.15, contingency_pct: 0.05, pinned_role: senior_consultant }
+
+overlays:
+  documentation_hours_min: 2
+  documentation_pct_of_dev: 0.05
+  qa_pct_of_delivery: 0.08
+  qa_hours_min: 3
+  training_sessions: 2
+  training_hours_per_session: 2
+
+# NOTE: cost_to_serve block (internal AED/h, account mgmt tier values,
+# support hours per 5 users) lives in the desk plugin and is intentionally
+# absent here. Pricing uses the published segment rates above and the
+# published-floor table for minimum quotable subscription.
+
+financing_uplift:
+  months_12: 0.06
+  months_18: 0.09
+  months_24: 0.18
+  zero_mobilisation_surcharge: 0.03
+
+gates:
+  platform_floor_multiplier: 1.25
+  min_gross_margin: 0.30
+  target_gross_margin: 0.35
+  default_mobilisation_pct: 0.33
+  max_multiple_of_incumbent: 1.30
+  review_cadence_monthly_threshold_aed: 2500
+  cash_positive_within_days: 30
+  min_cadence: quarterly_in_advance
+
+# NOTE: the absolute margin floor and the review_trigger commentary
+# live in the desk plugin. SDRs see min_gross_margin (0.30) and
+# target_gross_margin (0.35) as published gate values; the absolute
+# floor is enforced by the approval-gate skill.
+
+vat:
+  standard_rate: 0.05
+  registered: false
+  mandatory_threshold_aed: 375000
+  voluntary_threshold_aed: 187500
+  late_registration_penalty_aed: 10000
+  free_zone_exempt: false
+  charge_vat: false

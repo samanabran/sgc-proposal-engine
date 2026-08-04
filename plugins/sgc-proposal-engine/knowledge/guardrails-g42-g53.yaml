@@ -1,0 +1,92 @@
+# SGC TECH AI — Plugin-Conversion Guardrails (G42–G45, G53) — MIRROR COPY
+# Canonical: plugins/sgc-commercial-desk/knowledge/guardrails-g42-g53.yaml
+# This mirror is for SDR reference. Any change to a guardrail statement
+# must be made in the canonical file and mirrored here by the
+# redacted-derivative-release skill — never in this file directly.
+#
+# The SDR plugin sees this file so the gate names and what each gate
+# tests are visible during intake and pricing; the enforcement lives
+# in the approval-gate and signature-dispatch skills.
+version: 1.0
+effective_from: 2026-08-04
+mirror_of: plugins/sgc-commercial-desk/knowledge/guardrails-g42-g53.yaml
+
+approver:
+  # The legal-entity-named approver, per the trade licence (Dubai
+  # Integrated Economic Zones Authority, IFZA, Licence No. 45160).
+  # This is the person whose authority binds the entity.
+  named_approver: "Ali Asghar Teli Muhammad Iqbal Teli"
+  named_approver_title: "Company Manager"
+  # The actual signer who countersigns on behalf of the named approver.
+  # Zoho Sign records this name on the audit certificate; the MSA
+  # records the in-behalf-of relationship in the signatory block.
+  actual_signer: "Renbran Anthony Madelo"
+  actual_signer_title: "Founder & CEO"
+  signer_authority: "Renbran Anthony Madelo acts in behalf of Ali Asghar Teli Muhammad Iqbal Teli per the entity's internal authority. All signatures carry the named_approver's authority."
+
+# G42 — Published-floor compliance. Tested by approval-gate.
+gate_G42:
+  label: "Published-floor compliance"
+  rule: >
+    Every quoted subscription must be >= the corresponding cell in
+    `published-floor-table.yaml` (this plugin's knowledge/).
+  owner: SDR (enforced by approval-gate)
+  failure_action: refuse_to_proceed_to_approval_gate
+
+# G43 — Package-rate consistency. Tested by validator.
+gate_G43:
+  label: "Package-rate consistency"
+  rule: >
+    Every rate traces to `rate-card.yaml` exactly. Forbidden rates:
+    AED 690, AED 550.
+  owner: SDR (enforced by validator)
+  failure_action: refuse_to_run
+
+# G44 — Edition disclosure. Tested by proposal-drafting.
+gate_G44:
+  label: "Edition disclosure"
+  rule: >
+    Community must say "Odoo Community" (never "Enterprise"). Enterprise
+    must carry exclusions: no Odoo Enterprise mobile app, no Studio,
+    limited advanced accounting, major upgrades quoted separately.
+  owner: SDR
+  failure_action: refuse_to_draft
+
+# G45 — VAT-status disclosure. Tested by proposal-drafting and validator.
+gate_G45:
+  label: "VAT-status disclosure"
+  rule: >
+    Never "VAT inclusive", "VAT exempt", "free zone exempt", or any TRN
+    field. SGC is not VAT-registered. The MSA §C.6 carries the gross-up
+    clause from clause-library/vat-gross-up.md verbatim.
+  owner: SDR
+  failure_action: refuse_to_draft
+
+# G53 — No envelope without valid approval record. Tested by
+# signature-dispatch preflight.
+gate_G53:
+  label: "No envelope without valid approval record"
+  rule: >
+    signature-dispatch refuses to send unless:
+    1. 05-approval/approval-record.yaml exists for this artifact.
+    2. approved_artifact_sha256 matches the PDF on disk.
+    3. expires_at is in the future.
+    4. decision is "approved" (not rejected / conditional with unmet conditions).
+    5. approver.name is exactly "Ali Asghar Teli Muhammad Iqbal Teli".
+  validity_days: 30
+  re_approval_required_if:
+    - artifact_html_changes
+    - artifact_pdf_changes
+    - any_figure_changes
+    - any_term_or_cadence_changes
+    - any_clause_substitution
+    - any_new_concession
+    - validity_expires
+    - approved_hash_mismatch
+  owner: signature-dispatch
+  failure_action: refuse_to_send
+
+# SDR-facing reference to the larger guardrail set
+related:
+  commercial_guardrails: knowledge/commercial-rules/  (G1–G41, gate names)
+  signature_guardrails: knowledge/send-protocol.md, knowledge/odoo-mapping.yaml  (G46–G52 summaries)

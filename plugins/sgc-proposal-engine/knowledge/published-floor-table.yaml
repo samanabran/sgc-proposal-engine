@@ -1,0 +1,255 @@
+# SGC TECH AI — Published Floor Table (v1, desk-authored, shipped in SDR plugin)
+# The desk authors this once. The SDR plugin treats it as read-only.
+# The SDR-side validator (G42) refuses to proceed when a quoted
+# subscription is below the corresponding cell.
+#
+# Convention: floor is the minimum monthly subscription (AED) that SGC
+# will quote for the cell (users, edition, term_months, cadence). The
+# desk may tighten a cell at any time by publishing a new version; the
+# SDR plugin follows.
+#
+# Values below are conservative defaults. The desk must replace each
+# `<TBD>` cell before this plugin is published to production. Until
+# then, the approval-gate skill blocks on any cell that is `<TBD>` and
+# escalates to desk.
+version: 1.0
+effective_from: 2026-08-04
+currency: AED
+unit: per_month
+authored_by: "Commercial Desk — see PUBLISHING.md for the desk-side authoring skill"
+review_required_before_publish: true
+
+grid:
+  # Five user-count buckets, two editions, three term lengths, three
+  # cadences. 90 cells. The desk tightens each cell by reissuing this
+  # file; CI revalidates the read-only freeze.
+
+  # ========================================================================
+  # Users: 5
+  # ========================================================================
+  - users: 5
+    edition: community
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 1900
+          semi_annual_in_advance: 1850
+          annual_in_advance: 1800
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 1750
+          semi_annual_in_advance: 1700
+          annual_in_advance: 1650
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 1650
+          semi_annual_in_advance: 1600
+          annual_in_advance: 1550
+  - users: 5
+    edition: enterprise
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 2900
+          semi_annual_in_advance: 2850
+          annual_in_advance: 2800
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 2700
+          semi_annual_in_advance: 2650
+          annual_in_advance: 2600
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 2550
+          semi_annual_in_advance: 2500
+          annual_in_advance: 2450
+
+  # ========================================================================
+  # Users: 8
+  # ========================================================================
+  - users: 8
+    edition: community
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 2800
+          semi_annual_in_advance: 2750
+          annual_in_advance: 2700
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 2600
+          semi_annual_in_advance: 2550
+          annual_in_advance: 2500
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 2450
+          semi_annual_in_advance: 2400
+          annual_in_advance: 2350
+  - users: 8
+    edition: enterprise
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 4100
+          semi_annual_in_advance: 4050
+          annual_in_advance: 4000
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 3850
+          semi_annual_in_advance: 3800
+          annual_in_advance: 3750
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 3650
+          semi_annual_in_advance: 3600
+          annual_in_advance: 3550
+
+  # ========================================================================
+  # Users: 10
+  # ========================================================================
+  - users: 10
+    edition: community
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 3400
+          semi_annual_in_advance: 3350
+          annual_in_advance: 3300
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 3150
+          semi_annual_in_advance: 3100
+          annual_in_advance: 3050
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 2950
+          semi_annual_in_advance: 2900
+          annual_in_advance: 2850
+  - users: 10
+    edition: enterprise
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 4900
+          semi_annual_in_advance: 4850
+          annual_in_advance: 4800
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 4600
+          semi_annual_in_advance: 4550
+          annual_in_advance: 4500
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 4350
+          semi_annual_in_advance: 4300
+          annual_in_advance: 4250
+
+  # ========================================================================
+  # Users: 15
+  # ========================================================================
+  - users: 15
+    edition: community
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 4800
+          semi_annual_in_advance: 4750
+          annual_in_advance: 4700
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 4500
+          semi_annual_in_advance: 4450
+          annual_in_advance: 4400
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 4200
+          semi_annual_in_advance: 4150
+          annual_in_advance: 4100
+  - users: 15
+    edition: enterprise
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 6700
+          semi_annual_in_advance: 6650
+          annual_in_advance: 6600
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 6300
+          semi_annual_in_advance: 6250
+          annual_in_advance: 6200
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 5950
+          semi_annual_in_advance: 5900
+          annual_in_advance: 5850
+
+  # ========================================================================
+  # Users: 20
+  # ========================================================================
+  - users: 20
+    edition: community
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 6100
+          semi_annual_in_advance: 6050
+          annual_in_advance: 6000
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 5700
+          semi_annual_in_advance: 5650
+          annual_in_advance: 5600
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 5400
+          semi_annual_in_advance: 5350
+          annual_in_advance: 5300
+  - users: 20
+    edition: enterprise
+    cells:
+      - term_months: 12
+        cadences:
+          quarterly_in_advance: 8400
+          semi_annual_in_advance: 8350
+          annual_in_advance: 8300
+      - term_months: 24
+        cadences:
+          quarterly_in_advance: 7900
+          semi_annual_in_advance: 7850
+          annual_in_advance: 7800
+      - term_months: 36
+        cadences:
+          quarterly_in_advance: 7450
+          semi_annual_in_advance: 7400
+          annual_in_advance: 7350
+
+# What this table is NOT
+not_a_rate_card: true
+not_a_reservation_pricing: true
+not_a_margin_floor: true
+not_a_cost_to_serve: true
+# The desk-only originals live in the desk plugin. This file is the
+# *minimum quotable subscription* by cell. It is a single number per
+# cell, padded so the SDR has room to discount within the published
+# cadences and the ceiling calculation still binds.
+
+# How the SDR uses this
+usage:
+  description: >
+    At proposal time, the SDR looks up the cell corresponding to
+    (users, edition, term_months, cadence). The proposed monthly
+    subscription must be >= the cell value. If it would be below, the
+    SDR escalates to the desk rather than proposing below floor.
+
+  approval_gate_role: >
+    The approval-gate skill (G42) cross-checks the proposed subscription
+    against this table before producing the approval packet. Below
+    floor → refuse to proceed and emit a `RESOLVE:` field on the
+    approval request naming the cell and the proposed AED.
+
+# Re-issue cadence
+re_issue:
+  trigger: "Any published floor change, padding change, or grid extension."
+  method: "Bump version; publish via the desk-side published-floor-authoring skill; the SDR plugin receives the new file via sync."
+  compatibility: "Cell schema is stable across minor versions; only additions are allowed in patch releases."

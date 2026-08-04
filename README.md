@@ -1,71 +1,161 @@
-# SGC Proposal Engine
+# SGC TECH AI — Scholarix Global Consultants FZCO
 
-A layered repository for building Odoo subscription proposals for SGC
-TECH AI's UAE real estate brokerage clients — commercially defensible,
-cash-risk aware, and unable to lose money if the gates are respected.
+The SGC TECH AI proposal engine. Two installable plugins, one
+marketplace:
 
-## Start here
+- **`sgc-proposal-engine`** — SDR-facing. Six skills for the 13-step
+  proposal pipeline, plus a sanitized knowledge base. Assigned to
+  the SDR team.
+- **`sgc-commercial-desk`** — approver-only. Five skills for the
+  desk-side counterparts, plus the full desk-only knowledge base.
+  Assigned to the named approver (`Ali Asghar Teli Muhammad Iqbal
+  Teli`) only.
 
-Read `AGENTS.md` in full before touching anything. New SDRs: follow
-`05-ops/onboarding-new-sdr.md`.
+The marketplace lives at `.claude-plugin/marketplace.json`. The
+distribution manifest at `DISTRIBUTION-MANIFEST.md` classifies every
+repo file as `sdr` / `desk` / `both` / `excluded`. The publishing
+guide at `PUBLISHING.md` describes the Den self-host + RBAC + sync
+steps. The migration notes at `MIGRATION-NOTES.md` describe what
+moved, what was excluded, and what an SDR does on first run.
 
-## The three-number model (for a new SDR, in one read)
+## The mandatory human approval gate
 
-Every proposal reduces to three numbers, computed in order.
+Nothing reaches a client without a recorded decision from the named
+approver. The `approval-gate` skill in the SDR plugin produces a
+`05-approval/approval-request.md` and stops; the approver writes
+`05-approval/approval-record.yaml` with a SHA-256 binding to one
+exact artifact. The `signature-dispatch` skill refuses to send
+without a valid, unexpired, hash-matching approval record (G53).
+Re-approval is a new record, never an edit of the old one.
 
-**Number 1 — Cost to Serve.** What it costs SGC every month to keep this
-client running: licences (zero on Community edition, the default),
-hosting, tooling, support labour, account management. Multiply by 1.25 —
-that's the platform floor. The recurring subscription price must never
-sit below it.
+## The two plugins, side-by-side
 
-**Number 2 — Build Value.** The one-time cost of implementation: hours
-from the work-package catalogue, times a rate that must exist on the rate
-card, plus project management and contingency loading. This is what the
-client eventually pays for, whether upfront or over time.
+| Plugin | Skills | Knowledge | RBAC |
+|---|---|---|---|
+| `sgc-proposal-engine` | 6 (intake, pricing, drafting, contract-assembly, approval-gate, signature-dispatch) | Sanitized derivatives + verbatim clause-library + verbatim commercial-rules | All SDRs |
+| `sgc-commercial-desk` | 5 (walk-away-authoring, deal-card-review, published-floor-authoring, redacted-derivative-release, signature-handler-monitor) | Full desk originals (`00-knowledge/`, `07-protection/`, `04-governance/`, `05-ops/`, `06-brand/`, `10-signature/` reference) | Approver only |
 
-**Number 3 — Financing Uplift.** If the client doesn't pay the full build
-value at kickoff, the deferred portion carries a disclosed financing
-uplift, recovered through the subscription over the term. Settling in
-full at kickoff removes this number entirely.
+The Den RBAC assignment is the confidentiality boundary. Plugin
+content is a subset of the desk's knowledge, redacted. Both plugins
+together are the full pipeline.
 
-Assemble: mobilisation (33% of build value, by default) plus a monthly
-subscription of platform floor plus recovery. Two options only —
-mobilisation-paid or nothing else; zero-upfront is currently withdrawn.
-Every deal runs through 41 gates before it can be drafted. If one fails,
-you reduce scope — you never discount past it.
+## The 13-step pipeline
 
-## Why it's laid out this way
+```
+intake → fact ledger confirmed → risk assessment → pricing worksheet →
+payment-plan worksheet → exposure calculation → walk-away card →
+gates G1–G41 → brand resolution → draft → consistency map → validate →
+QA → PDF + hash → approval gate → envelope
+```
 
-Drift is the enemy: a copied rate card that gets edited becomes three
-different truths within months. `00-knowledge/` is read-only and single-
-sourced; `02-clients/` references it, never duplicates it. See
-`00-knowledge/failure-modes/known-defects.md` for what happens when this
-discipline slips — twenty defects, with the arithmetic, from a real
-revision history.
+Every skill in either plugin names its position in this sequence and
+refuses to run out of order. The refusal cites the specific gate
+that forbids the out-of-order invocation.
 
-## Layout
+## The guardrails
 
-| Layer | Who writes | Purpose |
-|---|---|---|
-| `00-knowledge/` | Commercial Desk only | Every rate, gate, and clause |
-| `01-templates/` | Commercial Desk only | Structure and prose skeletons |
-| `02-clients/` | SDR + agent | Deal execution, `05-issued/` immutable |
-| `03-library/` | SDR, reviewed | Shared craft |
-| `04-governance/` | Sales leadership | Approval authority |
-| `05-ops/` | Commercial Desk | How to run the repository |
-| `06-brand/` | Commercial Desk only | Visual identity, entity facts |
-| `07-protection/` | Commercial Desk + Finance | Exposure limits, walk-away pricing |
+- **G1–G41** — commercial guardrails (subscription, payment-plan,
+  protection). Stated verbatim in
+  `00-knowledge/commercial-rules/{subscription,payment-plan,protection}-guardrails.md`.
+- **G42–G45** — plugin-conversion guardrails (published-floor,
+  package-rate, edition disclosure, VAT disclosure). Authored in
+  `plugins/sgc-commercial-desk/knowledge/guardrails-g42-g53.yaml`;
+  mirror copy in the SDR plugin.
+- **G46–G52** — signature-pipeline guardrails. Stated verbatim in
+  `10-signature/guardrails-G46-G52.md`.
+- **G53** — the new approval-record gate. No envelope may be
+  created without a valid `approval-record.yaml` whose
+  `approved_artifact_sha256` matches the PDF being sent.
 
-## Live examples
+## CI gates
 
-`02-clients/VGE-vongeyern-realestate/` — v1, a clean 12-user smb build.
-`02-clients/MRD-meridianview-realty/` — v2, a 5-user Community-edition
-build whose first two revisions were retracted for documented defects,
-corrected in Rev3. Read the second one to see the gates catch a real
-failure pattern, not just pass a clean deal.
+Run on every commit to a plugin path; failure blocks release:
 
-## Starting a new deal
+- `plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py` —
+  verifies the redacted derivatives match the desk originals on the
+  SDR-safe line set and contain no desk-only line
+- `plugins/sgc-proposal-engine/ci/forbidden-strings.sh` — verifies
+  no forbidden string appears in the plugin
+- `plugins/sgc-proposal-engine/ci/secrets-scan.sh` — verifies no
+  credential, key, or client PII in any bundled file
+- `plugins/sgc-proposal-engine/tests/acceptance.sh` — runs all 10
+  acceptance items
 
-Copy `02-clients/_SCAFFOLD/` and follow
-`00-knowledge/runbook/subscription-proposal-runbook.md` from §1.
+The GitHub Actions workflow lives at
+`plugins/sgc-proposal-engine/ci/github-actions-workflow.yml` and is
+referenced for placement at `.github/workflows/plugin-gates.yml`.
+
+## Company facts
+
+- **Not registered for UAE VAT. No TRN.** The gross-up clause from
+  `00-knowledge/clause-library/vat-gross-up.md` is verbatim in the
+  MSA §C.6. Never "VAT inclusive", "VAT exempt", "free zone
+  exempt", or any TRN field in the proposal narrative.
+- **Odoo Community default**, version-pinned. State exclusions
+  plainly: no Odoo Enterprise mobile app (mobile-optimised browser
+  only), no Studio, limited advanced accounting, major upgrades
+  quoted separately.
+- **"Enterprise" refers only to the Odoo edition.** Top service
+  tier is **Professional**.
+- **G32**: every deal cash-positive within 30 days of Kickoff.
+- **G33**: Quarterly in advance minimum cadence.
+- **G34**: Mobilisation ≥33% and covers any pre-paid third-party
+  cost.
+
+## Open RESOLVE fields
+
+The following block the first go-live of the plugin; the desk
+authorises each before any SDR receives the plugin. See
+`PUBLISHING.md` for the full list.
+
+1. The root MSA at `subscription_mode_sla_msa.htm` still has stale
+   FZE and unresolved IFZA/DIFC/address. The entity file
+   `06-brand/entity/legal-identity.yaml` resolves to FZCO/IFZA/Al
+   Rigga. The plugin ships the root MSA verbatim; the desk-side
+   remediation is a separate task.
+2. **Den deployment status** — whether Den is fully configured for
+   this team's RBAC and sync is unknown.
+3. **GitHub connector configuration** — the connector that lets
+   Den pull from the repo is **not yet configured**.
+
+Countersignatory is resolved: `Ali Asghar Teli Muhammad Iqbal
+Teli` per `06-brand/entity/legal-identity.yaml: contact.name`.
+
+## What this repository contains
+
+- `AGENTS.md` — the desk's authoritative operating contract
+- `CHANGELOG.md` — the desk's changelog
+- `README.md` — this file
+- `subscription_mode_sla_msa.htm` — canonical MSA & SLA v2026.08
+  (root file is provenance)
+- `_source-documents/` — source PDFs and the commercial export
+  (desk reference)
+- `00-knowledge/` — pricing, commercial-rules, clause-library,
+  market-data, failure-modes, runbook
+- `01-templates/` — proposal sections, intake, comms, QA
+- `02-clients/` — historical (MRD, VGE); the `_SCAFFOLD` has been
+  moved to `plugins/sgc-proposal-engine/workspace-bootstrap/`
+- `03-library/` — worked examples (drafting reference)
+- `04-governance/` — access-model, approval-matrix, escalation-triggers
+- `05-ops/` — glossary, naming-conventions, onboarding, validate
+- `06-brand/` — entity, registry, brand-tokens, styles, watermarks
+- `07-protection/` — doctrine, walkaway, exposure, abort, monitoring
+- `08-contracts/` — root MSA (canonical) + untracked duplicate
+  (excluded from bundles) + VGE-specific consistency map (excluded)
+- `09-agent/` — step-gate, fabrication-rules, intake-interview,
+  question-bank, sufficiency, session-log (verbatim copies in the
+  SDR plugin)
+- `10-signature/` — Zoho Sign integration: send-protocol, webhook
+  spec, Odoo mapping, audit retention, notification templates,
+  guardrails G46–G52. The handler code (`handler/`) is in the SRE
+  repo.
+- `.claude-plugin/marketplace.json` — the marketplace manifest
+- `plugins/` — the two installable plugins
+- `DISTRIBUTION-MANIFEST.md` — every file classified
+- `PUBLISHING.md` — Den self-host + RBAC + sync
+- `MIGRATION-NOTES.md` — what moved, what was excluded, what an SDR
+  does on first run
+
+## License
+
+Proprietary — internal use only.

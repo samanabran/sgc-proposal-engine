@@ -1,0 +1,83 @@
+{
+  "name": "sgc-commercial-desk",
+  "version": "1.0.0",
+  "description": "Approver-only plugin. Five skills (walk-away-authoring, deal-card-review, published-floor-authoring, redacted-derivative-release, signature-handler-monitor) and the full desk-only knowledge base. RBAC-assigned to the named approver (Ali Asghar Teli Muhammad Iqbal Teli) only.",
+  "author": {
+    "name": "SGC TECH AI / Scholarix Global Consultants FZCO",
+    "contact": "hello@sgctech.ai"
+  },
+  "license": "Proprietary — internal use only",
+  "rbac_assignment": "Approver (Ali Asghar Teli Muhammad Iqbal Teli) only",
+  "skills": [
+    {
+      "name": "walk-away-authoring",
+      "path": "skills/walk-away-authoring/SKILL.md",
+      "step": 7,
+      "owner": "Commercial Desk"
+    },
+    {
+      "name": "deal-card-review",
+      "path": "skills/deal-card-review/SKILL.md",
+      "step": 8,
+      "owner": "approver (Ali Asghar Teli Muhammad Iqbal Teli)"
+    },
+    {
+      "name": "published-floor-authoring",
+      "path": "skills/published-floor-authoring/SKILL.md",
+      "step": "anytime",
+      "owner": "Commercial Desk"
+    },
+    {
+      "name": "redacted-derivative-release",
+      "path": "skills/redacted-derivative-release/SKILL.md",
+      "step": "anytime",
+      "owner": "Commercial Desk"
+    },
+    {
+      "name": "signature-handler-monitor",
+      "path": "skills/signature-handler-monitor/SKILL.md",
+      "step": "continuous",
+      "owner": "Commercial Desk + IT"
+    }
+  ],
+  "knowledge": {
+    "canonical": [
+      "knowledge/policy.yaml (full)",
+      "knowledge/hosting.yaml (full)",
+      "knowledge/payment-plans.yaml (full)",
+      "knowledge/concession-ladder.yaml (full)",
+      "knowledge/phase2-catalogue.yaml (full)",
+      "knowledge/risk-security-matrix.yaml (full)",
+      "knowledge/subscription-proposal-runbook.md (full)",
+      "knowledge/07-protection/",
+      "knowledge/00-knowledge/commercial-rules/",
+      "knowledge/00-knowledge/clause-library/",
+      "knowledge/00-knowledge/market-data/",
+      "knowledge/00-knowledge/failure-modes/known-defects.md",
+      "knowledge/04-governance/",
+      "knowledge/05-ops/",
+      "knowledge/06-brand/",
+      "knowledge/10-signature/ (excl. handler/, webhook-fixtures/, sgc-crm-fields/)",
+      "knowledge/guardrails-g42-g53.yaml (canonical)"
+    ]
+  },
+  "approver": {
+    "name": "Ali Asghar Teli Muhammad Iqbal Teli",
+    "title": "Company Manager",
+    "organisation": "Scholarix Global Consultants FZCO / SGC TECH AI",
+    "no_delegation": true,
+    "no_alternate": true,
+    "no_agent_on_behalf_of": true
+  },
+  "versioning": {
+    "scheme": "semver",
+    "bump_required_for": [
+      "Any rate, formula, gate, or clause change",
+      "Any absolute floor change",
+      "Any guardrail addition or rephrasing",
+      "Any new skill or skill removal",
+      "Any redacted-derivative line-set change"
+    ],
+    "sync_mechanism": "Described in PUBLISHING.md at the repo root"
+  }
+}

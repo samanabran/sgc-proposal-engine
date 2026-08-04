@@ -1,0 +1,29 @@
+# SGC TECH AI — Cloud Hosting (sanitized for SDR plugin)
+# Original: 00-knowledge/pricing/hosting.yaml (desk-only file)
+# Redacted by: plugins/sgc-commercial-desk/skills/redacted-derivative-release
+# Verified by: plugins/sgc-proposal-engine/ci/diff-redacted-derivatives.py
+#
+# This derivative carries the published tier list prices only. The
+# cost-basis note, the cross-reference to cost_to_serve, and the
+# third-party pass-through reference live in the desk plugin.
+version: 2.0
+effective_from: 2026-08-03
+
+tiers:
+  foundation:
+    spec: "2 vCPU · 4 GB RAM · 50 GB SSD"
+    max_users: 20
+    price_aed_mo: 990
+  growth:
+    spec: "4 vCPU · 8 GB RAM · 100 GB SSD"
+    max_users: 50
+    price_aed_mo: 1950
+  enterprise:
+    spec: "8 vCPU · 16 GB RAM · 200 GB SSD · HA"
+    max_users: 250
+    price_aed_mo: 3490
+
+# NOTE: The "COST BASIS NOTE" header, the cost_to_serve cross-reference,
+# the user-capacity annotation, and any third-party pass-through
+# references live in the desk plugin. They are the internal cost-to-serve
+# build-up; SDRs see only the list prices above.
