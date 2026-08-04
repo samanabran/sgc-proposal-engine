@@ -12,10 +12,20 @@ mandatory.
 
 **requires_counsel_review**: false.
 
-**When mandatory**: every proposal, always — this is not optional or
-deal-specific. Pairs with `vat-uae.md`.
+**When mandatory**: in the MSA (§C.6), always — this is not optional or
+deal-specific, and is never omitted there regardless of what the sales
+proposal says. Pairs with `vat-uae.md`.
 
-**When it must NOT be used**: never omit it while `vat.registered: false`.
+**In the sales proposal specifically** (per user decision 2026-08-04):
+omitted by default, same as `vat-uae.md` — include only if the client or
+SDR explicitly asks about tax treatment, and always paired with
+`vat-uae.md`, never alone.
+
+**When it must NOT be used**: never omit it from the MSA while
+`vat.registered: false`. The gross-up right this clause protects (adding
+VAT to invoices from the date SGC registers, without needing to
+renegotiate price) must exist in the binding contract regardless of
+proposal-level silence.
 
 ---
 

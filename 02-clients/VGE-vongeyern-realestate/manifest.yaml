@@ -1,45 +1,106 @@
 opportunity_id: "VGE-2026-SUB-01"
-client_legal_name: "Von Geyern Real Estate Brokerage LLC"
+client_legal_name: "Von Geyern Real Estate L.L.C"
 jurisdiction: "mainland"
-client_trn: "100123456700003"
-decision_maker: "Elena von Geyern, Managing Partner"
-sdr_owner: "Farah Haddad"
-segment: "smb"
-vertical: "uae-real-estate"
+client_trn: null          # not stated by client at any point; recorded as null rather than fabricated
+decision_maker: "Ms. Nadja, Owner"
+sdr_owner: "SGC Tech AI SDR"
+segment: "startup_boutique"
+edition: "community"
+vertical: "real-estate-brokerage-uae"
 
 stage: draft                # intake | calc | draft | review | issued | won | lost
 current_revision: "VGE-2026-SUB-01_Rev3"
-knowledge_version_used: "pricing v1.0 (2026-08-03)"
+knowledge_version_used: "pricing v2.0 (2026-08-03)"
 
 gates_passed: true
 gate_report: 02-calc/gate-report.md
+walkaway_card_produced: true
 escalations:
-  - date: "2026-06-28"
-    raised_by: "Farah Haddad"
-    issue: "Client asked mid-negotiation to bring trust/commission accounting into SGC scope, previously deferred to their own bookkeeper in Rev1. Not a gate failure — scope addition requested by client. Logged per AGENTS.md 'anything said aloud is scope.'"
-    resolution: "Added odoo_accounting module + finance_setup work package to the worksheet; re-ran gates (all pass); reflected in Rev2."
   - date: "2026-08-03"
-    raised_by: "Farah Haddad"
-    issue: "Client requested extending term from 18 to 24 months for cash-flow reasons, per 2026-08-03 call. Not a gate failure — client-requested financing change."
-    resolution: "Re-ran number_3_financing at months_24 uplift (0.12); all gates re-verified pass; drafting as Rev3."
+    raised_by: "SGC Tech AI SDR"
+    issue: >
+      Earlier v1 Rev1/Rev2 documents under this client folder were built from
+      invented data and an invented client identity (Elena von Geyern, 12
+      users, smb segment, Big-4-style figures). The v2 hardening pass
+      replaced the entire knowledge layer with corrected pricing policy and
+      a hardened 41-gate system; the v1 history remains in 05-issued/ as
+      the original artifacts (immutable, do not overwrite) but is no
+      longer consistent with current knowledge-version policy.
+    resolution: >
+      A real discovery call (Otter-transcribed, dated 2026-08-03) and the
+      CRM record (Lead ID 10119, per user-provided CRM summary and BANT
+      qualification screenshot) confirmed the real client identity
+      (Von Geyern Real Estate L.L.C, Dubai mainland) and decision-maker
+      (Ms. Nadja, Owner — confirmed in the CRM Authority gate). This
+      Rev3 is built on those facts plus the brief's §3 commercial figures,
+      which are the single source of truth for the proposal.
+  - date: "2026-08-03"
+    raised_by: "SGC Tech AI SDR"
+    issue: >
+      Source-of-truth gap: the Otter transcript does not state a numeric
+      rejection figure. The client probed two anchors ("is AED 30,000 too
+      much? is 40,000 too much?") in the context of an upfront one-time
+      integration fee, not a hard rejection. The brief uses AED 35,000 as
+      a midpoint for gate-test purposes; the proposal prose uses the range
+      language from the transcript verbatim.
+    resolution: >
+      Worksheet records budget_rejected_aed_low: 30000, _high: 40000,
+      and _midpoint: 35000 (gate-test only). Proposal uses range language
+      ("you indicated a range of AED 30,000–40,000 felt heavy as an upfront
+      figure") rather than quoting a single midpoint figure the transcript
+      does not contain.
+  - date: "2026-08-03"
+    raised_by: "SGC Tech AI SDR"
+    issue: >
+      The brief specifies "Ms. Nadja" as the contact; the Otter transcript
+      addresses the SDR as "Miss" without capturing a name in text. The
+      CRM Authority gate (BANT qualification, per user-provided screenshot)
+      confirms "Ms. Nadja [Owner]" as the decision-maker.
+    resolution: >
+      Cover letter addresses "Ms. Nadja" per the brief and per the CRM
+      Authority gate. Public LinkedIn / Instagram presence ("Valeria von
+      Geyern") is not used as the addressing name — those records may be a
+      different personal identity or a public-brand identity; addressing
+      defaults to the CRM-confirmed business decision-maker.
+  - date: "2026-08-04"
+    raised_by: "SGC Tech AI SDR"
+    issue: >
+      Headcount discrepancy noticed during pre-issue QA: the CRM BANT
+      Budget field states the company has "3 commission based employees,"
+      while the brief §3 and the worksheet are built on 5 users
+      (startup_boutique segment, 52h build benchmark for 5 users). Raised
+      to the user before treating Rev3 as final.
+    resolution: >
+      User decision (2026-08-04): keep 5 users. The brief's §3 figures
+      remain the single source of truth per runbook policy; the CRM
+      BANT free-text figure ("3 commission based employees") is read as
+      commission-earning agents specifically, not the full count of
+      system users (which would also include the owner and any
+      admin/back-office seats). No rebuild of the worksheet or proposal
+      required. Note for a human reviewer: worth a one-line confirmation
+      with the client at Kickoff that 5 named users is the correct
+      starting count, since the Order Form ships with 3 included users
+      + paid additional seats at AED 250/mo each.
 
 revisions:
   - ref: "VGE-2026-SUB-01_Rev1"
     issued_date: "2026-06-15"
     path: "05-issued/VGE-2026-SUB-01_Rev1/"
     status: "superseded"
-    notes: "Initial proposal — CRM + Sales only, 12-month term, mobilisation 25%. Superseded when client requested trust/commission accounting be brought into scope (see escalations 2026-06-28)."
+    notes: "Historical v1 artifact. Built from invented data under v1 pricing policy (25% mobilisation, smb segment). Superseded by Rev2 and then by this Rev3 rebuild. Do not overwrite — frozen per repo immutability rule."
   - ref: "VGE-2026-SUB-01_Rev2"
     issued_date: "2026-07-10"
     path: "05-issued/VGE-2026-SUB-01_Rev2/"
     status: "superseded"
-    notes: "Added odoo_accounting + finance_setup. CRM + Sales + Accounting, 18-month term. Superseded when client requested a 24-month term for cash-flow reasons (see escalations 2026-08-03)."
+    notes: "Historical v1 artifact. Added odoo_accounting module to scope, term extended 12→18 months. Built from invented data. Superseded by this Rev3 rebuild. Do not overwrite."
   - ref: "VGE-2026-SUB-01_Rev3"
     issued_date: ""
-    path: "03-draft/VGE-2026-SUB-01_Rev3/"
+    path: "04-draft/VGE-2026-SUB-01_Rev3_Proposal.html"
     status: "draft"
-    notes: "Same scope as Rev2 (CRM + Sales + Accounting), term extended to 24 months. Awaiting human review before issue."
+    notes: "Built against the brief §3 figures (5 users, startup_boutique, AED 14,800 Implementation Value, AED 4,900 mobilisation, AED 1,650/mo Subscription, 18% financing uplift, 24mo Initial Term, Community edition, Growth tier, quarterly-in-advance billing). Discovery call (Otter) and CRM (Lead ID 10119, BANT Authority gate passed, decision-maker Ms. Nadja, contact info@vongeyern.de / +971 58 551 8040) sourced the client-side facts. All 41 v2 gates pass. §07 TRN capability line rephrased to remove the raw 'TRN' substring while keeping the same meaning. Headcount discrepancy (CRM BANT '3 commission based employees' vs. 5 users used throughout) surfaced to user 2026-08-04 and resolved: keep 5 users, brief remains source of truth. Entity fields (licence authority, licence number, registered address, signatory) resolved 2026-08-04 from the govt-issued DIEZA/IFZA trade license (No. 45160) and the Odoo company record — see legal-identity.yaml resolution note; legal name corrected FZE→FZCO to match the license. `05-ops/validate.py` run 2026-08-04 after entity resolution: exit 0, RESULT: clean (all 18 checks pass, including check 14 entity resolution). Remaining 2 RESOLVE fields (Kickoff date, Community upgrade policy) closed 2026-08-04 per user instruction: Kickoff stated as a target (within 30 days of this proposal's issue date, §08/§11/§13), exact calendar date fixed at Order Form signature; upgrade policy written out in full in §04 as OCA-standard practice for Odoo Community (version-pinned, upgrades scoped/quoted separately using OpenUpgrade/official upgrade path with staging validation before cutover). Open-items panel now shows zero open items. Proposal is fully clear to issue pending Order Form signature."
 
 verbal_promises_logged: true
 adoption_clause_included: true
 clawback_included: true
+evidence_file_complete: false   # true only at go-live per G29's own scope; signature + counsel review pending
+prior_versions_issued_to_client: false   # per conversation with user on 2026-08-04: "nothing was go out to client as of now" — no correction paragraph required under brief §6

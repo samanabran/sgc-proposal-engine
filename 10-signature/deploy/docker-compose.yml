@@ -1,0 +1,19 @@
+services:
+  signature-handler:
+    image: python:3.12-slim
+    container_name: signature-handler
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./handler:/app:ro
+      - ./notification-templates:/notification-templates:ro
+      - ./data:/data
+    env_file:
+      - .env
+    environment:
+      - STORE_PATH=/data/store.db
+      - HOST=0.0.0.0
+      - PORT=8765
+    command: ["python", "handler.py", "serve", "--host", "0.0.0.0", "--port", "8765"]
+    ports:
+      - "127.0.0.1:18765:8765"

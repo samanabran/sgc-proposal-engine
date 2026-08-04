@@ -13,7 +13,16 @@ construction — but re-verify against `policy.yaml: vat.registered`
 immediately before every issue, since this is the one fact in the repo
 most likely to change without the clause library being updated in step).
 
-**When mandatory**: every proposal, always, while `vat.registered: false`.
+**When mandatory**: in the MSA (§C.6) and Order Form, always, while
+`vat.registered: false` — that binding position is never omitted there.
+
+**In the sales proposal specifically** (per user decision 2026-08-04):
+this clause is omitted by default — no "exclusive of VAT" line, no VAT
+commentary at all — unless the client or SDR explicitly asks about tax
+treatment. When asked, use this clause verbatim (paired with
+`vat-gross-up.md`, never alone) and record the origin per
+`09-agent/fabrication-rules.md`. Proposal silence never changes SGC's
+actual VAT position or the MSA's binding statement of it.
 
 **When it must NOT be used**: the moment SGC obtains a TRN. At that point
 this clause is replaced by a VAT-registered version (not yet drafted —

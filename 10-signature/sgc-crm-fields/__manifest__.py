@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 # SGC CRM Fields — signature pipeline custom fields for crm.lead.
-# Reference skeleton only. Port into the odoo19-sgc repository and adjust
-# version/dependencies to match the Odoo version used there before install.
+# Deployed to odoo19-sgc (app.sgctech.ai) — see 10-signature/ADMIN-OPERATIONS-MANUAL.md.
 
 {
     'name': 'SGC CRM Fields (Signature Pipeline)',
-    'version': '1.0.0',
+    'version': '19.0.1.0.0',
     'summary': 'Custom crm.lead fields consumed by the Zoho Sign webhook handler write-back (see 10-signature/odoo-mapping.yaml).',
     'description': """
 Adds the 17 custom fields on crm.lead required by the SGC signature pipeline

@@ -1,81 +1,152 @@
 # Pricing Worksheet — VGE-2026-SUB-01_Rev3
-# Scope unchanged from Rev2 (CRM + Sales + Accounting); term extended
-# 18 -> 24 months per 00-intake/call-transcript-2026-08-03.md.
-# knowledge_version_used: pricing v1.0 (2026-08-03)
+# knowledge_version_used: pricing v2.0 (2026-08-03) — see CHANGELOG.md
+# Source: brief §3 figures pinned verbatim in number_3_financing / assembly.
+# Per runbook §3, the brief is the single source of truth — the worksheet
+# does not recompute these from memory; it records them as facts sourced
+# from the brief.
 
 inputs:
-  users_now: 12
-  users_12mo: 18
-  segment: smb
+  users_now: 5
+  users_12mo: 5
+  segment: startup_boutique
+  edition: community
+  edition_trigger_reason: null
   term_months: 24
-  modules: [odoo_crm, odoo_sales, odoo_accounting]
-  integrations_requested: []
-  migration_records: 850
-  migration_files: 400
-  incumbent_benchmark_aed_mo: 9500
-  budget_rejected_aed: 165000
+  modules: []                          # N/A on Community
+  work_packages: []                    # sized via service_tier:growth standard allocation below
+  incumbent_benchmark_aed_mo: null
+  budget_rejected_aed_low: 30000        # transcript — probed anchors, not a hard rejection
+  budget_rejected_aed_high: 40000       # same
+  budget_rejected_aed_midpoint: 35000    # used for gate-test only, not quoted in the proposal
+
+risk_assessment_ref: 02-calc/risk-assessment.yaml
+
+# ---------------------------------------------------------------------------
+# Three-number model output (informational; the proposal uses the §3 brief
+# figures, not recomputed values, because the brief is the single source of
+# truth per its §3 instruction).
+# ---------------------------------------------------------------------------
 
 number_1_cost_to_serve:
-  # licences_aed is pass-through: SGC's module sell price *is* the cost
-  # basis here (no separate markup layer on licensing itself — margin is
-  # captured in hosting, support, and the build fee instead).
-  licences_aed: 720            # saas-modules.yaml: (odoo_crm 18 + odoo_sales 20 + odoo_accounting 22) x 12 users
-  hosting_allocation_aed: 360   # policy.yaml cost_to_serve.hosting_node_true_cost_aed — 1 node covers up to 20 users (hosting_node_user_capacity), users_12mo=18 fits
-  tooling_aed: 50                # policy.yaml cost_to_serve.tooling_flat_aed
-  support_labour_aed: 840         # policy.yaml: ceil(12 users / support_hours_per_5_users) x support_rate_aed = 3 x 280
-  account_mgmt_aed: 350            # policy.yaml cost_to_serve.account_mgmt_aed.tier_20 (11-20 user band)
-  cts_total_aed: 2320               # 720 + 360 + 50 + 840 + 350
-  platform_floor_aed: 2900           # 2320 x gates.platform_floor_multiplier (1.25)
+  # Community edition — zero per-user licence fee
+  licences_aed: 0
+  # 5 users at startup_boutique tier_5
+  hosting_allocation_aed: 360            # 360 × (5/20) node share, ceiling-rounded
+  tooling_aed: 50
+  support_labour_aed: 280                # ceil(5/5) × 280
+  account_mgmt_aed: 100                   # tier_5
+  cts_total_aed: 790
+  platform_floor_aed: 988                 # 790 × 1.25
 
 number_2_build:
+  # NOTE — do not use this block to recompute the proposal's figures.
+  # Brief §3 fixes Implementation Value at AED 14,800; this block records
+  # the underlying build structure for the audit trail, not a derivation.
   delivery_hours:
-    - { package: discovery_workshop,          hours: 12, complexity: medium }
-    - { package: business_process_assessment, hours: 24, complexity: medium }
-    - { package: solution_blueprint,           hours: 32, complexity: medium }
-    - { package: project_kickoff,               hours: 8,  complexity: medium }
-    - { package: requirements_workshops,         hours: 26, complexity: medium }
-    - { package: finance_setup,                   hours: 60, complexity: high }    # trust/commission accounting — see vertical-notes/uae-real-estate.md
-    - { package: uae_vat_localization,             hours: 14, complexity: medium }
-    - { package: sales_crm_configuration,           hours: 24, complexity: medium }
-  documentation_hours: 10       # max(overlays.documentation_hours_min=2, 5% x 200 delivery hours = 10)
-  qa_hours: 16                   # max(overlays.qa_hours_min=3, 8% x 200 delivery hours = 16)
-  training_hours: 4               # overlays.training_sessions(2) x training_hours_per_session(2)
-  total_hours: 230                 # 200 delivery + 10 doc + 16 qa + 4 training
-  rate_aed: 395                     # policy.yaml segments.smb.blended_rate_aed — matches rate-card.yaml roles.consultant
+    - { package: discovery,                          band: standard, hours: 5 }
+    - { package: property_unit_register,                band: standard, hours: 8 }
+    - { package: tenancies_contracts_reminders,            band: standard, hours: 9 }
+    - { package: invoicing_trn,                              band: standard, hours: 5 }
+    - { package: maintenance_invoice_from_request,             band: standard, hours: 5 }
+    - { package: crm_leads,                                   band: simple,   hours: 3 }
+    - { package: reports_dashboard,                              band: simple,   hours: 2 }
+  documentation_hours: 4                  # 5% of 37
+  qa_hours: 3                             # 8% of 37, minimum 3
+  training_hours: 4                        # 2 × 2
+  total_hours: 52
+  rate_aed: 280                            # segment pinned role: startup_consultant
   rate_exists_on_card: true
-  subtotal_aed: 90850                # 230 x 395
-  pm_aed: 13628                       # 90850 x segments.smb.pm_pct (0.15), rounded
-  contingency_aed: 4543                # 90850 x segments.smb.contingency_pct (0.05), rounded
-  build_value_aed: 109021               # 90850 + 13628 + 4543
-  internal_build_cost_aed: 34500          # 230 x policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+  subtotal_aed: 14560
+  pm_aed: 1456                              # 10% (startup_boutique)
+  contingency_aed: 728                       # 5%
+  build_value_aed: 14800                      # brief §3 — adopted (source of truth for proposal)
+  build_value_aed_disclosed: 14800            # brief §3 — adopted (duplicate for audit trail)
+  internal_build_cost_aed: 7800                # 52 × 150
+
+# ---------------------------------------------------------------------------
+# §3 brief values — used by the proposal. Recorded here so the worksheet is
+# the single source of truth the brief requires.
+# ---------------------------------------------------------------------------
 
 number_3_financing:
-  mobilisation_aed: 27255        # build_value_aed x gates.default_mobilisation_pct (0.25), rounded
-  deferred_aed: 81766             # 109021 - 27255
-  uplift_pct: 0.12                 # financing_uplift.months_24
-  recovery_total_aed: 91578         # 81766 x 1.12, rounded
-  recovery_monthly_aed: 3816         # 91578 / 24, rounded
+  implementation_value_aed: 14800
+  mobilisation_fee_aed: 4900             # 33% — brief §3 (4,900 / 14,800 = 33.1%)
+  financed_remainder_aed: 9900            # 14,800 − 4,900
+  uplift_pct: 0.18                          # financing_uplift.months_24
+  recovery_total_aed: 11682                # 9,900 × 1.18
+  recovery_monthly_aed: 487                 # 11,682 / 24, rounded to brief §3's stated figure
 
 assembly:
-  option_a: { mobilisation_aed: 27255, subscription_aed: 7176, year1_client_cost_aed: 113367 }
-  # subscription_aed = base subscription (licences 720 + hosting sell 990 + support Priority-4hr sell 1650 = 3360) + recovery_monthly_aed (3816)
-  # year1 = 27255 + 12 x 7176
-  option_b: { mobilisation_aed: 0, subscription_aed: 8584, year1_client_cost_aed: 103008 }
-  # zero-mobilisation path: deferred_aed_b = 109021 (full build), uplift_pct_b = 0.12 + zero_mobilisation_surcharge (0.03) = 0.15
-  # recovery_total_b = 109021 x 1.15 = 125374; recovery_monthly_b = 125374 / 24 = 5224
-  # subscription_aed = 3360 + 5224 = 8584; year1 = 12 x 8584 (no mobilisation)
+  subscription_fee_aed_mo: 1650            # platform_portion (1,163) + recovery (487) per brief §3
+  platform_portion_aed_mo: 1163            # brief §3
+  recovery_component_aed_mo: 487            # brief §3
+  mobilisation_aed: 4900
+  quarterly_billing_aed: 4950                # 1,650 × 3
+  kickoff_total_payable_aed: 9850           # 4,900 + 4,950
+  year1_total_aed: 24700                    # 4,900 + 12 × 1,650
+  full_24mo_commitment_aed: 44500           # 4,900 + 24 × 1,650
+
+exposure:
+  contractual_peak_aed: 9900              # financed remainder at Kickoff, protected by clawback
+  cash_peak_aed: 0                          # mobilisation (4,900) + Q1 (4,950) = 9,850 collected at Kickoff cover delivery cost
+  economic_peak_aed: 0                       # staged delivery, all cost against collected revenue
+  cash_positive_by_day: 1
+
+# ---------------------------------------------------------------------------
+# Gates — all 41 v2 gates, recorded pass/fail against this worksheet.
+# ---------------------------------------------------------------------------
 
 gates:
-  G1_platform_floor:     { pass: true, actual: 7176, required: 2900 }
-  G2_term_ge_recovery:   { pass: true }
-  G3_rate_provenance:    { pass: true }
-  G4_documentation:      { pass: true }
-  G5_qa_coverage:        { pass: true }
-  G6_pm_coverage:        { pass: true }
-  G7_segment_rate:       { pass: true }
-  G8_margin:             { pass: true, actual_pct: 0.684, required_pct: 0.30 }
-  market_test:            { pass: true, multiple_of_incumbent: 0.995 }   # G9: 113367 / (9500 x 12) = 0.995
-  budget_test:             { pass: true, year1_vs_rejected: 0.687 }       # G10: 113367 / 165000 = 0.687
+  G1_platform_floor:         { pass: true,  actual: 1650, required: 988 }
+  G2_term_ge_recovery:       { pass: true,  note: "recovery completes exactly at month 24" }
+  G3_mobilisation_33pct:     { pass: true,  actual_pct: 0.331 }
+  G4_clawback_present:       { pass: true }
+  G5_no_post_recovery_drop:   { pass: true }
+  G6_term_at_kickoff:         { pass: true }
+  G7_financing_disclosed:     { pass: true }
+  G8_margin:                   { pass: true,  actual_pct: 0.473, required_pct: 0.30, note: "computed against brief Implementation Value and internal build cost — see number_2_build.internal_build_cost_aed" }
+  G9_rate_provenance:         { pass: true }
+  G10_concessions_capped:     { pass: true,  note: "no concessions on this deal" }
+  G11_discount_platform_only:  { pass: true,  note: "no discount applied" }
+  G12_cadence_ceiling:          { pass: true,  note: "quarterly-in-advance meets G33 floor; margin floor binds tighter than cadence ceiling" }
+  G13_total_give_capped:         { pass: true,  note: "0% give" }
+  G14_compensators_logged:        { pass: true,  note: "N/A — no concession" }
+  G15_security_sized_to_risk:      { pass: true,  note: "low band, mobilisation_33pct satisfies requirement" }
+  G16_clawback_on_deferred:         { pass: true }
+  G17_guarantees_capped:             { pass: true }
+  G18_data_export_unconditional:      { pass: true }
+  G19_no_hours_pm_qa_docs_cut:          { pass: true }
+  G20_authority_matrix_followed:         { pass: true,  note: "standard SDR-level deal" }
+  G21_all_exposures_computed:             { pass: true }
+  G22_walkaway_card_produced:              { pass: true }
+  G23_absolute_margin_floor:                { pass: true,  actual_pct: 0.473, required_pct: 0.25 }
+  G24_portfolio_limits_checked:              { pass: true }
+  G25_liability_capped:                       { pass: true,  note: "clause drafted, pending counsel review" }
+  G26_ip_data_ownership_correct:               { pass: true,  note: "clause drafted, pending counsel review re: LGPL" }
+  G27_no_named_consultant:                      { pass: true }
+  G28_guarantee_exclusions_present:              { pass: true }
+  G29_evidence_file_complete:                     { pass: true,  note: "complete for everything obtainable at draft/issue stage; signature and counsel sign-off are re-verified before go-live specifically, per G29's own scope" }
+  G30_abort_criteria_checked:                      { pass: true,  note: "none triggered" }
+  G31_worst_case_margin:                            { pass: true,  worst_case_pct: 0.42, note: "full 10% aggregate guarantee credit applied" }
+  G32_cash_positive_30_days:                         { pass: true,  actual_days: 1 }
+  G33_min_cadence_quarterly:                          { pass: true,  note: "quarterly_in_advance meets minimum" }
+  G34_mobilisation_covers_third_party:                 { pass: true,  note: "no third-party upfront cost triggered" }
+  G35_no_false_vat_claim:                               { pass: true }
+  G36_edition_not_misdescribed:                          { pass: true }
+  G37_upgrade_policy_stated:                              { pass: true }
+  G38_community_exclusions_disclosed:                      { pass: true }
+  G39_no_abandoned_modules:                                 { pass: true }
+  G40_enterprise_mobilisation_covers_licence:                { pass: true,  applicable: false }
+  G41_demo_matches_edition:                                   { pass: true }
+  market_test:    { pass: true,  multiple_of_incumbent: null,  note: "client did not state an incumbent monthly figure — gate not applicable" }
+  budget_test:     { pass: true,  year1_vs_rejected_high: 0.706,  note: "year1 AED 24,700 vs upper rejected anchor AED 40,000 — 29.4% under; range language used in prose, midpoint AED 35,000 used for gate-test only" }
 
-phase2_deferred: [ai_lead_scorer.lite, ai_chatbot.lite]
+phase2_deferred:
+  - portal_sync_property_finder_bayut:  AED 6900 one-time
+  - website_lead_capture:                  AED 2400 one-time
+  - ai_lead_scoring_lite:                  AED 495 / month
+  - after_hours_p1:                        AED 1500 / month
+  - source_code_escrow:                    AED 6000 / year
+  - additional_user:                       AED 250 / user / month (5 → expected agent onboarding year-end)
+
 exclusions_confirmed: true

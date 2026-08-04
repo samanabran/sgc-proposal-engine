@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SGC Tech AI — Proposal VGE-2026-SUB-01</title>
+<style>
+  /* Playfair Display (TTF canonical, supplied 2026-08-04 in
+     06-brand/assets/fonts/). These file:// src: references resolve
+     in any browser that opens this HTML, including the client's
+     normal browser. They do NOT resolve in headless Chromium
+     print-to-pdf on this machine (verified 2026-08-04 — headless
+     silently falls back to Georgia/Times), so the on-disk PDF
+     rendered here uses the fallback chain instead. To get Playfair
+     into the rendered PDF, use a real browser, switch to a renderer
+     that honors file:// @font-face (e.g., WeasyPrint with explicit
+     font-config), or post-process the PDF with PyMuPDF's
+     insert_font + clean_contents to substitute the typeface into
+     text spans after render. */
+  @font-face{font-family:'PlayfairDisplay';font-style:normal;font-weight:400;font-display:swap;src:url('../../../06-brand/assets/fonts/PlayfairDisplay-Regular.ttf') format('truetype')}
+  @font-face{font-family:'PlayfairDisplay';font-style:normal;font-weight:700;font-display:swap;src:url('../../../06-brand/assets/fonts/PlayfairDisplay-Bold.ttf') format('truetype')}
+  :root{
+    --ivory:#F7F4EE; --navy:#0F213D; --gold:#8A6D2F; --charcoal:#1C2430;
+    --slate:#5F6775; --parchment:#ECE7DF; --line:#D8D2C4;
+    --warn-bg:#FBEFE6; --warn-border:#B65C1F; --warn-text:#7A3B10;
+    --ph-bg:#EAF1F7; --ph-border:#3E6C93; --ph-text:#1F3F57;
+    --ok-bg:#EAF3EC; --ok-border:#2C6654;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-serif: "Playfair Display", Georgia, "Times New Roman", Times, serif;
+  .playfair-display-vf {font-family:"Playfair Display",serif;font-optical-sizing:auto;font-weight:700;font-style:normal;}
+  .playfair-display-vf-400 {font-family:"Playfair Display",serif;font-optical-sizing:auto;font-weight:400;font-style:normal;}
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ivory:#12161f; --navy:#dbe6f4; --gold:#d4b567; --charcoal:#e8e6df;
+      --slate:#a7adb8; --parchment:#1a2030; --line:#333c4d;
+      --warn-bg:#3a2412; --warn-border:#d98a3f; --warn-text:#f0c090;
+      --ph-bg:#152234; --ph-border:#4f83ab; --ph-text:#a9cbe4;
+      --ok-bg:#152a20; --ok-border:#4f9c7f;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; font-family:var(--font-sans); color:var(--charcoal); background:var(--ivory); line-height:1.5; font-size:15px;}
+  a{color:var(--ph-border);}
+  nav.sidebar{position:sticky; top:0; align-self:flex-start; max-height:100vh; overflow-y:auto; padding:24px 16px; width:240px; flex:0 0 240px; border-right:1px solid var(--line);}
+  nav.sidebar h2{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate); margin:0 0 8px;}
+  nav.sidebar ol{list-style:none; margin:0; padding:0;}
+  nav.sidebar li{margin:2px 0;}
+  nav.sidebar a{display:block; padding:4px 8px; border-radius:4px; text-decoration:none; font-size:14px; color:var(--charcoal);}
+  nav.sidebar a:hover{background:var(--parchment);}
+  .layout{display:flex; max-width:1280px; margin:0 auto;}
+  main{flex:1 1 auto; min-width:0; padding:24px 36px 80px;}
+  .cover{text-align:center; padding:64px 16px 48px; border-bottom:2px solid var(--gold); margin-bottom:24px;
+    display:flex; flex-direction:column; justify-content:space-between; min-height:600px;}
+  .cover .kicker{text-transform:uppercase; letter-spacing:.12em; color:var(--slate); font-size:12px; margin-bottom:16px;}
+  .cover h1{font-family:var(--font-serif); font-weight:700; font-size:2.9rem; line-height:1.2;
+    margin:0 auto 28px; color:var(--navy); max-width:640px; letter-spacing:-.01em;}
+  .cover .subtitle{font-size:1.15rem; color:var(--slate); margin-bottom:20px;}
+  .cover .meta{font-size:13px; color:var(--slate); line-height:1.8;}
+  .cover .prepared{display:grid; grid-template-columns:1fr 1fr; gap:56px; margin:56px auto 0; max-width:840px;
+    text-align:left; font-size:13.5px; position:relative;}
+  /* Divider between the two "Prepared for / by" columns — a soft
+     gold fade top and bottom, not a hard grey rule, so it reads as a
+     deliberate accent rather than a stray leftover border. */
+  .cover .prepared::before{content:"";position:absolute; top:0; bottom:0; left:50%; width:1px;
+    background:linear-gradient(to bottom, transparent, var(--gold) 15%, var(--gold) 85%, transparent);
+    opacity:.45;}
+  .cover .prepared > div{padding:0 8px;}
+  .cover .prepared h3{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold); margin:0 0 10px; font-weight:700;}
+  .cover .prepared p{margin:0 0 5px; line-height:1.6;}
+  h1,h2,h3{font-family:var(--font-serif); color:var(--navy); scroll-margin-top:16px;}
+  h2{border-bottom:1px solid var(--line); padding-bottom:6px; margin-top:28px; font-size:1.35rem; page-break-after:avoid; break-after:avoid;}
+  h3{margin-top:20px; font-size:1.05rem; page-break-after:avoid; break-after:avoid;}
+  p{margin:6px 0;}
+  ul,ol{margin:6px 0 10px; padding-left:22px;}
+  li{margin:3px 0;}
+  .ph{display:inline-block; background:var(--ph-bg); color:var(--ph-text); border:1px solid var(--ph-border); border-radius:3px; padding:0 5px; font-family:var(--font-mono); font-size:.92em; white-space:nowrap;}
+  .resolve{display:inline-block; background:var(--warn-bg); color:var(--warn-text); border:1px solid var(--warn-border); border-radius:3px; padding:0 6px; font-family:var(--font-mono); font-size:.92em; font-weight:700;}
+  .box{border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin:14px 0; background:var(--parchment);}
+  .box.ok{background:var(--ok-bg); border-color:var(--ok-border);}
+  .open-items{margin:24px 0 40px;}
+  .open-items summary{cursor:pointer; font-weight:700; font-size:1rem; padding:12px 16px; background:var(--warn-bg); border:1px solid var(--warn-border); border-radius:8px; color:var(--warn-text);}
+  .open-items[open] summary{border-radius:8px 8px 0 0;}
+  .open-items ul{border:1px solid var(--warn-border); border-top:none; border-radius:0 0 8px 8px; margin:0; padding:14px 14px 14px 34px; background:var(--warn-bg);}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:13.5px; page-break-inside:auto;}
+  caption{text-align:left; font-weight:600; margin-bottom:4px; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top;}
+  th{background:var(--parchment); font-weight:600; font-size:12.5px;}
+  td.num{text-align:right; font-variant-numeric:tabular-nums;}
+  .footnote{font-size:12.5px; color:var(--slate); font-style:italic; margin-top:4px;}
+  footer.doc-footer{border-top:1px solid var(--line); margin-top:32px; padding:12px 0; font-size:11px; color:var(--slate); text-align:center;}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  /* Side-by-side signature block at end of document. Each .sig-col is
+     one party's column; .sig-line is a visible underline for ink
+     signatures, .sig-line-bold is heavier for the primary signatory
+     line. Equal widths, top-aligned, ~50mm tall signature space per
+     party to give ink room before the page footer. */
+  .sig-block{display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-top:24px; align-items:start;}
+  .sig-col{min-width:0; page-break-inside:avoid;}
+  .sig-org{font-family:var(--font-serif); font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:18px;}
+  .sig-label{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate); margin-top:14px;}
+  .sig-line{border-bottom:1px solid var(--charcoal); height:32px; margin-bottom:8px;}
+  .sig-line-bold{border-bottom:2px solid var(--charcoal);}
+  /* No watermark CSS here by design. A full-bleed per-page watermark
+     can't be done reliably in CSS print pagination: a background tied
+     to a <section> that runs across several physical pages lands
+     wherever that section's box happens to fall, which produced
+     cropped/fragmented artwork in earlier passes. The final PDF gets
+     one correctly-fitted full-page watermark stamped behind the
+     content per physical page as a post-process — see
+     04-draft/stamp_watermarks.py — using the page images in
+     06-brand/assets/watermarks/optimized/fullpage/. */
+  section{position:relative; margin:0 0 8px; break-inside:auto;}
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    nav.sidebar{position:relative; width:auto; max-height:none; border-right:none; border-bottom:1px solid var(--line);}
+    .cover .prepared{grid-template-columns:1fr;}
+    .two-col{grid-template-columns:1fr;}
+  }
+  @media print{
+    nav.sidebar{display:none;}
+    .layout{display:block; max-width:none;}
+    main{padding:0 10mm;}
+    body{background:transparent; color:#000; font-size:10.5pt; line-height:1.45;}
+    a{color:#000; text-decoration:none;}
+    .cover{page-break-after:always; border-bottom:none; padding-top:32px; min-height:250mm; page:cover;}
+    section#appendix{page-break-before:always; break-before:page; page:appendix; page-break-inside:avoid; break-inside:avoid;}
+    h2{page-break-after:avoid; break-after:avoid; margin-top:22px;}
+    h3{page-break-after:avoid; break-after:avoid;}
+    /* A heading whose break-after:avoid only protects the gap right
+       after the heading itself — the browser was still free to break
+       right after the FIRST paragraph under it, leaving the heading
+       stranded with one orphaned line at the bottom of a page. Extend
+       the same protection to whatever immediately follows a heading. */
+    h2 + p, h2 + ul, h2 + ol, h3 + p, h3 + ul, h3 + ol,
+    h2 + p + ul, h2 + p + ol, h3 + p + ul, h3 + p + ol{
+      page-break-before:avoid; break-before:avoid;
+    }
+    /* break-before:avoid above only stops a break landing BEFORE this
+       paragraph — it does nothing to stop the paragraph splitting
+       INSIDE itself once glued to the heading, so a long intro
+       paragraph could still wrap mid-sentence across the page break.
+       Force the whole intro paragraph to move as one unit instead. */
+    h2 + p, h3 + p{page-break-inside:avoid; break-inside:avoid;}
+    /* orphans/widows on `section` doesn't constrain how a <p> inside
+       it wraps — the property has to sit on the paragraph itself. */
+    p{orphans:3; widows:3;}
+    table,figure,.box{page-break-inside:avoid;}
+    thead{display:table-header-group;}
+    tr{page-break-inside:avoid;}
+    section{page-break-inside:auto; orphans:3; widows:3;}
+    section#appendix{page-break-before:always; break-before:page;}
+    footer.doc-footer{page-break-before:avoid;}
+    .open-items{display:none;}
+    /* Per-page initials via @page margin boxes — Chromium honours
+       named @page + content() in the bottom-left / bottom-right
+       slots. Initials appear once per body page (default @page),
+       not on the cover (@page cover) or the appendix (@page
+       appendix). Body content stops at the top-margin line so the
+       27mm bottom band is exclusively the initials line + the
+       page-number counter — no overlap with body text. */
+    @page{
+      size:A4; margin:18mm 18mm 27mm 18mm;
+      @bottom-left{
+        content: "Client initials: ________________________";
+        font-size:8.5pt; color:#888;
+      }
+      @bottom-right{
+        content: "SGC initials: ________________________";
+        font-size:8.5pt; color:#888;
+      }
+      @bottom-center{
+        content: "SGC Tech AI · VGE-2026-SUB-01 · Page " counter(page);
+        font-size:9pt; color:#555;
+      }
+    }
+    /* Cover and appendix: same physical size, but no initials in
+       the margin boxes (no Initial field needed there). */
+    @page cover{
+      size:A4; margin:18mm;
+      @bottom-left{content:"";}
+      @bottom-right{content:"";}
+      @bottom-center{
+        content: "SGC Tech AI · VGE-2026-SUB-01 · Page " counter(page);
+        font-size:9pt; color:#555;
+      }
+    }
+    @page appendix{
+      size:A4; margin:18mm;
+      @bottom-left{content:"";}
+      @bottom-right{content:"";}
+      @bottom-center{
+        content: "SGC Tech AI · VGE-2026-SUB-01 · Page " counter(page);
+        font-size:9pt; color:#555;
+      }
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Initials are emitted via the @page margin boxes in the print
+     stylesheet (see the @media print block). Cover and appendix use
+     named @page rules that suppress those boxes. No markup anchor
+     is needed in the document body itself. -->
+
+<div class="layout">
+
+<nav class="sidebar" aria-label="Document navigation">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#sec-01">01 Cover letter</a></li>
+    <li><a href="#sec-02">02 Executive summary</a></li>
+    <li><a href="#sec-03">03 Understanding</a></li>
+    <li><a href="#sec-04">04 Proposed solution</a></li>
+    <li><a href="#sec-05">05 How the subscription works</a></li>
+    <li><a href="#sec-06">06 What is included</a></li>
+    <li><a href="#sec-07">07 What is not included</a></li>
+    <li><a href="#sec-08">08 Implementation plan</a></li>
+    <li><a href="#sec-09">09 Adoption commitment</a></li>
+    <li><a href="#sec-10">10 Service levels</a></li>
+    <li><a href="#sec-11">11 Commercial summary</a></li>
+    <li><a href="#sec-12">12 Phase 2 and future options</a></li>
+    <li><a href="#sec-13">13 Next steps</a></li>
+    <li><a href="#appendix">Acceptance and signatures</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<details class="open-items" id="open-items">
+  <summary>Open items (build-time only, not printed) — proposal must not be sent while any remain</summary>
+  <ul>
+    <li>No open items — see §04 for the upgrade policy and §08/§13 for the Kickoff target.</li>
+  </ul>
+</details>
+
+<details class="open-items" id="zoho-sign-note">
+  <summary>Zoho Sign envelope setup (build-time only, not printed) — for whoever configures the envelope</summary>
+  <p><strong>I don't have Zoho Sign API/dashboard access from here — this is a setup
+  checklist for whoever creates the envelope in Zoho Sign, not a live integration.</strong></p>
+  <p><strong>Send-to flow (per final-draft instruction):</strong></p>
+  <ol>
+    <li><strong>First send to John (john@sgctech.ai)</strong> — Reviewer /
+      preparer. John reviews the whole document, fills in the
+      <em>Von Geyern signatory's full legal name, title, and email
+      address</em> on the cover-page contact block (Ms. Nadja is the
+      general contact, John confirms who actually signs), and adds any
+      final approved edits. This is the in-Zoho-Sign recipient field
+      setup step, not a signature.</li>
+    <li><strong>John approves and fills the recipient information</strong> in
+      the Zoho Sign envelope (signatory name, title, email) using the
+      values from step 1.</li>
+    <li><strong>Zoho Sign routes the envelope to the Von Geyern
+      signatory</strong> — signs the "For Von Geyern Real Estate L.L.C"
+      block on the final page.</li>
+    <li><strong>SGC Tech AI signatory</strong> — countersigns the "For SGC
+      Tech AI" block on the final page after the client signs. (Default
+      assumption: this is a separate authorised signatory, not John
+      himself — confirm who countersigns for SGC before building the
+      envelope.)</li>
+    <li><strong>CC on completion</strong> — once both signatures land, Zoho
+      Sign sends the signed PDF and the audit-trail PDF as a read-only
+      copy to:
+      <ul>
+        <li><strong>john@sgctech.ai</strong> (Reviewer / preparer)</li>
+        <li><strong>bran@sgctech.ai</strong> (CC)</li>
+      </ul>
+      Add both as CC recipients on the envelope (no signing action, just
+      receive the completed document). This is the only step that does
+      not require a signature — purely a copy-on-completion.</li>
+  </ol>
+  <p><strong>Fields needed (initials via @page margin boxes):</strong></p>
+  <ul>
+    <li><strong>Page 1 (cover, @page cover):</strong> no Initial field — the
+      cover uses a named @page with empty bottom-left / bottom-right
+      margin boxes, so no anchor renders here.</li>
+    <li><strong>Pages 2 through 9 (body, default @page):</strong> one Initial
+      field for the client signatory and one for the SGC signatory,
+      anchored on the "Client initials: ____" / "SGC initials: ____"
+      line in the bottom-left / bottom-right page-margin boxes. Both
+      lines render once on every body page in the same position, so
+      drag one Initial onto each box and Zoho Sign's "Repeat on all
+      pages" handles the rest.</li>
+    <li><strong>Page 10 (Acceptance and signatures, @page appendix):</strong>
+      full Name, Title, Signature, and Date fields for both parties —
+      already laid out as the two signature columns; map Zoho Sign's
+      field types onto those existing lines. No Initial field is needed
+      on this page.</li>
+  </ul>
+  <p><strong>Reminder before sending:</strong> confirm the Von Geyern
+  signatory's full legal name, title, and direct email with John (step
+  1) before filling the recipient fields — placeholder values on the
+  cover page are for layout only.</p>
+</details>
+
+<section class="cover">
+  <div class="cover-title-block">
+    <div class="kicker">Proposal</div>
+    <h1>All-in-One Solution for Von Geyern Real Estate</h1>
+    <div class="subtitle">Reference VGE-2026-SUB-01</div>
+    <div class="meta">
+      Issue date: <span class="ph">4 August 2026</span> · Valid through 3 September 2026 (30 days from issue)<br>
+      Prepared for <strong style="color:var(--charcoal);">Von Geyern Real Estate L.L.C</strong> · Dubai mainland, UAE
+    </div>
+  </div>
+  <div class="prepared">
+    <div>
+      <h3>Prepared for</h3>
+      <p>Von Geyern Real Estate L.L.C</p>
+      <p>Dubai, United Arab Emirates</p>
+      <p>info@vongeyern.de</p>
+      <p>+971 58 551 8040</p>
+      <p>Attention: Ms. Nadja, Owner</p>
+    </div>
+    <div>
+      <h3>Prepared by</h3>
+      <p>SGC Tech AI</p>
+      <p>(Scholarix Global Consultants FZCO)</p>
+      <p>Maseed Building, Office No. 304, 119/12 St, Al Rigga, Dubai, United Arab Emirates</p>
+      <p>Ali Asghar Teli Muhammad Iqbal Teli, Company Manager</p>
+      <p>hello@sgctech.ai · +971 52 198 5231</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 01: COVER LETTER                                      -->
+<!-- ============================================================ -->
+<section id="sec-01">
+<h2>01 — Cover letter</h2>
+<p>Dear Ms. Nadja,</p>
+<p>Thank you for your time on the 3 August call, and for the tour through
+the Odoo system.</p>
+<p>We heard you clearly. An upfront fee of AED 30,000–40,000 is too much
+cash to tie up for a five-person team. You want a subscription instead.
+So we changed the deal. You pay AED 9,850 at Kickoff, not AED 30,000+.
+The build work is bundled in. You can read the whole deal on one page —
+see §02.</p>
+<p>The figures, what is included, and our service promise are all below.
+The legal terms sit in the Master Service Agreement and Service Level
+Agreement (SGC MSA &amp; SLA v2026.08). We sign this together with the
+Order Form when you are ready to proceed.</p>
+<p>With kind regards,<br>
+SGC Tech AI</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 02: EXECUTIVE SUMMARY                                 -->
+<!-- ============================================================ -->
+<section id="sec-02">
+<h2>02 — Executive summary</h2>
+<p>This is the page to read if it is the only page you read.</p>
+
+<table>
+<caption>What the deal looks like in one page</caption>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>What you get</td><td>Odoo subscription, version-pinned; build, hosting, backup, support, account management, 30-day hyper-care, two training sessions, quarterly business review.</td></tr>
+<tr><td>Service tier</td><td>Growth (includes 3 users)</td></tr>
+<tr><td>Term</td><td>24 months from Kickoff</td></tr>
+<tr><td>Subscription Fee</td><td class="num">AED 1,650 / month</td></tr>
+<tr><td>Billed</td><td>AED 4,950, quarterly in advance</td></tr>
+<tr><td>At Kickoff</td><td class="num">AED 9,850 (Mobilisation 4,900 + Q1 4,950)</td></tr>
+<tr><td>Year 1 total</td><td class="num">AED 24,700</td></tr>
+<tr><td>Full 24-month commitment</td><td class="num">AED 44,500</td></tr>
+</tbody>
+</table>
+
+<p class="footnote">You can decide from this page alone. The sections after
+this explain what is included, how the payments work, and what is not
+part of the deal.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 03: UNDERSTANDING                                      -->
+<!-- ============================================================ -->
+<section id="sec-03">
+<h2>03 — Understanding your business</h2>
+<p>Von Geyern Real Estate L.L.C is a Dubai mainland brokerage operating
+near Dubai Islands. Here is what we learned on the 3 August discovery
+call:</p>
+<ul>
+<li>You run a five-person team today. You expect to add more agents by
+the end of the year, as the market picks up.</li>
+<li>You have tried other systems before. Your team stopped using them
+within two months. Your worry is not whether the software works. Your
+worry is whether people will actually use it.</li>
+<li>You want one simple platform. Listings, leads, deals, commissions,
+tenancies, contracts, invoices, and maintenance — all in one place, not
+ten different tools.</li>
+<li>You prefer a subscription over a one-time payment. You want to start
+with cash in hand, not a big cheque out the door.</li>
+<li>You asked about three things on the call. We priced them as Phase 2
+— see §12: Property Finder / Bayut / Dubizzle portal sync, a "request
+brochure" button on your website, and AI lead scoring.</li>
+</ul></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 04: PROPOSED SOLUTION                                  -->
+<!-- ============================================================ -->
+<section id="sec-04">
+<h2>04 — Proposed solution</h2>
+<p>This proposal is an <strong>Odoo subscription</strong>. SGC Tech AI
+builds it and supports it, start to finish. Your version is
+<strong>pinned</strong>: the version we build stays the version you run,
+until you choose to upgrade.</p>
+
+<h3>Upgrade policy</h3>
+<p>Odoo does not push automatic upgrades. No vendor does — this is
+normal, not a limit specific to us.</p>
+<p>Our rule is simple: stay on your version until you choose to upgrade.
+When you do, we treat it as its own project, at a fixed price. We never
+roll upgrade costs into your monthly fee.</p>
+<p>Here is how an upgrade works. First, we copy your live data to a test
+copy. Then we run the upgrade there, using OCA's proven upgrade tools
+where we can, or Odoo's official upgrade path where that fits better. We
+check the data and test everything. Only then do we move your live
+system over.</p>
+<p>Result: your system stays stable between upgrades. You choose when to
+upgrade, and you know the cost before you say yes.</p>
+
+<h3>What you get in plain language</h3>
+<ul>
+<li><strong>Listings and units.</strong> Every property you manage, with
+  status, project, location, and availability — visible to your whole
+  team.</li>
+<li><strong>Leads and deals.</strong> Every lead lands in one place, from
+  any source. Once Phase 2 is live, your website leads land here too.
+  Follow each lead through to a closed deal. See which agent is
+  performing.</li>
+<li><strong>Tenancies, contracts, invoices.</strong> Track rental income
+  and contract terms. Get an automatic reminder before a contract expires
+  — so you never miss a renewal.</li>
+<li><strong>Maintenance to invoice.</strong> Log a repair request, price
+  it, and turn it into an invoice — without typing it twice.</li>
+<li><strong>Reports and dashboards.</strong> See your revenue, your
+  properties, and your agents' activity at a glance — not buried in a
+  spreadsheet.</li>
+<li><strong>Customer and vendor records.</strong> Store your customers'
+  and suppliers' tax details in the system, where they apply.</li>
+</ul>
+
+<p>You and your agents can use this on your phone's browser. There is no
+separate app to install — see §07 for what is not included.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 05: HOW THE SUBSCRIPTION WORKS                        -->
+<!-- ============================================================ -->
+<section id="sec-05">
+<h2>05 — How the subscription works</h2>
+
+<p>This is the answer to what you told us about budget. In plain words:</p>
+
+<ul>
+<li>Your full build is worth <strong>AED 14,800</strong>. We tell you this
+  number up front. You will never see it as a separate invoice.</li>
+<li>At Kickoff, you pay <strong>AED 4,900</strong>. That is 33% of the
+  build value. It covers the cost of starting the work, and it is
+  non-refundable.</li>
+<li>We finance the remaining <strong>AED 9,900</strong> for you. You pay
+  it back through your monthly fee, over 24 months.</li>
+<li>Your monthly fee is <strong>AED 1,650</strong>. Two parts make up
+  this fee: AED 1,163 for the platform (hosting, backup, monitoring,
+  patching, support, account management), and AED 487 to repay the
+  financed build, plus a disclosed 18% financing cost.</li>
+<li>After 24 months, the build is fully paid off. Your fee stays the
+  same and continues month-to-month. Either side can end it with 30
+  days' written notice — see MSA &amp; SLA §A.14. The fee does not drop
+  automatically once the build is paid.</li>
+<li>You pay AED 4,950 every quarter, in advance.</li>
+</ul>
+
+<p>The 18% is the cost of us carrying that AED 9,900 for you, for 24
+months. Want to skip it? Pay the AED 9,900 build value in full at
+Kickoff instead, and your monthly fee drops to just the platform part.</p>
+
+<h3>What the constraint bought you</h3>
+<p>On the call, you asked about AED 30,000 and AED 40,000 as upfront,
+one-time build costs. Either number would have used up cash you told us
+you want to keep free. This structure fixes that. Instead of a big
+cheque, you pay AED 9,850 at Kickoff — far less than the AED 30,000–40,000
+you were quoted elsewhere. The table below shows the full comparison.</p>
+
+<table>
+<caption>Upfront vs subscription (illustrative)</caption>
+<thead><tr><th>Structure</th><th>Payable at Kickoff</th><th>Then</th><th>Total over 24 months</th></tr></thead>
+<tbody>
+<tr><td>Upfront build, then light platform fee</td><td class="num">~AED 32,000 (build) + platform</td><td>Platform fee only</td><td class="num">~AED 35,000 + platform</td></tr>
+<tr><td>This proposal (subscription)</td><td class="num">AED 9,850 (Mobilisation + Q1)</td><td>8 × AED 4,950 quarterly</td><td class="num">AED 44,500</td></tr>
+</tbody>
+</table>
+
+<p class="footnote">Yes, the subscription costs more in total over 24
+months. That is because financing the AED 9,900 carries an 18% cost.
+But your Year 1 cash cost is lower. You are paying a known, disclosed
+price for the cash-flow room you asked for.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 06: WHAT IS INCLUDED                                 -->
+<!-- ============================================================ -->
+<section id="sec-06">
+<h2>06 — What is included</h2>
+<ul>
+<li>The build work described in §04, exactly as listed in the Order
+  Form.</li>
+<li>Hosting for your Odoo system, managed by us. Provider and data
+  location are stated in the Order Form.</li>
+<li>Daily backup.</li>
+<li>We monitor your system and patch security issues, within your
+  pinned version.</li>
+<li>Two training sessions, 2 hours each, at Go-Live.</li>
+<li>30 days of extra support right after Go-Live.</li>
+<li>Support under the service levels in §10 (full detail in the MSA &amp;
+  SLA, Part B).</li>
+<li>A business review every quarter.</li>
+<li>Mobile-friendly browser access for you and your team.</li>
+</ul></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 07: WHAT IS NOT INCLUDED                              -->
+<!-- ============================================================ -->
+<section id="sec-07">
+<h2>07 — What is not included</h2>
+<ul>
+<li><strong>No app to download.</strong> You use a mobile browser
+  instead.</li>
+<li><strong>No Studio</strong> (a drag-and-drop customisation tool).</li>
+<li><strong>Advanced accounting</strong> — multi-currency, complex
+  reconciliation, complex tax setup — is not part of this deal. Need it
+  later? We scope and price it separately.</li>
+<li><strong>Major version upgrades</strong> cost extra and are quoted
+  separately.</li>
+<li><strong>Portal sync</strong> (Property Finder, Bayut, Dubizzle),
+  <strong>website lead capture</strong>, and <strong>AI lead scoring</strong>
+  are Phase 2 — priced separately, see §12.</li>
+<li><strong>Your own subscriptions</strong> — Property Finder, Bayut,
+  domain, email, LinkedIn — stay your direct cost.</li>
+<li>Anything beyond §04's scope is a change request, billed at our rate
+  card: Junior AED 350/hour, Senior AED 600/hour, Founder AED 850/hour.</li>
+</ul></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 08: IMPLEMENTATION PLAN                               -->
+<!-- ============================================================ -->
+<section id="sec-08">
+<h2>08 — Implementation plan</h2>
+
+<table>
+<thead><tr><th>Milestone</th><th>Target</th><th>Deliverable</th></tr></thead>
+<tbody>
+<tr><td>Kickoff (term and first invoice both start here)</td><td>Week 1 — target: within 30 days of this proposal's issue date</td><td>Mobilisation fee paid; RAID log opened; project plan agreed.</td></tr>
+<tr><td>Discovery and requirements</td><td>Weeks 1–2</td><td>Validated process requirements; data-quality sign-off.</td></tr>
+<tr><td>Configuration and migration</td><td>Weeks 3–5</td><td>Listings, leads, tenancies, contracts, invoicing, maintenance flow configured; historical data migrated.</td></tr>
+<tr><td>Training</td><td>Week 6</td><td>Two sessions delivered to your named data-entry owner and the agent team.</td></tr>
+<tr><td>Go-Live and 30-day hyper-care</td><td>Week 6 + 4 weeks</td><td>Go-Live criteria from §04 met; hyper-care issues resolved.</td></tr>
+<tr><td>Quarterly business reviews</td><td>Every 3 months post-Go-Live</td><td>Operational review, sizing check, upcoming-scope discussion.</td></tr>
+</tbody>
+</table>
+
+<h3>Client dependencies</h3>
+<p>Here is what we need from you: your data, in an agreed format, on
+time. One named point of contact for day-to-day decisions. Sign-off on
+testing and in-scope decisions within five business days.</p>
+<p>If you are late, the timeline moves — by the same number of days you
+were late. Any service-level promise tied to that milestone moves with
+it.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 09: ADOPTION COMMITMENT                               -->
+<!-- ============================================================ -->
+<section id="sec-09">
+<h2>09 — Adoption commitment</h2>
+
+<p>This section exists because of what you told us: your last systems
+stopped being used within two months. We built this section to fix
+that. It works both ways.</p>
+
+<ul>
+<li>Within two weeks of Go-Live, you name one person responsible for
+  using the system day to day.</li>
+<li>At day 30, we check real usage — deals, leads, contracts, invoices —
+  against a target we agree together at Kickoff.</li>
+<li>If usage falls short by day 60, we run one free retraining session
+  to fix it. No extra charge.</li>
+<li>Keep that named person in the role during the Initial Term. If they
+  leave, give us two weeks' notice so we can prepare the next person.</li>
+</ul>
+
+<p>This protects both of us from a rollout that stalls. We commit to
+actively helping your team use the system. You commit to having one
+person accountable for it.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 10: SERVICE LEVELS                                    -->
+<!-- ============================================================ -->
+<section id="sec-10">
+<h2>10 — Service levels</h2>
+
+<p>Full detail lives in the MSA &amp; SLA, Part B, signed alongside this
+proposal. Below is the short version.</p>
+
+<table>
+<caption>Service tier — Growth</caption>
+<thead><tr><th>Item</th><th>Target</th></tr></thead>
+<tbody>
+<tr><td>Monthly uptime</td><td>99.5% (excluding planned maintenance, force majeure, Client-caused issues, third-party outages, and periods of overdue invoices)</td></tr>
+<tr><td>P1 — Critical (system unavailable or core process fully blocked)</td><td>2 business-hour response · 8 business-hour resolution target</td></tr>
+<tr><td>P2 — High (major function impaired, workaround difficult)</td><td>4 business-hour response · 2 business-day resolution</td></tr>
+<tr><td>P3 — Medium (minor function impaired, workaround available)</td><td>1 business-day response · 5 business-day resolution</td></tr>
+<tr><td>P4 — Low (cosmetic / non-urgent)</td><td>2 business-day response · best-effort resolution</td></tr>
+</tbody>
+</table>
+
+<p>If we miss a service level, credits apply only to the platform part of
+your fee — never to the part repaying your build. Need after-hours
+Priority 1 cover? That is a paid add-on at AED 1,500/month, not included
+by default.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 11: COMMERCIAL SUMMARY                                 -->
+<!-- ============================================================ -->
+<section id="sec-11">
+<h2>11 — Commercial summary</h2>
+
+<table>
+<caption>Figures — source of truth is the Order Form</caption>
+<thead><tr><th>Item</th><th class="num">Value (AED)</th></tr></thead>
+<tbody>
+<tr><td>Implementation Value (disclosed, never separately invoiced)</td><td class="num">14,800</td></tr>
+<tr><td>Mobilisation Fee, at Kickoff (33%)</td><td class="num">4,900</td></tr>
+<tr><td>Financed remainder</td><td class="num">9,900</td></tr>
+<tr><td>Financing uplift (disclosed)</td><td class="num">18%</td></tr>
+<tr><td>Recovery Component</td><td class="num">487 / month</td></tr>
+<tr><td>Platform Component</td><td class="num">1,163 / month</td></tr>
+<tr><td><strong>Subscription Fee</strong></td><td class="num"><strong>1,650 / month</strong></td></tr>
+<tr><td>Billing</td><td>4,950 quarterly in advance</td></tr>
+<tr><td>Initial Term</td><td>24 months from Kickoff</td></tr>
+<tr><td>Target Kickoff</td><td>Within 30 days of this proposal's issue date (see §08, §13)</td></tr>
+<tr><td>Upgrade policy</td><td>Version-pinned; major-version upgrades quoted separately as a fixed-price project (OCA-standard practice — see §04)</td></tr>
+<tr><td>Payable at Kickoff (Mobilisation + Q1)</td><td class="num">9,850</td></tr>
+<tr><td>Year 1 total</td><td class="num">24,700</td></tr>
+<tr><td>Full 24-month commitment</td><td class="num">44,500</td></tr>
+<tr><td>Included users</td><td>3 (Growth tier)</td></tr>
+<tr><td>Additional users</td><td>250 / user / month</td></tr>
+</tbody>
+</table>
+
+<h3>Validity</h3>
+<p>This price is good for 30 days from the issue date on the cover page.
+After that, we re-check the numbers before confirming them again.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 12: PHASE 2 AND FUTURE OPTIONS                        -->
+<!-- ============================================================ -->
+<section id="sec-12">
+<h2>12 — Phase 2 and future options</h2>
+
+<p>These items are <strong>priced now, but you are not committing to them
+today</strong>. If you need one later, we quote it separately, at that
+time. One item you already asked about: adding agents at year-end. Each
+extra user beyond the 3 included in Growth is a flat <strong>AED 250 per
+user, per month</strong> — see the first row below.</p>
+
+<table>
+<thead><tr><th>Item</th><th class="num">Reference price (AED)</th></tr></thead>
+<tbody>
+<tr><td>Additional user, beyond the 3 included in Growth</td><td class="num">250 / user / month</td></tr>
+<tr><td>Portal sync, Property Finder + Bayut</td><td class="num">6,900 one-time</td></tr>
+<tr><td>Portal sync, Dubizzle (added with the above as scope permits)</td><td class="num">included in above once Property Finder + Bayut are active</td></tr>
+<tr><td>Website lead capture (request-brochure button wired to CRM)</td><td class="num">2,400 one-time</td></tr>
+<tr><td>AI lead scoring (Lite tier)</td><td class="num">495 / month</td></tr>
+<tr><td>After-hours Priority 1 support (paid add-on)</td><td class="num">1,500 / month</td></tr>
+<tr><td>Source-code escrow (optional)</td><td class="num">6,000 / year</td></tr>
+</tbody>
+</table>
+
+<p class="footnote">Portal sync needs a few things from you first: a valid
+RERA/DLD licence, your agency RERA ID, portal-side verification, and
+your own portal subscription with feed/API access. Our fee covers
+building the sync. Your portal subscription stays your own recurring
+cost.</p></section>
+
+<!-- ============================================================ -->
+<!-- SECTION 13: NEXT STEPS                                        -->
+<!-- ============================================================ -->
+<section id="sec-13">
+<h2>13 — Next steps</h2>
+
+<ol>
+<li>Sign and return the <strong>Order Form</strong> (VGE-2026-SUB-01_OF).</li>
+<li>SGC Tech AI issues an invoice for the Mobilisation (AED 4,900).</li>
+<li>Once the Mobilisation is paid, your Initial Term starts. Target:
+   Kickoff within 5 business days of payment.</li>
+<li>Both sides sign the <strong>MSA &amp; SLA v2026.08</strong> — the legal
+   document that governs the deal. If this proposal and the MSA &amp; SLA
+   ever disagree on terms, the MSA &amp; SLA wins. If they disagree on
+   price, the Order Form wins.</li>
+</ol>
+
+<p>This is a commercial proposal, not legal advice. Please have the
+MSA &amp; SLA reviewed by UAE-qualified counsel before signing.</p></section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX                                                       -->
+<!-- ============================================================ -->
+<section id="appendix">
+<h2>Acceptance and signatures</h2>
+
+<p style="margin-bottom:32px;">By signing below, both sides accept the
+deal in this proposal (§01–§13). SGC Tech AI can then start work on the
+Kickoff date. The legal terms sit in the Master Service Agreement and
+Service Level Agreement (SGC MSA &amp; SLA v2026.08), signed alongside
+this proposal. The numbers in this proposal only bind us once they
+appear in the signed Order Form.</p>
+
+<div class="sig-block">
+
+  <div class="sig-col">
+    <div class="sig-org">For Von Geyern Real Estate L.L.C</div>
+    <div class="sig-label">Name</div>
+    <div class="sig-line">&nbsp;</div>
+    <div class="sig-label">Title</div>
+    <div class="sig-line">&nbsp;</div>
+    <div class="sig-label">Authorised signatory</div>
+    <div class="sig-line sig-line-bold">&nbsp;</div>
+    <div class="sig-label">Date</div>
+    <div class="sig-line">&nbsp;</div>
+  </div>
+
+  <div class="sig-col">
+    <div class="sig-org">For SGC Tech AI (Scholarix Global Consultants FZCO)</div>
+    <div class="sig-label">Name</div>
+    <div class="sig-line">&nbsp;</div>
+    <div class="sig-label">Title</div>
+    <div class="sig-line">&nbsp;</div>
+    <div class="sig-label">Authorised signatory</div>
+    <div class="sig-line sig-line-bold">&nbsp;</div>
+    <div class="sig-label">Date</div>
+    <div class="sig-line">&nbsp;</div>
+  </div>
+
+</div>
+</section>
+
+</main>
+</div>
+</body>
+</html>

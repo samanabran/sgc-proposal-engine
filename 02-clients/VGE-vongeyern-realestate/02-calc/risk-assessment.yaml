@@ -1,0 +1,28 @@
+# Risk Assessment — VGE-2026-SUB-01_Rev3
+# Per pricing/risk-security-matrix.yaml, run before the pricing worksheet.
+
+inputs:
+  entity_age_years: "2-5"
+  jurisdiction: mainland_llc
+  vat_registered: "yes"
+  trade_licence_valid: ">6mo"
+  payment_history_sgc: none
+  decision_maker: owner
+  incumbent_churn_signal: abandoned_systems
+  peak_exposure_aed_band: "5-15k"
+
+scoring:
+  raw_score: 23
+  band: low
+  required_instruments: [mobilisation_33pct]
+
+notes: >
+  Low band. The abandoned-systems signal from the transcript is real and
+  worth tracking through the adoption clause (§09 of the proposal), but
+  it does not by itself require a security deposit — see runbook §2:
+  risk band drives security instruments, not structural commercial terms.
+  The brief §3 explicitly specifies Mobilisation at 33% with no deposit,
+  and that is what the proposal will quote; this risk assessment's
+  instrument set reflects that. The abandoned-systems signal is captured
+  in §09's day-30 checkpoint and one-free-remediation commitment rather
+  than as a financial security instrument.

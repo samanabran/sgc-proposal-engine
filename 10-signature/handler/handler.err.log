@@ -1,0 +1,33 @@
+2026-08-04 16:46:55,591 INFO Store path: C:\sgc_proposal_engine\10-signature\handler\store.db
+2026-08-04 16:46:55,609 INFO Signature webhook listening on http://127.0.0.1:8765/webhooks/signature/zoho_sign/
+2026-08-04 17:07:37,602 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 18:47:55,566 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 18:56:01,459 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 18:58:06,331 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp missing or unparseable: None
+2026-08-04 18:58:06,332 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 18:58:40,129 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:06:33,879 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:08:04,400 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp missing or unparseable: None
+2026-08-04 19:08:04,400 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 19:08:04,512 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp missing or unparseable: None
+2026-08-04 19:08:04,513 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 19:08:48,614 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:08:49,128 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:13:12,857 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:23:09,410 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:23:39,259 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp missing or unparseable: None
+2026-08-04 19:23:39,260 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 19:24:08,562 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 19:33:24,047 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp skew rejected: zs_timestamp=1785857606453, server_time=1785857604, diff=1784071748848s
+2026-08-04 19:33:24,049 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 19:33:24,940 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp skew rejected: zs_timestamp=1785857607788, server_time=1785857604, diff=1784071750183s
+2026-08-04 19:33:24,940 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 19:33:25,578 WARNING HMAC mismatch — potential spoofing from 127.0.0.1: Timestamp skew rejected: zs_timestamp=1785857608241, server_time=1785857605, diff=1784071750635s
+2026-08-04 19:33:25,578 INFO 127.0.0.1 - "POST /webhooks/signature/zoho_sign/ HTTP/1.1" 401 -
+2026-08-04 20:19:05,584 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 20:19:47,926 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 20:56:01,979 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 20:58:39,160 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 21:24:46,517 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 21:26:11,342 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -
+2026-08-04 21:26:27,806 INFO 127.0.0.1 - "GET /healthz HTTP/1.1" 200 -

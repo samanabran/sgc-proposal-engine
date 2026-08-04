@@ -11,7 +11,8 @@
 
 - [ ] Every capability described in §06 has corresponding hours in `number_2_build.delivery_hours`
 - [ ] `phase2_deferred` items appear in §07, not §06 — never sold both ways at once (`known-defects.md` #6)
-- [ ] Edition (`community`/`enterprise`) declared and matches `client-brief.yaml`; if `community`, upgrade policy and capability exclusions are stated in §06, in writing (G36–G38)
+- [ ] Edition (`community`/`enterprise`) declared internally and matches `client-brief.yaml` (G36); §06 names the edition/upgrade policy/exclusions **only if the client or SDR asked** — otherwise §06 is silent on edition by default (per user decision 2026-08-04)
+- [ ] MSA/Order Form §A.9 states the Edition and, if Community, the upgrade policy — regardless of what §06 says (G37, G38)
 - [ ] All three exposures computed and recorded (G21); walk-away deal card was produced before this draft existed (G22)
 
 ## Commitments
@@ -23,8 +24,8 @@
 
 ## Legal / tax
 
-- [ ] VAT clause is `clause-library/vat-uae.md` verbatim — states SGC is **not** VAT-registered, charges **no** VAT
-- [ ] `vat-gross-up.md` present
+- [ ] §10 is silent on VAT by default (per user decision 2026-08-04) — `vat-uae.md`/`vat-gross-up.md` text appears in the proposal **only if** the client or SDR asked about tax treatment, and always as a pair, never one without the other
+- [ ] MSA §C.6 states the VAT position and gross-up right regardless of what §10 says — never omitted there
 - [ ] No clause used outside the library; every clause flagged `requires_counsel_review: true` carries the flag and header, and is not treated as final text
 - [ ] No named individual consultant promised as a guarantee (G27)
 

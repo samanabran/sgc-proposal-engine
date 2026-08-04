@@ -1,30 +1,40 @@
 client:
-  legal_name: "Von Geyern Real Estate Brokerage LLC"
-  trading_name: "Von Geyern Real Estate"
+  legal_name: "Von Geyern Real Estate L.L.C"
   jurisdiction: mainland
-  trn: "100123456700003"
-  vertical: uae-real-estate
-  decision_maker: "Elena von Geyern"
-  decision_maker_title: "Managing Partner"
+  trn: null
+  vertical: real-estate-brokerage-uae
+  decision_maker: "Ms. Nadja"
+  decision_maker_title: "Owner"
+  contact_email: "info@vongeyern.de"
+  contact_phone: "+971 58 551 8040"
 
 scale:
-  users_now: 12
-  users_12mo: 18
-  segment: smb        # 12 users, within policy.yaml segments.smb.max_users (30)
+  users_now: 5                          # per brief §3; consistent with CRM demo-data description and transcript's "boutique brokerage"
+  users_12mo: 5                          # agent onboarding expected around year-end per transcript
+  segment: startup_boutique              # 5 users, under policy.yaml segments.startup_boutique.max_users (10)
+
+edition:
+  requested_or_assumed: community
+  trigger_conditions_met: []
+  deployment: version-pinned
 
 scope_signals:
-  modules_requested: [odoo_crm, odoo_sales, odoo_accounting]
-  incumbent_system: "Spreadsheet-based deal tracking + a legacy desktop accounting tool, no CRM"
-  integrations_requested: []
-  migration_records: 850       # historical deals/contacts
-  migration_files: 400          # signed contracts, ID docs, title deeds (PDF)
-  data_quality_confidence: medium
+  work_packages_requested: []
+  modules_requested: []
+  incumbent_system: null                  # not stated on the call — client only said "multiple systems, nobody uses them"
+  incumbent_benchmark_aed_mo: null
+  portal_integrations_requested: []        # Phase 2 per brief
+  migration_records: null
+  migration_files: null
+  data_quality_confidence: unknown
 
 commercial_signals:
-  incumbent_benchmark_aed_mo: 9500   # a competing mid-tier agency's quoted monthly-equivalent for a comparable subscription bundle, per client's own vendor search
-  budget_rejected_aed: 165000         # a Big-4-style quote the client received and rejected before approaching SGC
-  preferred_term_months: 24            # as of 2026-08-03 call — was 18 in Rev2
-  mobilisation_appetite: partial
+  budget_rejected_aed_low: 30000           # CRM transcript: client probed "is AED 30,000 too much?" and "is 40,000 too much?" — both in the context of an upfront one-time fee
+  budget_rejected_aed_high: 40000          # not a hard rejection; transcript shows her probing, not refusing
+  preferred_term_months: 24
+  mobilisation_appetite: full
+  prior_alternative_quoted: null
+  subscription_affinity: explicit           # transcript: "I prefer subscription models. I don't want for one-time payments"
 
 model:
   proposal_model: SUB
@@ -32,3 +42,17 @@ model:
 notes:
   verbal_promises_logged: true
   call_transcript_ref: "00-intake/call-transcript-2026-08-03.md"
+  crm_record_ref: "odoo19-sgc CRM Lead ID 10119 (per user-provided CRM summary)"
+  crm_decision_maker_recorded: "Ms. Nadja [Owner]"   # confirmed via CRM UI screenshot, Authority gate
+  crm_authority_gate_status: "passed"
+  crm_budget_gate_status: "no fixed budget, investing heavily in new tech"
+  crm_timeline_gate_status: "no timeline, owner-whim"
+  crm_need_gate_status: "passed — simple system, multiple-system pain point"
+  agent_onboarding_year_end: true
+  client_explicitly_wants_subscription: true
+  client_did_not_refuse_one_time_component: true   # per brief — only rejected the upfront structure, not the work itself
+  contact_address_known: false                     # CRM "Waterfront Living — 5 min to the Dubai Islands beach" is a project/marketing address, not a registered trade address; do not print as registered
+  contact_trn_known: false
+  client_legal_name_source: "CRM record + public LinkedIn/Instagram handle"
+  client_legal_name_confirmed: "Von Geyern Real Estate L.L.C"   # as recorded in CRM; matches LinkedIn public presence
+  contact_name_handling: "address as 'Ms. Nadja' per CRM Authority gate (brief §2); LinkedIn public brand 'Valeria von Geyern' is the public face, not necessarily the same person — do not conflate"

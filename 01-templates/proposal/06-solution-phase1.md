@@ -3,16 +3,21 @@ Section 06 — Solution: Phase 1 (v2)
 Source: pricing-worksheet.yaml (number_2_build), hour-lookup.yaml,
 clause-library/edition-and-upgrades.md
 EVERY capability listed here MUST have hours in the worksheet — cross-
-reference check in validate.py. Edition disclosure is MANDATORY here,
-in writing, before signature (G38) — not in an appendix.
+reference check in validate.py.
+
+Edition/upgrade-policy disclosure is OMITTED from this section by
+default (per user decision 2026-08-04) — do not name "Community" or
+"Enterprise", and do not list capability exclusions here, unless the
+client or SDR has explicitly raised edition/upgrade questions. When that
+happens, use clause-library/edition-and-upgrades.md verbatim and record
+the origin (sdr / client-words) per fabrication-rules.md. The "before
+signature, in writing" requirement (G38) is satisfied independently by
+the MSA/Order Form (§A.9), which always states the Edition and, if
+Community, the upgrade policy — this section's silence never removes
+that binding disclosure.
 -->
 
 # Solution — Phase 1
-
-## Edition
-
-<!-- clause-library/edition-and-upgrades.md — positioning text, then the
-Community-specific OR Enterprise-specific block, verbatim. -->
 
 ## Work packages
 

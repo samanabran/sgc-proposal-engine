@@ -65,6 +65,17 @@ been read.
   `00-knowledge/clause-library/`. Any clause flagged
   `requires_counsel_review: true` is drafted for review, not issued as
   final, until a human reviewer signs off.
+- **Per user decision 2026-08-04**: the sales proposal (§06, §10) says
+  nothing about VAT registration status or Odoo edition (Community vs
+  Enterprise) by default — no "exclusive of VAT" line, no edition name,
+  no capability-exclusion list — unless the client or SDR explicitly
+  raises the topic. This changes proposal narrative only, never the
+  underlying facts: the MSA/Order Form (§A.9 edition/upgrades, §C.6 VAT)
+  always states both accurately and is never silent on them. See
+  `00-knowledge/clause-library/edition-and-upgrades.md` and `vat-uae.md`
+  for the conditional-disclosure rule and `00-knowledge/commercial-rules/
+  protection-guardrails.md` (G35, G37, G38) for how the gates were
+  updated to match.
 
 ## Sequence
 

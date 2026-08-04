@@ -45,7 +45,19 @@ editions:
       - multi_entity
       - multi_currency
 
+demo_environment:
+  url: "https://demo.sgctech.ai"
+  purpose: "Live Odoo demo database — a prospect can register and try the finished build directly, rather than relying on screenshots or a recorded walkthrough."
+  edition_shown: community    # must match default_edition above
+  note: >
+    G41 requires whoever demos this to a prospect to confirm the instance's
+    active modules/edition still match `default_edition` before the call. If
+    this environment is ever reconfigured to Enterprise for internal testing,
+    it is not a valid demo for a Community deal until reset back — G41 blocks
+    its use in that state rather than letting a mismatched demo stand in for
+    a manual re-check.
+
 notes:
   - "G36: edition is declared at intake and never described as the other edition, in writing or verbally, regardless of which edition the client assumes or hopes for."
-  - "G41: the demo environment shown to a prospect must match the edition being sold — never demo Enterprise features to close a Community deal."
+  - "G41: the demo environment shown to a prospect must match the edition being sold — never demo Enterprise features to close a Community deal. See demo_environment above for the single source of truth for the URL."
   - "A Community deal only moves to Enterprise when the client brief explicitly triggers one of the trigger_conditions above — never as a default upsell assumption."

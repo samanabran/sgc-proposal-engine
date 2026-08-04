@@ -8,9 +8,17 @@ being promised while Community was actually sold.
 
 **requires_counsel_review**: false.
 
-**When mandatory**: every proposal — Community or Enterprise, no
-exceptions. A proposal without this clause has not disclosed what the
-client is actually buying.
+**When mandatory**: in the MSA/Order Form (§A.9), every deal, Community or
+Enterprise, no exceptions — that is the binding "before signature, in
+writing" disclosure G38 actually requires, and it is never omitted.
+
+**In the sales proposal specifically** (per user decision 2026-08-04):
+this clause is omitted by default — do not name "Community"/"Enterprise"
+or list capability exclusions in the proposal unless the client or SDR
+explicitly raises edition or upgrade questions. When asked, use this
+clause verbatim and record the origin (`sdr` / `client-words`) per
+`09-agent/fabrication-rules.md`. Proposal silence never substitutes for
+the MSA's binding disclosure, and never justifies skipping it there.
 
 **When it must NOT be used**: never substitute Enterprise language for a
 Community deal, even in the "why us" framing.

@@ -1,0 +1,50 @@
+# SGC TECH AI — Watermark rotation for the proposal template
+# Maps each proposal content block (cover + 01-13 + appendix, per
+# 01-templates/proposal/_section-map.md) to one watermark, in document
+# order, so no two consecutive sections repeat the same landmark — see
+# guidelines PDF chapter 6 "Per-Page Rotation: unique landmark, no
+# consecutive page repeats."
+#
+# Source images: 06-brand/assets/watermarks/*.png (master, full-res).
+# Use the print-optimized derivatives in optimized/*.jpg when embedding
+# into any actual document — ~15KB each vs ~2MB originals, same visual
+# result since these are already faded/pre-composited (see registry.yaml
+# status_note). Never embed the master PNGs directly into a proposal.
+#
+# 18 watermarks exist; 15 are used here. Unused, kept as spares for
+# future sections or other proposals: unconfirmed-etihad-towers,
+# unconfirmed-dubai-opera, unconfirmed-palace-or-mosque.
+version: 1.0
+effective_from: 2026-08-04
+
+assignment:
+  cover:    burj-khalifa            # max visual impact, per guidelines ch.6
+  sec-01:   heritage-ghaf-tree-dallah   # cover letter — welcoming, personal tone
+  sec-02:   emirates-towers             # executive summary — gravitas
+  sec-03:   jumeirah-mosque              # understanding the client — local/community feel
+  sec-04:   museum-of-the-future          # proposed solution — forward-looking (matches guidelines' own AI/roadmap mapping)
+  sec-05:   cayan-tower-marina             # how the subscription works — structural (matches guidelines' Dubai Marina -> technical mapping)
+  sec-06:   louvre-abu-dhabi                # what is included
+  sec-07:   dubai-frame                      # what is not included — "frame" = boundary/perspective
+  sec-08:   unconfirmed-stepped-tower         # implementation plan — staged massing suggests phased build
+  sec-09:   heritage-al-fahidi-windtowers      # adoption commitment — heritage/community feel
+  sec-10:   sheikh-zayed-mosque                # service levels — matches guidelines' governance/compliance mapping
+  sec-11:   burj-al-arab                        # commercial summary — prestige for the money section
+  sec-12:   ain-dubai                            # phase 2 and future options — "looking ahead"
+  sec-13:   unconfirmed-loop-building             # next steps — connector shape
+  appendix: heritage-mountain-village              # closing/reference section, quiet tone
+
+css_treatment:
+  opacity: 0.85
+  width_pct: 75
+  position: "centered, absolute, z-index behind text content"
+  pointer_events: none
+  note: >
+    These images are already faded/tinted (see registry.yaml) — tested
+    empirically 2026-08-04 against real proposal body text at opacities
+    from 0.18 to 1.0; even full opacity (1.0, unmodified) did not
+    compromise text legibility. 0.85 was chosen for a comfortable margin
+    while keeping the watermark clearly present rather than borderline
+    invisible. Do NOT apply the guidelines PDF's multiply/grayscale/
+    opacity-0.03 recipe on top of these — that recipe targets raw source
+    photography, not these pre-composited files.

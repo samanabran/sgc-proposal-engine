@@ -1,0 +1,35 @@
+# Payment Plan Worksheet — VGE-2026-SUB-01_Rev3
+# Selected cadence: quarterly_in_advance — meets G33 minimum without exception.
+# No concession on this deal.
+
+selected_cadence: quarterly_in_advance
+cadence_ceiling_pct: 0
+margin_floor_max_give_aed:                  # G12 ceiling — N/A, no concession requested
+applied_give_pct: 0
+
+concession_requested: null
+
+compensators_selected: []
+
+compensator_sum_aed: 0
+concession_covered: true
+
+gates_rerun_after_concession:
+  all_pass: true
+
+logged_in_manifest: true
+
+# Cadence summary — what the client sees
+billing_summary:
+  mobilisation_at_kickoff_aed: 4900
+  quarterly_invoice_aed: 4950             # 1650 × 3
+  billed_in_advance: true
+  quarterly_invoice_schedule:
+    - { quarter: 1,  due_on_day: 1,    amount_aed: 4950 }
+    - { quarter: 2,  due_on_day: 92,   amount_aed: 4950 }
+    - { quarter: 3,  due_on_day: 183,  amount_aed: 4950 }
+    - { quarter: 4,  due_on_day: 274,  amount_aed: 4950 }
+    - { quarter: 5,  due_on_day: 365,  amount_aed: 4950 }
+    - { quarter: 6,  due_on_day: 456,  amount_aed: 4950 }
+    - { quarter: 7,  due_on_day: 548,  amount_aed: 4950 }
+    - { quarter: 8,  due_on_day: 639,  amount_aed: 4950 }

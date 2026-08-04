@@ -2,6 +2,14 @@
    Values below mirror tokens/*.yaml — do not hardcode a value here that
    diverges from the token source; update the token file first. */
 
+/* Typeface pair as of 2026-08-04: Playfair Display (serif) + Inter (sans),
+   loaded via Google Fonts CDN. The brand guidelines PDF specified IBM
+   Plex Sans/Serif; user chose Playfair Display/Inter for this proposal
+   pass. To use a self-hosted pair, drop the @import and add @font-face
+   blocks with base64-encoded WOFF2 instead — headless Chromium can
+   still resolve @font-face over network on first render. */
+/* Playfair Display + Inter expected via in-document @font-face; copy the @font-face blocks from the current proposal HTML if using this stylesheet standalone. */
+
 :root {
   --ivory: #F7F4EE;
   --navy: #0F213D;
@@ -18,7 +26,7 @@
 }
 
 body {
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 15px;
   line-height: 1.75;
   color: var(--charcoal);
@@ -26,14 +34,14 @@ body {
 }
 
 h1.cover-title {
-  font-family: "IBM Plex Serif", serif;
+  font-family: "Playfair Display", serif;
   font-size: 38px;
   font-weight: 700;
   letter-spacing: -1px;
 }
 
 h1.section {
-  font-family: "IBM Plex Serif", serif;
+  font-family: "Playfair Display", serif;
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -41,7 +49,7 @@ h1.section {
 }
 
 h2.subsection {
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--gold);
@@ -53,10 +61,31 @@ h2.subsection {
   color: var(--slate);
 }
 
+/* Calibrated 2026-08-04 for the pre-composited landmark watermarks in
+   06-brand/assets/watermarks/ (already faded/tinted — NOT raw source
+   photography). Tested against real proposal body text from opacity
+   0.18 to 1.0; even 1.0 unmodified did not compromise legibility.
+   0.85 keeps a comfortable margin. Do not add grayscale/contrast/
+   multiply on top of these files — that recipe is for raw photography
+   only (see 06-brand/assets/watermarks/rotation.yaml). */
 .watermark {
-  opacity: 0.03; /* within tokens/decor.yaml watermark.opacity_range — adjust per section, hero pages use 0.06-0.08 */
-  filter: grayscale(1) contrast(1.2);
-  mix-blend-mode: multiply;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  opacity: 0.85;
+  z-index: 0;
+  pointer-events: none;
+}
+
+section {
+  position: relative;
+}
+
+section > :not(.watermark) {
+  position: relative;
+  z-index: 1;
 }
 
 table th {
