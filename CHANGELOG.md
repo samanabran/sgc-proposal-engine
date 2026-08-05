@@ -1167,3 +1167,121 @@ itself.
 No worksheet written, no package removed, no price changed, no engine
 change — including the traced `base_scope_hours=47` default, left as
 found per this pass's constraints.
+
+### Addendum, same day — padding question closed: no gate verdict moved; T12 added
+
+**1) The padding accomplished nothing, checked directly.** Reconstructed
+`validate.py` as it existed at `525940d` and ran every one of its ~24
+real check functions (the documented "18 checks" plus the V1-V4/R1-R12
+additions already live at that commit) against both totals, in-memory,
+nothing written. Both scenarios produce **identical results: 23 OK, 3
+FAIL** (`4. hour benchmark`, `R11`, `R12` — the same three, unchanged).
+**No check verdict differs between padded and unpadded.** The worksheet
+header's stated rationale ("expanded... to clear the hour-benchmark
+gate") describes an effect that did not occur under any check, at any
+version, at any point this repo's history can produce. Combined with the
+prior addendum's finding that check_4 itself hard-fails both totals even
+at the contemporaneous, pre-exception-branch version: there is no gate,
+past or present, that the padding cleared.
+
+**2) `base_scope_hours=47` direction, settled.** Kallat's padded 8-package
+`delivery_hours` and Prosper's 8-package `delivery_hours` are **byte-
+identical** — same 8 package names, same hours, same bands, same order
+(`diff` returns no output). Git cannot establish precedence between them:
+`git log --follow` shows Prosper's entire client folder, including
+`client-brief.yaml`, was created in the *same single commit* (`525940d`)
+that padded Kallat's — Prosper did not exist in this repo beforehand, so
+there is no earlier "Prosper's legitimate 47" for Kallat to have been
+raised to match. The only textual evidence on record points the other
+way: Prosper's own `verbal-promises.md` row 2 grounds two of the four
+shared packages in language "consistent with the same vertical baseline
+... **established for Kallat**" — Prosper's documentation cites Kallat as
+the origin, not the reverse. Prosper's inclusion of all 8 is still
+independently defensible on its own terms (its brief requests all 8;
+`verbal-promises.md` additionally grounds the shared two in Prosper's own
+prior PRJ document and CRM `x_bant_need`) — but the hypothesis that
+Prosper's genuine number became the default and Kallat was raised to
+match it is **not supported**. If anything, the documented direction runs
+the other way.
+
+**3) `CHECK_4_STRUCTURAL_BREACH_N=19` — fix proposed, not implemented.**
+Per-client breach N, computed against each client's own real (not
+padded, not defaulted) scope hours, in-memory only:
+
+| Client | Real scope hours | Breach N |
+|---|---|---|
+| Kallat (4 requested packages) | 20h | **10** |
+| Prosper (8 requested — legitimate) | 47h | 19 |
+| VGE (7 packages, own `delivery_hours`) | 37h | **16** |
+| MRD (7 packages, own `delivery_hours`) | 37h | **16** |
+
+**Proposed fix** (not implemented — engine/policy changes are out of
+scope for this pass): `check_4_hour_benchmark` and the `t8_check4_
+structural_sweep` test should compute the benchmark's structural-breach
+point **per client, from that client's own `number_2_build.
+work_package_hours_subtotal`**, not from a single hardcoded module-level
+constant fed by `pricing_engine.py`'s unoverridden `base_scope_hours=47`
+default. `CHECK_4_STRUCTURAL_BREACH_N` should be retired as a global in
+favor of a per-worksheet computation using the same `total_hours_for_n()`
+machinery, called with each client's real base.
+
+**Correction against `50d8759`** ("check_4 confirmed structurally
+obsolete for N>=19, classified deliberately"): that finding is **baseline-
+dependent, not an input-independent structural property.** The N=1..400
+sweep it ran consumed `pricing_engine.py`'s default `base_scope_hours=47`
+at every point on the curve — a value this pass has now traced to
+Kallat's padded worksheet, introduced in the immediately preceding
+commit. Under Kallat's own real scope the breach point is N=10; under
+VGE/MRD's real scope it is N=16. The qualitative conclusion (check_4's
+9.2h/user floor does not survive contact with the Class A-D model) still
+holds under every baseline tested — it is not overturned — but the
+specific figure "19," carried through this corpus as a precise constant
+and hardcoded in two files, was never an independent finding. Not
+rewriting `50d8759`; logged here as a correction.
+
+**5) Padding containment confirmed, per client:**
+
+| Client | Path |
+|---|---|
+| Kallat | `a_hours_for_n()` called with the unoverridden default (47) — **default ≠ Kallat's real request (20)**. Distorted. |
+| Prosper | `a_hours_for_n()` also called with the unoverridden default (47) — but **default == Prosper's real request (47)**. Touches the same contaminated default, arrives at the correct number anyway. |
+| VGE | `a_hours` stored directly from its own `work_package_hours_subtotal` (37). `a_hours_for_n()` is never called for its real pricing. |
+| MRD | Same as VGE — direct from its own sum (37), `a_hours_for_n()` never called for its real pricing; explicitly excluded from the one test (`test_pricing_engine.py:731`) that would have called it. |
+
+**Contained to Kallat.** Two of four clients never touch the default at
+all; the third (Prosper) touches it but isn't distorted by it because its
+real number happens to equal it.
+
+**T12 — input-layer provenance guard, implemented and committed**
+(`05-ops/test_pricing_engine.py`, separate from T10). Three assertions
+per client: `users_now` traces to a client-sourced document (checked
+against an explicit, human-audited provenance ledger, not inferred);
+every `work_package` appears in the brief's requested list or an
+approved-exception field (which does not exist anywhere in this corpus
+yet — its absence is a correct FAIL for any client with unrequested
+packages, not a bug); segment classification is contingent on the first
+assertion. Run against the live corpus:
+
+- **Kallat: RED on all three** — unsourced `users_now`, four unrequested
+  packages with no exception mechanism to pass through, segment therefore
+  unverified. No way to pass today, by design — assertion 2 has no
+  approved-exception field to grant Kallat's four packages an exception,
+  and none should be added without your explicit direction.
+- **MRD: GREEN on all three** — client-direct primary sourcing on both
+  users_now and scope.
+- **Prosper: fails assertion 1** (CRM Lead 8407's `x_employee_count` is
+  outside this repo's audited artifact set, unconfirmed by this audit)
+  **and assertion 3** (contingent on assertion 1); **passes assertion 2**
+  (its 8 packages match its own brief exactly).
+- **VGE: passes all three T12 assertions** (`users_now` traces to a
+  direct, client-present call — Ms. Nadja, "we are a boutique brokerage
+  ... small brokerage," a weaker tier than MRD's exact headcount quote
+  but genuinely client-sourced; `work_packages` is empty on both sides,
+  trivially matching, since VGE prices via the brief-pinned model, not
+  the Class A-D work-package model) — **while T10 still HARD FAILs its
+  mobilisation figure.** VGE's inputs are clean; its pin is not. Two
+  different, independent gates, both now correctly separated.
+
+No worksheet written. No scope removed. No price changed. No engine
+default changed, even though item 2 and item 3 above both point at it —
+flagged, not fixed, same discipline as the prior addendum.

@@ -810,6 +810,88 @@ def t9_worksheet_internal_consistency():
                   abs(internal_cost - expected_cost) <= 1)
 
 
+# ---------------------------------------------------------------------
+# T12 -- input-layer provenance guard. ADDED 2026-08-06, separate from
+# T10 on purpose: T10 only checks stored-vs-derived arithmetic against a
+# worksheet's OWN recorded inputs -- it has no way to see whether those
+# inputs are what the client actually asked for. This gap is exactly how
+# Kallat's unrequested scope and unsourced headcount passed every T10
+# check clean (see CHANGELOG.md pricing v3.1 addenda, 2026-08-06). Three
+# assertions per client:
+#   1. inputs.users_now traces to a client-sourced document -- checked
+#      against USERS_NOW_PROVENANCE below, an explicit, human-audited
+#      ledger (this session's file:line findings), not an NLP inference.
+#      A client name absent from the ledger, or present with a `None`
+#      source, fails this assertion by design.
+#   2. Every inputs.work_packages entry appears in the client's own
+#      client-brief.yaml: scope_signals.work_packages_requested, or in
+#      client-brief.yaml: scope_signals.approved_scope_exceptions -- a
+#      field that does not exist anywhere in this corpus yet. Its absence
+#      is a correct FAIL for any client with unrequested packages, not a
+#      bug in this check: exceptions must be explicitly recorded to pass,
+#      never assumed.
+#   3. Segment classification is contingent on assertion 1 -- an
+#      unverified users_now makes the derived segment unverified too,
+#      independent of whether the classification arithmetic itself
+#      (N vs policy.yaml segments.*.max_users) is correct.
+# ---------------------------------------------------------------------
+USERS_NOW_PROVENANCE = {
+    # client: (verified: bool, source) -- audited 2026-08-06, see
+    # CHANGELOG.md pricing v3.1 addenda for the full derivation of each.
+    "KP-kallat-properties": (False,
+        "UNSOURCED -- client-brief.yaml:12 cites both call transcripts, "
+        "neither contains a client-side headcount statement; "
+        "call-transcript-2026-07-16-internal-prep.md's own header: "
+        "'no client present'"),
+    "PRO-prosper-realestate": (False,
+        "externally sourced, unverified by this audit -- users_now=31 "
+        "traces to CRM Lead 8407's x_employee_count field, outside this "
+        "repo's audited artifact set; not independently re-confirmed"),
+    "VGE-vongeyern-realestate": (True,
+        "call-transcript-2026-08-03.md:296, Ms. Nadja (Owner), direct "
+        "client-present call: 'we are a boutique brokerage ... small "
+        "brokerage' -- confirms scale, not an exact headcount figure "
+        "(weaker tier than MRD's, but genuinely client-sourced)"),
+    "MRD-meridianview-realty": (True,
+        "call-transcript-2026-06-10.md:13, Omar Al Farsi (Owner), "
+        "verbatim: 'Five people, we're not a big operation' -- direct, "
+        "exact, client-present"),
+}
+
+
+def t12_input_provenance_guard():
+    for client in CLIENT_WORKSHEETS:
+        client_dir = os.path.join(REPO_ROOT, "02-clients", client)
+        ws_path = os.path.join(client_dir, "02-calc", "pricing-worksheet.yaml")
+        if not os.path.exists(ws_path):
+            continue
+        ws = pe._load(ws_path)
+        brief_path = os.path.join(client_dir, "00-intake", "client-brief.yaml")
+        brief = pe._load(brief_path) if os.path.exists(brief_path) else {}
+
+        users_now = ws.get("inputs", {}).get("users_now")
+        segment = ws.get("inputs", {}).get("segment")
+        verified, source = USERS_NOW_PROVENANCE.get(client, (False, "not in provenance ledger"))
+
+        check(f"T12: {client} users_now ({users_now}) traces to a client-sourced document",
+              verified, source)
+
+        ws_packages = set(ws.get("inputs", {}).get("work_packages", []) or [])
+        requested = set(brief.get("scope_signals", {}).get("work_packages_requested", []) or [])
+        approved_exceptions = set(brief.get("scope_signals", {}).get("approved_scope_exceptions", []) or [])
+        unrequested = ws_packages - requested - approved_exceptions
+        check(f"T12: {client} every worksheet work_package is in the brief's requested list "
+              "or an approved exception",
+              not unrequested,
+              f"unrequested (no approved_scope_exceptions field exists yet): {sorted(unrequested)}"
+              if unrequested else "all packages traced to the brief")
+
+        check(f"T12: {client} segment ({segment}) classification rests on a verified user count",
+              verified,
+              f"segment arithmetic may be correct, but depends on users_now, which is "
+              + ("verified" if verified else "NOT verified above"))
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -833,6 +915,8 @@ if __name__ == "__main__":
     t9_component_level_formulas()
     print("\n=== T10: client-facing money figure guard (corrected criterion) ===")
     t10_client_facing_money_figure_guard()
+    print("\n=== T12: input-layer provenance guard ===")
+    t12_input_provenance_guard()
 
     print()
     if FAILURES:
