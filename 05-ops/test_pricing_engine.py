@@ -858,6 +858,28 @@ USERS_NOW_PROVENANCE = {
         "exact, client-present"),
 }
 
+# ADDED 2026-08-06: a clean worksheet==brief package match is only
+# evidence of independent corroboration if the two documents weren't
+# written by the same pen in the same commit. Downgrades an otherwise-
+# passing assertion-2 match to FAIL where that's not the case.
+SCOPE_MATCH_INDEPENDENT_SOURCE = {
+    "PRO-prosper-realestate": (False,
+        "client-brief.yaml and pricing-worksheet.yaml were both first "
+        "committed in 525940d -- the same commit that padded Kallat's "
+        "scope. verbal-promises.md row 2 additionally grounds 2 of these "
+        "8 packages in language citing 'the same vertical baseline ... "
+        "established for Kallat'. A same-pen match is not independent "
+        "corroboration -- downgraded per explicit review, see "
+        "CHANGELOG.md pricing v3.1 addenda."),
+    # NOTE: MRD's worksheet and brief were ALSO first committed together
+    # (a405109), the same structural pattern as Prosper's. NOT downgraded
+    # here -- unlike Prosper, MRD's content is independently verifiable
+    # against call-transcript-2026-06-10.md's specific, multi-item client
+    # dialogue (not a citation to another client's baseline). This is a
+    # judgment call the CHANGELOG addendum flags explicitly for human
+    # review, not one this check silently resolves either way.
+}
+
 
 def t12_input_provenance_guard():
     for client in CLIENT_WORKSHEETS:
@@ -876,15 +898,48 @@ def t12_input_provenance_guard():
         check(f"T12: {client} users_now ({users_now}) traces to a client-sourced document",
               verified, source)
 
-        ws_packages = set(ws.get("inputs", {}).get("work_packages", []) or [])
+        # CORRECTED 2026-08-06: was ws.inputs.work_packages, which VGE's own
+        # worksheet leaves deliberately empty ("sized via service_tier:growth
+        # standard allocation" -- a different input convention, not an
+        # absence of scope). Comparing that empty list against VGE's equally
+        # empty brief.work_packages_requested read as a trivial match and
+        # silently PASSED, concealing VGE's real 7-package, 37h delivered
+        # scope entirely. The field that actually reflects what's billed,
+        # for every client regardless of input convention, is
+        # number_2_build.delivery_hours -- checked against that instead.
+        delivery_packages = set(
+            e.get("package") for e in (ws.get("number_2_build", {}).get("delivery_hours", []) or [])
+            if e.get("package")
+        )
         requested = set(brief.get("scope_signals", {}).get("work_packages_requested", []) or [])
         approved_exceptions = set(brief.get("scope_signals", {}).get("approved_scope_exceptions", []) or [])
-        unrequested = ws_packages - requested - approved_exceptions
-        check(f"T12: {client} every worksheet work_package is in the brief's requested list "
-              "or an approved exception",
-              not unrequested,
-              f"unrequested (no approved_scope_exceptions field exists yet): {sorted(unrequested)}"
-              if unrequested else "all packages traced to the brief")
+
+        if not delivery_packages:
+            check(f"T12: {client} worksheet declares a package-level scope to check",
+                  False,
+                  "number_2_build.delivery_hours is empty or missing -- INCONCLUSIVE, "
+                  "treated as FAIL: no worksheet scope recorded to compare against the brief")
+        elif not requested:
+            check(f"T12: {client} every worksheet work_package is in the brief's requested list "
+                  "or an approved exception",
+                  False,
+                  f"MAXIMUM SEVERITY: worksheet declares {len(delivery_packages)} package(s) "
+                  f"{sorted(delivery_packages)} against an EMPTY brief.scope_signals."
+                  "work_packages_requested -- 100% of delivered scope is undocumented against intake")
+        else:
+            unrequested = delivery_packages - requested - approved_exceptions
+            if unrequested:
+                check(f"T12: {client} every worksheet work_package is in the brief's requested list "
+                      "or an approved exception",
+                      False,
+                      f"unrequested (no approved_scope_exceptions field exists yet): {sorted(unrequested)}")
+            else:
+                independent, note = SCOPE_MATCH_INDEPENDENT_SOURCE.get(
+                    client, (True, "worksheet and brief independently sourced"))
+                check(f"T12: {client} every worksheet work_package is in the brief's requested list "
+                      "or an approved exception",
+                      independent,
+                      note if not independent else "all packages traced to the brief")
 
         check(f"T12: {client} segment ({segment}) classification rests on a verified user count",
               verified,

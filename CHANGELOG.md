@@ -1285,3 +1285,152 @@ assertion. Run against the live corpus:
 No worksheet written. No scope removed. No price changed. No engine
 default changed, even though item 2 and item 3 above both point at it —
 flagged, not fixed, same discipline as the prior addendum.
+
+### Addendum, same day — T12 field-path fix; Prosper re-graded; risk-assessment quantified; R11/R12 built for MRD only
+
+**T12 assertion 2 was reading the wrong field, and it produced a false
+PASS on VGE.** It read `inputs.work_packages`. VGE's worksheet leaves
+that field deliberately empty ("sized via `service_tier:growth` standard
+allocation" — a different input convention, not an absence of scope);
+VGE's real, billed scope (7 packages, 37h) lives only in
+`number_2_build.delivery_hours`. Comparing VGE's empty `inputs.
+work_packages` against its equally empty `client-brief.yaml: scope_
+signals.work_packages_requested` read as a trivial match and PASSED —
+**the previous addendum's own text repeated this same error** ("`work_
+packages` is empty on both sides, trivially matching"), which is wrong
+and is corrected here, not silently edited there.
+
+**Fixed**: assertion 2 now reads `number_2_build.delivery_hours[*].
+package` — the field that reflects what's actually billed, for every
+client regardless of input-schema convention — and two new severity
+tiers were added: an empty *worksheet* package list is INCONCLUSIVE
+(treated as FAIL, never a silent PASS), and a non-empty worksheet list
+against an *empty requested list* is flagged MAXIMUM SEVERITY rather
+than an ordinary partial mismatch. Corrected matrix:
+
+| Client | Assertion 2 (packages) |
+|---|---|
+| Kallat | FAIL — 4 of 8 unrequested |
+| Prosper | FAIL — see re-grade below |
+| **VGE** | **FAIL — MAXIMUM SEVERITY: 7 of 7 packages (100%) undocumented against an empty requested list** |
+| MRD | PASS |
+
+**VGE now shows 7 undocumented packages against Kallat's 4** — worse in
+proportion (100% vs 50% of delivered scope), though this is a different
+kind of gap than Kallat's: VGE's brief was never populated with a
+package-level request at all (it prices via the brief-pinned model), so
+"undocumented" here means the input schema doesn't carry this
+information for VGE, not that specific requested items were dropped.
+Flagged, not conflated with Kallat's.
+
+**Intake provenance, by first commit, all four clients** (client-brief.yaml
+/ verbal-promises.md / deal-card.md / transcript(s)):
+
+| Client | First commit | Date | Transcript internal date | Gap |
+|---|---|---|---|---|
+| Kallat | `525940d` (all 5 docs, incl. both transcripts) | 2026-08-05 15:06 | 2026-07-16 / 2026-07-24 | 20 / 12 days — uncorroborated either way |
+| Prosper | `525940d` (all 4 docs, incl. transcript) | 2026-08-05 15:06 | 2026-07-17 | 19 days — uncorroborated either way |
+| VGE | `cb2f194` (brief/promises/transcript); `6ea775b` (deal-card) | 2026-08-03 23:09 / 2026-08-05 01:48 | 2026-08-03 (same day as commit) | none — no gap |
+| MRD | `a405109` (brief/promises/transcript; no deal-card exists) | 2026-08-03 23:51 | 2026-06-10 | 54 days — uncorroborated either way |
+
+**Every one of Kallat's and Prosper's intake documents was created in
+`525940d` — the same commit that padded Kallat's scope.** Git provides no
+independent corroboration for either client's transcripts beyond that
+single commit's say-so. This is reported symmetrically: MRD's transcript
+gap (54 days) is the largest of the four in raw terms, and cannot be
+resolved by commit timing either — MRD's stronger grade rests on the
+transcript's *content* (a specific, multi-item, client-attributed
+dialogue independently matching stored figures line-for-line — budget
+rejected, headcount, named feature requests), not on when the file
+entered git. Flagged explicitly: **MRD's worksheet and brief were also
+first committed together** (`a405109`), the identical structural pattern
+being used to downgrade Prosper below. Not downgrading MRD here — the
+content-level distinction is judged sufficient — but this is a judgment
+call, not a settled fact, and is surfaced for your review rather than
+resolved silently in MRD's favor.
+
+**Prosper's T12 assertion 2 re-graded, per explicit review**: its clean
+package-list match is no longer scored as independent corroboration. Its
+`client-brief.yaml` and `pricing-worksheet.yaml` were both first
+committed in `525940d`, and `verbal-promises.md` row 2 separately cites
+"the same vertical baseline ... established for Kallat" as part of the
+basis for 2 of its 8 packages. A same-pen match proves the two documents
+agree with each other, not that either is independently true. Prosper
+now fails all three T12 assertions, the same as Kallat — MRD is the sole
+client clean on T12 in full.
+
+**Open question 6 quantified — Kallat and Prosper risk-assessment.yaml**:
+
+| Field | Kallat | Prosper |
+|---|---|---|
+| `entity_age_years` (RESOLVE) | `"1-2"` (+12) | `"1-2"` (+12) |
+| `vat_registered` (RESOLVE) | `"no"` (+10) | `"no"` (+10) |
+| `trade_licence_valid` (RESOLVE) | `">6mo"` (+0, not a placeholder) | `"<6mo"` (+8, RESOLVE) |
+| `raw_score` | 52 | 55 |
+| `band` | elevated (41–60) | elevated (41–60) |
+| mobilisation @ 40% (elevated) | AED 22,429 | AED 22,002 |
+| mobilisation @ 33% (moderate) | AED 18,504 | AED 18,152 |
+| **delta** | **3,925** | **3,850** |
+
+Both clients' mobilisation figures are contingent on unresolved
+placeholder facts. Kallat drops to `raw_score=30` (moderate) if
+`entity_age_years` and `vat_registered` both resolve favorably — matches
+its own risk-assessment.yaml note.
+
+**Prosper's own note is wrong, found while computing.** It states
+resolving `entity_age_years`/`vat_registered` favorably would leave
+`peak_exposure_aed_band` (+20) as enough on its own to "very likely keep
+this deal in the elevated band regardless." Checked against `risk-
+security-matrix.yaml`'s actual weights: resolving just those two drops
+Prosper to `raw_score=33` — **moderate band**, not elevated. Resolving
+all three RESOLVE fields (including `trade_licence_valid`) drops it
+further, to 25. **Prosper's mobilisation is at least as contingent on
+unresolved facts as Kallat's, and its own worksheet's note currently
+understates that.** Not corrected in `risk-assessment.yaml` this pass —
+compute-only, per instruction; flagged for whoever owns that file.
+
+**Causality correction to the prior addendum's item 2**: your working
+hypothesis — Prosper's legitimate 47h scope becoming
+`pricing_engine.py`'s default, Kallat then raised to match it — is
+**wrong**, and the prior addendum's finding already said so; restated
+here for the record with the reasoning made explicit. `verbal-promises.md`
+documents the reverse: the shared 8-package baseline is framed as
+"established for Kallat," not for Prosper. **The shared baseline
+originates in Kallat's unrequested set**, not in an independently
+legitimate Prosper number that Kallat was later raised to match.
+
+**Restated for the record**: the padding moved no gate verdict at all —
+23 OK / 3 FAIL, identical under both totals, checked directly against
+the code as it existed at `525940d`. The worksheet header's stated
+rationale describes nothing that happened, at any version this repo's
+history can produce.
+
+**R11/R12 built, scoped to MRD only** (`05-ops/render_r11_r12.py`,
+Markdown intermediate, no PDF). `ALLOWED_CLIENTS = ["MRD-meridianview-
+realty"]` is the single enforcement point. Pre-render gate reuses T10 and
+T12's real check functions (no separate, divergent gate logic); every
+rendered figure is read through `FIELD_SOURCE_MAP`, never a literal in a
+template; a post-render drift check (T11) re-extracts every AED numeral
+from the rendered text and fails the build on anything that doesn't
+trace to a value the map actually emitted; `monthly_billing_deviation`
+stays withheld per the approved spec. Invoked against the full corpus:
+Kallat, Prosper, and VGE are each refused twice over — once on
+`ALLOWED_CLIENTS` scope, and independently on their live T10/T12 failures
+(shown in full per client in this session's report, not duplicated
+here). MRD builds clean; output written to `02-clients/MRD-
+meridianview-realty/04-draft/MRD-2026-SUB-01_Rev3_{Quotation,Summary}.md`.
+
+**Open question 9 (`CHECK_4_STRUCTURAL_BREACH_N`) — held, not touched.**
+Fixing `base_scope_hours` would move Kallat's figures, which is pending
+your commercial decision — left exactly as found. A per-client breach-N
+computation (proposed in the prior addendum) would NOT move any stored
+figure — it only changes which classification bucket a check_4 *result*
+falls into, never a price, hour, or worksheet field. Confirmed safe to
+propose separately from the scope/price question; still not implemented
+this pass (`validate.py`/`test_pricing_engine.py`'s check_4-adjacent code
+is unchanged) pending separate authorization, since it touches
+check-classification logic rather than being purely additive like T12.
+
+No worksheet written. No scope removed. No price changed. No engine or
+policy change. No work performed on Kallat, Prosper, or VGE beyond
+reading and reporting.
