@@ -245,14 +245,14 @@ not evidence the recompute is wrong (P7). `check_4`'s literal remains
 untouched per K-5; this is logged as an open item, same status as the
 9.2-vs-4.8 question above.
 
-**Still open, unresolved by this recompute**: the "15–20% below
-mid-tier" positioning claim is still present in both Kallat's and
-Prosper's draft prose (`03-draft/.../02-about.md`) and now fails
-`validate.py check_v4_positioning_claim` at the 525 AED/hr blended rate
-(525 > the 382.5 threshold) — this is a draft-text edit, not a worksheet
-recompute, and remains for a follow-up pass. R11 (standalone quotation
-PDF) and R12 (one-page commercial summary) remain missing for all four
-corpus clients — a confirmed, repo-wide, pre-existing gap
+**Follow-up, same day**: the "15–20% below mid-tier" positioning claim
+in both Kallat's and Prosper's draft prose (`03-draft/.../02-about.md`)
+was corrected — both blend at 525 AED/hr, inside the mid-tier band
+(350–550), not below it (VGE/MRD, at 280 AED/hr, legitimately keep the
+original claim and were left untouched). Both now pass
+`check_v4_positioning_claim`. R11 (standalone quotation PDF) and R12
+(one-page commercial summary) remain missing for all four corpus
+clients — a confirmed, repo-wide, pre-existing gap
 (`kallat-recost-rev2.md` D5), not created or closed by this build.
 
 **V5 corpus prediction, written before running, corrected once**:
