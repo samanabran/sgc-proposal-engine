@@ -918,3 +918,130 @@ upward, uncited delta, and both it and MRD's (now-resolved) `+23` trace
 back to figures this same body of work had already flagged as
 provenance-weak. Logged here as a correction, not a silent edit to the
 earlier text.
+
+### Addendum, same day — Kallat input-layer defects, quantified; "CLEAR" grading retracted
+
+**T10 cannot see this class of defect.** T10 validates stored-vs-derived
+— that a client-facing figure equals what the engine would compute from
+the worksheet's own recorded inputs. It has no way to check whether
+those inputs themselves are what the client actually asked for. The
+previous pass's per-client gate table graded Kallat "CLEAR" on the
+strength of a clean T10 run; that grading is **retracted**. It measured
+the wrong layer.
+
+**Scope-expansion finding, quantified.** `02-clients/KP-kallat-properties/
+02-calc/pricing-worksheet.yaml`'s own header (lines 5–8) states the
+2026-08-05 Class A-D migration "expanded" the client's requested scope
+from 4 work packages to 8, "to clear `05-ops/validate.py`'s hour-benchmark
+gate with real, relevant work packages rather than a padded number."
+`client-brief.yaml:29` requested only `[crm_leads, users_roles_agent_perf,
+reports_dashboard, data_migration_500]`. The four added packages
+(`discovery`, `property_unit_register`, `tenancies_contracts_reminders`,
+`invoicing_trn`) appear in none of `client-brief.yaml`, `verbal-promises.md`,
+or `deal-card.md`.
+
+Recomputed via `05-ops/pricing_engine.py`'s own functions (N=40, segment
+and risk band unchanged, only `work_packages` varied — in-memory only,
+nothing written):
+
+| Figure | Current (8 pkgs) | Unpadded (4 requested) | Delta |
+|---|---|---|---|
+| `build_value_aed` | 56,072 | 36,420 | **+19,652 (35.0% of the quoted build value)** |
+| `mobilisation_fee_aed` | 22,429 | 14,568 | +7,861 |
+| `internal_build_cost_aed` | 15,710 | 11,060 | +4,650 (internal-only) |
+| `subscription_fee_aed_mo` | 5,850 | 5,270 | +580/mo |
+| `year1_total_aed` (mobilisation + 12×subscription) | 92,629 | 77,808 | +14,821 |
+
+**The stated reason for the expansion does not hold.** `check_4_hour_benchmark`
+(`05-ops/validate.py:227`, "4. hour benchmark" in `validate.md`) branches
+purely on `users_now >= 19` once `total_hours < benchmark×0.5` — the
+magnitude of `total_hours` is irrelevant to which branch fires once that
+threshold is crossed. Re-run in-memory against both scenarios: padded
+(104.734h) and unpadded (73.734h) **both** land in `structural_exception`,
+identically — `104.734h for 40 users is well under the ~368h reference
+benchmark -- EXPECTED for users>=19` vs the same message at 73.734h. The
+padding changed the AED figures above; it did not and structurally could
+not move Kallat out of the exception bucket into a clean pass. The
+worksheet's own stated rationale for the expansion is incorrect.
+
+**Circularity in the check_4 obsolescence finding itself.** `commit
+525940d` (the Class A-D migration) both added the four packages to
+Kallat's worksheet *and*, in the same commit, set
+`pricing_engine.a_hours_for_n`'s default `base_scope_hours=47` — the
+exact sum of the full 8-package list. `commit 50d8759` (later, "check_4
+confirmed structurally obsolete for N>=19, classified deliberately") ran
+`test_pricing_engine.py`'s N=1..400 sweep via `pe.total_hours_for_n()`,
+which uses that same unoverridden default at every N. Confirmed
+directly: `total_hours_for_n(40)` using the default reproduces Kallat's
+stored padded total (104.734h) exactly. The sweep that "confirmed" the
+9.2h/user floor structurally obsolete was run against a baseline scope
+assumption that is, by construction, Kallat's own padded figure — the
+one real corpus data point available to sanity-check that default is the
+same worksheet whose scope this entry now finds was not client-requested.
+This does not overturn the structural-exception classification (re-run
+above confirms padded and unpadded verdicts are identical for Kallat
+specifically, for the threshold reason above), but the general-purpose
+default this repo now treats as "the standard vertical baseline" traces
+to the same expansion.
+
+**users_now=40: unsourced.** `client-brief.yaml:12` attributes "40-50
+sales agents" to "the discovery call," citing both call transcripts
+(`:51`). Read directly: `call-transcript-2026-07-16-internal-prep.md`
+states its own participants as "Renbran Madelo, Jan, John (SGC internal
+— no client present)" and its only "40 people" figure is an SGC-internal
+recollection of the old PRJ proposal's tier pricing, not a client
+statement. `call-transcript-2026-07-24-client-call-note.md` is entirely
+about price pushback — no headcount mentioned. Grepped the full corpus
+for the "40 people... 2800 per month" line and for any other
+Kallat-specific client-sourced headcount statement: **no document
+anywhere contains one.** `mid_market` classification (40 > `smb.max_users`
+30) is therefore resting on an unverified number, same failure class as
+VGE's Brief §3 pin, on a different field.
+
+Downstream blast radius if Kallat were re-classified at N=30 (smb upper
+bound, 8-package scope held constant to isolate the N effect): segment
+`mid_market` → `smb`; rate 525 → 395 AED/hr; pm_pct 15% → 10%; hypercare
+6 pods/12h (not 8 pods/16h) — consistent with this corpus's earlier
+hypercare=12 precedent, itself now explained; `build_value_aed` 56,072 →
+40,503 (**−15,569, −27.8%**); `mobilisation_fee_aed` 22,429 → 16,201;
+`subscription_fee_aed_mo` 5,850 → 5,400 (−450/mo). `check_4` verdict is
+unaffected either way (30 ≥ 19, still `structural_exception`).
+
+**Copy-paste evidence.** The four added packages match, name and hour
+value both, exactly against the first four entries of both VGE's and
+MRD's `delivery_hours` (`discovery: standard/5`,
+`property_unit_register: standard/8`, `tenancies_contracts_reminders:
+standard/9`, `invoicing_trn: standard/5` — identical in all three
+worksheets). Consistent with this corpus's one previously-demonstrated
+cross-worksheet contamination (Prosper's hypercare pod count of 5
+coinciding with VGE/MRD's `users_now`, both 5).
+
+**Isolated to Kallat.** Checked Prosper, VGE, and MRD worksheet headers,
+inline notes, and full git log for their `pricing-worksheet.yaml` files
+for any comparable self-disclosed gate-clearing adjustment: none found.
+Prosper's header does state its 8-package scope was "applied
+consistently" from the same vertical baseline "established for Kallat"
+(also echoed in `verbal-promises.md` row 2) rather than re-derived
+independently per deal — but Prosper's own `work_packages_requested`
+(`client-brief.yaml:32`) already lists all 8, matching its worksheet
+exactly, and `verbal-promises.md` grounds the two shared-template
+packages in the client's own prior PRJ document and CRM `x_bant_need`,
+not merely in the Kallat precedent. Different, lower-severity note, not
+the same defect.
+
+**Re-graded** (supersedes this pass's earlier gate-table labels):
+- **Kallat**: was "CLEAR." Not clear — two confirmed input-layer defects
+  above (unrequested scope, unsourced headcount), both client-facing.
+- **Prosper**: "externally sourced, unverified by this audit — CRM Lead
+  8407 requires human confirmation." `users_now=31` traces to a CRM
+  enrichment field outside this repo; not self-referential like VGE's
+  pin, but not independently re-confirmed by anything in this audit
+  either.
+- **MRD**: the only client in the corpus with client-direct primary
+  sourcing — `call-transcript-2026-06-10.md:13`, Omar Al Farsi, verbatim:
+  "Five people, we're not a big operation," matching `users_now: 5`
+  directly, no restatement or citation chain in between.
+
+No worksheet written, no package removed, no price changed. Removing
+Kallat's four packages is a commercial decision to be made with the
+client, not an audit action.
