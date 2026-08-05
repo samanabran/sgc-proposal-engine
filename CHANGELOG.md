@@ -399,3 +399,127 @@ ceiling at high N (mirroring `hosting.yaml`'s step function, rather than
 scaling forever) is an open design question for whoever owns pricing
 policy, not resolved here, and the engine is not changed pending that
 decision.
+
+### Addendum, same day — VGE and MRD migrated to the Class A-D engine
+
+Both were on the pre-v3.0 model (last touched `cb2f194`/`a405109`,
+predating the engine entirely) — `05-ops/test_pricing_engine.py` T9 was
+widened to hard-fail (not skip) any worksheet missing `class_b`/
+`hypercare`/`a_side_hours`, confirmed red on both before this migration,
+green after.
+
+**Correction to the prior pass's audit claim**: that report said VGE/MRD
+"structurally can't" have the stored-total defect Kallat/Prosper had.
+**That was wrong for VGE.** VGE's own worksheet was internally
+inconsistent before this migration: stored `total_hours: 52` did not
+equal the sum of its own stated sub-fields
+(`delivery_hours` 37 + `documentation_hours` 4 + `qa_hours` 3 +
+`training_hours` 4 = 48, not 52) — and `documentation_hours` itself was
+overstated (4, when the policy floor formula gives 2). **Why the prior
+audit missed it**: the invariant used was
+`total_hours × 150 == internal_build_cost_aed`, which `52 × 150 = 7,800`
+satisfies exactly — but `internal_build_cost_aed` was itself derived
+from the same suspect `total_hours`, not independently. An invariant
+that takes the suspect value on both sides of the comparison is not a
+correctness check. T9 is now widened (this same pass) to assert every
+component — `documentation_hours`, `qa_hours`, `training_hours`,
+`a_side_hours`, `class_b.total_hours`, `hypercare.hours` — against its
+own engine formula independently, not just that sums are internally
+self-consistent. Confirmed clean on this wider check for Kallat,
+Prosper, and MRD; only VGE's `documentation_hours` failed, exactly the
+defect above.
+
+**VGE's 6h excess (52 stored vs 46 new-engine `a_side_hours`), decomposed
+— recorded as an ASSUMPTION, not a proven finding**: 2h traces cleanly to
+the `documentation_hours` overstatement above (4 vs the policy-correct
+2). The remaining 4h has **no documented origin anywhere** — checked
+`client-brief.yaml` (`work_packages_requested: []`, `migration_records:
+null`), `verbal-promises.md` (every entry maps to an existing package or
+is explicitly DEFERRED/EXCLUDED), and `deal-card.md` — no extra work
+package, training, or migration task is named anywhere in this deal's
+record. This 4h is *consistent with* an early, undocumented,
+hand-rolled per-user/rollout allowance, now properly represented as
+`class_b`(2.417h) + `hypercare`(2h) = 4.417h — but **4h ≠ 4.417h, this
+is not a numeric match** and is not presented as one. **What actually
+licenses this migration is the negative scope audit above (nothing
+named is missing), not the near-coincidence of the two figures** — the
+audit would license the migration even if the two numbers didn't rhyme
+at all.
+
+**VGE — audit-trail migration only, quote unchanged.** `number_2_build`
+now carries the full Class A-D breakdown (`a_hours`, `class_b`,
+`hypercare`, corrected `documentation_hours: 2`), but the brief-pinned
+figures are untouched: `build_value_aed` stays **14,800**, `assembly.
+subscription_fee_aed_mo` stays **1,650/mo** — confirmed by direct
+inspection after writing, not assumed. A new `brief_pin_variance` block
+records the mechanical engine output (15,999) against the pin (14,800,
+delta 1,199/8.1%) and states explicitly which one governs. **Confirmed:
+the quote was never at risk** — `assembly`/`number_3_financing` were
+always sourced directly from Brief §3, never from `number_2_build.
+total_hours`, so this worksheet's internal inconsistency never reached a
+client-facing figure. Only two internal-only fields move:
+`internal_build_cost_aed` (7,800→7,562) and its dependent gates
+(G8/G23 margin, now 48.9% vs 47.3% — up, since the corrected internal
+cost is lower than the figure derived from the wrong total_hours).
+
+**MRD — no brief pin, so this migration changes the quoted figures.**
+MRD's own pre-migration `documentation_hours: 2` was already
+formula-correct ("floor binds", its own comment) — confirmed as the
+control case: **identical inputs to VGE (same 7 delivery packages, same
+`startup_boutique` segment, same N=5) now correctly produce identical
+new-engine output** (`a_side_hours` 46, `class_b.total_hours` 2.417,
+`hypercare.hours` 2, `total_hours` 50.417 — both clients). **This
+duplication is expected, not an error**: there is no legitimate
+differentiator between VGE and MRD in any input the engine reads, and
+MRD's independently-correct historical 46 is what confirms the new
+engine's 46 is right, not a coincidence to be suspicious of.
+`platform_portion_aed` (1,150) — a deliberate competitive-positioning
+anchor, not a formula output — is preserved unchanged, restructured as
+an explicit `platform_portion_aed_override` block recording the anchor
+value, the mechanical floor it overrides (650), the multiplier that
+floor came from (1.25), and the positioning rationale, so it no longer
+occupies a field shaped like a formula output. `build_value_aed` and
+the recovery component **do** change (14,812→15,999, driven by the
+now-corrected Class A-D engine, migrated from this worksheet's own
+prior additive PM/contingency method to the compounding convention
+already used elsewhere — not a new policy, an applied-consistently one).
+Because only `platform_portion_aed` is frozen and recovery is not,
+**MRD's quoted Subscription Fee moves: 1,650/mo → 1,700/mo** (+50, +3%).
+Like VGE's Rev3, MRD's Rev3 has never been issued to the client
+(`issued_date: ""`, Rev1/Rev2 retracted) — this changes an internal
+draft figure, not a live quote, but it is flagged here prominently
+because, unlike VGE, nothing pins this number and the change is real.
+
+`G31_worst_case_margin` was **not** recomputed for either client — its
+original derivation from the base margin isn't fully reconstructable
+from the stored worksheet text alone, and inventing a plausible-looking
+number was rejected (P2). Flagged inline in both worksheets for a future
+pass, not guessed.
+
+**`monthly_billing_deviation.surcharge_pct: 0.03`** (Kallat/Prosper):
+still uncited. No `policy.yaml` field exists for this specific purpose
+— only `financing_uplift.zero_mobilisation_surcharge: 0.03`, a different
+concept, coincidentally the same value. **Logged as undecided, not
+invented**: either this needs its own named policy field, or it needs
+confirmation that reusing `zero_mobilisation_surcharge` is intentional.
+Not resolved in this pass.
+
+Committed engine additions (pure additions, zero lines removed from any
+existing function, confirmed via `git diff`): `pricing_engine.
+b_side_subtotal_aed()` and `pricing_engine.hypercare_cost_aed()` — the
+two orphan emitters (previously only computed in the scratch,
+never-committed `recompute_worksheet.py`) now have committed,
+T9-tested functions. Verified against Kallat/Prosper's already-stored
+values first (agreed exactly, no new discrepancy) before being used to
+write VGE/MRD.
+
+Four-client gate table, post-migration:
+
+| Client | check_4 | Structural exception? | Other failures |
+|---|---|---|---|
+| VGE (N=5) | PASS (50.417h vs ~46h reference) | No — below N=19 breach | R11, R12 |
+| MRD (N=5) | PASS (50.417h vs ~46h reference) | No — below N=19 breach | R11, R12 |
+| Kallat (N=40) | FAIL | Yes | R11, R12 |
+| Prosper (N=31) | FAIL | Yes | R11, R12 |
+
+`--selftest` confirmed clean throughout this pass.

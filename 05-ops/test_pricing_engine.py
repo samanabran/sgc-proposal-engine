@@ -505,6 +505,71 @@ CLIENT_WORKSHEETS = [
 ]
 
 
+def t9_component_level_formulas(policy=None):
+    """Widened T9 (per review): checks each COMPONENT against its own
+    engine formula, not just that the sums are internally self-consistent
+    -- a worksheet can pass the sum-check while every component is
+    independently wrong, if they're wrong by amounts that happen to
+    cancel (not the case found here, but the earlier sum-only check
+    could not have detected it either way). documentation_hours/qa_hours/
+    training_hours are checked for every worksheet, migrated or not, using
+    that worksheet's own reference dev_hours (a_hours+class_b.total_hours
+    once migrated; raw delivery_hours sum pre-migration, since that was
+    the only base that existed before class_b did). a_side_hours/
+    class_b.total_hours/hypercare.hours are checked only where the new
+    schema is present."""
+    pol = policy or pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    inv = pe.load_inventory()
+    for client in CLIENT_WORKSHEETS:
+        ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
+        if not os.path.exists(ws_path):
+            continue
+        ws = pe._load(ws_path)
+        b = ws.get("number_2_build", {})
+        n = ws.get("inputs", {}).get("users_now")
+        has_new_schema = "class_b" in b and "hypercare" in b and "a_side_hours" in b
+
+        if has_new_schema:
+            ref_dev_hours = b["a_hours"] + b["class_b"]["total_hours"]
+        else:
+            ref_dev_hours = sum(e["hours"] for e in b.get("delivery_hours", []))
+
+        expected_doc = max(pol["overlays"]["documentation_hours_min"],
+                            round(pol["overlays"]["documentation_pct_of_dev"] * ref_dev_hours))
+        expected_qa = max(pol["overlays"]["qa_hours_min"],
+                           round(pol["overlays"]["qa_pct_of_delivery"] * ref_dev_hours))
+        expected_training = pol["overlays"]["training_sessions"] * pol["overlays"]["training_hours_per_session"]
+
+        check(f"T9c: {client} documentation_hours == max(floor, pct*{ref_dev_hours:.3f}) "
+              f"(stored={b.get('documentation_hours')}, expected={expected_doc})",
+              b.get("documentation_hours") == expected_doc)
+        check(f"T9c: {client} qa_hours == max(floor, pct*{ref_dev_hours:.3f}) "
+              f"(stored={b.get('qa_hours')}, expected={expected_qa})",
+              b.get("qa_hours") == expected_qa)
+        check(f"T9c: {client} training_hours == policy constant "
+              f"(stored={b.get('training_hours')}, expected={expected_training})",
+              b.get("training_hours") == expected_training)
+
+        if has_new_schema and n:
+            expected_a_hours = pe.a_hours_for_n(n, inventory=inv) if client in ("KP-kallat-properties", "PRO-prosper-realestate") else None
+            if expected_a_hours is not None:
+                check(f"T9c: {client} a_hours == pricing_engine.a_hours_for_n({n}) "
+                      f"(stored={b.get('a_hours')}, expected={expected_a_hours})",
+                      b.get("a_hours") == expected_a_hours)
+            expected_class_b, _ = pe.b_hours_for_branch(n, "m", inv)
+            check(f"T9c: {client} class_b.total_hours == pricing_engine.b_hours_for_branch({n},'m') "
+                  f"(stored={b['class_b']['total_hours']}, expected={expected_class_b:.3f})",
+                  abs(b["class_b"]["total_hours"] - expected_class_b) < 0.001)
+            expected_hc_hours = pe.hypercare_hours_for_n(n)
+            check(f"T9c: {client} hypercare.hours == pricing_engine.hypercare_hours_for_n({n}) "
+                  f"(stored={b['hypercare']['hours']}, expected={expected_hc_hours})",
+                  b["hypercare"]["hours"] == expected_hc_hours)
+            expected_a_side = b["a_hours"] + expected_doc + expected_qa + expected_training
+            check(f"T9c: {client} a_side_hours == a_hours+doc+qa+training "
+                  f"(stored={b.get('a_side_hours')}, expected={expected_a_side})",
+                  b.get("a_side_hours") == expected_a_side)
+
+
 def t9_worksheet_internal_consistency():
     for client in CLIENT_WORKSHEETS:
         ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
@@ -513,9 +578,18 @@ def t9_worksheet_internal_consistency():
         ws = pe._load(ws_path)
         b = ws.get("number_2_build", {})
 
-        # Invariant 1 (new schema only -- Kallat/Prosper as of this build):
-        # total_hours_all_in == a_side_hours + class_b.total_hours + hypercare.hours
-        if "class_b" in b and "hypercare" in b and "a_side_hours" in b:
+        # Invariant 1: every worksheet MUST be on the new Class A-D schema --
+        # a worksheet missing class_b/hypercare/a_side_hours is un-migrated,
+        # not exempt. This is a hard FAIL, not a skip, so an un-migrated
+        # worksheet can never present as green again (closes the coverage
+        # gap VGE/MRD exposed: T9 previously only checked worksheets that
+        # already had the new fields, silently passing over ones that didn't).
+        has_new_schema = "class_b" in b and "hypercare" in b and "a_side_hours" in b
+        check(f"T9: {client} is migrated to the new Class A-D schema "
+              f"(class_b/hypercare/a_side_hours present)", has_new_schema,
+              "MISSING new-schema fields -- worksheet not yet migrated to pricing v3.0")
+
+        if has_new_schema:
             computed_sum = b["a_side_hours"] + b["class_b"]["total_hours"] + b["hypercare"]["hours"]
             stored_all_in = b.get("total_hours_all_in")
             stored_total = b.get("total_hours")
@@ -525,6 +599,28 @@ def t9_worksheet_internal_consistency():
             check(f"T9: {client} total_hours == total_hours_all_in "
                   f"(stored total_hours={stored_total}, total_hours_all_in={stored_all_in})",
                   stored_total is not None and stored_all_in is not None and abs(stored_total - stored_all_in) < 0.001)
+
+            # Invariant 3: class_b.subtotal_aed / b_side_subtotal_aed and
+            # hypercare.cost_aed must match the committed engine emitters,
+            # not a value that only ever existed in the scratch
+            # recompute_worksheet.py script.
+            users_now = ws.get("inputs", {}).get("users_now")
+            if users_now:
+                expected_b_side = pe.b_side_subtotal_aed(users_now)
+                stored_b_side = b["class_b"].get("subtotal_aed")
+                stored_b_side_top = b.get("b_side_subtotal_aed")
+                check(f"T9: {client} class_b.subtotal_aed == pricing_engine.b_side_subtotal_aed({users_now}) "
+                      f"(stored={stored_b_side}, expected={expected_b_side})",
+                      stored_b_side is not None and abs(stored_b_side - expected_b_side) < 0.01)
+                check(f"T9: {client} b_side_subtotal_aed == pricing_engine.b_side_subtotal_aed({users_now}) "
+                      f"(stored={stored_b_side_top}, expected={expected_b_side})",
+                      stored_b_side_top is not None and abs(stored_b_side_top - expected_b_side) < 0.01)
+
+                expected_hc_cost = pe.hypercare_cost_aed(users_now)
+                stored_hc_cost = b["hypercare"].get("cost_aed")
+                check(f"T9: {client} hypercare.cost_aed == pricing_engine.hypercare_cost_aed({users_now}) "
+                      f"(stored={stored_hc_cost}, expected={expected_hc_cost})",
+                      stored_hc_cost is not None and abs(stored_hc_cost - expected_hc_cost) < 1)
 
         # Invariant 2 (universal, any schema): internal_build_cost_aed ==
         # total_hours * policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
@@ -556,6 +652,8 @@ if __name__ == "__main__":
     t8_check4_structural_sweep()
     print("\n=== T9: worksheet internal consistency ===")
     t9_worksheet_internal_consistency()
+    print("\n=== T9c: component-level formula checks ===")
+    t9_component_level_formulas()
 
     print()
     if FAILURES:

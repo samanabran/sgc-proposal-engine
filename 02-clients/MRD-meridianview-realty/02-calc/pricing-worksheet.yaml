@@ -26,6 +26,14 @@ number_1_cost_to_serve:
   platform_floor_aed: 650                    # 520 x 1.25
 
 number_2_build:
+  # MIGRATED 2026-08-05 (v3.0): unlike VGE, this worksheet has always been
+  # its own source of truth (no external brief pin) -- so this migration
+  # DOES change the quoted figures below, not just the audit trail. See
+  # CHANGELOG.md pricing v3.0 VGE/MRD migration entry. This worksheet's
+  # pre-migration documentation_hours (2, "floor binds") was ALREADY
+  # correct -- confirmed as the control case proving 46 was the right
+  # a_side_hours figure for this exact scope/segment/N combination (VGE
+  # had the same inputs but a different, wrong, stored total of 52).
   delivery_hours:
     - { package: discovery,                          band: standard, hours: 5 }
     - { package: property_unit_register,               band: standard, hours: 8 }
@@ -34,50 +42,94 @@ number_2_build:
     - { package: maintenance_invoice_from_request,           band: standard, hours: 5 }
     - { package: crm_leads,                                   band: simple,   hours: 3 }
     - { package: reports_dashboard,                             band: simple,   hours: 2 }
-  documentation_hours: 2      # max(overlays.documentation_hours_min=2, 5% x 37 = 1.85) — floor binds
-  qa_hours: 3                   # max(overlays.qa_hours_min=3, 8% x 37 = 2.96) — floor binds
-  training_hours: 4              # overlays.training_sessions(2) x training_hours_per_session(2)
-  total_hours: 46                  # 37 delivery + 2 doc + 3 qa + 4 training
+  work_package_hours_subtotal: 37
+  class_a_additions: []   # none apply -- same reasoning as VGE: N=5 crosses no threshold, no migration in scope
+  a_hours: 37
+  class_b:
+    engine: "05-ops/pricing_engine.py: b_hours_for_branch(5, 'm'), class-b-task-inventory.yaml"
+    total_hours: 2.417
+    tasks:
+      - { name: account_creation_credential, hours: 0.417, role: junior_passthrough, rate_aed: 90 }
+      - { name: individual_onboarding,        hours: 0.833, role: junior_passthrough, rate_aed: 90 }
+      - { name: per_agent_signoff,             hours: 0.250, role: junior_passthrough, rate_aed: 90 }
+      - { name: bulk_path_validation,           hours: 0.000, role: junior_passthrough, rate_aed: 90 }
+      - { name: exception_allowance,             hours: 0.167, role: junior_passthrough, rate_aed: 90 }
+      - { name: role_permission_design,           hours: 0.750, role: business_analyst,   rate_aed: 450 }
+    subtotal_aed: 487.5    # pricing_engine.b_side_subtotal_aed(5), engine-emitted -- identical to VGE (same N, same inputs)
+    note: "90 AED/hr = midpoint of rate-card.yaml passthrough_band (60-120). 450 AED/hr = rate-card.yaml:26 business_analyst, per D-5."
+  dev_hours_for_overlays: 39.417        # a_hours(37) + class_b.total_hours(2.417)
+  documentation_hours: 2      # max(overlays.documentation_hours_min=2, 5% x 39.417=1.97) — floor binds. Unchanged: this worksheet already had the correct figure.
+  qa_hours: 3                   # max(overlays.qa_hours_min=3, 8% x 39.417=3.15) — unchanged
+  training_hours: 4              # overlays.training_sessions(2) x training_hours_per_session(2) — unchanged
+  a_side_hours: 46                  # a_hours(37) + qa(3) + doc(2) + training(4) -- SAME as VGE: identical scope/segment/N,
+                                      # no legitimate differentiator between the two deals in any engine input (see
+                                      # CHANGELOG.md pricing v3.0 entry -- this duplication is expected, not a bug)
   rate_aed: 280                      # policy.yaml segments.startup_boutique.blended_rate_aed — matches rate-card.yaml roles.startup_consultant
   rate_exists_on_card: true
-  subtotal_aed: 12880                   # 46 x 280
-  pm_aed: 1288                            # 12880 x segments.startup_boutique.pm_pct (0.10)
-  contingency_aed: 644                     # 12880 x segments.startup_boutique.contingency_pct (0.05)
-  build_value_aed: 14812                    # 12880 + 1288 + 644
-  internal_build_cost_aed: 6900               # 46 x policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+  a_side_subtotal_aed: 12880           # 46 x 280 -- same number as the old subtotal_aed, coincidentally (46 was already correct)
+  b_side_subtotal_aed: 487.5             # class_b.subtotal_aed, per-task-role rates (NOT the segment blended rate) -- NEW,
+                                           # was never priced before v3.0 (this worksheet had no Class B concept at all)
+  subtotal_aed: 13367.5                    # a_side_subtotal_aed + b_side_subtotal_aed -- CHANGED from 12880 (Class B now priced)
+  pm_aed: 1336.75                            # subtotal_aed x segments.startup_boutique.pm_pct (0.10)
+  contingency_aed: 668.38                     # subtotal_aed x segments.startup_boutique.contingency_pct (0.05)
+  build_value_aed: 15999                       # subtotal_aed x 1.10 x 1.05 (compounded, runbook §3 formula -- CHANGED from
+                                                 # this worksheet's own prior ADDITIVE method, 12880+1288+644=14812; migrating
+                                                 # to the compounding convention already used by Kallat/Prosper/VGE-mechanical
+                                                 # for consistency, not a new policy -- see hypercare below for the +hypercare step)
+                                                 # = build_value_core_aed(15439.46) + hypercare.cost_aed(560), rounded
+  build_value_core_aed: 15439.46               # subtotal_aed x 1.10 x 1.05, before hypercare
+  hypercare:
+    pods: 1                                       # ceil(5/5)
+    hours: 2                                       # 1 pod x 2h (M-branch)
+    rate_aed: 280                                   # policy.yaml cost_to_serve.support_rate_aed
+    cost_aed: 560                                    # pricing_engine.hypercare_cost_aed(5), engine-emitted -- NEW, was never priced before
+  total_hours_all_in: 50.417                              # a_side_hours(46) + class_b.total_hours(2.417) + hypercare.hours(2)
+  total_hours: 50.417                                      # = total_hours_all_in — CHANGED from 46 (which was A-side only, correct as far as it went, but didn't yet include Class B/hypercare)
+  internal_build_cost_aed: 7562                            # total_hours x policy.yaml internal_consultant_cost_aed_hr (150), rounded -- CHANGED from 6900 (46 x 150)
 
 number_3_financing:
-  mobilisation_aed: 4888        # 14812 x policy.yaml gates.default_mobilisation_pct (0.33), rounded — exactly 33.0%
-  deferred_aed: 9924              # 14812 - 4888
+  mobilisation_aed: 5280        # build_value_aed(15999) x policy.yaml gates.default_mobilisation_pct (0.33), rounded -- CHANGED from 4888
+  deferred_aed: 10719              # 15999 - 5280
   uplift_pct: 0.18                  # financing_uplift.months_24
-  recovery_total_aed: 11710           # 9924 x 1.18, rounded
-  recovery_monthly_aed: 488             # 11710 / 24, rounded
+  recovery_total_aed: 12648           # 10719 x 1.18, rounded -- CHANGED from 11710
+  recovery_monthly_aed: 527             # 12648 / 24, rounded -- CHANGED from 488
 
 assembly:
   option_a:
-    mobilisation_aed: 4888
-    platform_portion_aed: 1150    # market-defensible floor, well above the mechanical 650 floor, positioned under PropSpace's own upper range — a policy input, not a formula output
-    subscription_aed: 1650          # (1150 + 488 = 1638) rounded to nearest 50
-    year1_client_cost_aed: 24688      # 4888 + 12 x 1650
+    mobilisation_aed: 5280
+    platform_portion_aed_override:
+      # RESTRUCTURED 2026-08-05, per review: platform_portion_aed was a policy
+      # input (a deliberate competitive-positioning anchor) stored in a field
+      # shaped like a formula output. Declared explicitly here instead --
+      # UNCHANGED VALUE (1150), not recomputed off build_value or cts_total.
+      anchor_aed: 1150
+      mechanical_floor_aed: 650              # cts_total_aed(520) x policy.yaml gates.platform_floor_multiplier(1.25) -- the floor this anchor overrides
+      multiplier_that_would_apply: 1.25       # gates.platform_floor_multiplier -- what 650 came from; 1150 is NOT this x anything, it is a separate policy choice
+      rationale: "Market-defensible floor, well above the mechanical 650 floor, positioned under PropSpace's own upper range (incumbent_benchmark_aed_mo: 1760) -- a deliberate commercial-positioning decision, not a formula output. Preserved unchanged by this migration; only the recovery component below was recomputed, from the corrected build_value_aed."
+    platform_portion_aed: 1150    # = platform_portion_aed_override.anchor_aed, kept as a plain field too since gates/assembly below reference this name
+    subscription_aed: 1700          # (1150 + 527 = 1677) rounded to nearest 50 -- CHANGED from 1650. Recovery component
+                                      # moved because build_value_aed corrected (14812->15999); platform_portion_aed did
+                                      # NOT move (anchor preserved per platform_portion_aed_override above).
+    year1_client_cost_aed: 25680      # 5280 + 12 x 1700 -- CHANGED from 24688
   # option_b (zero mobilisation) is WITHDRAWN — not offered, see payment-plans.yaml: withdrawn
 
-payment_cadence: quarterly_in_advance   # meets policy.yaml gates.min_cadence (G33); quarterly billing = 1650 x 3 = 4950/quarter
+payment_cadence: quarterly_in_advance   # meets policy.yaml gates.min_cadence (G33); quarterly billing = 1700 x 3 = 5100/quarter
 
 exposure:
-  contractual_peak_aed: 9924       # deferred_aed at kickoff, protected by clawback
-  cash_peak_aed: 0                    # mobilisation (4888) + first quarter (4950) = 9838 collected at/near kickoff, comfortably ahead of the delivery-cost curve for a 46-hour build — see 02-calc/exposure-calculator.yaml
+  contractual_peak_aed: 10719       # deferred_aed at kickoff, protected by clawback -- CHANGED from 9924
+  cash_peak_aed: 0                    # mobilisation (5280) + first quarter (5100) = 10380 collected at/near kickoff, comfortably ahead of the delivery-cost curve for a 50.417-hour build — see 02-calc/exposure-calculator.yaml
   economic_peak_aed: 0                 # staged delivery keeps internal cost accrual paced with collections
   cash_positive_by_day: 1                # cash-positive at kickoff itself
 
 gates:
-  G1_platform_floor:      { pass: true, actual: 1650, required: 650 }
+  G1_platform_floor:      { pass: true, actual: 1700, required: 650 }
   G2_term_ge_recovery:    { pass: true }
-  G3_mobilisation_33pct:  { pass: true, actual_pct: 0.330 }
+  G3_mobilisation_33pct:  { pass: true, actual_pct: 0.330 }   # 5280/15999 = 0.330, unchanged ratio despite figures moving
   G4_clawback_present:    { pass: true }
   G5_no_post_recovery_drop: { pass: true }
   G6_term_at_kickoff:      { pass: true }
   G7_financing_disclosed:  { pass: true }
-  G8_margin:                { pass: true, actual_pct: 0.534, required_pct: 0.30 }
+  G8_margin:                { pass: true, actual_pct: 0.527, required_pct: 0.30, note: "(build_value_aed 15,999 - internal_build_cost_aed 7,562) / 15,999 = 52.7%, updated 2026-08-05 alongside the v3.0 migration (was 53.4% against the pre-migration 14,812/6,900 pair)" }
   G9_rate_provenance:        { pass: true }
   G10_concessions_capped:     { pass: true, note: "no concessions on this deal" }
   G11_discount_platform_only:  { pass: true, note: "no discount applied" }
@@ -92,7 +144,7 @@ gates:
   G20_authority_matrix_followed:         { pass: true, note: "standard SDR-level deal" }
   G21_all_exposures_computed:             { pass: true }
   G22_walkaway_card_produced:              { pass: true }
-  G23_absolute_margin_floor:                { pass: true, actual_pct: 0.534, required_pct: 0.25 }
+  G23_absolute_margin_floor:                { pass: true, actual_pct: 0.527, required_pct: 0.25, note: "updated 2026-08-05 alongside G8" }
   G24_portfolio_limits_checked:              { pass: true }
   G25_liability_capped:                       { pass: true, note: "clause drafted, pending counsel review" }
   G26_ip_data_ownership_correct:               { pass: true, note: "clause drafted, pending counsel review re: LGPL" }
@@ -100,7 +152,7 @@ gates:
   G28_guarantee_exclusions_present:              { pass: true }
   G29_evidence_file_complete:                     { pass: true, note: "complete for everything obtainable at draft/issue stage (intake, worksheet, walk-away card, QA checklists); signature and counsel sign-off on flagged clauses are re-verified against this same checklist before go-live specifically, per G29's own scope" }
   G30_abort_criteria_checked:                      { pass: true, note: "none triggered" }
-  G31_worst_case_margin:                            { pass: true, worst_case_pct: 0.48, note: "full 10% aggregate guarantee credit applied" }
+  G31_worst_case_margin:                            { pass: true, worst_case_pct: 0.48, note: "full 10% aggregate guarantee credit applied -- NOT recomputed in the 2026-08-05 migration pass, same reason as VGE's G31 (original derivation not fully reconstructable from stored text alone; flagged, not guessed, per P2)" }
   G32_cash_positive_30_days:                         { pass: true }
   G33_min_cadence_quarterly:                          { pass: true }
   G34_mobilisation_covers_third_party:                 { pass: true, note: "N/A — no third-party upfront cost triggered" }
@@ -111,8 +163,8 @@ gates:
   G39_no_abandoned_modules:                                 { pass: true }
   G40_enterprise_mobilisation_covers_licence:                { pass: true, applicable: false }
   G41_demo_matches_edition:                                   { pass: true }
-  market_test:    { pass: true, multiple_of_incumbent: 1.169 }
-  budget_test:     { pass: true, year1_vs_rejected: 0.823 }
+  market_test:    { pass: true, multiple_of_incumbent: 1.216, note: "year1_client_cost_aed(25,680) / (incumbent_benchmark_aed_mo(1,760) x 12) -- updated 2026-08-05, was 1.169 against the pre-migration year1 of 24,688" }
+  budget_test:     { pass: true, year1_vs_rejected: 0.856, note: "25,680 / 30,000 -- updated 2026-08-05, was 0.823" }
 
 phase2_deferred: [portal_sync_property_finder, portal_sync_bayut_dubizzle, website_lead_capture]
 exclusions_confirmed: true

@@ -39,9 +39,25 @@ number_1_cost_to_serve:
   platform_floor_aed: 988                 # 790 × 1.25
 
 number_2_build:
-  # NOTE — do not use this block to recompute the proposal's figures.
-  # Brief §3 fixes Implementation Value at AED 14,800; this block records
-  # the underlying build structure for the audit trail, not a derivation.
+  # MIGRATED 2026-08-05 (v3.0): this block is STILL audit-trail only --
+  # Brief §3 fixes Implementation Value at AED 14,800 and the quoted
+  # Subscription Fee at AED 1,650/mo; neither changes as part of this
+  # migration. See brief_pin_variance below and CHANGELOG.md pricing v3.0
+  # VGE/MRD migration entry for the full record, including the correction
+  # of this worksheet's own pre-migration internal inconsistency (stored
+  # total_hours: 52 did not equal the sum of ITS OWN stated sub-fields,
+  # 37+4+3+4=48 -- documentation_hours was itself overstated at 4 instead
+  # of the policy-floor-correct 2; the remaining 4h has no documented
+  # origin anywhere in this deal's brief/transcript/verbal-promises, and
+  # is treated as an unrecoverable ASSUMPTION -- not a proven finding --
+  # consistent with an early undocumented per-user/rollout allowance now
+  # properly represented by class_b + hypercare below. What licenses this
+  # migration is the negative scope audit (client-brief.yaml
+  # work_packages_requested: [], migration_records: null; every
+  # verbal-promises.md entry maps to an existing package or is DEFERRED/
+  # EXCLUDED; all 7 delivery packages below are intact, none removed),
+  # not the numeric near-match to class_b+hypercare (4h vs 4.417h -- not
+  # an exact match, not claimed as one).
   delivery_hours:
     - { package: discovery,                          band: standard, hours: 5 }
     - { package: property_unit_register,                band: standard, hours: 8 }
@@ -50,18 +66,65 @@ number_2_build:
     - { package: maintenance_invoice_from_request,             band: standard, hours: 5 }
     - { package: crm_leads,                                   band: simple,   hours: 3 }
     - { package: reports_dashboard,                              band: simple,   hours: 2 }
-  documentation_hours: 4                  # 5% of 37
-  qa_hours: 3                             # 8% of 37, minimum 3
-  training_hours: 4                        # 2 × 2
-  total_hours: 52
-  rate_aed: 280                            # segment pinned role: startup_consultant
+  work_package_hours_subtotal: 37
+  class_a_additions: []   # none apply: users_now=5 crosses neither bulk_user_import_csv's (>25) nor
+                            # training_content_design_multiagent's (>10) threshold, and data_migration_500
+                            # is not in this deal's work_packages -- migration_record_validation_signoff
+                            # does not apply either.
+  a_hours: 37                          # work_package_hours_subtotal (no class_a_additions apply)
+  class_b:
+    engine: "05-ops/pricing_engine.py: b_hours_for_branch(5, 'm'), class-b-task-inventory.yaml"
+    total_hours: 2.417
+    tasks:
+      - { name: account_creation_credential, hours: 0.417, role: junior_passthrough, rate_aed: 90 }
+      - { name: individual_onboarding,        hours: 0.833, role: junior_passthrough, rate_aed: 90 }
+      - { name: per_agent_signoff,             hours: 0.250, role: junior_passthrough, rate_aed: 90 }
+      - { name: bulk_path_validation,           hours: 0.000, role: junior_passthrough, rate_aed: 90 }
+      - { name: exception_allowance,             hours: 0.167, role: junior_passthrough, rate_aed: 90 }
+      - { name: role_permission_design,           hours: 0.750, role: business_analyst,   rate_aed: 450 }
+    subtotal_aed: 487.5    # pricing_engine.b_side_subtotal_aed(5), engine-emitted
+    note: "90 AED/hr = midpoint of rate-card.yaml passthrough_band (60-120). 450 AED/hr = rate-card.yaml:26 business_analyst, per D-5."
+  dev_hours_for_overlays: 39.417        # a_hours(37) + class_b.total_hours(2.417)
+  documentation_hours: 2                 # CORRECTED 2026-08-05: was 4 (stated as "5% of 37"=1.85, but 4 was never
+                                           # the correct floor-bound value -- max(policy.yaml documentation_hours_min=2,
+                                           # round(5% of 39.417=1.97))=2). This is the 2h portion of the pre-migration
+                                           # 6h excess (52 vs 46) -- see the block comment above.
+  qa_hours: 3                             # max(min=3, 8% of 39.417=3.15), rounded -- unchanged, was already correct
+  training_hours: 4                        # 2 sessions x 2h -- unchanged
+  a_side_hours: 46                          # a_hours(37) + qa(3) + doc(2) + training(4)
+  rate_aed: 280                              # startup_boutique blended_rate_aed, pinned_role startup_consultant -- applies to a_side_hours ONLY
   rate_exists_on_card: true
-  subtotal_aed: 14560
-  pm_aed: 1456                              # 10% (startup_boutique)
-  contingency_aed: 728                       # 5%
-  build_value_aed: 14800                      # brief §3 — adopted (source of truth for proposal)
-  build_value_aed_disclosed: 14800            # brief §3 — adopted (duplicate for audit trail)
-  internal_build_cost_aed: 7800                # 52 × 150
+  a_side_subtotal_aed: 12880                  # 46 x 280
+  b_side_subtotal_aed: 487.5                    # class_b.subtotal_aed, per-task-role rates (NOT the segment blended rate)
+  subtotal_aed: 13367.5                          # a_side_subtotal_aed + b_side_subtotal_aed -- CHANGED from 14560 (52 x 280,
+                                                   # undifferentiated) now that Class B is priced at its own rates, not 280.
+  pm_aed: 1336.75                                 # subtotal_aed x 0.10 (startup_boutique pm_pct)
+  contingency_aed: 668.38                          # subtotal_aed x 0.05 (startup_boutique contingency_pct)
+  build_value_core_aed: 15439.46                    # subtotal_aed x 1.10 x 1.05, compounded per runbook §3 formula
+  hypercare:
+    pods: 1                                           # ceil(5/5)
+    hours: 2                                           # 1 pod x 2h (M-branch)
+    rate_aed: 280                                       # policy.yaml cost_to_serve.support_rate_aed
+    cost_aed: 560                                        # pricing_engine.hypercare_cost_aed(5), engine-emitted
+  build_value_mechanical_aed: 15999                       # build_value_core_aed + hypercare.cost_aed, rounded --
+                                                            # informational only, see brief_pin_variance below.
+  build_value_aed: 14800                      # brief §3 — STILL adopted, UNCHANGED. The pin governs, not this block's own arithmetic.
+  build_value_aed_disclosed: 14800            # brief §3 — adopted (duplicate for audit trail), UNCHANGED
+  total_hours_all_in: 50.417                              # a_side_hours(46) + class_b.total_hours(2.417) + hypercare.hours(2)
+  total_hours: 50.417                                      # = total_hours_all_in, kept for validate.py check_4 (untouched per K-5)
+  internal_build_cost_aed: 7562                            # total_hours x policy.yaml internal_consultant_cost_aed_hr(150), rounded.
+                                                             # CHANGED from 7800 (was 52 x 150, using the wrong stored total_hours) --
+                                                             # this is an internal-only metric (SGC's own cost estimate, never
+                                                             # disclosed to the client), feeding gates G8/G23 below, which are updated
+                                                             # accordingly. It does NOT feed the client-facing quote.
+  brief_pin_variance:
+    mechanical_build_value_aed: 15999    # what this deal would cost under the standard v3.0 Class A-D engine,
+                                           # same method as Kallat/Prosper -- see build_value_mechanical_aed above.
+    pinned_build_value_aed: 14800          # brief §3 -- what is actually quoted, unchanged by this migration.
+    delta_aed: 1199                          # mechanical - pinned
+    delta_pct: 0.081                          # 1199 / 14800
+    which_governs: "pinned (14,800), per this worksheet's own header rule ('brief is the single source of truth') and Brief §3. The mechanical figure is informational only."
+    quote_never_at_risk: "Confirmed: the quoted Subscription Fee (1,650/mo) and Implementation Value (14,800) were always sourced directly from the brief, never derived from number_2_build.total_hours -- so this worksheet's pre-migration internal inconsistency (stored 52h vs its own stated sub-fields summing to 48h) never reached a client-facing figure. The pin, not internal_build_cost_aed or total_hours, drives the quote."
 
 # ---------------------------------------------------------------------------
 # §3 brief values — used by the proposal. Recorded here so the worksheet is
@@ -104,7 +167,7 @@ gates:
   G5_no_post_recovery_drop:   { pass: true }
   G6_term_at_kickoff:         { pass: true }
   G7_financing_disclosed:     { pass: true }
-  G8_margin:                   { pass: true,  actual_pct: 0.473, required_pct: 0.30, note: "computed against brief Implementation Value and internal build cost — see number_2_build.internal_build_cost_aed" }
+  G8_margin:                   { pass: true,  actual_pct: 0.489, required_pct: 0.30, note: "computed against brief Implementation Value (14,800, unchanged) and internal_build_cost_aed (7,562, corrected 2026-08-05 from 7,800 -- see number_2_build.internal_build_cost_aed and brief_pin_variance). Internal-only figure, does not affect the client-facing quote." }
   G9_rate_provenance:         { pass: true }
   G10_concessions_capped:     { pass: true,  note: "no concessions on this deal" }
   G11_discount_platform_only:  { pass: true,  note: "no discount applied" }
@@ -119,7 +182,7 @@ gates:
   G20_authority_matrix_followed:         { pass: true,  note: "standard SDR-level deal" }
   G21_all_exposures_computed:             { pass: true }
   G22_walkaway_card_produced:              { pass: true }
-  G23_absolute_margin_floor:                { pass: true,  actual_pct: 0.473, required_pct: 0.25 }
+  G23_absolute_margin_floor:                { pass: true,  actual_pct: 0.489, required_pct: 0.25, note: "updated 2026-08-05 alongside G8 -- see internal_build_cost_aed correction" }
   G24_portfolio_limits_checked:              { pass: true }
   G25_liability_capped:                       { pass: true,  note: "clause drafted, pending counsel review" }
   G26_ip_data_ownership_correct:               { pass: true,  note: "clause drafted, pending counsel review re: LGPL" }
@@ -127,7 +190,7 @@ gates:
   G28_guarantee_exclusions_present:              { pass: true }
   G29_evidence_file_complete:                     { pass: true,  note: "complete for everything obtainable at draft/issue stage; signature and counsel sign-off are re-verified before go-live specifically, per G29's own scope" }
   G30_abort_criteria_checked:                      { pass: true,  note: "none triggered" }
-  G31_worst_case_margin:                            { pass: true,  worst_case_pct: 0.42, note: "full 10% aggregate guarantee credit applied" }
+  G31_worst_case_margin:                            { pass: true,  worst_case_pct: 0.42, note: "full 10% aggregate guarantee credit applied -- NOT recomputed in the 2026-08-05 migration pass (original derivation from the 0.473 base margin is not fully reconstructable from this worksheet's stored text alone; flagged rather than guessed, per P2 -- no invented figures). Re-derive alongside a future G8/G23 pass if this gate is relied on." }
   G32_cash_positive_30_days:                         { pass: true,  actual_days: 1 }
   G33_min_cadence_quarterly:                          { pass: true,  note: "quarterly_in_advance meets minimum" }
   G34_mobilisation_covers_third_party:                 { pass: true,  note: "no third-party upfront cost triggered" }

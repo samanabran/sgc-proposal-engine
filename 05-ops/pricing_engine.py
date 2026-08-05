@@ -228,6 +228,46 @@ def total_hours_for_n(n, inventory=None, hour_lookup=None, policy=None):
     return a_side_hours + b_total + hypercare_hours
 
 
+def b_side_subtotal_aed(n, inventory=None, rate_card=None):
+    """Emits class_b.subtotal_aed / b_side_subtotal_aed: per-task hours x
+    per-task-role rate, summed. This arithmetic previously lived ONLY in
+    the scratch recompute_worksheet.py (never committed) -- the same class
+    of risk (hand-computed, not engine-emitted) that caused the
+    total_hours_all_in defect fixed in dd87dd2. No new formula: this wraps
+    the exact per-task rate assignment already documented in
+    class-b-task-inventory.yaml and cost-classes.md (junior_passthrough
+    tasks at rate-card.yaml: passthrough_band midpoint, role_permission_design
+    at rate-card.yaml roles.business_analyst)."""
+    inv = inventory or load_inventory()
+    rc = rate_card or load_rate_card()
+    _, breakdown = b_hours_for_branch(n, "m", inv)
+    junior_rate = junior_passthrough_ceiling_aed_hr(rc) - 30  # midpoint of the 60-120 band = 90
+    ba_rate = rc["roles"]["business_analyst"]["rate_aed_hr"]
+    total = 0.0
+    for task_name, hours in breakdown.items():
+        role = inv["tasks"][task_name]["role"]
+        rate = junior_rate if role == "junior_passthrough" else ba_rate
+        total += hours * rate
+    return round(total, 2)
+
+
+def hypercare_hours_for_n(n):
+    """Hours only -- ceil(N/5) pods x 2h/pod (M-branch), the same formula
+    already used inside total_hours_for_n(). Exposed standalone so
+    hypercare_cost_aed() (and any future caller) doesn't have to
+    re-derive it."""
+    return math.ceil(n / 5) * 2
+
+
+def hypercare_cost_aed(n, policy=None):
+    """Emits hypercare.cost_aed: hypercare hours x support_rate_aed.
+    Previously only computed in the scratch recompute_worksheet.py script,
+    same orphan-emitter gap as b_side_subtotal_aed above."""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    hours = hypercare_hours_for_n(n)
+    return round(hours * pol["cost_to_serve"]["support_rate_aed"])
+
+
 def class_d_hours_or_cost(edition):
     """Class D structural guarantee: zero for Community by construction."""
     if edition == "community":
