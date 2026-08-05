@@ -489,17 +489,20 @@ def t8_check4_structural_sweep():
 # an explicit declared override field naming the mechanical value and a
 # reason. Corrected two-tier criterion (per review):
 #   HARD FAIL — any upward delta (vendor-favoring) OR downward exceeding
-#              one rounding step of the declared convention. Undeclared
-#              margin in either direction.
-#   PASS-WITH-CITATION — downward delta within one rounding step of a
-#              rule cited in the inline comment OR a future policy.yaml
-#              field. Presentational.
-# Note: the policy.yaml `presentation.client_facing_subscription_rounding`
-# field referenced in the basis texts is PROPOSED only, not yet written --
-# committing this test before the field lands means every sub-1 item
-# currently fails the CITATION sub-criterion (uncited). MRD's +23 is
-# the only positive uncited delta in the corpus. After the policy field
-# lands, every sub-1 item collapses to PASS-WITH-CITATION.
+#              one rounding step, where the rule is NOT cited to a
+#              policy.yaml field. Undeclared margin in either direction.
+#   PASS-WITH-CITATION — delta in EITHER direction, within one rounding
+#              step, where the rule IS cited to a policy.yaml field.
+# AMENDED 2026-08-06: policy.yaml `presentation.client_facing_subscription_rounding`
+# now exists (nearest_10_aed, applies_to subscription figures only,
+# scope_excludes mobilisation/build_value/internal_build_cost/platform_portion).
+# "Cited" below means cited to that field specifically, not to any inline
+# worksheet comment -- comments don't survive yaml.safe_load and never
+# actually satisfied the old string-match check. subscription deltas are
+# cited and pass in either direction within one step; mobilisation and
+# internal_build_cost are scope-excluded, have no policy field of their
+# own, and remain uncited -- upward always hard-fails, downward hard-fails
+# past one step, per the criterion above.
 # ---------------------------------------------------------------------
 POLICY = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
 N_REF = 5  # for internal_build_cost reference
@@ -605,6 +608,28 @@ def t10_client_facing_money_figure_guard():
     # own manifest.yaml; mobilisation_pct is sourced from risk-assessment
     # for elevated, default for low. We honour the worksheet's own stored
     # figure and only test whether it matches the rate-of-risk formula.
+
+    # AMENDED 2026-08-06: "cited" now means cited to a policy.yaml field,
+    # not an inline worksheet comment (the old "rounded to nearest 10" in
+    # str(...) check never matched anything -- YAML comments don't survive
+    # yaml.safe_load, so every worksheet was silently uncited regardless of
+    # its own text). subscription is cited because policy.yaml now declares
+    # presentation.client_facing_subscription_rounding: nearest_10_aed with
+    # subscription figures in applies_to. internal_build_cost is cited via
+    # the separate presentation.non_subscription_rounding field (banker's
+    # rounding, Python round() half-to-even) -- it is scope-excluded from
+    # the subscription rule but IS a round()-derived figure, and its only
+    # observed deltas corpuswide are the sub-1 artifacts that field
+    # describes. mobilisation has no policy field of its own: its
+    # mechanical value is a straight bv*pct with no declared rounding
+    # tolerance, so it stays uncited -- an uncited delta hard-fails upward
+    # unconditionally, and downward past one step.
+    subscription_rounding = POLICY.get("presentation", {}).get("client_facing_subscription_rounding")
+    subscription_cited = bool(subscription_rounding) and subscription_rounding.get("method") == "nearest_10_aed"
+    non_subscription_rounding = POLICY.get("presentation", {}).get("non_subscription_rounding")
+    internal_build_cost_cited = (bool(non_subscription_rounding)
+                                  and non_subscription_rounding.get("method") == "bankers_rounding_half_to_even")
+
     for client in CLIENT_WORKSHEETS:
         ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
         if not os.path.exists(ws_path):
@@ -618,14 +643,14 @@ def t10_client_facing_money_figure_guard():
             ("subscription", ws.get("assembly", {}).get("subscription_fee_aed_mo")
                           or ws.get("assembly", {}).get("option_a", {}).get("subscription_aed"),
              _derive_subscription(ws),
-             "rounded to nearest 10" in str(ws.get("assembly", {}))),
+             subscription_cited),
             ("mobilisation", ws.get("number_3_financing", {}).get("mobilisation_fee_aed")
                           or ws.get("number_3_financing", {}).get("mobilisation_aed"),
              _derive_mobilisation(ws),
-             True),  # always cited as a percentage of build_value
+             False),  # scope_excludes: no policy field grants this a rounding tolerance
             ("internal_build_cost", ws.get("number_2_build", {}).get("internal_build_cost_aed"),
              _derive_internal_build_cost(ws),
-             True),  # total_hours * 150 is mechanically cited everywhere
+             internal_build_cost_cited),  # cited to presentation.non_subscription_rounding
         ]
         for label, stored, derived, cited in cases:
             verdict, reason = _classify_delta(stored, derived, cited)

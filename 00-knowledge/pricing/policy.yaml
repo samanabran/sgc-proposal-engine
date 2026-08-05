@@ -5,9 +5,9 @@
 # case study): mobilisation raised 25% -> 33%; 24-month financing uplift
 # raised 12% -> 18% pending reserve rebuild; vat.charge_vat flipped to
 # false — SGC is NOT VAT-registered and has no TRN as of this version.
-version: 3.0
-effective_from: 2026-08-05
-source: "v3.0 — rollout_hours_per_user overlay DELETED, replaced by class-b-task-inventory.yaml + cost-classes.md, see CHANGELOG.md"
+version: 3.1
+effective_from: 2026-08-06
+source: "v3.1 — presentation.client_facing_subscription_rounding and presentation.non_subscription_rounding ADDED (first-ever declared rounding-convention fields; previously three uncited conventions coexisted in the corpus with no policy backing), see CHANGELOG.md. v3.0 change (rollout_hours_per_user overlay DELETED, replaced by class-b-task-inventory.yaml + cost-classes.md) carried forward unchanged."
 
 # RESOLVED 2026-08-04 (see failure-modes/known-defects.md #21): this
 # build's own source spec reintroduced the pre-correction smb and
@@ -102,3 +102,36 @@ vat:
   late_registration_penalty_aed: 10000       # plus retroactive liability from the date registration became mandatory
   free_zone_exempt: false                     # DO NOT CHANGE — Designated Zone treatment applies to GOODS only, services are standard-rated even inside one; see market-data/vertical-notes/uae-tax-vat.md
   charge_vat: false                            # illegal to charge VAT while unregistered — see clause-library/vat-uae.md and vat-gross-up.md
+
+presentation:
+  # ADDED 2026-08-06. Declares, for the first time, which rounding
+  # convention governs which class of client-facing figure. Basis is the
+  # inline "rounded to nearest 10" comments already live in the corpus —
+  # nothing new is invented here, this only names the rule those comments
+  # were already applying uncited. See CHANGELOG.md pricing v3.0 addendum
+  # for the corpus-wide sweep that found it and T10 (05-ops/test_pricing_engine.py)
+  # for the guard that now checks against this field instead of re-deriving
+  # citation status from each worksheet's own inline text.
+  client_facing_subscription_rounding:
+    method: nearest_10_aed
+    applies_to:
+      - subscription figures only (e.g. subscription_fee_aed_mo, subscription_fee_aed_mo_24term, assembly.option_a.subscription_aed)
+    scope_excludes:
+      - mobilisation (mobilisation_aed / mobilisation_fee_aed)
+      - build_value_aed
+      - internal_build_cost_aed
+      - platform_portion (platform_portion_aed / platform_portion_aed_mo)
+    basis:
+      # NOTE: 6 verbatim occurrences located and verified 2026-08-06, not 8 —
+      # see CHANGELOG.md pricing v3.0 addendum for the count correction.
+      - 02-clients/KP-kallat-properties/02-calc/pricing-worksheet.yaml:130
+      - 02-clients/KP-kallat-properties/02-calc/pricing-worksheet.yaml:143
+      - 02-clients/KP-kallat-properties/02-calc/pricing-worksheet.yaml:151
+      - 02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml:112
+      - 02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml:125
+      - 02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml:133
+
+  non_subscription_rounding:
+    method: bankers_rounding_half_to_even
+    basis: "Python round() built-in (IEEE 754 round-half-to-even), already the mechanism every non-subscription monetary figure in 05-ops/pricing_engine.py and the worksheets is derived through — this field names the existing behaviour, it does not change it."
+    live_tie_break_example: "PRO-prosper-realestate platform_floor_aed / platform_portion_aed_mo: 2918 x 1.25 = 3647.5 -> 3648 (round-half-to-even: 3648 is the even neighbour). 02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml:34. The only live .5 tie-break in the corpus as of 2026-08-06."

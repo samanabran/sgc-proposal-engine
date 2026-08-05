@@ -107,22 +107,28 @@ assembly:
       multiplier_that_would_apply: 1.25       # gates.platform_floor_multiplier -- what 650 came from; 1150 is NOT this x anything, it is a separate policy choice
       rationale: "Market-defensible floor, well above the mechanical 650 floor, positioned under PropSpace's own upper range (incumbent_benchmark_aed_mo: 1760) -- a deliberate commercial-positioning decision, not a formula output. Preserved unchanged by this migration; only the recovery component below was recomputed, from the corrected build_value_aed. NOTE 2026-08-05: this positioning claim was written against the platform_portion field itself (1,150 vs 1,760), not the total subscription -- confirmed no price commitment exists anywhere in this deal's verbal-promises.md/client-brief.yaml/deal-card.md (deal-card.md does not exist for this client) that would fix the total at 1,650. Read literally (platform_portion vs incumbent), the claim is unaffected by the total moving. Read as a claim about the TOTAL client cost, the margin has compressed from 110 AED (6.3%) to 60 AED (3.4%) under PropSpace's ceiling -- not broken, but flagged for whoever owns this deal's positioning. Stale '1,650' citations NOT yet corrected: 02-calc/gate-report.md, 03-draft/MRD-2026-SUB-01_Rev3/10-commercial-terms.md, 04-review/qa-checklist.md -- see CHANGELOG.md."
     platform_portion_aed: 1150    # = platform_portion_aed_override.anchor_aed, kept as a plain field too since gates/assembly below reference this name
-    subscription_aed: 1700          # (1150 + 527 = 1677) rounded to nearest 50 -- CHANGED from 1650. Recovery component
-                                      # moved because build_value_aed corrected (14812->15999); platform_portion_aed did
-                                      # NOT move (anchor preserved per platform_portion_aed_override above).
-    year1_client_cost_aed: 25680      # 5280 + 12 x 1700 -- CHANGED from 24688
+    subscription_aed: 1680          # raw 1150 + 527 = 1677, rounded to nearest 10 per policy.yaml
+                                      # presentation.client_facing_subscription_rounding (nearest_10_aed) --
+                                      # delta +3, cited, PASS-WITH-CITATION under T10. CORRECTED 2026-08-06 from
+                                      # 1700 (stale "rounded to nearest 50" comment, inherited verbatim from VGE's
+                                      # wording and never itself a declared policy rule -- see CHANGELOG.md).
+                                      # Recovery component moved because build_value_aed corrected (14812->15999);
+                                      # platform_portion_aed did NOT move (anchor preserved per
+                                      # platform_portion_aed_override above).
+    year1_client_cost_aed: 25440      # 5280 + 12 x 1680 -- CHANGED from 25680 (mechanical consequence of the
+                                        # subscription_aed correction above; no other input moved)
   # option_b (zero mobilisation) is WITHDRAWN — not offered, see payment-plans.yaml: withdrawn
 
-payment_cadence: quarterly_in_advance   # meets policy.yaml gates.min_cadence (G33); quarterly billing = 1700 x 3 = 5100/quarter
+payment_cadence: quarterly_in_advance   # meets policy.yaml gates.min_cadence (G33); quarterly billing = 1680 x 3 = 5040/quarter
 
 exposure:
   contractual_peak_aed: 10719       # deferred_aed at kickoff, protected by clawback -- CHANGED from 9924
-  cash_peak_aed: 0                    # mobilisation (5280) + first quarter (5100) = 10380 collected at/near kickoff, comfortably ahead of the delivery-cost curve for a 50.417-hour build — see 02-calc/exposure-calculator.yaml
+  cash_peak_aed: 0                    # mobilisation (5280) + first quarter (5040) = 10320 collected at/near kickoff, comfortably ahead of the delivery-cost curve for a 50.417-hour build — see 02-calc/exposure-calculator.yaml
   economic_peak_aed: 0                 # staged delivery keeps internal cost accrual paced with collections
   cash_positive_by_day: 1                # cash-positive at kickoff itself
 
 gates:
-  G1_platform_floor:      { pass: true, actual: 1700, required: 650 }
+  G1_platform_floor:      { pass: true, actual: 1680, required: 650 }
   G2_term_ge_recovery:    { pass: true }
   G3_mobilisation_33pct:  { pass: true, actual_pct: 0.330 }   # 5280/15999 = 0.330, unchanged ratio despite figures moving
   G4_clawback_present:    { pass: true }
@@ -163,8 +169,8 @@ gates:
   G39_no_abandoned_modules:                                 { pass: true }
   G40_enterprise_mobilisation_covers_licence:                { pass: true, applicable: false }
   G41_demo_matches_edition:                                   { pass: true }
-  market_test:    { pass: true, multiple_of_incumbent: 1.216, note: "year1_client_cost_aed(25,680) / (incumbent_benchmark_aed_mo(1,760) x 12) -- updated 2026-08-05, was 1.169 against the pre-migration year1 of 24,688" }
-  budget_test:     { pass: true, year1_vs_rejected: 0.856, note: "25,680 / 30,000 -- updated 2026-08-05, was 0.823" }
+  market_test:    { pass: true, multiple_of_incumbent: 1.205, note: "year1_client_cost_aed(25,440) / (incumbent_benchmark_aed_mo(1,760) x 12) -- updated 2026-08-06 alongside the subscription_aed 1,700->1,680 rounding correction, was 1.216 against the pre-correction year1 of 25,680" }
+  budget_test:     { pass: true, year1_vs_rejected: 0.848, note: "25,440 / 30,000 -- updated 2026-08-06 alongside the subscription_aed correction, was 0.856" }
 
 phase2_deferred: [portal_sync_property_finder, portal_sync_bayut_dubizzle, website_lead_capture]
 exclusions_confirmed: true

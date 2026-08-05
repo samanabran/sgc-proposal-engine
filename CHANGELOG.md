@@ -793,3 +793,128 @@ documents both `pinned_implementation_value_aed: 14800` and
 `mechanical_*_aed` figures and delta ratios, citing the downgrade to
 "held pending verification" per `6a0ae84` and pointing at the action
 list above. The block documents, does not change any price field.
+
+## pricing v3.1 — 2026-08-06
+
+**Verification pass before writing, two claims checked and retracted**:
+(1) floor-10 does NOT mis-reproduce Kallat's or Prosper's stored
+subscription figures — `5,854` floors to `5,850` and `5,271` floors to
+`5,270`, both exact matches to what's stored; a floor-based rule and a
+nearest-based rule are indistinguishable on this pair of data points, so
+neither confirms nor rules out either convention. (2) the `.5`-boundary
+tie-break present in the corpus (Prosper's `platform_floor_aed`,
+`2,918 × 1.25 = 3,647.5 → 3,648`) sits on `platform_portion`, a field the
+new policy declaration below places in `scope_excludes` — it cannot be
+used to discriminate between subscription-rounding conventions either.
+**Neither claim is the basis for the decision below.** The basis is the
+verbatim "rounded to nearest 10" comment already present, independently,
+on all six of Kallat's and Prosper's own subscription-figure lines — see
+`basis` in the policy field itself.
+
+**Count correction**: the working assumption going into this pass was 8
+verbatim occurrences of "rounded to nearest 10" in the corpus. Verified
+by direct search: there are **6** — three each in
+`KP-kallat-properties/02-calc/pricing-worksheet.yaml` (lines 130, 143,
+151) and `PRO-prosper-realestate/02-calc/pricing-worksheet.yaml` (lines
+112, 125, 133). The other two matches found by an unscoped search are
+downstream restatements, not independent basis: `CHANGELOG.md:702`
+(this file, quoting the worksheets) and
+`05-ops/test_pricing_engine.py:621` (the old T10 citation check itself,
+matching against its own search string). `policy.yaml`'s `basis` list
+below cites the 6 genuine occurrences only.
+
+**`policy.yaml` gains `presentation.client_facing_subscription_rounding`**
+(`nearest_10_aed`, `applies_to` subscription figures only, `scope_excludes`
+mobilisation / `build_value_aed` / `internal_build_cost_aed` /
+platform_portion) — the first-ever declared rounding rule for this class
+of figure; previously `policy.yaml` and everything under
+`00-knowledge/pricing/` and `00-knowledge/commercial-rules/` had none
+(see the prior addendum's corpus sweep). Basis: the 6 occurrences above,
+by file:line.
+
+**`policy.yaml` also gains `presentation.non_subscription_rounding`**
+(`bankers_rounding_half_to_even`, citing Python `round()`'s built-in
+half-to-even behaviour — the mechanism every non-subscription monetary
+figure in `05-ops/pricing_engine.py` and the worksheets was already being
+derived through, uncited, before this field named it). **Confirmed a
+no-op**: declaring the field does not touch a single worksheet, and no
+stored figure changed as a result — checked directly, byte-identical.
+The one live `.5` tie-break in the corpus, Prosper's `platform_floor_aed`
+(`2,918 × 1.25 = 3,647.5 → 3,648`,
+`02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml:34`),
+already matches `round(3647.5) == 3648` exactly — the rule reproduces
+what's stored, so it stands.
+
+**T10 amended** (`05-ops/test_pricing_engine.py`): "cited" now means
+cited to a `policy.yaml` field, not an inline worksheet comment — the old
+check (`"rounded to nearest 10" in str(ws.get("assembly", {}))`) never
+actually matched anything, because `yaml.safe_load` discards comments
+before the dict is built, so every worksheet was silently uncited
+regardless of its own text. For a delta cited to a policy field, T10 now
+passes in **either direction** within one rounding step; an uncited delta
+still hard-fails upward unconditionally, and downward past one step,
+exactly as before. Re-run against the amended criterion and the corrected
+MRD figure (see below):
+
+- Kallat: subscription −4 DOWN, cited (nearest-10) → **PASS-WITH-CITATION**
+- Prosper: subscription −1 DOWN, cited (nearest-10) → **PASS-WITH-CITATION**
+- MRD: subscription +3 UP, cited (nearest-10) → **PASS-WITH-CITATION**
+- VGE: subscription exactly derived → PASS; mobilisation +16 UP, uncited
+  (no policy field covers mobilisation; explicitly in
+  `scope_excludes`) → **HARD FAIL, unchanged**
+- `internal_build_cost_aed`'s sub-1 corpus-wide artifacts (Kallat/Prosper
+  exact; VGE/MRD −1, cited via `non_subscription_rounding`) all
+  **PASS / PASS-WITH-CITATION**
+- Full corpus run: 1 failure (VGE mobilisation), down from 3 the moment
+  `internal_build_cost` was first (incorrectly) marked uncited mid-pass —
+  corrected before landing; see test file inline comments.
+
+**MRD `subscription_aed`: 1,700 → 1,680.** Derivation: raw
+`1,150 + 527 = 1,677`; nearest-10 → `1,680`; delta `+3`, now cited to
+`presentation.client_facing_subscription_rounding`. The stale "rounded to
+nearest 50" inline comment — inherited verbatim from VGE's original
+wording and never itself a declared rule, per the prior addendum's
+finding — is removed from
+`02-clients/MRD-meridianview-realty/02-calc/pricing-worksheet.yaml:110`.
+Mechanically dependent fields updated alongside it, as a direct
+consequence of the `+20`/mo change, not as independent moves:
+`year1_client_cost_aed` (`25,680 → 25,440`), the `payment_cadence`
+quarterly-billing comment (`5,100 → 5,040`), the `exposure.cash_peak_aed`
+comment (`10,380 → 10,320`), `gates.G1_platform_floor.actual`
+(`1,700 → 1,680`), `gates.market_test.multiple_of_incumbent`
+(`1.216 → 1.205`), and `gates.budget_test.year1_vs_rejected`
+(`0.856 → 0.848`). No other MRD input (hours, rates, build_value,
+mobilisation, margin gates) moved.
+
+### Addendum, same day — VGE's blast radius, logged; prior "+23 only upward delta" claim corrected
+
+**VGE's unverified-pin blast radius, restated as its own entry** (all
+four figures below still unchanged in value — this documents exposure,
+it does not touch a price field, same discipline as `brief_pin_variance`):
+
+| Figure | Pinned (quoted) | Mechanical | Delta |
+|---|---|---|---|
+| `subscription_fee_aed_mo` | 1,650 | 1,650 (self-consistent given the pinned `platform_portion_aed_mo` component) | — |
+| `build_value_aed` | 14,800 | 15,999 | −1,199 (pin favours the client) |
+| `mobilisation_fee_aed` | 4,900 | 4,884 | **+16**, uncited (T10 HARD FAIL) |
+| `platform_portion_aed_mo` | 1,163 | 987.5 (`790 × 1.25`, `platform_floor_aed`) | **+175.5**, uncited |
+
+`mobilisation_fee_aed` is the upfront portion of `build_value_aed`, and
+`platform_portion_aed_mo` is a component of `subscription_fee_aed_mo` —
+summing all four would double-count. The correct total **Year-1 AED
+exposure resting on the unverified pin is `year1_total_aed` = 24,700**
+(`4,900 + 12 × 1,650`, `02-clients/VGE-vongeyern-realestate/02-calc/pricing-worksheet.yaml:169`,
+unchanged) — every AED of it downstream of the same single, unverified
+§3 attestation. **VGE action-list priority raised**: two of four traced
+figures (mobilisation, platform_portion) now carry their own uncited
+positive deltas on top of the pre-existing source-verification gap: this
+is no longer a single open question about one pair of numbers, it is a
+pattern across the whole pin. R11/R12 remain NO-GO on VGE.
+
+**Correction to the prior addendum** (commit `e50f01a`, not rewritten):
+that pass stated "MRD's +23 is the only positive uncited delta in the
+entire corpus." That was wrong — VGE's mobilisation `+16` is also an
+upward, uncited delta, and both it and MRD's (now-resolved) `+23` trace
+back to figures this same body of work had already flagged as
+provenance-weak. Logged here as a correction, not a silent edit to the
+earlier text.
