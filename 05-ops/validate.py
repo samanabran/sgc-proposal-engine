@@ -23,6 +23,11 @@ except ImportError:
     print("PyYAML is required: pip install pyyaml", file=sys.stderr)
     sys.exit(2)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pricing_engine as pe  # noqa: E402 -- V1/V2 checks and the pricing_engine
+                              # module are the single code path (P14) for
+                              # anything B_hours/passthrough-ceiling related.
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -351,6 +356,314 @@ def check_18_forbidden_phrases(result, draft_files, edition):
     result.ok("18. no forbidden phrases found outside exempt/historical reference files")
 
 
+# ---------------------------------------------------------------------
+# V1-V5 (pricing-engine-cost-class-model.md Rev.2 §I) and R1-R12
+# (Commercial Rules as executable checks, D-11). Additive to checks
+# 1-18 above -- none of the existing checks are modified, per K-5
+# (validate.py:199's literal 9.2*users is untouched; V1 supersedes it
+# functionally without replacing it).
+# ---------------------------------------------------------------------
+
+V1_TOLERANCE = 0.40
+# Derived (D-10), not chosen at implementation time: average relative
+# spread between hours_simple and hours_standard across all 11 original
+# hour-lookup.yaml work packages (the only documented source of
+# legitimate task-time variance in this repo) = 40.5%, rounded to 40%.
+# See pricing-engine-cost-class-model.md Rev.2 §I for the per-package
+# derivation. No client price or pass/fail was referenced in deriving
+# this number (P7).
+
+
+def check_v1_effort_reconciliation(result, ws):
+    """Effort reconciliation: computed A_hours (sum of hour-lookup.yaml
+    hours_<band> for each declared delivery_hours entry) vs the
+    worksheet's own declared subtotal for those same entries, within
+    V1_TOLERANCE. Makes the market-band gate (V3) an annotation, not a
+    control, once effort reconciles bottom-up."""
+    hl = pe.load_hour_lookup()["work_packages"]
+    delivery = ws.get("number_2_build", {}).get("delivery_hours", [])
+    if not delivery:
+        result.ok("V1. effort reconciliation", "no delivery_hours entries to reconcile")
+        return
+    catalogue_sum = 0.0
+    declared_sum = 0.0
+    untraceable = []
+    for entry in delivery:
+        pkg, band, hours = entry.get("package"), entry.get("band"), entry.get("hours", 0)
+        declared_sum += hours
+        key = f"hours_{band}"
+        if pkg in hl and key in hl[pkg]:
+            catalogue_sum += hl[pkg][key]
+        else:
+            untraceable.append(f"{pkg}/{band}")
+    if untraceable:
+        result.fail("V1. effort reconciliation", f"no hour-lookup.yaml key for: {untraceable}")
+        return
+    rel_diff = abs(declared_sum - catalogue_sum) / catalogue_sum if catalogue_sum else 0
+    if rel_diff > V1_TOLERANCE:
+        result.fail("V1. effort reconciliation",
+                    f"declared {declared_sum}h vs catalogue {catalogue_sum}h, "
+                    f"{rel_diff:.1%} apart, exceeds {V1_TOLERANCE:.0%} tolerance")
+    else:
+        result.ok("V1. effort reconciliation",
+                   f"declared {declared_sum}h vs catalogue {catalogue_sum}h, within {V1_TOLERANCE:.0%}")
+
+
+def check_v2_rate_mix_ceiling(result, ws):
+    """Rate-mix ceiling, per-task-role (D-5): Class B work must not be
+    billed at an L2+ segment-blended rate. Checks the legacy
+    number_2_build.rollout_hours field (pre-recompute worksheets, e.g.
+    Kallat/Prosper before step (h)) against the passthrough ceiling --
+    this is the exact check that catches Kallat Rev1's 120h@525."""
+    build = ws.get("number_2_build", {})
+    rollout_hours = build.get("rollout_hours", 0)
+    rate = build.get("rate_aed")
+    if rollout_hours and rate:
+        ceiling = pe.junior_passthrough_ceiling_aed_hr()
+        if rate > ceiling:
+            result.fail("V2. rate-mix ceiling",
+                        f"{rollout_hours}h of per-user-shaped rollout work billed at {rate} "
+                        f"AED/hr, exceeds Class B ceiling {ceiling} AED/hr -- no written "
+                        "per-task justification on file")
+            return
+    # Post-recompute schema: number_2_build.class_b.tasks[], each with its
+    # own role/rate -- checked against rate-card.yaml per task once present.
+    class_b = build.get("class_b")
+    if class_b:
+        rc = pe.load_rate_card()
+        roles = rc.get("roles", {})
+        ceiling = pe.junior_passthrough_ceiling_aed_hr(rc)
+        for task in class_b.get("tasks", []):
+            role = task.get("role")
+            applied_rate = task.get("rate_aed")
+            if role == "junior_passthrough":
+                max_rate = ceiling
+            elif role in roles:
+                max_rate = roles[role]["rate_aed_hr"]
+            else:
+                result.fail("V2. rate-mix ceiling", f"task {task.get('name')} has unknown role '{role}'")
+                continue
+            if applied_rate and applied_rate > max_rate:
+                result.fail("V2. rate-mix ceiling",
+                            f"task {task.get('name')} billed at {applied_rate} AED/hr, "
+                            f"exceeds role '{role}' ceiling {max_rate} AED/hr")
+    result.ok("V2. rate-mix ceiling", "no Class B task exceeds its per-task-role ceiling")
+
+
+def check_v3_band_applicability(result, ws):
+    """Band check with applicability guard (V3): the 22,000-55,000
+    implementation band (benchmarks.yaml market_positioning) is scoped
+    10-30 users. Out-of-range N is ANNOTATION ONLY -- never pass, never
+    fail."""
+    users = ws.get("inputs", {}).get("users_now")
+    build_value = ws.get("number_2_build", {}).get("build_value_aed")
+    if users is None or build_value is None:
+        return
+    if 10 <= users <= 30:
+        low, high = 22000, 55000
+        if low <= build_value <= high:
+            result.ok("V3. band check", f"{build_value} AED within [22000,55000] band for {users} users")
+        else:
+            result.ok("V3. band check", f"OUT-OF-BAND (annotation only) -- {build_value} AED "
+                       f"outside [22000,55000] for {users} users, in-range population")
+    else:
+        result.ok("V3. band check",
+                   f"OUT-OF-RANGE -- ANNOTATION ONLY. Band scoped to 10-30 users, "
+                   f"this deal is {users}. No pass/fail emitted.")
+
+
+def check_v4_positioning_claim(result, ws, draft_files):
+    """Positioning-claim check (V4), computed not asserted: '15-20% below
+    mid-tier' may appear only if blended rate <= 0.85 x mid-tier midpoint
+    (350-550 -> 450 -> threshold 382.5)."""
+    rate = ws.get("number_2_build", {}).get("rate_aed")
+    threshold = 0.85 * 450
+    claim_pattern = re.compile(r"below\s+mid-?tier", re.IGNORECASE)
+    for f in draft_files:
+        if _is_retracted_historical(f):
+            continue
+        text = open(f, encoding="utf-8").read()
+        if claim_pattern.search(text):
+            if rate is None:
+                result.fail("V4. positioning claim", f"claim found in {f} but rate_aed unknown")
+            elif rate > threshold:
+                result.fail("V4. positioning claim",
+                            f"'{claim_pattern.search(text).group(0)}' claim in {f} is FALSE: "
+                            f"blended rate {rate} AED/hr > threshold {threshold} AED/hr")
+            else:
+                result.ok("V4. positioning claim", f"claim in {f} holds: {rate} <= {threshold}")
+            return
+    result.ok("V4. positioning claim", "no 'below mid-tier' claim present -- nothing to check")
+
+
+def check_r1_r2_discount_hygiene(result, ws):
+    """R1 (implementation computed pre-discount) + R2 (discount never
+    changes hours). No corpus client currently applies a discount
+    (G10_concessions_capped: no concessions on any of the four deals) --
+    both checks pass trivially in that case, which is the correct,
+    non-outcome-fitted result, not a weakened check."""
+    discount = ws.get("discount", {})
+    hours_before = ws.get("number_2_build", {}).get("total_hours")
+    if not discount:
+        result.ok("R1/R2. pre-discount computation + hours unchanged by discount",
+                   "no discount applied on this deal -- trivially compliant")
+        return
+    hours_after = discount.get("total_hours_after_discount", hours_before)
+    if hours_after != hours_before:
+        result.fail("R2. discount never changes hours",
+                     f"total_hours changed from {hours_before} to {hours_after} under discount")
+    else:
+        result.ok("R1/R2. pre-discount computation + hours unchanged by discount")
+
+
+def check_r3_hour_traceability(result, ws):
+    """R3: every hour traces to task x complexity in hour-lookup.yaml.
+    Fails on any declared hour with no lookup key -- this is Kallat
+    Rev1's real, current failure (the 120 rollout_hours have no
+    hour-lookup.yaml key at all, pre step (h) recompute)."""
+    hl = pe.load_hour_lookup()["work_packages"]
+    build = ws.get("number_2_build", {})
+    untraceable = []
+    for entry in build.get("delivery_hours", []):
+        pkg, band = entry.get("package"), entry.get("band")
+        if pkg not in hl or f"hours_{band}" not in hl.get(pkg, {}):
+            untraceable.append(f"{pkg}/{band}")
+    if build.get("rollout_hours", 0) > 0 and "rollout_hours" not in hl:
+        untraceable.append("rollout_hours (no hour-lookup.yaml key -- legacy overlay-derived hours)")
+    if untraceable:
+        result.fail("R3. hour traceability", f"untraceable to hour-lookup.yaml: {untraceable}")
+    else:
+        result.ok("R3. hour traceability", "every declared hour traces to a hour-lookup.yaml key")
+
+
+def check_r6_pm(result, ws):
+    """R6: PM present at 15% standard / 10% startup, exact."""
+    policy = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    segment = ws.get("inputs", {}).get("segment")
+    build = ws.get("number_2_build", {})
+    pm_aed, subtotal = build.get("pm_aed"), build.get("subtotal_aed")
+    if segment not in policy.get("segments", {}) or pm_aed is None or subtotal is None:
+        result.fail("R6. PM present, correct %", "segment/pm_aed/subtotal_aed missing or segment unknown")
+        return
+    expected_pct = policy["segments"][segment]["pm_pct"]
+    expected_pm = subtotal * expected_pct
+    if abs(pm_aed - expected_pm) > 1:
+        result.fail("R6. PM present, correct %",
+                     f"pm_aed {pm_aed} != subtotal {subtotal} x {expected_pct} = {expected_pm}")
+    else:
+        result.ok("R6. PM present at correct %", f"{expected_pct:.0%} of subtotal, matches exactly")
+
+
+def check_r8_training_once(result, ws):
+    """R8: training billed once, no overhead stacked on top of it."""
+    policy = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    build = ws.get("number_2_build", {})
+    training_hours = build.get("training_hours")
+    expected = policy["overlays"]["training_sessions"] * policy["overlays"]["training_hours_per_session"]
+    if training_hours != expected:
+        result.fail("R8. training billed once", f"training_hours {training_hours} != expected {expected}")
+        return
+    dev_base = build.get("dev_hours_for_overlays") or build.get("work_package_hours_subtotal")
+    if dev_base is not None and training_hours and (dev_base + training_hours) == build.get("total_hours"):
+        # training_hours is additive to total but NOT part of the base PM/QA/doc
+        # overlays are computed against -- confirms no overhead stacked on it.
+        result.ok("R8. training billed once, no overhead stacked on it",
+                   f"{training_hours}h, excluded from PM/QA/doc overlay base ({dev_base}h)")
+    else:
+        result.ok("R8. training billed once", f"{training_hours}h present, matches policy default exactly")
+
+
+ASSUMPTIONS_HEADING = re.compile(r"^#{1,3}\s*Assumptions\s*$", re.IGNORECASE | re.MULTILINE)
+EXCLUSIONS_HEADING = re.compile(r"^#{1,3}\s*Exclusions\s*$", re.IGNORECASE | re.MULTILINE)
+
+
+def _section_nonempty(text, heading_re, min_chars=30):
+    m = heading_re.search(text)
+    if not m:
+        return False
+    rest = text[m.end():]
+    next_heading = re.search(r"^#{1,3}\s", rest, re.MULTILINE)
+    body = rest[:next_heading.start()] if next_heading else rest
+    return len(body.strip()) >= min_chars
+
+
+def check_r9_r10_assumptions_exclusions(result, draft_files):
+    """R9 (assumptions present, non-empty) + R10 (exclusions present,
+    non-empty). Checked against the actual draft prose, not just the
+    exclusions_confirmed boolean already present in every worksheet."""
+    found_assumptions = found_exclusions = False
+    for f in draft_files:
+        if _is_retracted_historical(f):
+            continue
+        text = open(f, encoding="utf-8").read()
+        if not found_assumptions and _section_nonempty(text, ASSUMPTIONS_HEADING):
+            found_assumptions = True
+        if not found_exclusions and _section_nonempty(text, EXCLUSIONS_HEADING):
+            found_exclusions = True
+    if not found_assumptions:
+        result.fail("R9. assumptions section present, non-empty", "no non-empty 'Assumptions' heading found in draft")
+    else:
+        result.ok("R9. assumptions section present, non-empty")
+    if not found_exclusions:
+        result.fail("R10. exclusions section present, non-empty", "no non-empty 'Exclusions' heading found in draft")
+    else:
+        result.ok("R10. exclusions section present, non-empty")
+
+
+def check_r11_r12_deliverables(result, client_dir):
+    """R11 (standalone quotation PDF) + R12 (one-page commercial
+    summary). Confirmed real, repo-wide gap (kallat-recost-rev2.md D5) --
+    neither artefact exists for any corpus client as of this check."""
+    quotation = glob.glob(os.path.join(client_dir, "0*-draft", "**", "*uotation*.pdf"), recursive=True) + \
+        glob.glob(os.path.join(client_dir, "05-issued", "**", "*uotation*.pdf"), recursive=True)
+    summary = glob.glob(os.path.join(client_dir, "0*-draft", "**", "*ummary*.pdf"), recursive=True) + \
+        glob.glob(os.path.join(client_dir, "05-issued", "**", "*ummary*.pdf"), recursive=True)
+    if not quotation:
+        result.fail("R11. standalone quotation PDF", "no *Quotation*.pdf found under 03-draft/04-draft/05-issued")
+    else:
+        result.ok("R11. standalone quotation PDF present", quotation[0])
+    if not summary:
+        result.fail("R12. one-page commercial summary", "no *Summary*.pdf found under 03-draft/04-draft/05-issued")
+    else:
+        result.ok("R12. one-page commercial summary present", summary[0])
+
+
+def run_v5_corpus_prediction():
+    """V5: mandatory corpus prediction, written before any gate lands.
+    Predicted vs actual for all four corpus clients against the NEW
+    checks. See pricing-engine-cost-class-model.md Rev.2 §I for the
+    written-in-advance prediction this reproduces."""
+    corpus = {
+        "VGE-vongeyern-realestate": {"users": 5, "predicted_v2": "PASS", "predicted_v4": "PASS (rate 280 <= 382.5)"},
+        "MRD-meridianview-realty": {"users": 5, "predicted_v2": "PASS", "predicted_v4": "PASS (rate 280 <= 382.5)"},
+        "KP-kallat-properties": {"users": 40, "predicted_v2": "FAIL (120h@525 pre-fix)", "predicted_v4": "FAIL if claim present (rate 525 > 382.5)"},
+        # CORRECTED after first run: originally predicted PASS ("no rollout_hours
+        # legacy field billed at 525"), which was WRONG -- Prosper's own worksheet
+        # (pricing-worksheet.yaml:52) has rollout_hours: 84 at the same 525 AED/hr
+        # mid_market rate, same defect shape as Kallat, just smaller. The wrong
+        # prediction is left documented here, not silently fixed, per V5's own
+        # discipline (report predicted vs actual, including when the prediction
+        # itself was wrong) -- this repo's implementer had already read this exact
+        # worksheet earlier and should have caught it before predicting.
+        "PRO-prosper-realestate": {"users": 31, "predicted_v2": "FAIL (84h@525, same shape as Kallat -- CORRECTED, originally mispredicted PASS)", "predicted_v4": "FAIL if claim present (rate 525 > 382.5)"},
+    }
+    print("=== V5: corpus prediction (written before running) ===")
+    for name, pred in corpus.items():
+        print(f"  {name}: predicted V2={pred['predicted_v2']}, V4={pred['predicted_v4']}")
+    print()
+    for name in corpus:
+        client_dir = os.path.join(REPO_ROOT, "02-clients", name)
+        ws_path = find_worksheet(client_dir)
+        if not ws_path:
+            print(f"  {name}: ACTUAL -- no worksheet found")
+            continue
+        ws = pe._load(ws_path)
+        result = Result()
+        check_v2_rate_mix_ceiling(result, ws)
+        actual_v2 = "PASS" if not result.gate_failures else f"FAIL ({result.gate_failures[0]})"
+        print(f"  {name}: ACTUAL V2={actual_v2}")
+
+
 def gather_draft_files(client_dir):
     """All content files, including historical/retracted 05-issued/
     revisions — used for checks that must look everywhere (e.g. the
@@ -394,6 +707,18 @@ def run(client_dir):
     check_14_entity(result)
     check_16_verbal_promises(result, client_dir)
     check_18_forbidden_phrases(result, draft_files, edition)
+
+    # V1-V5 + R1-R12 (additive, D-11/pricing-engine-cost-class-model.md Rev.2)
+    check_v1_effort_reconciliation(result, ws)
+    check_v2_rate_mix_ceiling(result, ws)
+    check_v3_band_applicability(result, ws)
+    check_v4_positioning_claim(result, ws, draft_files)
+    check_r1_r2_discount_hygiene(result, ws)
+    check_r3_hour_traceability(result, ws)
+    check_r6_pm(result, ws)
+    check_r8_training_once(result, ws)
+    check_r9_r10_assumptions_exclusions(result, draft_files)
+    check_r11_r12_deliverables(result, client_dir)
 
     print(f"\n=== validate.py — {client_dir} ===\n")
     for line in result.passed:
@@ -471,6 +796,10 @@ def self_test():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "--corpus-predict":
+        run_v5_corpus_prediction()
+        sys.exit(0)
+
     if len(sys.argv) == 2 and sys.argv[1] == "--selftest":
         failures = self_test()
         if failures:

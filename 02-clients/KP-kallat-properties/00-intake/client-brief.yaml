@@ -1,0 +1,70 @@
+client:
+  legal_name: "Kallat Properties"
+  jurisdiction: mainland
+  trn: null
+  vertical: real-estate-brokerage-uae
+  decision_maker: "Sadique Abbas"
+  decision_maker_title: "Sales Manager"
+  contact_email: "sales@kallatproperties.com"
+  contact_phone: "+971 54 791 6003"
+
+scale:
+  users_now: 40                          # per discovery call: "40-50 sales agents"; lower confirmed bound used
+  users_12mo: 40
+  segment: mid_market                     # 40 users exceeds smb max_users (30) — policy.yaml segments
+
+edition:
+  requested_or_assumed: community
+  trigger_conditions_met: [users_above_15]   # editions.yaml trigger — explicitly overridden, see note below
+  deployment: version-pinned
+  override_note: >
+    users_above_15 trigger is technically met (40-50 agents), but user
+    (2026-08-05) explicitly directed Community-first: "if they decide
+    enterprise that's their choice but right now no demand." No hard
+    technical ceiling behind this trigger per clause-library/
+    edition-and-upgrades.md — it is a feature heuristic, not a platform
+    limit. Documented as a deliberate business decision, not an oversight.
+
+scope_signals:
+  work_packages_requested: [crm_leads, users_roles_agent_perf, reports_dashboard, data_migration_500]
+  modules_requested: ["CRM pipeline", "agent accountability/SLA tracking", "reporting dashboard"]
+  incumbent_system: "Zapier automation (lead distribution) + Google Sheets (reporting/pipeline)"
+  incumbent_benchmark_aed_mo: null
+  portal_integrations_requested: [bayut, property_finder, dubizzle]   # Phase 2 — see phase2-catalogue.yaml, preconditions unconfirmed
+  migration_records: 500                  # data_migration_500 work package
+  migration_files: 2
+  data_quality_confidence: unknown
+
+commercial_signals:
+  budget_rejected_aed_low: null
+  budget_rejected_aed_high: null
+  preferred_term_months: 24                # user instruction: "max 24 month commitment"
+  mobilisation_appetite: full
+  prior_alternative_quoted: "SGC-KP-2026-07 (PRJ model, tiered AED 425/hr, unsigned — superseded by this SUB-model revised offer)"
+  subscription_affinity: sdr_initiated      # not client-stated; SDR strategy to disarm price objection via Subscription Recovery Model
+
+model:
+  proposal_model: SUB
+
+notes:
+  verbal_promises_logged: true
+  call_transcript_ref: "00-intake/call-transcript-2026-07-16-internal-prep.md, 00-intake/call-transcript-2026-07-24-client-call-note.md"
+  crm_record_ref: "odoo19-sgc CRM Lead ID 164 (Kallat Properties - Real estate developer, stage: Proposal)"
+  crm_decision_maker_recorded: "Sadique Abbas [Sales Manager]"
+  crm_authority_gate_status: "unconfirmed — CRM 'Pipeline Gate Review: incomplete' flagged 2026-08-02, missing Q1 (specific problem), Q2 (cost of inaction), Q3 (approver), Q4 (timeline)"
+  crm_budget_gate_status: "price explicitly contested per 2026-07-24 call note: 'the price remains a point of contention for their final decision and that much evaluation is still being done'"
+  crm_timeline_gate_status: "unconfirmed — client said they would call back once a decision on timing is made"
+  crm_need_gate_status: "passed — clear stated pain: lead accountability gap ('agents receive leads and fail to call back'), no centralized CRM, data security/AI concerns raised unprompted"
+  internal_only_disclaimer: >
+    Per explicit user instruction (2026-08-05): this proposal is for
+    INTERNAL SDR review/signature only, routed via Docuseal. No external
+    client recipient. This is a revised internal draft to formalize a
+    disarm-hesitation pricing strategy, not a confirmed client agreement —
+    the underlying BANT gate review is still incomplete per CRM.
+  prior_document_conflict: >
+    An earlier, unsigned PRJ-model proposal (SGC-KP-2026-07) exists as a
+    CRM attachment, built outside this repo's governance. It uses AED
+    425/hr (not on this repo's rate-card.yaml at all) and does not
+    disclose edition/licensing. This SUB-model rebuild uses only this
+    repo's governed rate-card.yaml, hour-lookup.yaml, and policy.yaml —
+    the two documents' numbers are intentionally NOT reconciled line-by-line.

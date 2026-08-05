@@ -1,8 +1,10 @@
-# SGC TECH AI — Phase 2 / Deferred Scope Catalogue (v2)
+# SGC TECH AI — Phase 2 / Deferred Scope Catalogue (v2.1)
 # Items here are quoted separately from the Phase 1 build — never folded
 # into number_2_build, never described to the client as "included."
-version: 2.0
-effective_from: 2026-08-03
+# v2.1 (2026-08-05): additional_user replaced by onboarding_fee_per_marginal_user
+# + platform_capacity_fee -- see items block below and CHANGELOG.md.
+version: 2.1
+effective_from: 2026-08-05
 
 items:
   portal_sync_property_finder:  { price_aed: 3900, unit: one_time, phase: 2 }
@@ -12,7 +14,41 @@ items:
   ai_lead_scorer_standard:          { price_aed: 1250, unit: month }
   extra_training_session:            { price_aed: 1750, unit: session }
   priority_support_4h:                { price_aed: 1650, unit: month }
-  additional_user:                     { price_aed: 250,  unit: month, marginal_cost_aed: 102, discountable: false }
+
+  # REPLACED 2026-08-05 (v3.0): additional_user (AED 250/mo, marginal_cost_aed:
+  # 102, discountable: false) split into a one-time onboarding fee (Class B,
+  # script-derived) + a recurring platform capacity fee (banded, negotiable).
+  # See pricing-engine-cost-class-model.md Rev.2 §G and D-2/D-8.
+  onboarding_fee_per_marginal_user:
+    unit: one_time
+    formula: "05-ops/pricing_engine.py: marginal_user_fee(users_now_before_addition) -- clerical_hours at rate-card.yaml passthrough_band midpoint (90 AED/hr) + design_hours (if a role-count boundary is crossed) at business_analyst rate (450 AED/hr)"
+    worked_example_aed:
+      at_n_40_to_41: 9      # Kallat baseline -- marginal user falls in the bulk-provisioning regime (N>25), so
+                              # account_creation_credential/individual_onboarding are already replaced by the
+                              # much smaller bulk_path_validation step. See D-2 -- this is lower than either of
+                              # the two earlier hand-estimates (AED 36, then AED 17), for a stated reason
+                              # (regime, not a re-tuned constant), not a third disagreeing guess.
+    grade: D
+    note: "Charged ONCE per user at provisioning, because the work happens once. Never bundled into the recurring line below."
+
+  platform_capacity_fee:
+    unit: month
+    bands: "mirrors hosting.yaml Class C steps: 1-20 / 21-50 / 51+ -- price moves when the band moves, not per head"
+    marginal_cost_aed_per_user_mo:
+      low: 58     # O-branch: infra delta (32, hosting.yaml Foundation->Growth / 30 users) + support-minutes O(5min@280/hr) + storage O
+      mean: 107   # M-branch, Grade D (support-minutes/user is the widest driver, PERT 5-30min)
+      high: 180   # P-branch
+    floor_aed_per_user_mo:
+      low: 76     # low marginal cost x (1 + 30% min margin)
+      mean: 139
+      high: 234
+    list_aed_per_user_mo: 250   # retained as the top of a real negotiable band, not a fixed point
+    negotiable_range_aed: [76, 250]
+    discountable: true
+    grade: D
+    existing_figure_cross_check: "The pre-2026-08-05 marginal_cost_aed:102 figure (no derivation shown anywhere in this repo -- checked this file and the rest of 00-knowledge/ for a formula, found none) sits inside this bottom-up 58-180 range. Because its method cannot be confirmed as independent of this approach, it is NEITHER confirmed NOR contradicted here -- not described as corroboration (D-8)."
+    commission_impact: "No commission/sales-comp-plan document exists anywhere in this repo (checked concession-ladder.yaml, 12-commercial-rules.md, and a repo-wide grep). Per P5, no per-1%-discount coefficient is stated. Open item -- see pricing-engine-cost-class-model.md Rev.2 §L."
+    note: "Label this line PLATFORM CAPACITY FEE only. Never 'licence', 'seat', or 'pass-through', and never marked non-discountable -- under Community edition its underlying vendor cost is ~0 (editions.yaml), making it the highest-margin line in the model and the correct place to flex for a price-sensitive client."
 
 portal_dependency_note: >
   Every portal_sync_* item is conditional on the client, not SGC. Before

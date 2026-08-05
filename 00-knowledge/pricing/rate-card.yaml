@@ -1,10 +1,37 @@
 # SGC TECH AI — Revised Rate Card
 # Source: commercial-pricing-revised-v2.xlsx, sheet "Rate Card (Revised)"
-# UAE specialist-boutique band — 15% below mid-tier agency rates.
-# Reference bands: specialist boutique 180-300 AED/hr; mid-tier agencies
-# 350-550 AED/hr; Big-4 600-900 AED/hr. SGC plays in the specialist band.
-version: 2.0
-effective_from: 2026-08-03
+#
+# v2.1 (2026-08-05): header corrected. The prior header ("180-300 AED/hr
+# is the UAE specialist band -- SGC plays here") contradicted this file's
+# own table (280-800) -- a documentation defect, not a pricing conflict,
+# per pricing-engine-cost-class-model.md Rev.2 §B. Fixed by inspection:
+# the table is authoritative. SGC spans specialist-to-mid bands by role:
+# L0-L1 (280-475) sit in the specialist boutique band; L2-L3 (525-800)
+# sit above it, in the mid-tier band (350-550) and just below Big-4
+# (600-900). Reference bands unchanged: specialist boutique 180-300
+# AED/hr; mid-tier agencies 350-550 AED/hr; Big-4 600-900 AED/hr.
+#
+# v2.1 also adds passthrough_band (below) -- a real xlsx figure (Market
+# Positioning sheet, row 7: "Junior data entry / hr, 60-120 (passthrough)")
+# that was never transcribed into 00-knowledge/ during the v1.0 ingestion
+# (every other row on that sheet made it into market-data/benchmarks.yaml;
+# this one didn't -- see D-6, pricing-engine-cost-class-model.md Rev.2).
+# Governed here, not left in benchmarks.yaml's annotation-only tier,
+# because the SGC column's own "(passthrough)" label is a declared
+# cost-plus/no-markup POLICY stance for junior/clerical labour, not an
+# external competitive comparison point like the sheet's other rows --
+# that distinction is what makes it usable as class-b-task-inventory.yaml's
+# hard V2 ceiling for clerical Class B tasks.
+version: 2.1
+effective_from: 2026-08-05
+
+passthrough_band:
+  low: 60
+  high: 120
+  role_label: "junior_data_entry"
+  source: "xlsx SGC-TECH-AI-Commercial-Export-v2_REVISED.xlsx, sheet 'Market Positioning', row 7"
+  status: "newly governed 2026-08-05, completing the pricing v1.0 transcription gap -- see CHANGELOG.md pricing v3.0 entry"
+  usage: "V2 rate-mix ceiling for clerical Class B tasks (class-b-task-inventory.yaml). NOT applicable to role_permission_design, which is priced at roles.business_analyst instead -- see D-5."
 
 forbidden_rates:
   - rate_aed_hr: 690

@@ -1,0 +1,96 @@
+client:
+  legal_name: "Prosper Intl Real Estate L.L.C"
+  jurisdiction: mainland          # inferred from "L.L.C" suffix (mainland/DED convention); office is in Dubai Media City (a free zone) but company designation itself reads mainland — not independently verified, see risk-assessment.yaml RESOLVE note
+  trn: null
+  vertical: real-estate-brokerage-uae
+  decision_maker: "Louai Khzam"
+  decision_maker_title: "Owner"
+  trusted_contact: "Dian Sajulga, Operations — confirmed by user (2026-08-05) as the trusted, authorized operational contact acting on the owner's behalf; not herself the owner"
+  contact_email: "louai.khzam@prosperuae.com"   # primary CRM lead email — Louai Khzam, the owner
+  additional_contact_email: "sales@prosperuae.com"
+  contact_phone: "+971 56 526 4300"
+  office: "Office 3804-3805, Concord Tower, Dubai Media City, Dubai, UAE"
+
+scale:
+  users_now: 31                          # x_employee_count per CRM Lead 8407 enrichment — used in place of the prior PRJ doc's "up to 25 named users" Phase-1 scope cap, which was a pricing choice in an ungoverned document, not a real headcount
+  users_12mo: 31
+  segment: mid_market                     # 31 users exceeds smb max_users (30) by a single user — boundary case, see manifest.yaml escalation
+
+edition:
+  requested_or_assumed: community
+  trigger_conditions_met: [users_above_15]   # editions.yaml trigger — explicitly overridden, same basis as Kallat
+  deployment: version-pinned
+  override_note: >
+    users_above_15 trigger is technically met (31 employees), but user
+    (2026-08-05) explicitly directed Community-first across both deals in
+    this pipeline run: "if they decide enterprise that's their choice but
+    right now no demand." No hard technical ceiling behind this trigger
+    per clause-library/edition-and-upgrades.md. Documented as a deliberate
+    business decision, not an oversight.
+
+scope_signals:
+  work_packages_requested: [discovery, property_unit_register, tenancies_contracts_reminders, invoicing_trn, crm_leads, users_roles_agent_perf, reports_dashboard, data_migration_500]
+  modules_requested: ["CRM/lead management", "listings/property register", "invoicing", "user roles/multiple admins", "reporting"]
+  incumbent_system: "Spreadsheets + WhatsApp-based client communication + manual attendance tracking — no unified CRM or ERP (per prior PRJ doc §03/§04; not an abandoned prior system, a genuine absence of one)"
+  incumbent_benchmark_aed_mo: null
+  portal_integrations_requested: [property_finder, bayut]   # Phase 2 — see phase2-catalogue.yaml, preconditions unconfirmed
+  migration_records: 500
+  migration_files: 2
+  data_quality_confidence: unknown
+  out_of_catalogue_requests:              # BANT need items with no priceable basis in hour-lookup.yaml / phase2-catalogue.yaml — see verbal-promises.md
+    - "Sales agent check-in/check-out (HR attendance tracking) — no attendance/HR work package exists in the real-estate-brokerage-uae v2 catalogue"
+    - "Payroll / salary structure / WPS submission — not in hour-lookup.yaml or phase2-catalogue.yaml; prior PRJ doc itself placed this under its own unpriced Phase 3"
+    - "ChatGPT/Copilot-style AI assistant — closest catalogue analog is ai_lead_scorer_lite/standard (lead scoring, not a conversational assistant); not the same capability"
+
+commercial_signals:
+  budget_rejected_aed_low: null
+  budget_rejected_aed_high: null
+  preferred_term_months: 24                # user instruction 2026-08-05: "max 24 month commitment" (applied across both deals in this pipeline run)
+  mobilisation_appetite: full
+  prior_alternative_quoted: "PROSPER x SGC Implementation Proposal - 2026 (phased PRJ/fixed-fee model, Phase 1 AED 45,000 at AED 690/650 hr — not on this repo's rate-card.yaml — unsigned, superseded by this SUB-model revised offer)"
+  subscription_affinity: sdr_initiated      # not client-stated; SDR strategy per user instruction to build a subscription model for this deal
+
+model:
+  proposal_model: SUB
+
+disarm_hesitation_tweaks_scope_note: >
+  The 2026-08-05 disarm-hesitation tweak bundle (2-week free sandbox
+  reversing standard demo-access policy, mobilisation refundable if
+  Go-Live missed, 5-free-users idea) was confirmed by the user as
+  calibrated to Kallat specifically ("Kallat — AED 4,900 matches their
+  numbers"). Not carried over to this deal without separate confirmation.
+  Structural elements that are standard SUB-model presentation patterns
+  regardless of which client (24-month preferred term with a 12-month
+  alternative, MSA/SLA attached as PDF, monthly-billing-as-disclosed-
+  deviation option) are applied here since they were instructed generally
+  ("also make it maxx 24 month commitment"), not as Kallat-specific
+  concessions.
+
+notes:
+  verbal_promises_logged: true
+  call_transcript_ref: "00-intake/call-transcript-2026-07-17-internal-demo-prep.md"
+  crm_record_ref: "odoo19-sgc CRM Lead ID 8407 (PROSPER INTL REAL ESTATE L.L.C, stage: Proposal, probability 94.61%)"
+  crm_decision_maker_recorded: "x_bant_authority names 'Diane' (Dian Sajulga) as coordinator/final decision-maker for this purchase, and x_contact_authority was separately flagged 'unknown' in CRM — RESOLVED 2026-08-05 by direct user confirmation: Louai Khzam is the owner (final authority); Dian Sajulga is the trusted, authorized operational contact acting on his behalf. Matches the prior PRJ doc's governance table, which lists Louai as Project Sponsor and Dian as Client SPOC — the CRM record's own 'unknown' flag was simply stale, not a real contradiction."
+  crm_authority_gate_status: "unconfirmed — CRM 'Pipeline Gate Review: incomplete' flagged 2026-08-02, same open-gate pattern as Kallat Lead 164"
+  crm_budget_gate_status: "unconfirmed — x_bant_budget field is blank in CRM; manager (author_id 1) flagged on 2026-07-23 that expected_revenue/recurring were never updated 'as per proposal' after the PRJ doc was attached"
+  crm_timeline_gate_status: "x_bant_timeline recorded as '1.5 to 2 months' — passed, more complete than Kallat's timeline gate"
+  crm_need_gate_status: "passed — x_bant_need lists 6 concrete items (field customization, no-extra-cost lead management, AI/ChatGPT integration, multiple admins, agent check-in/check-out, accounts integration incl. salary structure)"
+  internal_only_disclaimer: >
+    Per explicit user instruction (2026-08-05): this proposal is for
+    INTERNAL SDR review/signature only, routed via Docuseal. No external
+    client recipient. Built as the second of two individually-sequenced
+    subscription-model rebuilds in this pipeline run (after Kallat
+    Properties), same governance standard, not a confirmed client
+    agreement — the underlying BANT gate review is still incomplete per
+    CRM.
+  prior_document_conflict: >
+    An earlier, unsigned phased/fixed-fee proposal ("PROSPER x SGC
+    Implementation Proposal - 2026", CRM attachment ID 5306, dated 21 July
+    2026) exists on CRM Lead 8407, built outside this repo's governance.
+    It uses AED 690/hr and AED 650/hr (both on rate-card.yaml's
+    forbidden_rates list) and promises a native iOS/Android mobile app
+    (Community edition excludes official_mobile_app per editions.yaml —
+    see verbal-promises.md). This SUB-model rebuild uses only this repo's
+    governed rate-card.yaml, hour-lookup.yaml, and policy.yaml — the two
+    documents' numbers are intentionally NOT reconciled line-by-line, same
+    treatment as Kallat's SGC-KP-2026-07.

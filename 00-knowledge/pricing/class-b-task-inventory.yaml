@@ -1,0 +1,137 @@
+# SGC TECH AI — Class B Task-Time Inventory
+# Replaces policy.yaml overlays.rollout_hours_per_user / rollout_hours_free_users
+# (v2.1, 2026-08-05, deleted in this same v3.0 pass — see CHANGELOG.md).
+# Source: .omc/plans/pricing-engine-cost-class-model.md Rev.2 (§D, D-1..D-5
+# fixes), derived from class_b_engine.py (session scratch script; this file
+# is its governed successor — same formulas, same constants).
+#
+# Grade D throughout — no delivered per-user timesheet exists anywhere in
+# this repo. Every constant below has a named collapse trigger in
+# pricing-engine-cost-class-model.md Rev.2 §L. Do not treat any single
+# value here as more precise than the PERT range it is drawn from (P8).
+version: 1.0
+effective_from: 2026-08-05
+
+constants:
+  learning_exponent_b: 0.15        # Wright's law, unit_time(n) = T1 * n^-b. Grade D, bounded 0.05-0.25.
+  n_bulk: 25                        # bulk-import threshold. Above this, account_creation_credential and
+                                      # individual_onboarding are replaced by bulk_path_validation (below).
+                                      # Grade D. Collapse trigger: one delivered CSV-bulk-import rollout,
+                                      # timed against manual per-user creation on the same headcount.
+  n_ref_for_time_basis_conversion: 5  # reference cohort for steady-state -> first-unit conversion (D-3).
+                                        # Chosen as the smallest real corpus size (VGE/MRD, both 5 users) --
+                                        # the population where a "typical per user" time would plausibly
+                                        # first be informally estimated. Grade D judgment call, not measured.
+                                        # Collapse trigger: a genuinely first-user (not averaged) timing on
+                                        # one delivered rollout.
+  role_count_divisor: 13            # role_count(N) = min(6, max(1, round(N/13))). Anchored to the deleted
+                                      # overlay's own origin comment in policy.yaml v2.1 ("40 agents in 3
+                                      # roles" -> 40/13 = 3.08 -> 3, matches exactly). Capped at 6 (diminishing
+                                      # distinct role archetypes at very large N). Grade D, single-anchor.
+                                      # Collapse trigger: two delivered rollouts at different N, count actual
+                                      # distinct roles designed in each.
+  role_count_cap: 6
+
+# time_basis (D-3, required per task): "steady_state_mean" means the O/M/P
+# values below were elicited as "typical per user," NOT literally the very
+# first unit's time. Convert to Wright's-law T1 before applying the curve:
+#   T1 = steady_state_value * n_ref_for_time_basis_conversion /
+#        SUM_{n=1..n_ref}(n ^ -learning_exponent_b)
+# The denominator (cum_sum(5) at b=0.15) = 4.3471 (computed, see
+# class_b_engine.py / test_pricing_engine.py cum_sum()).
+# "first_unit" (none currently used below) would apply the curve directly
+# with no conversion.
+
+tasks:
+  account_creation_credential:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 3
+    minutes_m: 5
+    minutes_p: 8
+    scales_with: users_now
+    learning_curve: true
+    bulk_replaced_above_n_bulk: true    # replaced by bulk_path_validation for the (n_bulk+1)-th user onward
+    role: junior_passthrough
+    role_rate_source: "rate-card.yaml: passthrough_band (60-120 AED/hr, xlsx Market Positioning sheet row 7 -- see D-6)"
+
+  individual_onboarding:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 5
+    minutes_m: 10
+    minutes_p: 15
+    scales_with: users_now
+    learning_curve: true
+    bulk_replaced_above_n_bulk: true
+    role: junior_passthrough
+    role_rate_source: "rate-card.yaml: passthrough_band"
+
+  per_agent_signoff:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 2
+    minutes_m: 3
+    minutes_p: 5
+    scales_with: users_now
+    learning_curve: true
+    bulk_replaced_above_n_bulk: false   # D-4 fix: applies to EVERY user regardless of individual/bulk
+                                          # provisioning path -- the small remainder that legitimately
+                                          # still scales with headcount after record-level validation
+                                          # itself moved to Class A (hour-lookup.yaml:
+                                          # migration_record_validation_signoff).
+    role: junior_passthrough
+    role_rate_source: "rate-card.yaml: passthrough_band"
+    note: "This is what D-4 left in Class B after moving the 500-fixed-record validation work to Class A -- a per-agent sign-off/spot-check step, correctly non-decreasing in N (unlike the defect it replaces)."
+
+  bulk_path_validation:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 1
+    minutes_m: 2
+    minutes_p: 3
+    scales_with: "users beyond n_bulk (flat per user, no further learning curve -- already minimal)"
+    learning_curve: false
+    role: junior_passthrough
+    role_rate_source: "rate-card.yaml: passthrough_band"
+    note: "Applies only to users n_bulk+1..N. Paired with hour-lookup.yaml: bulk_user_import_csv (one-time Class A engineering line, triggered once when users_now > n_bulk)."
+
+  exception_allowance:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 10
+    minutes_m: 20
+    minutes_p: 35
+    scales_with: "flat 10% of users_now"
+    learning_curve: false
+    role: junior_passthrough
+    role_rate_source: "rate-card.yaml: passthrough_band"
+    note: "A contingency allowance, not a repeated learned skill -- no Wright's-law curve applied, by design."
+
+  role_permission_design:
+    class: B
+    time_basis: steady_state_mean
+    minutes_o: 20
+    minutes_m: 45
+    minutes_p: 75
+    scales_with: "distinct role count (role_count(N) formula above), NOT users_now directly"
+    learning_curve: false
+    role: business_analyst
+    role_rate_source: "rate-card.yaml:26 (business_analyst, L1, 450 AED/hr)"
+    note: "D-5 fix: this is business-process design work (defining what each role can see/do), not clerical data entry -- priced at business_analyst, exempt from the junior_passthrough ceiling. The justification V2 requires for a non-passthrough Class B rate is this note itself: solution-design labor, evidenced by the task's own 20-75 minute range (far above a clerical task's 1-8 minutes) and its role-count (not headcount) scaling."
+
+# ---------------------------------------------------------------------------
+# V2 rate-mix ceiling (per-task-role, D-5 fix -- replaces the Rev.1 flat
+# class-wide ceiling): applied_rate for a Class B task must not exceed its
+# named role's rate-card.yaml rate. junior_passthrough tasks ceiling = 120
+# AED/hr (top of rate-card.yaml: passthrough_band). role_permission_design
+# ceiling = rate-card.yaml roles.business_analyst.rate_aed_hr (450) exactly,
+# since it IS priced at that role, not passthrough. Any Class B line priced
+# above its task's own ceiling fails V2 unless a written per-task
+# justification is attached (see 05-ops/validate.py check_v2).
+# ---------------------------------------------------------------------------
+
+notes:
+  - "A Class B task not listed here does not exist. Escalate rather than estimate by analogy, same convention as hour-lookup.yaml."
+  - "B_hours(N) = sum over per-user learning-curved tasks (Wright's law, first-unit converted per time_basis) + bulk-path tasks (flat, N>n_bulk) + exception_allowance (flat %) + role_permission_design (flat per role_count(N)). Implemented once in 05-ops/test_pricing_engine.py's B_hours() function -- cost-classes.md, worksheets, and the T3 sweep all call that same function (P14 -- single code path)."
+  - "Do not re-add a flat per-user multiplier here or anywhere else. If a future deal's Class B total looks too low against intuition, the fix is a new named task in this file with its own O/M/P and citation, not a scalar overlay in policy.yaml (P11)."

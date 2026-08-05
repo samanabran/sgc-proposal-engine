@@ -1,0 +1,178 @@
+opportunity_id: "PRO-2026-SUB-01"
+client_legal_name: "Prosper Intl Real Estate L.L.C"
+jurisdiction: "mainland"
+client_trn: null
+decision_maker: "Louai Khzam, Owner (final authority) — Dian Sajulga, Operations, trusted authorized operational contact, confirmed 2026-08-05"
+sdr_owner: "SGC Tech AI SDR"
+segment: "mid_market"
+edition: "community"
+vertical: "real-estate-brokerage-uae"
+
+stage: draft                # intake | risk_assessed | calc | draft | review | issued | won | lost
+current_revision: "PRO-2026-SUB-01_Rev1"
+knowledge_version_used: "pricing v2.1 (2026-08-05)"
+
+risk_band: "elevated"         # placeholder-driven — see 02-calc/risk-assessment.yaml
+required_security_instruments: [mobilisation_40pct, deposit_2_months, pdc_set]
+
+gates_passed: true
+gate_report: 02-calc/gate-report.md
+walkaway_card_produced: true
+escalations:
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Prosper Intl Real Estate (31 employees per CRM enrichment) technically
+      trips the users_above_15 Enterprise trigger in editions.yaml. User
+      explicitly directed Community edition regardless, applied across
+      both deals in this pipeline run: "if they decide enterprise that's
+      their choice but right now no demand." No hard technical ceiling
+      behind this trigger per clause-library/edition-and-upgrades.md.
+    resolution: >
+      Documented as a deliberate business decision, not an oversight.
+      Community edition used throughout this worksheet and draft.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Three of eight risk-assessment.yaml scoring inputs (entity_age_years,
+      vat_registered, trade_licence_valid) are unconfirmed — no source
+      document or CRM field establishes them. Together these placeholders
+      push the risk band to "elevated" (mobilisation 40%, 2-month deposit,
+      PDC set required). [Original entry also flagged the decision-maker
+      authority split — resolved below, 2026-08-05.]
+    resolution: >
+      Decision-maker authority RESOLVED 2026-08-05 by direct user
+      confirmation: Louai Khzam is the owner (final authority); Dian
+      Sajulga is his trusted, authorized operational contact — matches the
+      prior doc's own governance table. risk-assessment.yaml's
+      decision_maker input updated from "manager" (5) to "owner" (0),
+      raw_score dropped from 60 to 55, still elevated band, no change to
+      required instruments. The three remaining inputs (entity_age_years,
+      vat_registered, trade_licence_valid) are still NOT resolved. A human
+      reviewer must re-run the risk assessment with those confirmed before
+      this is ever shown externally. Unlike Kallat, favorable resolution
+      of the remaining inputs alone is unlikely to move this out of the
+      elevated band — the financed-remainder exposure component dominates
+      the score independently.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      CRM Lead 8407's own "Pipeline Gate Review: incomplete" flag
+      (2026-08-02) lists the BANT gate as unresolved, despite the lead
+      sitting at 94.61% stage probability ("Proposal" stage) in CRM — a
+      mismatch between recorded pipeline confidence and actual gate
+      completeness. This proposal was built anyway, at explicit user
+      instruction, as an internal draft — not a confirmed client
+      agreement.
+    resolution: >
+      Not resolved — by design. Proposal is internal-only pending a real
+      reopened conversation with the client. Do not treat Rev1 as
+      client-ready without first closing the BANT gate in CRM. The
+      probability/gate-completeness mismatch itself is worth flagging to
+      whoever owns CRM pipeline hygiene, separate from this proposal.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      An earlier, unsigned phased/fixed-fee proposal ("PROSPER x SGC
+      Implementation Proposal - 2026", CRM attachment ID 5306, sent 21
+      July 2026) exists on CRM Lead 8407, built outside this repo's
+      governance, using AED 690/hr and AED 650/hr (both on this repo's
+      rate-card.yaml forbidden_rates list). This SUB-model rebuild
+      intentionally does not reconcile line-by-line against it — different
+      rate card, different commercial model entirely, same treatment as
+      Kallat's prior PRJ doc.
+    resolution: >
+      Documented, not reconciled. Both documents remain associated with
+      CRM Lead 8407; this repo's PRO-2026-SUB-01_Rev1 is the governed
+      artifact going forward.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      The prior PRJ doc explicitly promises a native iOS/Android mobile
+      app as a Phase 1 deliverable ("Native Odoo app for updating leads
+      and logging visits"). Community edition — used throughout this
+      build per the edition-override decision above — excludes the
+      official mobile app per editions.yaml (mobile-optimised browser
+      access only).
+    resolution: >
+      Resolved 2026-08-05 per explicit user decision: keep Community
+      edition (not worth the Enterprise licence-cost jump for this
+      specific gap), and present the responsive mobile-browser experience
+      in the draft on its own terms rather than framing it as a shortfall
+      against the prior document. See verbal-promises.md #9 and 03-draft
+      §07. The underlying use case (update leads, log visits, from any
+      phone) is genuinely covered; the "native app" framing specifically
+      is what changed.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Two items the client explicitly asked for (per CRM x_bant_need and
+      the internal demo-prep call transcript) have no priceable basis
+      anywhere in this repo's knowledge layer: sales-agent attendance/
+      check-in tracking and payroll/salary-structure/WPS submission.
+      hour-lookup.yaml's real-estate-brokerage-uae v2 catalogue covers
+      property/CRM/invoicing domains only — no HR/attendance or payroll
+      work packages exist at any complexity band. (A third item,
+      ChatGPT/Copilot-style AI assistant, is partially addressable via
+      the AI Lead Scorer add-on — a different capability, not a full
+      substitute.)
+    resolution: >
+      Not resolved. Escalated per hour-lookup.yaml's own rule against
+      estimating by analogy — see verbal-promises.md #4-#5. This proposal
+      prices only what the catalogue supports and stays silent on the
+      rest rather than inventing figures.
+
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Same as Kallat (KP-2026-SUB-01 manifest.yaml, 2026-08-05 entry):
+      pricing/policy.yaml overlays.rollout_hours_per_user (v2.1, which
+      gave this deal 84 rollout hours at the mid_market blended rate of
+      525 AED/hr) was DELETED 2026-08-05 (v3.0) per
+      pricing-engine-cost-class-model.md Rev.2. validate.py's V2
+      rate-mix-ceiling check confirms this was a real violation on this
+      deal too, same shape as Kallat, just smaller (84h vs 120h).
+    resolution: >
+      Worksheet recomputed under the new model: build_value_aed
+      96,359 -> 55,006 (-43%), Subscription Fee 6,490/mo -> 5,270/mo
+      (24mo option). Discovery, not a discount -- see Kallat's manifest
+      entry for the full framing, unchanged here. Recomputed
+      02-calc/pricing-worksheet.yaml in place (Rev1 unissued per
+      prior_versions_issued_to_client: false). Re-run validate.py before
+      further action. BANT gate remains open independently of this
+      recompute.
+
+revisions:
+  - ref: "PRO-2026-SUB-01_Rev1"
+    issued_date: ""
+    path: "03-draft/PRO-2026-SUB-01_Rev1/"
+    status: "draft"
+    notes: >
+      Built against pricing-worksheet.yaml: mid_market segment (31
+      employees, just above the smb threshold), Community edition
+      (deliberate override), build_value AED 96,359 using the same
+      8-work-package real-estate-brokerage-uae vertical baseline
+      established for Kallat, applied directly this time — passed the
+      hour-benchmark gate on the first pass (152h vs. 9.2h/user × 31 =
+      285.2h benchmark floor of 142.6h), no iterative scope expansion
+      needed. Mobilisation AED 38,544 (40% — elevated risk band,
+      placeholder-driven), Subscription Fee AED 6,490/mo (24mo preferred,
+      52.2% margin) or AED 8,760/mo (12mo alt), quarterly-in-advance
+      billing, monthly billing available at +3% surcharge. Scope: core
+      real-estate CRM/property-register/tenancy/accountability/reporting/
+      migration/invoicing — portal sync and AI lead-scoring offered as
+      separate add-ons/escalation, not in base. Attendance and payroll/WPS
+      remain entirely unpriced — no catalogue basis, see escalations
+      above. Mobile access delivered via responsive browser, presented on
+      its own terms rather than as a shortfall against the prior PRJ
+      doc's native-app promise (resolved 2026-08-05). Internal-only per
+      explicit user instruction — routed to Docuseal for SDR signature,
+      no external client recipient. Kallat's 2026-08-05 disarm-hesitation
+      tweak bundle (free sandbox, refundable mobilisation) explicitly NOT
+      carried over — confirmed by user as Kallat-specific.
+
+verbal_promises_logged: true
+adoption_clause_included: true
+clawback_included: true
+evidence_file_complete: false      # correct as-is per G29's own scope — false until go-live, see gate-report
+prior_versions_issued_to_client: false   # PROSPER x SGC Implementation Proposal - 2026 (the prior PRJ doc) was sent but is a different model/document; this SUB-model Rev1 has not been issued to the client

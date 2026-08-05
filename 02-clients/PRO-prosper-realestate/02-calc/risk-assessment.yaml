@@ -1,0 +1,39 @@
+# Risk Assessment — PRO-2026-SUB-01_Rev1
+# Per pricing/risk-security-matrix.yaml, run before the pricing worksheet.
+#
+# IMPORTANT: several inputs below are UNCONFIRMED and use a conservative
+# (higher-risk) placeholder rather than a fabricated fact, clearly flagged.
+# This assessment must be re-run with real answers before this proposal is
+# ever shown externally — consistent with this proposal being internal-only
+# (Docuseal, SDR signature) per explicit user instruction.
+
+inputs:
+  entity_age_years: "1-2"          # RESOLVE — unconfirmed, conservative placeholder (not "<1" worst-case, not ">5" best-case), same treatment as Kallat
+  jurisdiction: mainland_llc        # inferred from "L.L.C" suffix — not independently verified against a trade licence
+  vat_registered: "no"              # RESOLVE — unconfirmed, conservative placeholder; res_partner.vat field is blank in CRM
+  trade_licence_valid: "<6mo"       # RESOLVE — unconfirmed. CRM engagement span is only ~2.5 months (lead created 2026-05-22, assigned to Talha 2026-07-01) — weaker evidence than Kallat's 4+ month span, so scored conservatively rather than inferring favorably
+  payment_history_sgc: none         # confirmed — first engagement with SGC
+  decision_maker: owner             # RESOLVED 2026-08-05 by direct user confirmation: Louai Khzam is the owner (final authority); Dian Sajulga is the trusted, authorized operational contact acting on his behalf, matching the prior PRJ doc's governance table (Louai as Project Sponsor, Dian as Client SPOC). No longer scored as manager/ambiguous.
+  incumbent_churn_signal: none      # confirmed — no prior system existed (spreadsheets/WhatsApp, not an abandoned platform), distinct from Kallat's abandoned Zapier+Sheets automation
+  peak_exposure_aed_band: ">40k"    # computed from this worksheet's financed remainder (57,815) — see pricing-worksheet.yaml exposure.contractual_peak_aed; consistent with final figures, not an interim/stale estimate
+
+scoring:
+  raw_score: 55                     # was 60 — decision_maker resolved from manager(5) to owner(0), 2026-08-05
+  band: elevated
+  required_instruments: [mobilisation_40pct, deposit_2_months, pdc_set]
+
+notes: >
+  RESOLVED 2026-08-05: decision-maker authority is no longer ambiguous —
+  Louai Khzam is the owner, Dian Sajulga is his trusted, authorized
+  operational contact. raw_score dropped from 60 to 55 accordingly, still
+  within the elevated band. STILL RESOLVE before external use:
+  entity_age_years, vat_registered, and trade_licence_valid remain
+  unconfirmed placeholders. raw_score of 55 sits near the top of the
+  elevated band (41-60) — if entity_age and VAT registration both resolve
+  favorably, the remaining non-exposure inputs would drop further, but
+  peak_exposure_aed_band (>40k, +20) is driven by the build value itself
+  and would very likely keep this deal in the elevated band regardless.
+  Per risk-security-matrix.yaml: "elevated and above cannot proceed with
+  zero security regardless of any other factor" (G15) — this worksheet
+  uses 40% mobilisation. A human reviewer must re-run this with the
+  remaining confirmed answers before any external send.

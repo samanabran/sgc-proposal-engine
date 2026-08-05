@@ -1,0 +1,140 @@
+opportunity_id: "KP-2026-SUB-01"
+client_legal_name: "Kallat Properties"
+jurisdiction: "mainland"
+client_trn: null
+decision_maker: "Sadique Abbas, Sales Manager"
+sdr_owner: "SGC Tech AI SDR"
+segment: "mid_market"
+edition: "community"
+vertical: "real-estate-brokerage-uae"
+
+stage: draft                # intake | risk_assessed | calc | draft | review | issued | won | lost
+current_revision: "KP-2026-SUB-01_Rev1"
+knowledge_version_used: "pricing v2.1 (2026-08-05)"
+
+risk_band: "elevated"         # placeholder-driven — see 02-calc/risk-assessment.yaml
+required_security_instruments: [mobilisation_40pct, deposit_2_months, pdc_set]
+
+gates_passed: true
+gate_report: 02-calc/gate-report.md
+walkaway_card_produced: true
+escalations:
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Kallat Properties (40-50 agents) technically trips the
+      users_above_15 Enterprise trigger in editions.yaml. User explicitly
+      directed Community edition regardless: "if they decide enterprise
+      that's their choice but right now no demand." No hard technical
+      ceiling behind this trigger per clause-library/edition-and-upgrades.md
+      — confirmed a feature heuristic, not a platform limit, before
+      accepting the override.
+    resolution: >
+      Documented as a deliberate business decision, not an oversight.
+      Community edition used throughout this worksheet and draft.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Two of eight risk-assessment.yaml scoring inputs (entity_age_years,
+      vat_registered) are unconfirmed — no source document or CRM field
+      establishes them. Using them as conservative placeholders pushed
+      the risk band to "elevated" (mobilisation 40%, 2-month deposit, PDC
+      set required), materially different from the 33%-mobilisation-only
+      structure that would apply at "low" or "moderate" band.
+    resolution: >
+      Not resolved. Flagged in risk-assessment.yaml, deal-card.md, and
+      here. A human reviewer must re-run the risk assessment with
+      confirmed answers before this is ever shown externally — this
+      proposal is internal-only (Docuseal, SDR signature) precisely
+      because this and the BANT gate below are still open.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      CRM Lead 164's own "Pipeline Gate Review: incomplete" flag
+      (2026-08-02) lists BANT Q1-Q4 (specific problem, cost of inaction,
+      approver, timeline) as unanswered. This proposal was built anyway,
+      at explicit user instruction, as an internal disarm-hesitation
+      draft — not a confirmed client agreement.
+    resolution: >
+      Not resolved — by design. Proposal is internal-only pending a real
+      reopened conversation with the client. Do not treat Rev1 as
+      client-ready without first closing the BANT gate in CRM.
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      An earlier, unsigned PRJ-model proposal (SGC-KP-2026-07) exists on
+      CRM Lead 164 as an attachment, built outside this repo's
+      governance, using AED 425/hr (not on rate-card.yaml) and silent on
+      edition/licensing. This SUB-model rebuild intentionally does not
+      reconcile line-by-line against it — different rate card, different
+      commercial model entirely.
+    resolution: >
+      Documented, not reconciled. Both documents remain associated with
+      CRM Lead 164; this repo's KP-2026-SUB-01_Rev1 is the governed
+      artifact going forward.
+
+  - date: "2026-08-05"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      pricing/policy.yaml overlays.rollout_hours_per_user (v2.1, the
+      mechanism that took this deal's rollout hours from 0 to 120, billed
+      at the mid_market blended rate of 525 AED/hr) was DELETED 2026-08-05
+      (v3.0) per pricing-engine-cost-class-model.md Rev.2 -- it mixed
+      three different cost classes into one per-user multiplier and
+      billed Class-B-shaped work at an L2 consultant rate, a real,
+      demonstrated V2 rate-mix-ceiling violation (validate.py check_v2).
+      Replaced by class-b-task-inventory.yaml (genuine Class B, ~10.7h at
+      N=40, priced at 60-120/450 AED/hr per task role) plus three new
+      Class A entries (migration_record_validation_signoff,
+      bulk_user_import_csv, training_content_design_multiagent) and one
+      new Class A/support hypercare allocation
+      (support-training.yaml: hypercare_golive_support).
+    resolution: >
+      Worksheet recomputed under the new model: build_value_aed
+      121,716 -> 56,072 (-54%), Subscription Fee 7,790/mo -> 5,850/mo
+      (24mo option). This is a DISCOVERY of what the deal should cost
+      once per-user provisioning is billed at its own role rate rather
+      than the segment blended rate, not a discount or a re-litigation
+      of scope -- the Class A work (property/CRM/migration/reporting)
+      and Class B per-user provisioning are unchanged in kind, only in
+      how they are classed and rated. Recomputed 02-calc/pricing-worksheet.yaml
+      in place (Rev1 stays draft/unissued -- manifest.prior_versions_issued_to_client
+      confirms this was never sent). Re-run validate.py after this change
+      before any further action on this deal. BANT gate (escalation above,
+      2026-08-05) remains open independently of this recompute -- this is
+      a pricing-model correction, not a deal-stage change.
+
+revisions:
+  - ref: "KP-2026-SUB-01_Rev1"
+    issued_date: ""
+    path: "03-draft/KP-2026-SUB-01_Rev1/"
+    status: "draft"
+    notes: >
+      Built against pricing-worksheet.yaml: mid_market segment, Community
+      edition (deliberate override), 40 users, build_value AED 121,716
+      (expanded twice on 2026-08-05: first from 34h to 58h by adding real
+      hour-lookup.yaml packages after the hour-benchmark gate flagged 34h
+      as ~11x under reference; then to 192h after the user directed adding
+      a genuine per-user scaling factor to policy.yaml itself —
+      `overlays.rollout_hours_per_user`, pricing v2.1, see CHANGELOG.md —
+      since the catalogue had no headcount-scaling mechanism at all,
+      confirmed by checking demo.sgctech.ai's preset addons first and
+      finding no real-estate-specific preset to explain the gap).
+      Mobilisation AED 48,686 (40% — elevated risk band, placeholder-driven),
+      Subscription Fee AED 7,790/mo (24mo preferred, 53.6% margin) or
+      AED 10,650/mo (12mo alt), quarterly-in-advance billing, monthly
+      billing available at +3% surcharge. **Price roughly 47% higher than
+      the pre-scaling-factor draft (AED 5,290→7,790/mo)** — flagged as a
+      real tension against the original disarm-hesitation strategic goal,
+      see deal-card.md. Scope: core real-estate CRM/property-register/
+      tenancy/accountability/reporting/migration ("prioritize early needs"
+      per user instruction) — portal sync, AI scoring, WhatsApp offered as
+      separate add-ons/escalation, not in base. Internal-only per explicit
+      user instruction — routed to Docuseal for SDR signature, no external
+      client recipient.
+
+verbal_promises_logged: true
+adoption_clause_included: true
+clawback_included: true
+evidence_file_complete: false      # correct as-is per G29's own scope — false until go-live, see gate-report
+prior_versions_issued_to_client: false   # SGC-KP-2026-07 (the prior PRJ doc) was sent but is a different model/document; this SUB-model Rev1 has not been issued to the client

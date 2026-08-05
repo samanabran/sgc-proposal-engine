@@ -1,12 +1,24 @@
-# SGC TECH AI — Work Package -> Hours, by Complexity (v2)
+# SGC TECH AI — Work Package -> Hours, by Complexity (v2.1)
 # Real-estate-brokerage-specific work packages, replacing the v1 generic
 # ERP catalogue. {simple, standard} — simple for a lean single-office
 # brokerage with clean data; standard for typical UAE boutique brokerage
 # complexity. There is no "high" band in v2 — if a deal needs more than
 # standard, that is itself a signal to re-scope or escalate, not to invent
 # a higher number.
-version: 2.0
-effective_from: 2026-08-03
+#
+# v2.1 (2026-08-05) — three new Class A entries added as part of the
+# rollout_hours_per_user overlay deletion (policy.yaml v3.0, see
+# CHANGELOG.md and .omc/plans/pricing-engine-cost-class-model.md Rev.2,
+# D-4/D-9). These are the real, cited scope the deleted per-user overlay
+# was informally covering (record validation, bulk provisioning,
+# multi-agent training-content design) — added BEFORE the overlay's
+# deletion so no commit prices the corpus with neither mechanism (D-9).
+# All three are Grade D (structured estimate, no delivered actual exists
+# yet) — hours_standard is the PERT mean, used as the worksheet figure;
+# hours_pessimistic is carried for range/PERT reporting, not itself used
+# as a point estimate (P8).
+version: 2.1
+effective_from: 2026-08-05
 
 work_packages:
   discovery:                          { hours_simple: 3, hours_standard: 5 }
@@ -21,8 +33,33 @@ work_packages:
   portal_sync_per_portal:                       { hours_simple: 8, hours_standard: 12, phase: 2 }
   website_lead_capture:                          { hours_simple: 5, hours_standard: 8,  phase: 2 }
 
+  migration_record_validation_signoff:
+    hours_simple: 4                    # PERT O=4.17h (500 records x 0.5min/record / 60), rounded
+    hours_standard: 8                   # PERT M=8.33h (500 records x 1min/record / 60) -- use as worksheet figure
+    hours_pessimistic: 17                # PERT P=16.67h (500 records x 2min/record / 60), rounded
+    grade: D
+    scales_with: "fixed migration record count (500 per data_migration_500's own scope), NOT user count N"
+    note: "Moved from Class B to Class A 2026-08-05 -- record-level validation scales with record count, which is fixed regardless of headcount, not with N. Applying a per-agent learning curve to a fixed record pool made total validation hours FALL as headcount rose (a category error). See pricing-engine-cost-class-model.md Rev.2 D-4. Class B retains only a small per-agent sign-off step (class-b-task-inventory.yaml: per_agent_signoff) which correctly scales with N."
+
+  bulk_user_import_csv:
+    hours_simple: 3
+    hours_standard: 5
+    hours_pessimistic: 8
+    grade: D
+    trigger: "users_now > 25 (N_bulk threshold -- class-b-task-inventory.yaml)"
+    note: "One-time Class A engineering line replacing linear per-user account creation above the bulk threshold, so per-user provisioning cost does not run linearly to N=400. See pricing-engine-cost-class-model.md Rev.2 D-1/D-4."
+
+  training_content_design_multiagent:
+    hours_simple: 2
+    hours_standard: 4
+    hours_pessimistic: 8
+    grade: D
+    trigger: "users_now > 10 (beyond policy.yaml overlays.training_sessions' 2-session/4h default baseline)"
+    note: "One-time curriculum/rollout-plan design for a multi-agent training programme -- distinct from the per-session delivery hours already priced via policy.yaml overlays.training_sessions x training_hours_per_session. Extracted from the deleted rollout_hours_per_user overlay's bundled 'individual training coordination' language, which mixed this Class A design work with genuine per-user Class B effort. Priced at trainer role (rate-card.yaml, 395 AED/hr), not the segment blended rate."
+
 notes:
   - "A work package not listed here does not exist. Escalate rather than estimate by analogy."
   - "phase: 2 items are priced from phase2-catalogue.yaml, not from segment blended rate — see runbook."
   - "documentation_hours and qa_hours are computed from overlays in policy.yaml, not looked up here."
   - "portal_sync_per_portal is per portal (Property Finder, Bayut, Dubizzle each counted separately) — see phase2-catalogue.yaml portal dependency note before quoting any portal integration."
+  - "migration_record_validation_signoff, bulk_user_import_csv, and training_content_design_multiagent are Grade D (v2.1, 2026-08-05) -- no delivered actual exists yet. Each has a named collapse trigger in pricing-engine-cost-class-model.md Rev.2 §L. Do not treat hours_standard as more precise than the PERT range it's drawn from."

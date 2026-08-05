@@ -1,0 +1,38 @@
+# Risk Assessment — KP-2026-SUB-01_Rev1
+# Per pricing/risk-security-matrix.yaml, run before the pricing worksheet.
+#
+# IMPORTANT: several inputs below are UNCONFIRMED and use a conservative
+# (higher-risk) placeholder rather than a fabricated fact, clearly flagged.
+# This assessment must be re-run with real answers before this proposal is
+# ever shown externally — consistent with this proposal being internal-only
+# (Docuseal, SDR signature) per explicit user instruction.
+
+inputs:
+  entity_age_years: "1-2"          # RESOLVE — unconfirmed, conservative placeholder (not "<1" worst-case, not ">5" best-case)
+  jurisdiction: mainland_llc        # real estate developer/broker in Dubai — reasonably inferred, not free-zone-typical for this vertical
+  vat_registered: "no"              # RESOLVE — unconfirmed, conservative placeholder
+  trade_licence_valid: ">6mo"       # inferred from sustained CRM activity since 2026-04-12 (4+ months of engagement); not a document check
+  payment_history_sgc: none         # confirmed — first engagement with SGC
+  decision_maker: manager           # confirmed — Sadique Abbas, "Sales Manager" per CRM contact_name
+  incumbent_churn_signal: abandoned_systems   # confirmed — Zapier + manual portal posting + Google Sheets per discovery notes
+  peak_exposure_aed_band: "15-40k"  # computed from this worksheet's build_value (~21,554) — see pricing-worksheet.yaml
+
+scoring:
+  raw_score: 52
+  band: elevated
+  required_instruments: [mobilisation_40pct, deposit_2_months, pdc_set]
+
+notes: >
+  RESOLVE before external use: entity_age_years and vat_registered are
+  unconfirmed placeholders, not verified facts. If both resolve favorably
+  (entity >5yr, VAT-registered), raw_score drops to ~30 (moderate band,
+  mobilisation_33pct only) — a materially different commercial structure
+  than the elevated band computed here. Per risk-security-matrix.yaml:
+  "elevated and above cannot proceed with zero security regardless of any
+  other factor" (G15) — this worksheet uses 40% mobilisation, not the 33%
+  used in earlier informal calculations before this formal risk assessment
+  was run, precisely because the elevated band (as currently, conservatively
+  scored) requires it. This is a placeholder-driven outcome, not a final
+  one — a human reviewer must re-run this with confirmed answers before
+  any external send, and the commercial structure may loosen once
+  confirmed.

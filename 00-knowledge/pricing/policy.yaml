@@ -5,9 +5,9 @@
 # case study): mobilisation raised 25% -> 33%; 24-month financing uplift
 # raised 12% -> 18% pending reserve rebuild; vat.charge_vat flipped to
 # false — SGC is NOT VAT-registered and has no TRN as of this version.
-version: 2.0
-effective_from: 2026-08-03
-source: "v2 hardening pass — see CHANGELOG.md"
+version: 3.0
+effective_from: 2026-08-05
+source: "v3.0 — rollout_hours_per_user overlay DELETED, replaced by class-b-task-inventory.yaml + cost-classes.md, see CHANGELOG.md"
 
 # RESOLVED 2026-08-04 (see failure-modes/known-defects.md #21): this
 # build's own source spec reintroduced the pre-correction smb and
@@ -35,6 +35,37 @@ overlays:
   qa_hours_min: 3
   training_sessions: 2
   training_hours_per_session: 2
+  # DELETED 2026-08-05 (v3.0): overlays.rollout_hours_per_user (4h) and
+  # overlays.rollout_hours_free_users (10), added v2.1 same day. Deletion,
+  # not retuning, per P11 -- the overlay was justified by "it makes the
+  # hour-benchmark gate pass" (KP-2026-SUB-01 could only reach ~52-60h
+  # using hour-lookup.yaml alone, against a 9.2h/user reference expecting
+  # ~368h for 40 users), which is exactly the pattern P11 forbids keeping.
+  # It also bundled three genuinely different kinds of work into one flat
+  # per-user multiplier -- role/permission design (Class A, scope-driven),
+  # training-content design (Class A), hypercare support (Class C/A
+  # one-time) -- alongside actual Class B per-user provisioning, and
+  # billed all of it at the segment blended rate (525 AED/hr for Kallat),
+  # which is also a real, demonstrated V2 rate-mix-ceiling violation on
+  # work that is structurally Class B (see validate.py check_v2).
+  #
+  # Replaced by (all added 2026-08-05, BEFORE this deletion landed, so no
+  # commit priced the corpus with neither mechanism -- D-9):
+  #   - class-b-task-inventory.yaml -- genuine Class B per-user tasks,
+  #     bottom-up, Wright's-law learning curve, per-task-role ceiling
+  #   - hour-lookup.yaml: migration_record_validation_signoff,
+  #     bulk_user_import_csv, training_content_design_multiagent (Class A)
+  #   - support-training.yaml: hypercare.hypercare_golive_support (Class A
+  #     one-time, support-rate-priced)
+  #
+  # The corrected bottom-up Class B figure for Kallat (N=40) is ~10.7h
+  # against this deleted overlay's 120h -- a GAP, not a saving: the Class
+  # A/C lines above absorb some of the difference, but their own O/M/P
+  # estimates are themselves new and Grade D (no delivered actual exists
+  # yet for any of them). See CHANGELOG.md pricing v3.0 and
+  # .omc/plans/pricing-engine-cost-class-model.md Rev.2 for the full
+  # derivation. Per PRECEDENCE.md's own rule: deleted and logged here,
+  # not left dormant as a comment for a future read to silently revive.
 
 cost_to_serve:
   hosting_node_true_cost_aed: 360        # NOT the 990 list price — see hosting.yaml note

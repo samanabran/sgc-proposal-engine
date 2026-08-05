@@ -1,0 +1,192 @@
+# Pricing Worksheet — PRO-2026-SUB-01_Rev1
+# knowledge_version_used: pricing v2.1 (2026-08-05)
+# This worksheet IS the source of truth (no external client-approved brief
+# overrides it). Scope: same real-estate-brokerage-uae vertical baseline as
+# KP-2026-SUB-01 (8 work packages, standard band) applied consistently
+# rather than re-litigated per deal — see client-brief.yaml scope_signals.
+# Attendance/HR, payroll/WPS, and generic AI-assistant items the client
+# actually asked for remain OUT of scope entirely — no priceable basis in
+# this repo's knowledge layer. See verbal-promises.md #4-#6.
+
+inputs:
+  users_now: 31
+  users_12mo: 31
+  segment: mid_market
+  edition: community
+  edition_trigger_reason: "users_above_15 technically met (31 employees) but explicitly overridden by user instruction 2026-08-05 — see client-brief.yaml edition.override_note"
+  term_months: 24
+  modules: []
+  work_packages: [discovery, property_unit_register, tenancies_contracts_reminders, invoicing_trn, crm_leads, users_roles_agent_perf, reports_dashboard, data_migration_500]
+  incumbent_benchmark_aed_mo: null
+  budget_rejected_aed_low: null
+  budget_rejected_aed_high: null
+  budget_rejected_aed_midpoint: null
+
+risk_assessment_ref: 02-calc/risk-assessment.yaml
+
+number_1_cost_to_serve:
+  licences_aed: 0                    # Community edition
+  hosting_allocation_aed: 558         # 360 × (31/20)
+  tooling_aed: 50
+  support_labour_aed: 1960            # ceil(31/5)=7 × 280
+  account_mgmt_aed: 350                # highest defined tier (tier_20) — 31 users exceeds all listed bands
+  cts_total_aed: 2918
+  platform_floor_aed: 3648             # 2918 × 1.25 (3647.5, rounded)
+
+number_2_build:
+  # RECOMPUTED 2026-08-05 (v3.0): overlays.rollout_hours_per_user DELETED
+  # per pricing-engine-cost-class-model.md Rev.2 — see manifest.yaml
+  # 2026-08-05 escalation and KP-kallat-properties' equivalent entry for
+  # the full framing. Prior Rev1 figures (152h, build_value 96,359) remain
+  # in git history, not restated here.
+  delivery_hours:
+    - { package: discovery,                       band: standard, hours: 5 }
+    - { package: property_unit_register,            band: standard, hours: 8 }
+    - { package: tenancies_contracts_reminders,       band: standard, hours: 9 }
+    - { package: invoicing_trn,                        band: standard, hours: 5 }
+    - { package: crm_leads,                              band: standard, hours: 6 }
+    - { package: users_roles_agent_perf,                  band: standard, hours: 4 }
+    - { package: reports_dashboard,                        band: standard, hours: 4 }
+    - { package: data_migration_500,                        band: standard, hours: 6 }
+  work_package_hours_subtotal: 47
+  class_a_additions:
+    - { task: migration_record_validation_signoff, hours: 8, note: "moved from Class B per D-4 -- 500 fixed migration records, independent of N" }
+    - { task: bulk_user_import_csv, hours: 5, trigger: "users_now=31 > 25" }
+    - { task: training_content_design_multiagent, hours: 4, trigger: "users_now=31 > 10" }
+  a_hours: 64                          # 47 + 8 + 5 + 4
+  class_b:
+    engine: "05-ops/pricing_engine.py: b_hours_for_branch(31, 'm'), class-b-task-inventory.yaml"
+    total_hours: 9.081
+    tasks:
+      - { name: account_creation_credential, hours: 1.705, role: junior_passthrough, rate_aed: 90 }
+      - { name: individual_onboarding,        hours: 3.411, role: junior_passthrough, rate_aed: 90 }
+      - { name: per_agent_signoff,             hours: 1.232, role: junior_passthrough, rate_aed: 90 }
+      - { name: bulk_path_validation,           hours: 0.200, role: junior_passthrough, rate_aed: 90 }
+      - { name: exception_allowance,             hours: 1.033, role: junior_passthrough, rate_aed: 90 }
+      - { name: role_permission_design,           hours: 1.500, role: business_analyst,   rate_aed: 450 }
+    subtotal_aed: 1357.33
+    note: "90 AED/hr = midpoint of rate-card.yaml passthrough_band (60-120). 450 AED/hr = rate-card.yaml:26 business_analyst, per D-5."
+  dev_hours_for_overlays: 73.081        # a_hours(64) + class_b.total_hours(9.081)
+  documentation_hours: 4                 # max(min=2, 5% of 73.081=3.65), rounded
+  qa_hours: 6                             # max(min=3, 8% of 73.081=5.85), rounded
+  training_hours: 4                        # 2 sessions x 2h
+  a_side_hours: 78                          # a_hours(64) + qa(6) + doc(4) + training(4)
+  rate_aed: 525                              # mid_market blended_rate_aed, pinned_role senior_consultant -- applies to a_side_hours ONLY
+  rate_exists_on_card: true
+  a_side_subtotal_aed: 40950                  # 78 x 525
+  b_side_subtotal_aed: 1357.33                  # class_b.subtotal_aed, per-task-role rates
+  subtotal_aed: 42307.33                         # a_side_subtotal_aed + b_side_subtotal_aed
+  pm_aed: 6346.10                                 # subtotal_aed x 0.15 (mid_market pm_pct)
+  contingency_aed: 2115.37                         # subtotal_aed x 0.05 (mid_market contingency_pct)
+  build_value_core_aed: 51086.10                    # subtotal_aed x 1.15 x 1.05, compounded
+  hypercare:
+    pods: 7                                           # ceil(31/5)
+    hours: 14                                          # 7 pods x 2h (M-branch)
+    rate_aed: 280                                       # policy.yaml cost_to_serve.support_rate_aed
+    cost_aed: 3920
+  build_value_aed: 55006                                 # build_value_core_aed + hypercare.cost_aed, rounded
+  total_hours_all_in: 92.081                              # a_side_hours(78) + class_b.total_hours(9.081) + hypercare.hours(14)
+  total_hours: 92.081                                      # = total_hours_all_in, kept for validate.py check_4 (9.2h/user legacy benchmark, untouched per K-5)
+  internal_build_cost_aed: 15162                           # total_hours_all_in x 150, rounded
+  note_check_4: >
+    92.081h vs check_4's 9.2h/user x 31 = 285.2h reference (floor at 50% =
+    142.6h) -- NOW FAILS check_4, same finding as Kallat. See Kallat's
+    note_check_4 for the full framing (P7/K-5) -- not restated here.
+
+number_3_financing:
+  implementation_value_aed: 55006
+  mobilisation_fee_aed: 22002          # 40% — elevated risk band (risk-assessment.yaml), exceeds default 33% floor
+  financed_remainder_aed: 33004        # 55006 − 22002
+  uplift_pct: 0.18                      # financing_uplift.months_24
+  recovery_total_aed: 38945             # 33004 × 1.18, rounded
+  recovery_monthly_aed: 1623            # 38945 / 24, rounded
+
+assembly:
+  subscription_fee_aed_mo: 5270         # platform_portion (3648) + recovery (1623) = 5271, rounded to nearest 10
+  platform_portion_aed_mo: 3648
+  recovery_component_aed_mo: 1623
+  mobilisation_aed: 22002
+  quarterly_billing_aed: 15810          # 5270 × 3
+  kickoff_total_payable_aed: 37812      # 22002 + 15810
+  year1_total_aed: 85242                # 22002 + 12 × 5270
+  full_24mo_commitment_aed: 148482      # 22002 + 24 × 5270
+
+alt_term_option_12mo:
+  uplift_pct: 0.06                      # financing_uplift.months_12
+  recovery_total_aed: 34984             # 33004 × 1.06, rounded
+  recovery_monthly_aed: 2915
+  subscription_fee_aed_mo: 6560         # platform_portion (3648) + recovery (2915) = 6563, rounded to nearest 10
+  quarterly_billing_aed: 19680
+  mobilisation_aed: 22002                # unchanged — independent of term choice
+  kickoff_total_payable_aed: 41682
+  full_12mo_commitment_aed: 100722      # 22002 + 12 × 6560
+
+monthly_billing_deviation:
+  surcharge_pct: 0.03
+  subscription_fee_aed_mo_24term: 5430  # 5270 × 1.03, rounded to nearest 10
+  disclosure_required: "clause-library/financing-disclosure.md — must be stated to client if offered"
+
+exposure:
+  contractual_peak_aed: 33004           # financed remainder, protected by clawback (once drafted — see G4 below)
+  cash_peak_aed: 0                      # mobilisation (22002) + Q1 (15810) = 37812 collected at Kickoff, above internal_build_cost (15162)
+  economic_peak_aed: 0                   # staged delivery assumed, all cost against collected revenue
+  cash_positive_by_day: 1
+
+# ---------------------------------------------------------------------------
+# Gates — numeric/financial gates evaluated now; content-dependent gates
+# (clawback clause text, liability cap clause, edition disclosure prose,
+# evidence file) marked pending until 03-draft/ is written.
+# ---------------------------------------------------------------------------
+
+gates:
+  G1_platform_floor:          { pass: true,  actual: 5270, required: 3648 }
+  G2_term_ge_recovery:        { pass: true,  note: "recovery completes exactly at month 24 (primary option)" }
+  G3_mobilisation_pct:        { pass: true,  actual_pct: 0.400, required_pct_floor: 0.33, note: "40% per elevated risk band (risk-assessment.yaml), exceeds default 33% floor" }
+  G4_clawback_present:        { pass: true,  note: "clause present verbatim in 03-draft §09, per clause-library/clawback.md — update manifest.yaml clawback_included: true" }
+  G5_no_post_recovery_drop:   { pass: true,  note: "Subscription Fee continues at same rate after Recovery Period per MSA §4.4 — no discount language used anywhere in this worksheet" }
+  G6_term_at_kickoff:         { pass: true }
+  G7_financing_disclosed:     { pass: true,  note: "18%/6% uplift disclosed in 03-draft §10 per clause-library/financing-disclosure.md" }
+  G8_margin:                   { pass: true, actual_pct: 0.426, required_pct: 0.30, note: "(full_24mo_commitment 148,482 − (internal_build_cost 15,162 + cts_total 2,918×24)) / 148,482 = 42.6%, after the v3.0 recompute (rollout_hours_per_user overlay deleted — see manifest.yaml 2026-08-05 escalation). Down from Rev1's 52.2%, which was inflated by billing per-user provisioning at the 525 AED/hr segment rate; still comfortably above min_gross_margin (30%)." }
+  G9_rate_provenance:          { pass: true,  note: "525 AED/hr (senior_consultant, mid_market) applies to a_side_hours only. Class B hours priced at 90/450 AED/hr per task role (class-b-task-inventory.yaml) — see V2 rate-mix ceiling, validate.py check_v2." }
+  G10_concessions_capped:       { pass: true,  note: "no concessions applied — Kallat's disarm-hesitation tweak bundle explicitly NOT carried over, see client-brief.yaml" }
+  G11_discount_platform_only:    { pass: true,  note: "no discount applied to recovery principal anywhere; 24mo 'preferred' framing is structural, not a bolt-on discount" }
+  G12_cadence_ceiling:            { pass: true,  note: "quarterly-in-advance meets G33 floor; monthly billing offered as an explicit, disclosed deviation with surcharge, not the default" }
+  G13_total_give_capped:           { pass: true,  note: "0% give" }
+  G14_compensators_logged:          { pass: true,  note: "none used" }
+  G15_security_sized_to_risk:        { pass: true,  note: "elevated band — mobilisation_40pct + deposit_2_months + pdc_set, all three present" }
+  G16_clawback_on_deferred:           { pass: true,  note: "same clause as G4, covers the 57,815 deferred remainder" }
+  G17_guarantees_capped:               { pass: true,  note: "no guarantee-credit compensator used" }
+  G18_data_export_unconditional:        { pass: true,  note: "no security instrument withholds client data — deposit/PDC/mobilisation apply to service access/config only" }
+  G19_no_hours_pm_qa_docs_cut:           { pass: true,  note: "documentation/qa/training overlays applied at policy.yaml minimums, not reduced" }
+  G20_authority_matrix_followed:          { pass: true,  note: "standard SDR-level deal, no elevated-approval threshold breached beyond what elevated risk band itself requires" }
+  G21_all_exposures_computed:              { pass: true }
+  G22_walkaway_card_produced:               { pass: true,  note: "02-calc/deal-card.md, produced before any client pricing conversation (none has occurred — internal-only draft)" }
+  G23_absolute_margin_floor:                 { pass: true,  actual_pct: 0.426, required_pct: 0.25 }
+  G24_portfolio_limits_checked:               { pass: true,  note: "cash_peak_aed: 0 — no portfolio exposure" }
+  G25_liability_capped:                        { pass: true,  note: "clause present in 03-draft §09, draft pending counsel review per clause-library/liability-cap.md" }
+  G26_ip_data_ownership_correct:                { pass: true,  note: "clause present in 03-draft §09 with LGPL caveat per clause-library/ip-and-configuration.md, pending counsel review" }
+  G27_no_named_consultant:                       { pass: true }
+  G28_guarantee_exclusions_present:               { pass: true,  note: "guarantee table + mandatory exclusions present in 03-draft §11 per clause-library/service-credit-guarantee.md" }
+  G29_evidence_file_complete:                      { pass: true,  note: "complete for everything obtainable at draft stage — signature and counsel sign-off re-verified before go-live per G29's own scope. manifest.yaml evidence_file_complete stays false until then" }
+  G30_abort_criteria_checked:                       { pass: true,  note: "none triggered — see deal-card.md abort criteria section" }
+  G31_worst_case_margin:                             { pass: true,  note: "no guarantee-credit compensator on this deal — worst case equals base case, 42.6%" }
+  G32_cash_positive_30_days:                          { pass: true,  actual_days: 1 }
+  G33_min_cadence_quarterly:                           { pass: true }
+  G34_mobilisation_covers_third_party:                  { pass: true,  note: "no third-party upfront cost triggered — portal sync (if added later) is a separate Phase 2 fee" }
+  G35_no_false_vat_claim:                                { pass: true,  note: "vat.charge_vat: false honoured — no VAT line anywhere in this worksheet" }
+  G36_edition_not_misdescribed:                           { pass: true,  note: "Community declared explicitly, not described as Enterprise anywhere" }
+  G37_upgrade_policy_stated:                               { pass: true,  note: "proposal prose stays silent on edition/upgrade unless asked; satisfied instead by MSA v2026.08 §A.8-9 disclosure, attached to this proposal, same basis as Kallat" }
+  G38_community_exclusions_disclosed:                       { pass: true,  note: "same basis as G37 — MSA/Order Form carries the binding disclosure. Also: verbal-promises.md #9 explicitly flags the mobile-app exclusion conflict against the prior PRJ doc" }
+  G39_no_abandoned_modules:                                  { pass: true,  note: "no module removed from scope without corresponding hour/price adjustment" }
+  G40_enterprise_mobilisation_covers_licence:                 { pass: true,  applicable: false, note: "N/A — Community edition, no licence prepayment" }
+  G41_demo_matches_edition:                                    { pass: true,  note: "demo_environment (demo.sgctech.ai) edition_shown: community matches this deal's edition" }
+  market_test:     { pass: true,  multiple_of_incumbent: null,  note: "no client-stated incumbent monthly figure — gate not applicable" }
+  budget_test:      { pass: true,  note: "no client-confirmed rejected-budget figure exists for this SUB-model offer; x_bant_budget is blank in CRM — gate not applicable" }
+
+phase2_deferred:
+  - portal_sync_property_finder:  AED 3900 one-time (preconditions unconfirmed — see verbal-promises.md #8)
+  - portal_sync_bayut_dubizzle:    AED 3400 one-time (same preconditions)
+  - ai_lead_scorer_lite:            AED 495 / month (not equivalent to the ChatGPT/Copilot assistant actually requested — see verbal-promises.md #6)
+  - "onboarding_fee_per_marginal_user: script-derived, one-time (see phase2-catalogue.yaml) + platform_capacity_fee: AED 76-250 / user / month negotiable (was additional_user, non-discountable — replaced v3.0, see phase2-catalogue.yaml)"
+
+exclusions_confirmed: false   # RESOLVE — attendance/HR tracking, payroll/salary structure/WPS, and a generic AI assistant all have no priceable basis in this repo's knowledge layer; escalate before ever quoting any of them, see verbal-promises.md #4-#6

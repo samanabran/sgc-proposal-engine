@@ -1,12 +1,25 @@
 # SGC TECH AI — Revised Support & Cybersecurity
 # Source: commercial-pricing-revised-v2.xlsx, sheet "Support & Security"
-version: 2.0
-effective_from: 2026-08-03
+# v2.1 (2026-08-05): added hypercare_golive_support -- see note below and
+# .omc/plans/pricing-engine-cost-class-model.md Rev.2 D-4/D-9.
+version: 2.1
+effective_from: 2026-08-05
 
 support:
   email_24hr_sla:      { unit: month, price_aed: 650 }
   priority_4hr_sla:    { unit: month, price_aed: 1650 }
   dedicated_24_7:      { unit: month, price_aed: 3750 }
+
+hypercare:
+  hypercare_golive_support:
+    unit: one_time_per_rollout
+    formula: "ceil(users_now / 5) pods x hours_pessimistic/standard/simple per pod, per policy.yaml cost_to_serve.support_hours_per_5_users anchor"
+    hours_simple_per_pod: 1
+    hours_standard_per_pod: 2
+    hours_pessimistic_per_pod: 4
+    grade: D
+    rate_basis: "policy.yaml cost_to_serve.support_rate_aed (280 AED/hr)"
+    note: "One-time, time-boxed elevated support allocation during go-live (e.g. first two weeks), extracted from the deleted rollout_hours_per_user overlay's bundled 'hypercare support fanned across more people' language -- Class A one-time allocation, NOT a recurring Class C support-tier line (support: block above), and NOT a Class B per-user task. Scales with distinct 5-user pods, not with users_now directly, mirroring the same pod-shape as cost_to_serve.support_hours_per_5_users. Grade D -- no delivered actual exists yet; collapse trigger: one delivered go-live's actual hypercare hours logged separately from ongoing support tickets."
 
 training:
   end_user_standard:   { unit: session, hours: 5, price_aed: 1750 }

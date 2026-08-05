@@ -1,0 +1,604 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>KP-2026-SUB-01_Rev1 — Internal Draft</title>
+<style>
+@page { size: A4; margin: 20mm 18mm; }
+body { font-family: 'IBM Plex Sans', Arial, sans-serif; color: #1C2430; line-height: 1.5; font-size: 10.5pt; }
+h1 { font-size: 20pt; color: #1C2430; border-bottom: 2px solid #B79554; padding-bottom: 6px; margin-top: 0; page-break-before: always; }
+section:first-of-type h1 { page-break-before: avoid; }
+h2 { font-size: 13pt; color: #1C2430; margin-top: 18px; }
+h3 { font-size: 11.5pt; color: #5F6775; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+th, td { border: 1px solid #D9C08A; padding: 5px 8px; text-align: left; }
+th { background: #ECE7DF; font-weight: 600; }
+blockquote { border-left: 3px solid #B79554; margin: 10px 0; padding: 6px 14px; background: #F7F4EE; font-style: italic; }
+.internal-banner { background: #1C2430; color: #F7F4EE; padding: 10px 16px; font-weight: 600; text-align: center; margin-bottom: 14px; }
+.cover { text-align: center; padding-top: 30mm; }
+.cover h1 { border: none; font-size: 26pt; page-break-before: avoid; }
+section { page-break-after: always; }
+section:last-of-type { page-break-after: avoid; }
+code { background: #ECE7DF; padding: 1px 4px; border-radius: 2px; font-size: 9pt; }
+</style>
+</head><body>
+<div class="cover">
+<div class="internal-banner">INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION — SDR REVIEW/SIGNATURE ONLY</div>
+<h1>KP-2026-SUB-01</h1>
+<p>Revision 1 &middot; Subscription Recovery Model &middot; Kallat Properties</p>
+<p>Prepared by SGC TECH AI &middot; 2026-08-05</p>
+</div>
+<section><h1>Executive Summary</h1>
+
+<p>Kallat Properties runs a 40-agent sales team on manual portal posting to</p>
+<p>Bayut, Property Finder, and Dubizzle, with lead distribution via Zapier</p>
+<p>automation and pipeline reporting entirely in Google Sheets. The core gap</p>
+<p>is not assignment logic — it's follow-through: leads are handed to agents</p>
+<p>with no enforced accountability, no callback tracking, and no escalation</p>
+<p>when a lead goes cold. This proposal sets out a Subscription Recovery</p>
+<p>Model to bring lead management, agent accountability, and reporting into</p>
+<p>one Odoo platform, with no separate implementation invoice.</p>
+
+<h2>Scope snapshot</h2>
+
+<p>Property/unit register, tenancy and contract tracking, TRN-compliant</p>
+<p>invoicing, centralized CRM with lead-locking and mandatory callback</p>
+<p>logging, agent role/permission setup, reporting dashboards, and migration</p>
+<p>of 500 historical records — sized for your full 40-agent team.</p>
+
+<h2>Commercial headline</h2>
+
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>Recommended option</td><td>24-month term (preferred)</td></tr>
+<tr><td>Year 1 investment</td><td>AED 142,166</td></tr>
+<tr><td>Term</td><td>24 months</td></tr>
+<tr><td>Timeline to go-live</td><td>4–6 weeks from kickoff</td></tr>
+</table>
+
+<p>Full commercial detail, including financing terms, is in §10 Commercial</p>
+<p>Terms.</p>
+
+<h2>Why this structure</h2>
+
+<p>Rather than a large one-time fee, the implementation value is recovered</p>
+<p>inside your subscription across the term — no separate build invoice.</p>
+<p>Mobilisation at kickoff is followed by a single, predictable monthly</p>
+<p>subscription fee covering both platform costs and implementation</p>
+<p>recovery.</p>
+</section><section><h1>About SGC TECH AI</h1>
+
+<p>SGC TECH AI is a specialist Odoo implementation and advisory partner</p>
+<p>serving the UAE and wider GCC. We operate in the specialist-boutique</p>
+<p>pricing band — deliberately positioned 15–20% below mid-tier agency</p>
+<p>pricing and well below Big-4 consultancy rates, without competing on the</p>
+<p>low-price, low-structure end of the market where quote quality and</p>
+<p>delivery discipline vary widely.</p>
+
+<h2>What we do</h2>
+
+<p>Odoo implementation, integration, migration, training, and managed</p>
+<p>support, delivered through a discovery-first, gate-checked commercial</p>
+<p>process — every proposal we issue has passed the same margin, market, and</p>
+<p>scope-integrity checks before it reaches you.</p>
+
+<h2>Relevant to real estate brokerage</h2>
+
+<p>Lead accountability is where generic CRM tools fail brokerages with a</p>
+<p>larger agent team — a lead assigned to an agent is only as good as the</p>
+<p>follow-through behind it. Our accountability configuration (lead-locking,</p>
+<p>mandatory callback logging, automated escalation) is scoped and priced as</p>
+<p>its own work package specifically because of this, not folded into a</p>
+<p>generic "CRM setup" line that leaves the actual accountability gap</p>
+<p>unaddressed.</p>
+</section><section><h1>Understanding Your Business</h1>
+
+<p>Kallat Properties is a Dubai mainland real estate development and</p>
+<p>brokerage operation running a team of approximately 40 sales agents (up</p>
+<p>to 50 during peak periods), coordinated by Sadique Abbas, Sales Manager.</p>
+
+<table>
+<tr><th>Dimension</th><th>What we understand</th></tr>
+<tr><td>Core business</td><td>Real estate development and brokerage — listing management, lead-to-close pipeline across a 40-50 agent team</td></tr>
+<tr><td>Current tooling</td><td>Zapier automation for lead distribution, manual portal posting (Bayut, Property Finder, Dubizzle), Google Sheets for pipeline reporting — no centralized CRM</td></tr>
+<tr><td>Team composition</td><td>~40-50 sales agents, a sales manager as primary point of contact, and — per "their final decision" language in call notes — at least one additional decision-maker not yet identified by name</td></tr>
+<tr><td>Primary objective</td><td>Lead accountability: agents receive leads and do not reliably follow through; management has no enforced escalation or visibility mechanism</td></tr>
+<tr><td>Decision constraints</td><td>Price sensitivity — the prior proposal stalled specifically on cost, per the 2026-07-24 call note</td></tr>
+</table>
+
+<p>This proposal is built against the original discovery call's findings</p>
+<p>(portal integration need, accountability gap, data security concerns</p>
+<p>raised unprompted) plus this repo's own governed pricing calculation — not</p>
+<p>a client-confirmed renegotiation. **The underlying CRM qualification gate</p>
+<p>(BANT: specific problem, cost of inaction, approver, timeline) remains</p>
+<p>incomplete as of 2026-08-02** — see <code>00-intake/verbal-promises.md</code> and</p>
+<p><code>manifest.yaml</code> escalations for the full picture. This is an internal</p>
+<p>revised-offer draft, not a document ready to reopen the client</p>
+<p>conversation as-is.</p>
+</section><section><h1>Current Process Assessment (As-Is)</h1>
+
+<table>
+<tr><th>Observed gap</th><th>Implied business impact</th></tr>
+<tr><td>Manual portal posting to Bayut, Property Finder, Dubizzle</td><td>Agents/admins upload listings individually; no automated sync; no Meta or Google lead capture</td></tr>
+<tr><td>No centralized CRM</td><td>Lead distribution runs on Zapier automation; reporting entirely in Google Sheets, manually maintained</td></tr>
+<tr><td>No enforced follow-up mechanism</td><td>Root cause flagged directly in discovery: agents receive leads and do not reliably call back; some "give links but they will not immediately call the client"</td></tr>
+<tr><td>No lead scoring or prioritization</td><td>All leads treated equally regardless of source or conversion probability</td></tr>
+<tr><td>No structured KPI visibility</td><td>Management cannot see agent-level performance without manual compilation</td></tr>
+</table>
+
+<p>The accountability gap is the primary stated pain point, not a secondary</p>
+<p>concern — it was raised as the "root concern" on the original discovery</p>
+<p>call, ahead of the portal-integration request itself. Data security and AI</p>
+<p>processing concerns were also raised unprompted, indicating any AI-driven</p>
+<p>scoring capability (offered separately, see §07) needs to be positioned in</p>
+<p>terms of concrete security controls, not general assurances.</p>
+</section><section><h1>Future State Vision (To-Be)</h1>
+
+<p>The future state replaces fragmented Zapier/Sheets tooling with one</p>
+<p>connected operating platform: leads flow into a single pipeline with</p>
+<p>source attribution, every lead is locked to its assigned agent with</p>
+<p>mandatory callback logging and timestamps, and management gains automated</p>
+<p>escalation when an agent fails to act within an SLA window — closing the</p>
+<p>accountability gap that was the primary reason the original proposal</p>
+<p>stalled.</p>
+
+<ul>
+<li>A single lead record per prospect, with property/unit and tenancy</li>
+<p>context attached.</p>
+<li>Centralized CRM pipeline replacing Google Sheets as the reporting</li>
+<p>backbone, with real-time dashboards.</p>
+<li>Mandatory callback logging and automated escalation on missed</li>
+<p>follow-through — directly addressing "agents receive leads and do not</p>
+<p>call back."</p>
+<li>TRN-compliant invoicing tied to the deal/tenancy record.</li>
+<li>A foundation ready for portal-sync and AI-scoring add-ons (§07) once</li>
+<p>the core accountability and reporting layer is proven in use.</p>
+</ol>
+
+<p>This is a phased approach: this proposal's base scope establishes the</p>
+<p>accountability and reporting foundation; portal automation and AI-driven</p>
+<p>lead scoring remain available as separately-priced additions once the</p>
+<p>foundation is live, rather than bundled into a single large build.</p>
+</section><section><h1>Solution — Phase 1</h1>
+
+<h2>Modules</h2>
+
+<table>
+<tr><th>Module</th><th>Source</th><th>Included</th></tr>
+<tr><td>Odoo CRM</td><td><code>saas-modules.yaml: erp.odoo_crm</code></td><td>✓</td></tr>
+<tr><td>Odoo Sales</td><td><code>saas-modules.yaml: erp.odoo_sales</code></td><td>✓</td></tr>
+<tr><td>Odoo Accounting (TRN invoicing)</td><td><code>saas-modules.yaml: erp.odoo_accounting</code></td><td>✓</td></tr>
+</table>
+
+<h2>Work packages</h2>
+
+<table>
+<tr><th>Work package</th><th>Deliverable</th><th>Hours</th><th>Complexity</th></tr>
+<tr><td>Discovery</td><td>Requirements confirmation, priorities</td><td>5</td><td>Standard</td></tr>
+<tr><td>Property/unit register</td><td>Property and unit records</td><td>8</td><td>Standard</td></tr>
+<tr><td>Tenancies, contracts & reminders</td><td>Tenancy tracking, renewal reminders</td><td>9</td><td>Standard</td></tr>
+<tr><td>TRN invoicing</td><td>Invoicing tied to deal/tenancy records</td><td>5</td><td>Standard</td></tr>
+<tr><td>CRM & lead pipeline</td><td>Centralized lead pipeline, source attribution</td><td>6</td><td>Standard</td></tr>
+<tr><td>Agent roles & accountability</td><td>Lead-locking, callback logging, SLA escalation</td><td>4</td><td>Standard</td></tr>
+<tr><td>Reports & dashboard</td><td>Real-time reporting, replaces Google Sheets</td><td>4</td><td>Standard</td></tr>
+<tr><td>Data migration (500 records)</td><td>Historical lead/contact migration</td><td>6</td><td>Standard</td></tr>
+<tr><td>Rollout (40 users)</td><td>Role/permission setup, individual onboarding coordination, per-agent data validation</td><td>120</td><td>—</td></tr>
+<tr><td>Documentation</td><td>—</td><td>8</td><td>—</td></tr>
+<tr><td>QA</td><td>—</td><td>13</td><td>—</td></tr>
+<tr><td>Training</td><td>2 sessions × 2 hrs</td><td>4</td><td>—</td></tr>
+</table>
+
+<p><strong>Total: 192 hours</strong> at the mid_market blended rate (AED 525/hr).</p>
+
+<h2>What "done" looks like for this phase</h2>
+
+<ul>
+<li>Every active lead visible in a centralized pipeline with source</li>
+<p>attribution and correct stage.</p>
+<li>Every lead locked to its assigned agent with mandatory callback logging</li>
+<p>and timestamps — the accountability gap directly addressed.</p>
+<li>Automated escalation triggers when an agent fails to act within an SLA</li>
+<p>window, visible to management.</p>
+<li>TRN-compliant invoicing tied to the underlying deal/tenancy record.</li>
+<li>Full 40-agent team onboarded with role-appropriate access.</li>
+</ul>
+
+<h2>Migration scope</h2>
+
+<p>500 historical records from up to two source files (Google Sheets export).</p>
+<p>Data quality confidence is unknown at this stage — not yet assessed</p>
+<p>against source data, since this deal has not reopened with the client.</p>
+</section><section><h1>Options & Inclusions</h1>
+
+<h2>Phase 2 options (not included in this proposal's pricing)</h2>
+
+<table>
+<tr><th>Option</th><th>Description</th><th>Reference price</th></tr>
+<tr><td>Portal sync — Property Finder</td><td>Automated listing sync and enquiry ingestion</td><td>AED 3,900 one-time — <code>phase2-catalogue.yaml</code>. Conditional on 5 preconditions (valid RERA/DLD licence, agency RERA ID, portal-side verification, image-standard compliance, Client's own portal API subscription in place) — <strong>not yet confirmed for this deal, see verbal-promises.md</strong></td></tr>
+<tr><td>Portal sync — Bayut & Dubizzle</td><td>Automated listing sync and enquiry ingestion</td><td>AED 3,400 one-time — <code>phase2-catalogue.yaml</code>. Same preconditions as above</td></tr>
+<tr><td>AI Lead Scorer — Lite</td><td>Rule-based scoring</td><td>AED 495/mo — <code>phase2-catalogue.yaml</code></td></tr>
+<tr><td>Additional users beyond 40</td><td>Per-user, non-discountable</td><td>AED 250/user/month — <code>phase2-catalogue.yaml</code></td></tr>
+</table>
+
+<p>These are available to add at any point; adding one after go-live does not</p>
+<p>require re-opening this proposal, only a short scoping note and updated</p>
+<p><code>pricing-worksheet.yaml</code> for that increment.</p>
+
+<p><strong>Not currently priceable</strong>: WhatsApp Business API integration has no</p>
+<p>basis in this repo's <code>hour-lookup.yaml</code> or <code>phase2-catalogue.yaml</code> — it</p>
+<p>must be scoped and escalated before ever being quoted, not estimated by</p>
+<p>analogy to another line item.</p>
+
+<h2>Assumptions</h2>
+
+<ul>
+<li>Data quality on the 500 migrated records is unconfirmed — not yet</li>
+<p>assessed against source Sheets data.</p>
+<li>RERA/DLD licensing status and any third-party portal (listing feed) API</li>
+<p>access remain the Client's responsibility and are assumed already in</p>
+<p>place if portal sync is added; SGC's scope does not include obtaining</p>
+<p>or renewing these.</p>
+<li>The Client's decision maker(s) are available for discovery and</li>
+<p>requirements confirmation within the proposed timeline — not yet</p>
+<p>confirmed given the incomplete BANT gate on this deal.</p>
+</ol>
+
+<h2>Exclusions</h2>
+
+<p>The following are excluded from the scope and pricing of this proposal</p>
+<p>unless explicitly listed as an included module, work package, or option</p>
+<p>elsewhere in this document:</p>
+
+<ul>
+<li>Third-party software licensing costs not explicitly listed in this</li>
+<p>proposal's commercial terms, including any client-side portal</p>
+<p>subscription fees (e.g. Property Finder API access), which remain the</p>
+<p>Client's own recurring cost.</p>
+<li>Custom development or configuration beyond the work packages listed in</li>
+<p>§06 Solution (Phase 1) and §07 Options & Inclusions.</p>
+<li>Portal sync (Property Finder, Bayut, Dubizzle), AI lead scoring, and</li>
+<p>WhatsApp Business integration — all separately priced or not yet</p>
+<p>priceable, see above.</p>
+<li>Data migration from source systems not identified in the Client's</li>
+<p>brief, or migration volumes materially exceeding the figures stated</p>
+<p>there.</p>
+<li>Ongoing change management, internal communications, or user adoption</li>
+<p>activity beyond the training sessions included in this proposal (see</p>
+<p>§09 Adoption).</p>
+<li>Hardware procurement, on-premise infrastructure, or network setup at</li>
+<p>the Client's premises.</p>
+<li>Regulatory, tax, or legal advisory services. Where this proposal</li>
+<p>references compliance requirements (RERA/DLD or similar), such</p>
+<p>references are operational configuration guidance only and do not</p>
+<p>constitute legal or tax advice.</p>
+<li>Integration with third-party systems not explicitly named in this</li>
+<p>proposal's scope.</p>
+<li>Support and maintenance beyond the tier and term specified in §11</li>
+<p>Support & SLA.</p>
+<li>Travel and accommodation beyond what is explicitly itemized.</li>
+<li>Group-level/multi-company rollout ("Kallat Group Command Center") —</li>
+<p>explicitly forward-looking, not priced in this proposal.</p>
+</ol>
+
+<p>Any work requested outside this list is treated as a change request and</p>
+<p>quoted separately, at the rates current in SGC TECH AI's rate card at the</p>
+<p>time of the request.</p>
+</section><section><h1>Implementation Timeline</h1>
+
+<h2>Phases</h2>
+
+<table>
+<tr><th>Phase</th><th>Weeks</th><th>Key activities</th></tr>
+<tr><td>Discovery</td><td>1–2</td><td>Requirements confirmation, data audit against 500-record migration scope</td></tr>
+<tr><td>Build</td><td>3–4</td><td>Property/tenancy/CRM/accountability configuration, agent role setup</td></tr>
+<tr><td>UAT + Go-Live</td><td>5–6</td><td>UAT with Sadique Abbas, two training sessions, go-live</td></tr>
+<tr><td>Hypercare</td><td>7–10</td><td>Daily support, adoption coaching, day-30 activity threshold check (§09)</td></tr>
+</table>
+
+<p>Go-live target: 4–6 weeks from kickoff. Each stage has a defined exit</p>
+<p>criterion before the next begins.</p>
+
+<h2>Replacing current tooling</h2>
+
+<p>Zapier-based lead distribution and Google Sheets reporting are retired at</p>
+<p>go-live, not run in parallel indefinitely — a defined cutover date is</p>
+<p>agreed during Discovery so agents are not working across two systems for</p>
+<p>an extended period. Manual portal posting to Bayut, Property Finder, and</p>
+<p>Dubizzle continues as-is until portal sync (§07, separately priced) is</p>
+<p>added.</p>
+
+<h2>Third-party dependencies</h2>
+
+<blockquote>Neither party is liable for delay or failure to perform caused by</blockquote>
+<blockquote>circumstances beyond its reasonable control, including third-party</blockquote>
+<blockquote>system outages, changes to third-party portal or regulatory system</blockquote>
+<blockquote>requirements (e.g. RERA/DLD, property portal APIs), or force majeure</blockquote>
+<blockquote>events. Where a third-party dependency identified in this proposal's</blockquote>
+<blockquote>assumptions is delayed or unavailable, affected milestones and any</blockquote>
+<blockquote>associated service-credit guarantees are extended or suspended</blockquote>
+<blockquote>accordingly.</blockquote>
+
+<p><em>(<code>clause-library/force-majeure-and-third-party.md</code> — draft, pending</p>
+<p>counsel review before external issue.)</em></p>
+</section><section><h1>Partnership Terms</h1>
+
+<p><em>Several clauses below are marked "pending counsel review" per the</p>
+<p>clause-library — this is expected and correct at the internal-draft stage</p>
+<p>this document is at. None of these should be treated as final without</p>
+<p>that review, regardless of internal sign-off.</em></p>
+
+<h2>Term and commencement</h2>
+
+<blockquote>The initial term commences on the date of kickoff, and the first</blockquote>
+<blockquote>invoice — including mobilisation, where applicable — is issued on that</blockquote>
+<blockquote>date. Where kickoff and signature fall on different dates, the term</blockquote>
+<blockquote>commences at kickoff, not at signature.</blockquote>
+
+<p>The initial term is <strong>24 months</strong> (preferred option) or <strong>12 months</strong></p>
+<p>(alternative option — see §10). Following the initial term, this</p>
+<p>agreement renews automatically for successive terms of equal length</p>
+<p>unless either party provides written notice of non-renewal at least</p>
+<p>thirty (30) days prior to the end of the then-current term, subject to</p>
+<p>Post-Recovery Continuation below.</p>
+
+<h2>Adoption</h2>
+
+<blockquote>The Client nominates a named data-entry owner responsible for day-to-day</blockquote>
+<blockquote>system use. SGC TECH AI checks agreed activity thresholds at day 30</blockquote>
+<blockquote>following go-live. If those thresholds are not met by day 60, SGC TECH</blockquote>
+<blockquote>AI provides one remediation and retraining session at no additional</blockquote>
+<blockquote>charge.</blockquote>
+
+<p>Given the accountability gap is this deal's primary driver, the day-30</p>
+<p>check specifically includes callback-logging compliance, not just general</p>
+<p>system usage.</p>
+
+<h2>Clawback</h2>
+
+<blockquote>If this subscription is terminated before the end of the committed term</blockquote>
+<blockquote>for any reason other than SGC TECH AI's material breach, the unrecovered</blockquote>
+<blockquote>balance of the implementation value becomes immediately due and payable.</blockquote>
+
+<h2>Post-recovery continuation</h2>
+
+<blockquote>The implementation component is fully recovered by the end of the</blockquote>
+<blockquote>committed term. Thereafter the subscription continues month-to-month at</blockquote>
+<blockquote>the same rate with 30 days' written notice. No reduction in the</blockquote>
+<blockquote>subscription fee is implied.</blockquote>
+
+<h2>Security instruments (elevated risk band)</h2>
+
+<p>Per <code>risk-security-matrix.yaml</code>, this deal's current risk band (elevated,</p>
+<p>placeholder-driven — see <code>02-calc/risk-assessment.yaml</code>) requires two</p>
+<p>instruments beyond mobilisation:</p>
+
+<p><strong>Security deposit</strong> <em>(draft, pending counsel review)</em>:</p>
+
+<blockquote>The Client provides a security deposit equal to 2 month(s) of the</blockquote>
+<blockquote>subscription fee prior to kickoff, held by SGC TECH AI for the duration</blockquote>
+<blockquote>of the term. The deposit is applied against any outstanding balance on</blockquote>
+<blockquote>termination and refunded within 30 days of the term's end if no balance</blockquote>
+<blockquote>remains outstanding.</blockquote>
+
+<p><strong>Post-dated cheques</strong> <em>(draft, pending counsel review)</em>:</p>
+
+<blockquote>The Client provides a set of post-dated cheques covering the deferred</blockquote>
+<blockquote>balance, to be presented only in the event of non-payment under the</blockquote>
+<blockquote>terms of this agreement.</blockquote>
+
+<p>Both instruments are placeholder-driven and should be re-confirmed once</p>
+<p>the two unconfirmed risk-assessment inputs (entity age, VAT registration)</p>
+<p>are verified — the required instrument set may loosen materially.</p>
+
+<h2>Exclusivity</h2>
+
+<blockquote>This pricing is specific to the scope, user count, and term set out in</blockquote>
+<blockquote>this proposal and is not transferable to other scopes or entities.</blockquote>
+
+<h2>Key person and subcontracting <em>(draft, pending counsel review)</em></h2>
+
+<blockquote>SGC TECH AI assigns qualified personnel to this engagement and reserves</blockquote>
+<blockquote>the right to substitute personnel, including subcontracted specialists,</blockquote>
+<blockquote>at its discretion, provided the substitution does not materially reduce</blockquote>
+<blockquote>the quality of delivery under this agreement.</blockquote>
+
+<h2>IP and configuration <em>(draft, pending counsel review — LGPL check required, Community edition in scope)</em></h2>
+
+<blockquote>The Client owns all of its own data unconditionally, at all times. SGC</blockquote>
+<blockquote>TECH AI retains ownership of the specific configuration and</blockquote>
+<blockquote>customization work built for the Client until the implementation value</blockquote>
+<blockquote>is fully recovered per this agreement's term, subject to the licensing</blockquote>
+<blockquote>terms of any underlying open-source components.</blockquote>
+
+<h2>Dispute resolution and jurisdiction <em>(draft, pending counsel review)</em></h2>
+
+<blockquote>This agreement is governed by the laws of the United Arab Emirates and</blockquote>
+<blockquote>the regulations of IFZA (Dubai Silicon Oasis), per SGC TECH AI's</blockquote>
+<blockquote>registered licence authority. Any dispute arising under this agreement</blockquote>
+<blockquote>is subject to the exclusive jurisdiction of the courts of Dubai, UAE.</blockquote>
+
+<h2>Liability cap <em>(draft, pending counsel review — G25, mandatory on every proposal)</em></h2>
+
+<blockquote>SGC TECH AI's total liability under this agreement is capped at the</blockquote>
+<blockquote>total fees paid by the Client in the 12 months preceding the claim.</blockquote>
+<blockquote>Neither party is liable to the other for indirect, incidental, or</blockquote>
+<blockquote>consequential damages, including loss of profit or business</blockquote>
+<blockquote>interruption.</blockquote>
+</section><section><h1>Commercial Terms</h1>
+
+<h2>Pricing summary</h2>
+
+<table>
+<tr><th></th><th>24-month term (preferred)</th><th>12-month term</th></tr>
+<tr><td>Mobilisation (at Kickoff)</td><td>AED 48,686</td><td>AED 48,686</td></tr>
+<tr><td>Recurring subscription</td><td>AED 7,790/mo</td><td>AED 10,650/mo</td></tr>
+<tr><td>Billed quarterly in advance</td><td>AED 23,370</td><td>AED 31,950</td></tr>
+<tr><td>Year 1 total</td><td>AED 142,166</td><td>n/a — full term is 12mo</td></tr>
+<tr><td>Full term commitment</td><td>AED 235,646</td><td>AED 176,486</td></tr>
+</table>
+
+<p><strong>24-month term is recommended</strong> — genuinely lower monthly cost, purely</p>
+<p>from spreading the same recovery principal over a longer period (no</p>
+<p>discount applied to the recovery component itself). Both options carry</p>
+<p>the same mobilisation fee, independent of term choice.</p>
+
+<p><strong>Monthly billing</strong> is available as an alternative to the standard</p>
+<p>quarterly-in-advance cadence, at a <strong>+3% surcharge</strong> (AED 8,020/mo on the</p>
+<p>24-month term) — offered specifically to match cash-flow patterns the</p>
+<p>Client may already be used to (rent, visas, portal fees), at the cost of</p>
+<p>a modest premium for the more frequent billing cycle.</p>
+
+<h2>Payment schedule</h2>
+
+<p>Mobilisation (AED 48,686) due at Kickoff. **Refundable in full if the</p>
+<p>committed Go-Live date is missed** — a deliberate deviation from the</p>
+<p>standard MSA v2026.08 §5.2 position (normally non-refundable except on</p>
+<p>Client termination-for-cause), extended here as a downside-protection</p>
+<p>concession; SGC TECH AI is already incentivized to hit the 4–6 week</p>
+<p>Go-Live target regardless. Security deposit and post-dated cheques per</p>
+<p>§09 due prior to Kickoff. Recurring subscription billed quarterly in</p>
+<p>advance from the Commencement Date (or monthly, at the surcharge above,</p>
+<p>if elected).</p>
+
+<h2>Financing disclosure</h2>
+
+<blockquote>Deferring the build carries an 18% financing component, reflected in</blockquote>
+<blockquote>the recovery portion of your subscription fee (24-month term). Settling</blockquote>
+<blockquote>the build in full at kickoff removes this component entirely.</blockquote>
+
+<p>The 12-month term carries a 6% financing component instead, per</p>
+<p><code>pricing/policy.yaml: financing_uplift</code>. This uplift does not vary by</p>
+<p>negotiation — only by the term length selected.</p>
+
+<h2>Two-week sandbox</h2>
+
+<p>A working sandbox environment is offered for two weeks prior to Kickoff,</p>
+<p>at no charge, so the accountability and CRM workflow can be evaluated</p>
+<p>before any commitment — before paying AED 48,686 mobilisation, the core</p>
+<p>mechanism this proposal is built around can be seen working.</p>
+
+<h2>Knowledge version</h2>
+
+<p>This proposal was priced against knowledge layer version</p>
+<p><strong>pricing v2.1 (2026-08-05)</strong> — see repository <code>CHANGELOG.md</code>. Note: the</p>
+<p>v2.1 <code>rollout_hours_per_user</code> overlay materially increased this deal's</p>
+<p>build value (and therefore its price) relative to earlier drafts built</p>
+<p>the same day — see <code>02-calc/deal-card.md</code> for the full reasoning and the</p>
+<p>resulting tension against this proposal's original disarm-hesitation</p>
+<p>intent.</p>
+</section><section><h1>Support & SLA</h1>
+
+<h2>Support tier</h2>
+
+<table>
+<tr><th>Tier</th><th>Response SLA</th><th>Price</th></tr>
+<tr><td>Priority</td><td>4-hour response</td><td>AED 1,650/mo — <code>support-training.yaml: support.priority_4hr_sla</code></td></tr>
+</table>
+
+<p>Priority tier reflects the elevated risk band on this deal and the</p>
+<p>data-security sensitivity raised unprompted in discovery — a faster</p>
+<p>response SLA is a reasonable pairing with the additional security</p>
+<p>instruments in §09, not an upsell.</p>
+
+<h2>Training included</h2>
+
+<p>2 sessions of 2 hours each, included in the implementation fee (billed</p>
+<p>once). Sessions are scheduled around Sadique Abbas's availability as</p>
+<p>primary point of contact, with the wider agent team joining across the</p>
+<p>sessions given the 40-agent headcount. Additional training available at</p>
+<p><code>support-training.yaml: training.*</code> rates (e.g. Admin Training —</p>
+<p>Advanced, AED 2,750/session).</p>
+
+<h2>What's covered</h2>
+
+<p>Bug fixes, configuration questions, and minor adjustments within the</p>
+<p>delivered scope, with a 4-hour response SLA. New module requests, custom</p>
+<p>development, or scope beyond §06/§07 are change requests, priced</p>
+<p>separately at current rate-card rates.</p>
+
+<h2>Service credit guarantees</h2>
+
+<table>
+<tr><th>Guarantee</th><th>Credit</th><th>Cap</th></tr>
+<tr><td>Go-live timeliness</td><td>5% of one month's subscription per week late</td><td>2 months' subscription</td></tr>
+<tr><td>Adoption</td><td>One free remediation/retraining session</td><td>1 per term (see §09)</td></tr>
+<tr><td>UAT re-performance</td><td>Re-performed at no charge</td><td>Never a refund</td></tr>
+<tr><td>Price lock</td><td>Rate fixed for the term</td><td>—</td></tr>
+<tr><td>Uptime (SGC-managed hosting only)</td><td>1 month's subscription credit below 99.5% uptime</td><td>1 month per year</td></tr>
+<tr><td>Data portability</td><td>Unconditional export</td><td>—</td></tr>
+<tr><td>Exit</td><td>No exit fee; unrecovered clawback balance only</td><td>—</td></tr>
+</table>
+
+<p>**Aggregate credit cap: 10% of annual contract value across all</p>
+<p>guarantees combined, per term.**</p>
+
+<blockquote>These guarantees are void where the triggering delay or shortfall is</blockquote>
+<blockquote>caused by the Client — including late provision of data files, delayed</blockquote>
+<blockquote>portal feed access, or unavailability of the Client's nominated system</blockquote>
+<blockquote>owner — and are void during any period of non-payment.</blockquote>
+</section><section><h1>Why SGC TECH AI</h1>
+
+<table>
+<tr><th>Criterion</th><th>SGC TECH AI</th><th>Generic CRM</th><th>In-house build</th></tr>
+<tr><td>Real estate domain</td><td>Built for UAE real estate — property/tenancy/TRN configuration as a named work package</td><td>Horizontal platform, requires custom configuration</td><td>Build from scratch</td></tr>
+<tr><td>Agent accountability</td><td>Native feature — lead-locking, mandatory callback logging, automated escalation</td><td>Partial, via generic workflow tools</td><td>Must design and build</td></tr>
+<tr><td>Data security</td><td>UAE-resident hosting, security controls scoped as their own work package</td><td>Varies by vendor</td><td>Depends on internal team</td></tr>
+<tr><td>Commercial structure</td><td>Subscription Recovery Model — no separate implementation invoice, transparent cost breakdown</td><td>Typically separate licence + implementation fees</td><td>Ongoing engineering cost, no recovery structure</td></tr>
+<tr><td>Time to deploy</td><td>4–6 weeks to Go-Live</td><td>Varies widely</td><td>6–18 months typical</td></tr>
+<tr><td>Ongoing support</td><td>Priority 4-hour SLA, dedicated team</td><td>Support queue</td><td>Internal burden</td></tr>
+</table>
+
+<p>A generic CRM requires extensive customization to match UAE real estate</p>
+<p>workflows and the accountability mechanism this deal is specifically</p>
+<p>built around. Building in-house carries a multi-month timeline and</p>
+<p>ongoing engineering cost with no equivalent recovery structure. SGC TECH</p>
+<p>AI delivers a domain-specific platform with accountability as a native</p>
+<p>feature, deployed in weeks rather than months.</p>
+</section><section><h1>Next Steps</h1>
+
+<h2>⚠ Internal document — not ready for external send</h2>
+
+<p>This revision is an <strong>internal-only draft</strong>, routed for SDR review and</p>
+<p>signature via Docuseal, <strong>not for client transmission</strong>. Before this could</p>
+<p>ever reopen the conversation with Kallat Properties:</p>
+
+<ol>
+<li>The underlying CRM "Pipeline Gate Review: incomplete" (BANT Q1-Q4)</li>
+<p>must actually be closed — this proposal does not resolve that gate,</p>
+<p>it exists alongside it.</p>
+<li>The two unconfirmed risk-assessment inputs (entity age, VAT</li>
+<p>registration) should be verified — the security instrument set in §09</p>
+<p>may loosen materially once they are.</p>
+<li>The price tension flagged in <code>02-calc/deal-card.md</code> (AED 7,790/mo,</li>
+<p>~47% above where this exercise started, now above the original PRJ</p>
+<p>proposal's effective cost) should be consciously re-confirmed as the</p>
+<p>number to lead with before any client conversation.</p>
+</ol>
+
+<h2>If/when this proceeds externally</h2>
+
+<ol>
+<li>Freeze and issue per the standard runbook — this document does not</li>
+<p>skip that process.</p>
+<li>Route through Zoho Sign or the equivalent, to the actual client</li>
+<p>signatories — never Docuseal, which is reserved for internal-only</p>
+<p>documents per this repo's operating convention.</p>
+</ol>
+
+<h2>Internal sign-off (this revision)</h2>
+
+<p>Internal review required given: elevated risk band (placeholder-driven),</p>
+<p>two content gates that closed only during this drafting pass</p>
+<p>(G4/G7/G16/G25/G26/G28/G37/G38 — now addressed in §09/§10, re-verify via</p>
+<p><code>05-ops/validate.py</code> after this file is saved), and the price-vs-strategy</p>
+<p>tension noted above. Not a standard SDR-level no-escalation deal.</p>
+
+<h2>Signature block (internal — SDR acknowledgement only)</h2>
+
+<table>
+<tr><th></th><th>SDR</th><th>Reviewer</th></tr>
+<tr><td>Name</td><td></td><td></td></tr>
+<tr><td>Title</td><td></td><td></td></tr>
+<tr><td>Date</td><td></td><td></td></tr>
+<tr><td>Signature</td><td></td><td></td></tr>
+</table>
+</section>
+</body></html>
