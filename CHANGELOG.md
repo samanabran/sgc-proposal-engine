@@ -1045,3 +1045,125 @@ the same defect.
 No worksheet written, no package removed, no price changed. Removing
 Kallat's four packages is a commercial decision to be made with the
 client, not an audit action.
+
+### Addendum, same day — Kallat investigation closed out: contemporaneous check_4, engine-default contamination, combined-defect figure
+
+**1) Re-tested against the version that existed at the time.** `05-ops/
+validate.py`'s `structural_exception` branch was added in `50d8759`
+(Aug 5, 16:25 +0400), *after* the padding commit `525940d` (Aug 5,
+15:06 +0400). Extracted `check_4_hour_benchmark` as it read at `525940d`
+— a strict binary gate, no exception branch:
+
+```
+if total_hours < benchmark * 0.5:
+    result.fail(...)
+else:
+    result.ok(...)
+```
+
+Ran both totals through it (N=40, benchmark=368, half=184): padded
+104.734h → **FAIL**. Unpadded 73.734h → **FAIL**. Both fail, at the time,
+under the code the worksheet's own header claims it was written to
+satisfy. **The stated reason is false. No other explanation is on record
+for the AED 19,652 of added scope.** (Consistent with the worksheet's own
+"NOW FAILS check_4, which it passed under Rev1's 192h" note — the
+padding recovered ground lost when the old overlay was deleted, but not
+enough of it, under either version of the gate.)
+
+**2) `base_scope_hours=47` traced — every real call site relies on the
+default; none passes it explicitly:**
+
+| Call site | Passes explicit `base_scope_hours`? | Touches VGE/MRD/Prosper? |
+|---|---|---|
+| `pricing_engine.py:220`, inside `total_hours_for_n()` | No — default | Generic N=1..400 model only, not a specific client |
+| `test_pricing_engine.py:149` (T3, A_hours step-boundary sweep) | No — default | Same — abstract sweep |
+| `test_pricing_engine.py:452-453` (T8, uptick-step explanation) | No — default | Same |
+| `test_pricing_engine.py:731` (T9c, per-client a_hours cross-check) | No — default | **Explicitly restricted to `("KP-kallat-properties", "PRO-prosper-realestate")`, `else None`** — VGE and MRD are excluded from this specific check by name in the code |
+
+VGE and MRD's real `a_hours` (37, both) come directly from their own
+`delivery_hours` sums, validated only against their own stored fields —
+they never call `a_hours_for_n()` at all, so the default cannot touch
+their pricing. Prosper's real pricing does rely on the default, but it
+legitimately matches Prosper's own client-requested 8-package scope
+(47h, confirmed in the prior addendum). Kallat's real pricing relies on
+the same default, and for Kallat the default does *not* match a
+requested scope.
+
+**Kallat's 4 requested packages sum to 20h**, not 47. Re-ran the N=1..400
+sweep with `base_scope_hours` overridden (in-memory only, `pricing_engine.py`
+untouched):
+
+| `base_scope_hours` | first breach (N) |
+|---|---|
+| 47 (current default = Kallat/Prosper padded) | **19** |
+| 20 (Kallat's actual requested scope) | **10** |
+| 37 (VGE/MRD's real, uncontested scope) | **16** |
+
+**The N=19 breach point moves substantially under every alternative,
+defensible baseline.** `CHECK_4_STRUCTURAL_BREACH_N = 19` — hardcoded as
+a named constant in both `validate.py` and `test_pricing_engine.py`, and
+cited repeatedly through this corpus as a structural finding — is not an
+input-independent property of the model. It is a direct function of the
+same 47h baseline this pass has now traced to Kallat's padded worksheet.
+**This is not isolated to one client's quote; it is a contaminated engine
+default that a structural classification and a hardcoded threshold
+constant were both built on. No engine change made — flagged, not fixed,
+per this pass's constraints.**
+
+**3) Combined-defect figure** (4 requested packages **and** N=30/smb,
+computed together — no prior pass did both at once):
+
+| Figure | Current quoted | Combined (unpadded + N≤30) | Delta | % |
+|---|---|---|---|---|
+| `build_value_aed` | 56,072 | 26,360 | 29,712 | **53.0%** |
+| `mobilisation_fee_aed` | 22,429 | 10,544 | 11,885 | — |
+| `subscription_fee_aed_mo` | 5,850 | 4,980 | 870/mo | — |
+| `year1_total_aed` | 92,629 | 70,304 | 22,325 | **24.1%** |
+
+Over half the quoted Implementation Value, and roughly a quarter of the
+quoted Year-1 total, rest on the two input-layer questions still open.
+
+**4) The 5,270 coincidence — genuine arithmetic, not a shared floor/cap.**
+Side by side:
+
+| | Kallat (unpadded, N=40) | Prosper (as stored, N=31) |
+|---|---|---|
+| `platform_portion_aed_mo` | 4,200 | 3,648 |
+| `recovery_monthly_aed` | 1,074 | 1,623 |
+| raw sum | 5,274 | 5,271 |
+| rounded (nearest-10) | **5,270** | **5,270** |
+
+No shared constant, band, or cap is in play — `platform_portion` is
+independently N-derived for each (`cost_to_serve × 1.25`, different `N`,
+different result) and `recovery_monthly` is independently derived from
+each client's own `build_value`/`mobilisation` split. The two raw sums
+(5,274 vs 5,271) differ by only 3 AED before rounding — close enough that
+nearest-10 rounding collapses both into the same bucket. The platform-
+portion gap (552 AED, driven by N=40 vs N=31) and the recovery gap (549
+AED, driven by the two deals' very different build values) happen to
+nearly cancel. Confirmed coincidence, not a masking mechanism.
+
+**5) Authorship.** `525940d` ("Pricing v3.0: replace per-user overlay
+with Class A-D cost model") is the same commit that introduced the
+worksheet header's "expanded 2026-08-05... to clear the hour-benchmark
+gate" text — one commit, not two. Git author identity: `scholarixglobal-ctrl`,
+email `renbranmadelo@gmail.com` — **Renbran Madelo**. Committed
+2026-08-05 15:06:19 +0400. No intent inferred beyond the commit record
+itself.
+
+**6) R11/R12 spec — approved as proposed, two amendments recorded:**
+
+- The **"not in original client request" annotation is a permanent guard
+  for future deals only.** It is explicitly **not** the remedy for
+  Kallat's current state: unrequested scope gets resolved with the
+  client before a quote is generated, never shipped inside a quote with
+  a footnote. The spec's annotation rule catches the *next* instance of
+  this defect at render time; it does not retroactively license this
+  one.
+- The `monthly_billing_deviation` withhold rule (no render until
+  `surcharge_pct`'s policy citation is resolved) is approved as written,
+  no changes.
+
+No worksheet written, no package removed, no price changed, no engine
+change — including the traced `base_scope_hours=47` default, left as
+found per this pass's constraints.
