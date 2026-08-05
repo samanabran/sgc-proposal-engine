@@ -660,3 +660,78 @@ case). `OMC_SKIP_HOOKS=UserPromptSubmit` would disable it, but also
 `skill-injector` (same event, no finer-grained switch found) — not
 recommended while this repo is under active commit, since the actual
 harm is a non-destructive routing suggestion, not a data or file risk.
+
+### Addendum, same day — Brief §3 downgraded from "pin" to "unverified attestation"; corpus-wide rounding finding
+
+**Correction to how the prior addendum framed this**: it treated
+`manifest.yaml:100` and `pricing-worksheet.yaml:143-145` as evidence the
+Brief §3 pin covers the monthly subscription. That's true only in the
+narrow sense that those two documents *say* it does — **both live
+inside the artifacts under audit; they attest to their own authority,
+they don't establish it.** Exhaustively searched every non-worksheet
+location in VGE's client folder, plus a repo-wide check for `docs/`,
+archives, PDFs, and email exports. **No primary source for AED 14,800
+or AED 1,650/mo exists anywhere in this repository.**
+`01-source/README.md:1` — the folder this repo's own convention
+reserves for "unedited client-supplied files" — states directly: *"No
+raw client materials were provided for this opportunity as of the
+current revision."* Rev1/Rev2 (the retracted prior revisions) don't
+contain these figures either, so they aren't inherited through a longer
+paper trail — they appear to originate with Rev3 specifically, from a
+source outside this repo (most likely an original session-level
+instruction, never persisted here) or were entered directly with no
+separate source at all.
+
+**Provenance grade, assigned explicitly, consistent with how hypercare's
+Grade D is recorded**: **Grade D at best, and weaker than typical Grade
+D** — hypercare's `ceil(N/5)×2` at least carries a stated formula and
+rationale (support capacity should scale with headcount); the Brief §3
+figures carry no formula, no rationale, and no locatable source
+document at all, only two internal restatements of each other.
+**Reclassified from "brief-pinned" to "held pending verification."**
+VGE's Subscription Fee **stays at 1,650/mo — not moved** — but the basis
+for holding it is now stated accurately: a number nobody in this repo
+can currently trace to an original document, not a verified client
+commitment. Collapse trigger: production of the actual source (see
+above) or explicit confirmation from whoever built Rev3 originally that
+no such document exists and the figures were a direct entry.
+
+**MRD/Kallat/Prosper rounding, tested corpus-wide, not assumed**: swept
+every subscription/fee figure across all four worksheets for a
+multiple-of-50 pattern. It does not hold. Kallat's 5,850 and Prosper's
+5,270 both use a **stated "rounded to nearest 10"** convention
+(`pricing-worksheet.yaml` inline comments, both clients) — Kallat's
+figure only *looks* like a nearest-50 match by coincidence; Prosper's
+correctly does not. Kallat's own `alt_term_option_12mo` (7,170) and
+`monthly_billing_deviation` (6,030) figures, and Prosper's equivalents
+(6,560, 5,430), are not multiples of 50 either, confirming nearest-10 is
+what's actually being applied for those two clients. MRD's "rounded to
+nearest 50" is different text, inherited verbatim from VGE's original
+comment wording — even though VGE's own calculation never exercised any
+rounding (1,163+487=1,650 exactly, nothing to round). **`policy.yaml`
+and every file under `00-knowledge/pricing/` and
+`00-knowledge/commercial-rules/` were grepped for any rounding-rule
+declaration for subscription or fee figures: none exists.** Three
+mutually inconsistent, uncited conventions currently coexist in this
+corpus (none, nearest-50, nearest-10).
+
+**MRD's raw derived subscription is 1,677** (1,150 + 527); 1,700 carries
+**+23/mo unattributed** (46% of the 50 AED move from the old 1,650 has
+no source beyond an inherited, never-validated comment). **Proposed,
+not applied**: MRD → 1,677. Requires separate explicit approval, same as
+the VGE pin question — no price field is changed by this commit.
+
+**New finding this pass**: Kallat's and Prosper's own "nearest 10"
+rounding is *also* uncited to any policy field — it was introduced by
+this same body of work, not inherited, and was not previously flagged
+as an open item alongside MRD's. Both now carry the same class of
+provenance gap MRD's rounding does.
+
+**R11/R12 readiness: NO-GO.** Two high-severity, client-facing,
+unresolved pricing-provenance questions (the Brief §3 attestation, and
+rounding conventions across all four clients) sit directly upstream of
+every number that would print on a quotation or commercial summary.
+Full go/no-go table, severities, and internal-vs-client-facing
+classification recorded in this session's report; not duplicated here.
+Building R11/R12 before these resolve would bake unverified figures into
+the first client-facing deliverable this repo produces.
