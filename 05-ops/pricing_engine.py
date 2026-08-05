@@ -13,6 +13,7 @@ values or per-inventory constants are duplicated here beyond pure math
 (Wright's law, PERT). See the plan document for the full derivation and
 citations.
 """
+import math
 import os
 import yaml
 
@@ -204,6 +205,27 @@ def marginal_user_fee(n_base, inventory=None):
         "minute_breakdown": minutes,
         "bulk_regime": bulk_regime,
     }
+
+
+def total_hours_for_n(n, inventory=None, hour_lookup=None, policy=None):
+    """Reproduces exactly what a recomputed worksheet's number_2_build
+    fields sum to at population N: a_hours(N) + qa + doc + training +
+    class_b(N) + hypercare(N). Used by validate.py's check_4 structural
+    analysis and by test_pricing_engine.py's sweep -- same engine, no
+    separate hand model (P13/P14)."""
+    inv = inventory or load_inventory()
+    hl = hour_lookup or load_hour_lookup()
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+
+    a_hours = a_hours_for_n(n, inventory=inv, hour_lookup=hl)
+    b_total, _ = b_hours_for_branch(n, "m", inv)
+    dev_hours = a_hours + b_total
+    qa_hours = max(pol["overlays"]["qa_hours_min"], round(pol["overlays"]["qa_pct_of_delivery"] * dev_hours))
+    doc_hours = max(pol["overlays"]["documentation_hours_min"], round(pol["overlays"]["documentation_pct_of_dev"] * dev_hours))
+    training_hours = pol["overlays"]["training_sessions"] * pol["overlays"]["training_hours_per_session"]
+    a_side_hours = a_hours + qa_hours + doc_hours + training_hours
+    hypercare_hours = math.ceil(n / 5) * 2
+    return a_side_hours + b_total + hypercare_hours
 
 
 def class_d_hours_or_cost(edition):

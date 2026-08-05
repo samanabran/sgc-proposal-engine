@@ -17,6 +17,7 @@ Exit 0 = all tests pass. Exit 1 = at least one failure (printed).
 import os
 import sys
 import glob
+import math
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pricing_engine as pe
@@ -388,6 +389,99 @@ def t7_kallat_rule_regression():
               live_rollout == 0)
 
 
+# ---------------------------------------------------------------------
+# T8 — check_4 (validate.py's legacy 9.2h/user benchmark) structural
+# sweep, N=1..400. Confirms or refutes the hypothesis that a flat
+# per-user benchmark is structurally incompatible with a model where
+# hours grow sub-linearly in N (Class A near-flat, Class B sub-linear
+# via Wright's law, hypercare a coarse ceil(N/5) step) -- if so, the
+# benchmark should pass at low N and diverge progressively as N grows,
+# never recovering, with no dependence on the exact constants chosen.
+# If it instead fails uniformly even at small N, that would point to a
+# wrong recompute, not an obsolete benchmark -- this test would need to
+# report that instead. Per the review request: do not adjust the engine
+# to satisfy this check either way; only characterize its shape.
+# ---------------------------------------------------------------------
+CHECK_4_STRUCTURAL_BREACH_N = 19  # first N where total_hours_for_n(N) < 9.2*N*0.5 -- see below
+
+
+def t8_check4_structural_sweep():
+    inv = pe.load_inventory()
+    hl = pe.load_hour_lookup()
+    policy = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+
+    first_breach = None
+    last_pass = None
+    per_user_values = []
+    ever_recovers_after_breach = False
+    breached = False
+
+    for n in range(1, 401):
+        total = pe.total_hours_for_n(n, inv, hl, policy)
+        floor = 9.2 * n * 0.5
+        passes = total >= floor
+        per_user_values.append(total / n)
+        if passes:
+            last_pass = n
+            if breached:
+                ever_recovers_after_breach = True
+        else:
+            breached = True
+            if first_breach is None:
+                first_breach = n
+
+    fails_at_n1 = per_user_values[0] < 9.2 * 0.5  # i.e. total_hours_for_n(1) < 4.6
+
+    # total_hours(N)/N is non-increasing EXCEPT at three known, fully-explained
+    # step boundaries (role_count(N) steps, hypercare's ceil(N/5) pod steps,
+    # and QA/doc-hours rounding-boundary steps) -- same honest characterization
+    # already established for B_hours/N alone (see T3). Asserting flat strict
+    # monotonicity here would be asserting something the real, rounded engine
+    # does not actually guarantee; the correct guarantee is "explained and
+    # small," not "zero."
+    divisor, cap = inv["constants"]["role_count_divisor"], inv["constants"]["role_count_cap"]
+    unexplained_upticks = []
+    max_uptick = 0.0
+    for n in range(2, 401):
+        if per_user_values[n - 1] > per_user_values[n - 2] + 1e-9:
+            jump = per_user_values[n - 1] - per_user_values[n - 2]
+            max_uptick = max(max_uptick, jump)
+            is_role_step = pe.role_count(n, divisor, cap) != pe.role_count(n - 1, divisor, cap)
+            is_hypercare_step = math.ceil(n / 5) != math.ceil((n - 1) / 5)
+            # QA/doc rounding step: recompute both hours blocks and compare
+            dev_n = pe.a_hours_for_n(n, inventory=inv, hour_lookup=hl) + pe.b_hours_for_branch(n, "m", inv)[0]
+            dev_n1 = pe.a_hours_for_n(n - 1, inventory=inv, hour_lookup=hl) + pe.b_hours_for_branch(n - 1, "m", inv)[0]
+            qa_n = max(policy["overlays"]["qa_hours_min"], round(policy["overlays"]["qa_pct_of_delivery"] * dev_n))
+            qa_n1 = max(policy["overlays"]["qa_hours_min"], round(policy["overlays"]["qa_pct_of_delivery"] * dev_n1))
+            doc_n = max(policy["overlays"]["documentation_hours_min"], round(policy["overlays"]["documentation_pct_of_dev"] * dev_n))
+            doc_n1 = max(policy["overlays"]["documentation_hours_min"], round(policy["overlays"]["documentation_pct_of_dev"] * dev_n1))
+            is_rounding_step = (qa_n != qa_n1) or (doc_n != doc_n1)
+            if not (is_role_step or is_hypercare_step or is_rounding_step):
+                unexplained_upticks.append(n)
+
+    check("T8: check_4 does NOT fail uniformly at small N (N=1 passes comfortably)",
+          not fails_at_n1, f"total_hours_for_n(1)={pe.total_hours_for_n(1, inv, hl, policy):.2f}")
+    check(f"T8: check_4 first breaches at exactly N={CHECK_4_STRUCTURAL_BREACH_N} "
+          f"(got N={first_breach})", first_breach == CHECK_4_STRUCTURAL_BREACH_N)
+    check("T8: once breached, check_4 NEVER recovers through N=400 (progressive divergence, not noise)",
+          not ever_recovers_after_breach, f"last_pass={last_pass}, first_breach={first_breach}")
+    check("T8: every total_hours(N)/N uptick traces to role_count/hypercare/QA-doc-rounding "
+          f"step boundaries -- none unexplained (found {len(unexplained_upticks)})",
+          len(unexplained_upticks) == 0, f"unexplained at N={unexplained_upticks}")
+    check(f"T8: largest single uptick is small ({max_uptick:.3f} h/user) against the "
+          f"overall decline from {per_user_values[0]:.1f} to {per_user_values[-1]:.2f} h/user",
+          max_uptick < 1.0)
+
+    if first_breach == CHECK_4_STRUCTURAL_BREACH_N and not ever_recovers_after_breach and not fails_at_n1:
+        print(f"  CONCLUSION: check_4's 9.2h/user floor is structurally obsolete for N>={CHECK_4_STRUCTURAL_BREACH_N} "
+              "-- confirmed by shape (passes small N, diverges progressively, never recovers), "
+              "not by tuning any constant to produce this result. See CHANGELOG.md pricing v3.0 "
+              "addendum and validate.py check_4_hour_benchmark's structural-exception classification.")
+    else:
+        print("  CONCLUSION: sweep does NOT confirm structural obsolescence as hypothesized -- "
+              "the recompute is suspect and must be re-examined before touching check_4's status.")
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -403,6 +497,8 @@ if __name__ == "__main__":
     t6_class_purity()
     print("\n=== T7: Kallat Rev1 rule regression ===")
     t7_kallat_rule_regression()
+    print("\n=== T8: check_4 structural sweep ===")
+    t8_check4_structural_sweep()
 
     print()
     if FAILURES:

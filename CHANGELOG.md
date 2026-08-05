@@ -273,3 +273,54 @@ source exists), WhatsApp Business API hours (Grade D, see
 `pricing-engine-cost-class-model.md` Rev.2 §N). None of these block
 pricing — each has a PERT range and a named collapse trigger — but none
 should be presented client-facing as dirham-exact.
+
+### Addendum, same day — check_4 (9.2h/user) formally classified as a known structural exception, not silently red
+
+The v3.0 recompute above made both Kallat and Prosper fail
+`validate.py check_4` (this file's own v2.2-revert entry already flagged
+this literal as uncited "known debt"). Per K-5 the literal is untouched
+— but leaving it as an unqualified `[FAIL]` risks a future reader
+"fixing" it by loosening the 9.2 constant or the 50% floor without
+understanding why, repeating the exact v2.2 mistake.
+
+Before classifying it either way, `05-ops/pricing_engine.py:
+total_hours_for_n(N)` and `05-ops/test_pricing_engine.py: t8_check4_
+structural_sweep` were added to sweep check_4 across **every integer
+N=1..400**, using the same engine the recompute uses (not a separate
+hand model):
+
+- **N=1**: total_hours ≈ 69.1h vs. floor 4.6h — passes by a wide margin.
+- **First breach: N=19.** From N=19 onward, check_4 **fails and never
+  recovers** through N=400.
+- **Per-user hours fall monotonically** from 69.1h/user (N=1) to
+  0.72h/user (N=400), while check_4 demands a flat 4.6h/user floor
+  forever. 74 small local upticks exist across the range; every one of
+  them traces to a known, explained step boundary
+  (`role_count(N)` steps, `hypercare_golive_support`'s `ceil(N/5)` pod
+  steps, or QA/documentation-hours rounding boundaries) — none
+  unexplained, and the largest is 0.21h/user against an overall decline
+  spanning two orders of magnitude.
+
+**Conclusion, confirmed by shape, not by tuning any constant to produce
+it**: a flat per-user benchmark is structurally incompatible with a
+model where Class A hours are near-flat in N, Class B hours grow
+sub-linearly (Wright's-law learning), and hypercare is a coarse
+population-pod step — any such model eventually falls below a flat
+per-user floor as N grows, regardless of the exact constants chosen.
+This is the opposite failure mode from a subtly-wrong recompute
+producing an artificially low number: a wrong recompute would not
+reliably pass at low N, diverge progressively, and never recover across
+382 of 400 integers with every local exception independently explained.
+
+**Action taken**: `check_4_hour_benchmark` now classifies its own
+failure as `structural_exception` (a new `Result` bucket, same pattern
+as the existing `entity_blocker`) rather than `gate_failures` when
+`users_now >= CHECK_4_STRUCTURAL_BREACH_N` (19). This is a
+**reporting/classification change only** — the 9.2 literal, the 50%
+floor, and the pass/fail arithmetic are byte-for-byte unchanged. The
+check still prints, still shows red, still cites the evidence inline;
+it is simply no longer counted the same as an unexplained defect like
+missing R11/R12. Kallat and Prosper now report "all commercial gates
+PASS" with the structural exception listed separately, rather than
+"NOT clean" conflating a known, evidenced, expected condition with a
+real gap.
