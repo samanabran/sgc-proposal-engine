@@ -735,3 +735,61 @@ Full go/no-go table, severities, and internal-vs-client-facing
 classification recorded in this session's report; not duplicated here.
 Building R11/R12 before these resolve would bake unverified figures into
 the first client-facing deliverable this repo produces.
+
+### Addendum, same day — corrected guard test (T10) + VGE action list
+
+**Guard test T10 added** (`05-ops/test_pricing_engine.py`), corrected
+criterion per review: HARD FAIL on any upward delta (vendor-favoring)
+OR downward delta exceeding one step of the declared convention;
+PASS-WITH-CITATION on downward delta within one step if a rule is
+cited (inline comment OR policy field); HARD FAIL on downward uncited
+within-step (passes only once a rule is declared). Run output:
+
+- Kallat: subscription −4 DOWN uncited → HARD FAIL (passes on item 3
+  policy addition).
+- Prosper: subscription −1 DOWN uncited → HARD FAIL (same).
+- VGE: subscription PASS (exactly derived); mobilisation +16 UP
+  uncited → HARD FAIL (derives from the brief-pinned 14800 × 0.33 =
+  4884; brief asserts 4900 — resolvable only by the item 4 source
+  verification or the pin being declared inline).
+- MRD: subscription +23 UP uncited → **HARD FAIL**, the only
+  uncited *positive* delta in the entire corpus.
+- All other client-facing figures collapse to PASS or PASS-WITH-CITATION
+  (sub-1 artifacts of Python banker's rounding).
+
+**VGE action list (place-keyed; one named owner field left blank
+intentionally for you to fill):**
+
+| Place | What to look for |
+|---|---|
+| SGC CRM record — Lead ID 10119 | Any quote, order form, email thread, activity log |
+| Outbound email export | Any message to @vongeyern.de mentioning 14,800 / 1,650 |
+| Client correspondence shared drive / 01-source/ | Already checked — `01-source/README.md:1` says no raw client materials provided |
+| Original Rev3 build session transcript | Most likely origin point for these figures |
+| Original proposal deck sent pre-Rev3 | Distinguishes "presented to client" from "internal illustrative" |
+| 05-issued/VGE-2026-SUB-01_Rev1, Rev2 | Already checked — neither contains these figures |
+
+**Single question**: "Was AED 14,800 / 1,650-per-month ever presented
+to VGE, or was it an internal illustrative figure?"
+
+**NAMED OWNER: ___________________________** (for you to fill).
+
+**Fallback if no source surfaces**: VGE **cannot issue — source
+unverified**. Hold Subscription Fee at 1,650/mo as "held pending
+verification"; require explicit human confirmation before any
+client-facing artefact quotes these figures. Do not re-issue, do
+not re-render any proposal, do not re-quote in any R11/R12 template.
+
+**Note on circularity**: `manifest.yaml:100` itself lives inside the
+audited artifact set — citing it as the source of the pin's scope is
+the same circularity already logged in commit `6a0ae84`. It is treated
+here as a secondary restatement of what `pricing-worksheet.yaml:143-145`
+asserts, not as independent corroboration.
+
+**`brief_pin_variance` block extended** to cover both halves of the
+VGE pin (was previously scoped only to Implementation Value). Now
+documents both `pinned_implementation_value_aed: 14800` and
+`pinned_subscription_fee_aed_mo: 1650`, with the corresponding
+`mechanical_*_aed` figures and delta ratios, citing the downgrade to
+"held pending verification" per `6a0ae84` and pointing at the action
+list above. The block documents, does not change any price field.

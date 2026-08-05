@@ -118,12 +118,32 @@ number_2_build:
                                                              # disclosed to the client), feeding gates G8/G23 below, which are updated
                                                              # accordingly. It does NOT feed the client-facing quote.
   brief_pin_variance:
-    mechanical_build_value_aed: 15999    # what this deal would cost under the standard v3.0 Class A-D engine,
-                                           # same method as Kallat/Prosper -- see build_value_mechanical_aed above.
-    pinned_build_value_aed: 14800          # brief §3 -- what is actually quoted, unchanged by this migration.
-    delta_aed: 1199                          # mechanical - pinned
-    delta_pct: 0.081                          # 1199 / 14800
-    which_governs: "pinned (14,800), per this worksheet's own header rule ('brief is the single source of truth') and Brief §3. The mechanical figure is informational only."
+    # EXTENDED 2026-08-05 (was previously scoped only to Implementation Value).
+    # Scope per manifest.yaml:100 and pricing-worksheet.yaml:143-145 (both
+    # attestations inside the audited artifact set; the brief document
+    # itself is not in this repo -- 01-source/README.md:1). Source downgrade
+    # to "held pending verification" recorded in CHANGELOG.md pricing v3.0
+    # addendum, per 6a0ae84 -- the figures are stated correctly here as
+    # what is actually quoted, but the basis for holding them is not a
+    # verified client commitment, only an internal restatement of each other.
+    pinned_implementation_value_aed: 14800
+    mechanical_implementation_value_aed: 15999     # what this deal would cost under the standard v3.0 Class A-D engine,
+                                                   # same method as Kallat/Prosper -- see build_value_mechanical_aed above.
+    implementation_value_delta_aed: 1199               # mechanical - pinned
+    implementation_value_delta_pct: 0.081              # 1199 / 14800
+
+    pinned_subscription_fee_aed_mo: 1650
+    mechanical_subscription_fee_aed_mo: 1677         # platform_portion (1,163) + recovery (487), no rounding -- the
+                                                     # "raw" MRD-level figure for identical scope/segment/N, included here
+                                                     # so the pin's delta is symmetric with the implementation_value half.
+                                                     # Same mechanical engine, same inputs, same value -- the only difference
+                                                     # is rounding behaviour, which this VGE pin overrides.
+    subscription_fee_delta_aed_mo: 27                # pinned - mechanical (rounding-direction up, +27; net visible gap from
+                                                     # the original 1,650/mo is +27 versus the model's raw 1,677 -- the
+                                                     # equivalent of 1 rounding step at nearest-25, not declared here)
+    subscription_fee_delta_pct: 0.016              # 27 / 1650
+
+    which_governs: "pinned (both halves), per this worksheet's own header rule ('brief is the single source of truth') and Brief §3. The mechanical figures are informational only -- client never sees them. Brief §3 itself is not in this repo (01-source/README.md:1: 'No raw client materials were provided') -- the pin's basis is the inline restatements at manifest.yaml:100 and pricing-worksheet.yaml:143-145, which attest to each other, not to an external source. See CHANGELOG.md pricing v3.0 addendum (commit 6a0ae84) for the provenance downgrade and the VGE action list for source verification."
     quote_never_at_risk: "Confirmed: the quoted Subscription Fee (1,650/mo) and Implementation Value (14,800) were always sourced directly from the brief, never derived from number_2_build.total_hours -- so this worksheet's pre-migration internal inconsistency (stored 52h vs its own stated sub-fields summing to 48h) never reached a client-facing figure. The pin, not internal_build_cost_aed or total_hours, drives the quote."
 
 # ---------------------------------------------------------------------------

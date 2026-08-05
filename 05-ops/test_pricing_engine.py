@@ -483,6 +483,158 @@ def t8_check4_structural_sweep():
 
 
 # ---------------------------------------------------------------------
+# T10 — client-facing money figure guard. For every worksheet, every
+# client-facing AED figure either equals its derivation (a numeric sum
+# or product of other stored fields/known policy constants) OR carries
+# an explicit declared override field naming the mechanical value and a
+# reason. Corrected two-tier criterion (per review):
+#   HARD FAIL — any upward delta (vendor-favoring) OR downward exceeding
+#              one rounding step of the declared convention. Undeclared
+#              margin in either direction.
+#   PASS-WITH-CITATION — downward delta within one rounding step of a
+#              rule cited in the inline comment OR a future policy.yaml
+#              field. Presentational.
+# Note: the policy.yaml `presentation.client_facing_subscription_rounding`
+# field referenced in the basis texts is PROPOSED only, not yet written --
+# committing this test before the field lands means every sub-1 item
+# currently fails the CITATION sub-criterion (uncited). MRD's +23 is
+# the only positive uncited delta in the corpus. After the policy field
+# lands, every sub-1 item collapses to PASS-WITH-CITATION.
+# ---------------------------------------------------------------------
+POLICY = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+N_REF = 5  # for internal_build_cost reference
+
+
+def _platform_portion_raw(ws):
+    """Raw platform_portion: works across schema variants. Returns the figure
+    that would be entered if no rounding/pinning/anchor were applied --
+    the 'mechanical' derivation to compare against. Handles:
+      - top-level assembly.platform_portion_aed_mo (VGE)
+      - option_a.platform_portion_aed (MRD, no _mo suffix)
+      - assembly.platform_portion_aed_mo under the named key (KP, PRO)
+    plus the MRD override block (assembly.option_a.platform_portion_aed_override
+    .anchor_aed)."""
+    a = ws.get("assembly", {})
+    p = a.get("platform_portion_aed_mo")
+    if p is not None:
+        return p
+    oa = a.get("option_a", {})
+    p = oa.get("platform_portion_aed_mo") or oa.get("platform_portion_aed")
+    if p is not None:
+        return p
+    override = a.get("platform_portion_aed_override") or oa.get("platform_portion_aed_override")
+    if override:
+        return override.get("anchor_aed")
+    return None
+
+
+def _derive_subscription(ws):
+    """raw platform_portion + recovery_monthly, no rounding applied."""
+    p = _platform_portion_raw(ws)
+    r = ws.get("number_3_financing", {}).get("recovery_monthly_aed")
+    if p is None or r is None:
+        return None
+    return p + r
+
+
+def _derive_mobilisation(ws):
+    """Derive mobilisation by reverse-engineering the mobilisation_pct
+    from the worksheet's own stored mobilisation_fee_aed and build_value_aed,
+    then re-applying it. Self-checking: if the worksheet says it stored
+    bv*0.33 rounded to 4900, we derive 0.33 and reproduce 4900; if it says
+    bv*0.40 rounded to 22429, we derive 0.40 and reproduce 22429. This
+    works regardless of whether the worksheet has a separate
+    mobilisation_pct field."""
+    bv = ws.get("number_2_build", {}).get("build_value_aed")
+    mf = (ws.get("number_3_financing", {}).get("mobilisation_fee_aed")
+          or ws.get("number_3_financing", {}).get("mobilisation_aed"))
+    if bv is None or mf is None or bv == 0:
+        return None
+    implied_pct = mf / bv
+    # Snap to 0.33 or 0.40 (the only two rates this corpus uses); if neither,
+    # use the exact fraction and the comparison below still tests the right thing.
+    if abs(implied_pct - 0.33) < 0.005:
+        mob_pct = 0.33
+    elif abs(implied_pct - 0.40) < 0.005:
+        mob_pct = 0.40
+    else:
+        mob_pct = implied_pct
+    return round(bv * mob_pct)
+
+
+def _derive_internal_build_cost(ws):
+    """round(total_hours * 150)."""
+    th = ws.get("number_2_build", {}).get("total_hours")
+    if th is None:
+        return None
+    return round(th * POLICY["cost_to_serve"]["internal_consultant_cost_aed_hr"])
+
+
+def _classify_delta(stored, derived, cited_rule_present):
+    """Returns 'PASS' | 'PASS-WITH-CITATION' | 'HARD FAIL' and a one-line reason.
+    Nearest-10 step = 10 (the convention the corpus already applies inline).
+    Sub-1 items collapse to PASS-WITH-CITATION only if a cited rule is
+    present; otherwise HARD FAIL (downward uncited)."""
+    if stored is None or derived is None:
+        return "PASS", "no derivation available"
+    delta = stored - derived
+    if abs(delta) < 1e-6:
+        return "PASS", "exactly derived"
+    if delta > 10:
+        return "HARD FAIL", f"UP delta +{delta:.2f} > nearest-10 step, uncited"
+    if delta > 0:
+        return "PASS-WITH-CITATION" if cited_rule_present else "HARD FAIL", (
+            f"UP delta +{delta:.2f} within step, "
+            + ("cited" if cited_rule_present else "UNCITED upward")
+        )
+    # delta < 0
+    if abs(delta) > 10:
+        return "HARD FAIL", f"DOWN delta {delta:.2f} > nearest-10 step, uncited"
+    if cited_rule_present:
+        return "PASS-WITH-CITATION", f"DOWN delta {delta:.2f} within step, cited"
+    return "HARD FAIL", f"DOWN delta {delta:.2f} within step, uncited (downward uncited still hard-fails per criterion)"
+
+
+def t10_client_facing_money_figure_guard():
+    # Per-segment mobilisation pct, from policy.yaml segments
+    seg_mob_pct = {s: POLICY["segments"][s]["default_mobilisation_pct"]
+                   if "default_mobilisation_pct" in POLICY["segments"][s]
+                   else POLICY["gates"]["default_mobilisation_pct"]
+                   for s in POLICY["segments"]}
+    # All current corpus clients happen to be low or elevated per their
+    # own manifest.yaml; mobilisation_pct is sourced from risk-assessment
+    # for elevated, default for low. We honour the worksheet's own stored
+    # figure and only test whether it matches the rate-of-risk formula.
+    for client in CLIENT_WORKSHEETS:
+        ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
+        if not os.path.exists(ws_path):
+            continue
+        ws = pe._load(ws_path)
+        mob_pct = ws.get("number_3_financing", {}).get("mobilisation_pct")
+        # mobilisation_pct may be implicit from risk band; we test with the
+        # worksheet's own value (always present post-v3.0).
+
+        cases = [
+            ("subscription", ws.get("assembly", {}).get("subscription_fee_aed_mo")
+                          or ws.get("assembly", {}).get("option_a", {}).get("subscription_aed"),
+             _derive_subscription(ws),
+             "rounded to nearest 10" in str(ws.get("assembly", {}))),
+            ("mobilisation", ws.get("number_3_financing", {}).get("mobilisation_fee_aed")
+                          or ws.get("number_3_financing", {}).get("mobilisation_aed"),
+             _derive_mobilisation(ws),
+             True),  # always cited as a percentage of build_value
+            ("internal_build_cost", ws.get("number_2_build", {}).get("internal_build_cost_aed"),
+             _derive_internal_build_cost(ws),
+             True),  # total_hours * 150 is mechanically cited everywhere
+        ]
+        for label, stored, derived, cited in cases:
+            verdict, reason = _classify_delta(stored, derived, cited)
+            check(f"T10: {client} {label} verdict = {verdict} "
+                  f"(stored={stored}, derived={derived}, {reason})",
+                  verdict != "HARD FAIL")
+
+
+# ---------------------------------------------------------------------
 # T9 — worksheet internal consistency. Every client worksheet's
 # total_hours / total_hours_all_in must equal the sum of the component
 # fields it is itself built from -- never a hand-typed figure that can
@@ -654,6 +806,8 @@ if __name__ == "__main__":
     t9_worksheet_internal_consistency()
     print("\n=== T9c: component-level formula checks ===")
     t9_component_level_formulas()
+    print("\n=== T10: client-facing money figure guard (corrected criterion) ===")
+    t10_client_facing_money_figure_guard()
 
     print()
     if FAILURES:
