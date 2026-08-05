@@ -523,3 +523,64 @@ Four-client gate table, post-migration:
 | Prosper (N=31) | FAIL | Yes | R11, R12 |
 
 `--selftest` confirmed clean throughout this pass.
+
+### Addendum, same day — MRD's 1,650->1,700 resolved: no commitment found, correction confirmed, not an increase
+
+Before treating the prior pass's 1,650→1,700 change as final, checked
+whether it contradicted any actual commitment. `verbal-promises.md` (full
+file), `client-brief.yaml`, and `deal-card.md` (which does not exist for
+MRD) were checked line by line for any price figure. **None found.**
+Every entry in `verbal-promises.md` is scope-only; the only AED figures
+anywhere in MRD's intake record are `budget_rejected_aed: 30,000` (a
+different vendor's prior quote, rejected) and the PropSpace incumbent
+benchmark (1,100–1,760/mo, a market comparator, not an SGC promise).
+Same check run on VGE for comparison — its `client-brief.yaml` also
+contains no "1,650"/"14,800" text; VGE's pin traces instead to an
+internal commercial decision recorded in `manifest.yaml:100`, not to a
+client-extracted commitment either. Neither client's price was ever
+fixed by something the client said.
+
+**Conclusion: 1,700 stands, correctly framed as a correction, not a
+price increase.** The old 1,650 never priced Class B (2.417h) or
+hypercare (2h) at all — it was computed under a model with no per-user
+or support-capacity concept whatsoever. The new figure recognizes work
+that was always being delivered (agent onboarding, role/permission
+setup, go-live support capacity) and was never priced. Derivation
+chain, in full: `build_value_aed` (14,812→15,999, via the compounding
+`segments.startup_boutique.pm_pct`/`contingency_pct` formula plus
+`hypercare.cost_aed`) → `mobilisation_aed` (`× gates.
+default_mobilisation_pct` 0.33) → `deferred_aed` → `recovery_total_aed`
+(`× (1+financing_uplift.months_24)` = flat-on-principal, 24-month term)
+→ `recovery_monthly_aed` (÷24) → raw subscription **1,677** = frozen
+`platform_portion_aed`(1,150) + recomputed `recovery_monthly_aed`(527).
+**1,700 is a rounded presentation of 1,677, rounded to the nearest 50 —
+a convention that exists only as an inline worksheet comment, cited to
+no `policy.yaml` field. Logged as undecided, not invented one to fill
+the gap.**
+
+**VGE/MRD divergence, recorded as a deliberate, known commercial
+variance — not converged, not resolved here**: identical scope, segment,
+and N; identical engine cost (50.417h / AED 7,562 internal); **different
+quotes (1,650 vs 1,700) solely because VGE carries a Brief-pin and MRD
+does not.** Whether these two should converge (either freeze MRD the
+same way, or unfreeze VGE) is a **human decision, flagged, not made
+here** — neither the pin nor the anchor was altered.
+
+**MRD's positioning claim** ("under PropSpace's upper range") was
+written against the `platform_portion_aed` field itself (1,150 vs
+1,760), not the total — literally read, unaffected by the total moving.
+If read as a claim about the total client cost instead, the margin
+under PropSpace's ceiling has compressed from 110 AED (6.3%) to 60 AED
+(3.4%) — not broken, flagged in the worksheet's own
+`platform_portion_aed_override.rationale` field for whoever owns this
+deal's positioning next.
+
+**Stale "1,650" citations for MRD, located, NOT edited (out of scope for
+this pass)**: `02-calc/gate-report.md`, `03-draft/MRD-2026-SUB-01_Rev3/
+10-commercial-terms.md`, `04-review/qa-checklist.md`. These need a
+follow-up pass before this draft goes anywhere near review or issue.
+
+Commit scoped to `CHANGELOG.md` and the MRD worksheet annotation only —
+no quoted price was changed in this pass (1,700 was already committed in
+the prior pass; this addendum only confirms it was correctly derived and
+not blocked by any commitment).
