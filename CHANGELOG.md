@@ -236,8 +236,11 @@ both.
 **New finding surfaced by the recompute, not hidden**: both recomputed
 worksheets now **fail** `validate.py check_4` (the legacy, uncited
 9.2h/user benchmark this same file's v2.2-revert entry already flagged
-as "known debt") — Kallat 100.7h vs a 368h/184h-floor reference, Prosper
-92.1h vs 285.2h/142.6h. This is not a regression to paper over: a
+as "known debt") — Kallat 104.7h vs a 368h/184h-floor reference, Prosper
+101.1h vs 285.2h/142.6h (both figures corrected same day — see the
+addendum below; the originally-reported 100.7h/92.1h were wrong by
+4.0h/9.0h due to a hand-transcription error, not an engine defect).
+This is not a regression to paper over: a
 properly-classed recompute failing an unvalidated legacy floor is
 evidence the floor itself was never well-founded (the deleted overlay
 was originally added in v2.1 specifically to clear this exact check),
@@ -324,3 +327,75 @@ missing R11/R12. Kallat and Prosper now report "all commercial gates
 PASS" with the structural exception listed separately, rather than
 "NOT clean" conflating a known, evidenced, expected condition with a
 real gap.
+
+### Addendum, same day — stored total_hours defect found, diagnosed, fixed, regression-guarded
+
+Reviewing the check_4 addendum above against the actual committed
+worksheets (cross-checking `total_hours_for_n(N)` output against
+`total_hours_all_in`'s own stated component sum) found a real
+arithmetic error, independent of the engine:
+
+| | Kallat (N=40) | Prosper (N=31) |
+|---|---|---|
+| `a_side_hours + class_b.total_hours + hypercare.hours` (correct) | 104.734 | 101.081 |
+| stored `total_hours_all_in`/`total_hours` (wrong) | 100.734 | 92.081 |
+| discrepancy | 4.0h | 9.0h |
+
+**Diagnosis**: `a_side_hours` (78 on both) is independently verified
+correct — it equals its own stated sub-fields
+(`a_hours` + `qa_hours` + `documentation_hours` + `training_hours`)
+exactly on both worksheets. `class_b.total_hours` (10.734 / 9.081) is
+also correctly reflected in the sum. Isolating the arithmetic shows the
+entire shortfall sits specifically in the `hypercare.hours` contribution:
+Kallat's sum used 12 instead of the stated 16 (short 4); Prosper's used
+5 instead of the stated 14 (short 9). The two shortfalls share no common
+ratio (4/16=0.25 vs 9/14=0.64) or fixed offset — ruling out a systematic
+formula bug. **Root cause: `total_hours_all_in` was hand-typed into each
+worksheet's YAML rather than piped from the recompute script's own
+output** — the exact P13 violation ("no hand-computed values") this
+build otherwise held to, committed by omission in this one summary
+field. Two independent transcription slips, not one shared defect.
+
+**`internal_build_cost_aed` (15,710 / 15,162) and every AED figure
+downstream of it — `build_value_aed`, `mobilisation_fee_aed`,
+`subscription_fee_aed_mo` — were NEVER affected.** They were computed
+independently from the correct totals throughout and are byte-identical
+before and after this fix. Verified directly, not assumed.
+
+**The `check_4` N=1..400 sweep and the N=19 breach point are also
+unaffected** — `pricing_engine.total_hours_for_n()` computes from
+`hour-lookup.yaml`/`class-b-task-inventory.yaml`/`policy.yaml` only; it
+has no dependency on any client worksheet file (confirmed: the only
+`_load()` call inside it is for `policy.yaml`). The structural-exception
+classification and its evidence stand unchanged. Only the specific
+h-figures cited alongside it (in the worksheets' own `note_check_4`
+fields and in this file's prior addendum) were wrong, now corrected to
+104.734h and 101.081h.
+
+**Fixed, root cause addressed, not just the values**: `total_hours_all_in`
+and `total_hours` corrected in both worksheets, each with an inline
+note explaining what was wrong and why. `05-ops/test_pricing_engine.py`
+gained **T9** (worksheet internal consistency), which asserts, for
+every corpus client: `total_hours_all_in` equals the sum of its own
+component fields (0.001h tolerance), and `internal_build_cost_aed`
+equals `total_hours × 150`. T9 was run and confirmed **failing on the
+four affected checks** against the pre-fix values before either
+worksheet was touched, then confirmed passing after. This guards the
+invariant going forward — a future hand-typed total that drifts from
+its own components will fail loudly, not silently.
+
+References commit `50d8759` (which introduced the `total_hours_for_n`
+engine function this diagnosis used) and is itself scoped only to the
+two worksheet YAMLs, `test_pricing_engine.py`, and this file.
+
+**Open pricing-policy question, logged not decided**: `hypercare`'s
+`ceil(N/5)×2` formula is unbounded linear in N and drives ~82% of the
+asymptotic 0.487h/user rate as N→∞ (see the prior sanity-check finding
+in this session). It is Grade D (single origin comment, no delivered
+hypercare engagement has ever been timed) and **immaterial at the N≤50
+scale of every current corpus client** — this is not an active pricing
+risk today. Whether it should instead carry a Class-C-style banded
+ceiling at high N (mirroring `hosting.yaml`'s step function, rather than
+scaling forever) is an open design question for whoever owns pricing
+policy, not resolved here, and the engine is not changed pending that
+decision.

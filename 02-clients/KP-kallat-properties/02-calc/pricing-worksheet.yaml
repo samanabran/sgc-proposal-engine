@@ -95,11 +95,19 @@ number_2_build:
     rate_aed: 280                                       # policy.yaml cost_to_serve.support_rate_aed
     cost_aed: 4480
   build_value_aed: 56072                                 # build_value_core_aed + hypercare.cost_aed, rounded
-  total_hours_all_in: 100.734                             # a_side_hours(78) + class_b.total_hours(10.734) + hypercare.hours(16) -- reference only, not a single blended-rate multiplier
-  total_hours: 100.734                                     # = total_hours_all_in, kept for validate.py check_4 (9.2h/user legacy benchmark, untouched per K-5) -- see note below
-  internal_build_cost_aed: 15710                           # total_hours_all_in x policy.yaml internal_consultant_cost_aed_hr(150), rounded
+  total_hours_all_in: 104.734                             # a_side_hours(78) + class_b.total_hours(10.734) + hypercare.hours(16) = 104.734.
+                                                            # CORRECTED 2026-08-05: previously read 100.734, a 4.0h hand-transcription error
+                                                            # (hypercare's contribution was mistyped into this sum as 12 instead of 16) --
+                                                            # made because this field was hand-typed rather than piped from the recompute
+                                                            # script's output, exactly the P13 violation this build otherwise avoided.
+                                                            # internal_build_cost_aed below was NEVER affected -- always computed from the
+                                                            # correct 104.734. See CHANGELOG.md pricing v3.0 addendum and
+                                                            # 05-ops/test_pricing_engine.py T9 (worksheet internal consistency), which now
+                                                            # guards this invariant for every corpus client.
+  total_hours: 104.734                                     # = total_hours_all_in, kept for validate.py check_4 (9.2h/user legacy benchmark, untouched per K-5) -- see note below
+  internal_build_cost_aed: 15710                           # total_hours_all_in x policy.yaml internal_consultant_cost_aed_hr(150), rounded -- unchanged, always correct
   note_check_4: >
-    100.734h vs check_4's 9.2h/user x 40 = 368h reference (floor at 50% = 184h)
+    104.734h vs check_4's 9.2h/user x 40 = 368h reference (floor at 50% = 184h)
     -- this NOW FAILS check_4, which it passed under Rev1's 192h. This is not
     a regression to hide: check_4's 9.2h/user constant is itself uncited
     "known debt" (CHANGELOG.md v2.2-revert entry) that the deleted overlay

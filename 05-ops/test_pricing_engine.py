@@ -482,6 +482,61 @@ def t8_check4_structural_sweep():
               "the recompute is suspect and must be re-examined before touching check_4's status.")
 
 
+# ---------------------------------------------------------------------
+# T9 — worksheet internal consistency. Every client worksheet's
+# total_hours / total_hours_all_in must equal the sum of the component
+# fields it is itself built from -- never a hand-typed figure that can
+# silently drift from its own stated parts. Found live: Kallat's and
+# Prosper's total_hours_all_in were off by 4.0h and 9.0h respectively
+# (both traced to the hypercare.hours contribution being mistyped into
+# the final sum during manual worksheet authoring -- a P13 violation:
+# the recompute script computed the correct figures, but this specific
+# summary field was hand-typed into the YAML rather than piped from the
+# script's own output). internal_build_cost_aed was NOT affected in
+# either case -- it was independently computed from the correct total
+# and matches to the AED. This test guards both invariants for every
+# corpus client going forward, to a 0.001h tolerance.
+# ---------------------------------------------------------------------
+CLIENT_WORKSHEETS = [
+    "KP-kallat-properties",
+    "PRO-prosper-realestate",
+    "VGE-vongeyern-realestate",
+    "MRD-meridianview-realty",
+]
+
+
+def t9_worksheet_internal_consistency():
+    for client in CLIENT_WORKSHEETS:
+        ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
+        if not os.path.exists(ws_path):
+            continue
+        ws = pe._load(ws_path)
+        b = ws.get("number_2_build", {})
+
+        # Invariant 1 (new schema only -- Kallat/Prosper as of this build):
+        # total_hours_all_in == a_side_hours + class_b.total_hours + hypercare.hours
+        if "class_b" in b and "hypercare" in b and "a_side_hours" in b:
+            computed_sum = b["a_side_hours"] + b["class_b"]["total_hours"] + b["hypercare"]["hours"]
+            stored_all_in = b.get("total_hours_all_in")
+            stored_total = b.get("total_hours")
+            check(f"T9: {client} total_hours_all_in == a_side_hours+class_b.total_hours+hypercare.hours "
+                  f"(stored={stored_all_in}, computed={computed_sum})",
+                  stored_all_in is not None and abs(stored_all_in - computed_sum) < 0.001)
+            check(f"T9: {client} total_hours == total_hours_all_in "
+                  f"(stored total_hours={stored_total}, total_hours_all_in={stored_all_in})",
+                  stored_total is not None and stored_all_in is not None and abs(stored_total - stored_all_in) < 0.001)
+
+        # Invariant 2 (universal, any schema): internal_build_cost_aed ==
+        # total_hours * policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+        total_hours = b.get("total_hours")
+        internal_cost = b.get("internal_build_cost_aed")
+        if total_hours is not None and internal_cost is not None:
+            expected_cost = round(total_hours * 150)
+            check(f"T9: {client} internal_build_cost_aed == total_hours*150 "
+                  f"(stored={internal_cost}, expected={expected_cost} from total_hours={total_hours})",
+                  abs(internal_cost - expected_cost) <= 1)
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -499,6 +554,8 @@ if __name__ == "__main__":
     t7_kallat_rule_regression()
     print("\n=== T8: check_4 structural sweep ===")
     t8_check4_structural_sweep()
+    print("\n=== T9: worksheet internal consistency ===")
+    t9_worksheet_internal_consistency()
 
     print()
     if FAILURES:

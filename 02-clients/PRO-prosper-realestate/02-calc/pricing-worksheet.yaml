@@ -85,11 +85,18 @@ number_2_build:
     rate_aed: 280                                       # policy.yaml cost_to_serve.support_rate_aed
     cost_aed: 3920
   build_value_aed: 55006                                 # build_value_core_aed + hypercare.cost_aed, rounded
-  total_hours_all_in: 92.081                              # a_side_hours(78) + class_b.total_hours(9.081) + hypercare.hours(14)
-  total_hours: 92.081                                      # = total_hours_all_in, kept for validate.py check_4 (9.2h/user legacy benchmark, untouched per K-5)
-  internal_build_cost_aed: 15162                           # total_hours_all_in x 150, rounded
+  total_hours_all_in: 101.081                             # a_side_hours(78) + class_b.total_hours(9.081) + hypercare.hours(14) = 101.081.
+                                                            # CORRECTED 2026-08-05: previously read 92.081, a 9.0h hand-transcription error
+                                                            # (hypercare's contribution was mistyped into this sum as 5 instead of 14) --
+                                                            # same root cause as Kallat's 4.0h error (this field hand-typed rather than piped
+                                                            # from the recompute script's output), an independent instance, not a shared
+                                                            # formula bug -- the two shortfalls (4.0 vs 9.0) do not share a common ratio.
+                                                            # internal_build_cost_aed below was NEVER affected. See CHANGELOG.md pricing v3.0
+                                                            # addendum and 05-ops/test_pricing_engine.py T9.
+  total_hours: 101.081                                      # = total_hours_all_in, kept for validate.py check_4 (9.2h/user legacy benchmark, untouched per K-5)
+  internal_build_cost_aed: 15162                           # total_hours_all_in x 150, rounded -- unchanged, always correct
   note_check_4: >
-    92.081h vs check_4's 9.2h/user x 31 = 285.2h reference (floor at 50% =
+    101.081h vs check_4's 9.2h/user x 31 = 285.2h reference (floor at 50% =
     142.6h) -- NOW FAILS check_4, same finding as Kallat. See Kallat's
     note_check_4 for the full framing (P7/K-5) -- not restated here.
 
