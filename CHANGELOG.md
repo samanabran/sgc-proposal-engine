@@ -584,3 +584,79 @@ Commit scoped to `CHANGELOG.md` and the MRD worksheet annotation only —
 no quoted price was changed in this pass (1,700 was already committed in
 the prior pass; this addendum only confirms it was correctly derived and
 not blocked by any commitment).
+
+### Addendum, same day — VGE's Brief §3 scope resolved: covers the monthly too; hold VGE at 1,650
+
+No file in this repo contains an original "Brief §3" document with
+quotable verbatim text — searched exhaustively. The two closest
+surviving artifacts, both consistent and both independent restatements
+rather than a primary source, agree: `manifest.yaml:100` lists "AED
+14,800 Implementation Value... **AED 1,650/mo Subscription**" together
+as "the brief §3 figures"; `pricing-worksheet.yaml:143-145` attributes
+`subscription_fee_aed_mo`, `platform_portion_aed_mo`, and
+`recovery_component_aed_mo` all individually to "brief §3." **The pin
+covers both the Implementation Value and the monthly subscription, not
+Implementation Value alone.** VGE's Subscription Fee stays **1,650/mo**,
+untouched.
+
+**Direct, pre-existing confirmation of a shared origin, found in MRD's
+own `gate-report.md` (written 2026-08-03, before this session's work
+began)**: *"[MRD's build_value_aed, then 14,812] differs by AED 12 from
+the illustrative figure originally quoted for this deal type (14,800)
+due to rounding in the original illustration."* This is not an inference
+— MRD's own historical record already documented that VGE's pinned
+14,800 was "the illustrative figure originally quoted for **this deal
+type**" (i.e., generic to the scope/segment/N combination both clients
+share), not a client-specific negotiated figure. Both 14,800 and MRD's
+14,812 are outputs of the same pre-v3.0 additive calculation, for
+identical inputs, neither ever pricing Class B or hypercare. VGE's
+version was frozen as a rounded external constant at some point; MRD's
+stayed live and got correctly migrated. **The VGE/MRD divergence (1,650
+vs 1,700) is, in origin, one calculation that got frozen in one place
+and not the other — not two independent commercial decisions that
+happened to coincide, and not a genuine, ongoing commercial variance.**
+Recorded as a declared, deliberate variance for now (per the pin) and
+flagged for a brief amendment at re-issue — not converged, not decided
+here.
+
+**MRD's rounding provenance, restated precisely**: raw subscription =
+`platform_portion_aed`(1,150, frozen anchor) + `recovery_monthly_aed`
+(527) = **1,677**. Presented as **1,700** — rounded to the nearest 50,
+a convention that exists only as an inline worksheet comment inherited
+from VGE's own original wording, cited to no `policy.yaml` field.
+**Logged as undecided, not invented.**
+
+**Stale "1,650" citations corrected** (all three were approved for
+correction — neither is an R11/R12 template, since neither artefact
+exists yet in this repo):
+- `02-calc/gate-report.md` (internal working note) — **not just the two
+  "1,650" cells**: this document's entire three-numbers table and gate
+  summary were still on the pre-migration figures (build value, internal
+  cost, mobilisation, recovery, margin, market_test, budget_test all
+  stale). Fixing only the literal "1,650" string would have left the
+  table internally self-contradictory (a corrected subscription sitting
+  next to an uncorrected mobilisation/margin that no longer reconcile
+  with it) — so the full table was resynced, not just the two cited
+  cells. Its historical "arithmetic note" (the 14,800-vs-14,812
+  observation above) is preserved, annotated, not deleted — it is now
+  the primary evidence for this addendum's shared-origin finding.
+- `03-draft/MRD-2026-SUB-01_Rev3/10-commercial-terms.md` (**client-facing
+  draft prose**) — same reasoning: mobilisation, subscription, year-1
+  total, quarterly billing, and the financing-disclosure recovery
+  figure were all interlocking and all stale. Full section resynced.
+  Both worksheets remain unissued (`issued_date: ""`), so no issued
+  document is contradicted by this correction.
+- `04-review/qa-checklist.md` (internal working note) — single isolated
+  figure, no adjacent inconsistency; corrected alone.
+
+**Marker hygiene note**: going forward, the `[MAGIC KEYWORD: ...]`-style
+marker from the `oh-my-claudecode` plugin's `UserPromptSubmit` hook
+chain (`keyword-detector.mjs`/`skill-injector.mjs`, confirmed via
+`hooks/hooks.json`, no network-call pattern found in the detector's own
+code) is referred to descriptively, not quoted literally, since quoting
+it re-triggers the detector past its line-anchored echo guard
+(`keyword-detector-echo-guard.test.js` exists specifically for this
+case). `OMC_SKIP_HOOKS=UserPromptSubmit` would disable it, but also
+`skill-injector` (same event, no finer-grained switch found) — not
+recommended while this repo is under active commit, since the actual
+harm is a non-destructive routing suggestion, not a data or file risk.

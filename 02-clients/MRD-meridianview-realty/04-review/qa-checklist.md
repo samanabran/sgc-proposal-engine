@@ -37,7 +37,7 @@
 ## Cadence and review
 
 - [x] Quarterly-in-advance cadence stated, meets G33 minimum
-- [x] Subscription (AED 1,650/mo) is below the AED 2,500 threshold — review cadence stated as quarterly, not monthly
+- [x] Subscription (AED 1,700/mo) is below the AED 2,500 threshold — review cadence stated as quarterly, not monthly
 
 ## Forbidden phrases — confirmed NONE present
 
