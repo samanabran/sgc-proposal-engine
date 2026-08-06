@@ -18,7 +18,7 @@ for 5 users today, growing to 6 within 12 months. Built on Odoo
 | | |
 |---|---|
 | Recommended option | Option A — 33% mobilisation |
-| Year 1 investment | AED 24,688, **no VAT charged** |
+| Year 1 investment | AED 25,440, **no VAT charged** |
 | Term | 24 months |
 | Timeline to go-live | 6 weeks from mobilisation |
 

@@ -24,6 +24,6 @@ instance of them.
 - **Honest edition disclosure**: this is a Community-edition build,
   stated plainly, with its real capabilities and real exclusions listed
   in §06 — not implied to be something it isn't.
-- **Fair, proportionate pricing**: AED 24,688 for Year 1, well under the
+- **Fair, proportionate pricing**: AED 25,440 for Year 1, well under the
   AED 30,000+ quote you'd already turned down, for a 5-person operation
   sized correctly rather than scaled down from an enterprise quote.

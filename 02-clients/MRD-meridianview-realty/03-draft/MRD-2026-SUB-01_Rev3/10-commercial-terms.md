@@ -5,8 +5,8 @@
 | | Option A — mobilisation paid |
 |---|---|
 | Mobilisation (33% of build value) | AED 5,280 |
-| Recurring subscription | AED 1,700/mo |
-| Year 1 total | AED 25,680 |
+| Recurring subscription | AED 1,680/mo |
+| Year 1 total | AED 25,440 |
 
 All figures **exclusive of VAT — no VAT is charged** (see below). This is
 the only option offered — a zero-mobilisation structure is not available
@@ -14,8 +14,8 @@ at this time.
 
 ## Payment cadence
 
-Subscription fees are billed **quarterly in advance** — AED 5,100 per
-quarter.
+Subscription fees are billed **quarterly in advance** — AED 5,040 per
+quarter (AED 1,680 × 3).
 
 ## VAT
 
