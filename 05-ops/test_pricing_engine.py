@@ -203,9 +203,14 @@ def t3_n_sweep():
         prev_rc = rc
 
     actual_violation_ns = {v[0] for v in bn_violations}
+    # comparison_set=expected_violation_ns (2026-08-06, meta-guard wiring): a
+    # degenerate role_count() (e.g. never stepping across N=1..400) would
+    # make BOTH sides empty and "equal" without this check ever having
+    # verified the alignment it claims to.
     check("T3: B_hours/N violations occur ONLY at role_count(N) step boundaries "
           f"(expected {sorted(expected_violation_ns)}, got {sorted(actual_violation_ns)})",
-          actual_violation_ns == expected_violation_ns)
+          actual_violation_ns == expected_violation_ns,
+          comparison_set=expected_violation_ns)
     check("T3: A_hours(N) steps ONLY at documented thresholds (N=11, N=26)", a_step_ok)
 
     check("T3: Class D is structurally zero for community edition, N=1..400",
@@ -341,9 +346,14 @@ def t6_class_purity():
         # labeling fields instead.
         prose_fields = {"note", "existing_figure_cross_check", "commission_impact"}
         label_text = " ".join(str(v) for k, v in capacity_fee.items() if k not in prose_fields).lower()
+        # comparison_set=label_text (2026-08-06, meta-guard wiring): if every
+        # non-prose field were removed/renamed away, label_text would be ""
+        # and "no forbidden word found" would vacuously pass without ever
+        # scanning anything real.
         check("T6: platform_capacity_fee's LABEL fields (excl. explanatory prose) do not use "
               "'licence'/'seat'/'pass-through'/'non-discountable'",
-              not any(w in label_text for w in ("licence", "license", "seat", "pass-through", "non-discountable")))
+              not any(w in label_text for w in ("licence", "license", "seat", "pass-through", "non-discountable")),
+              comparison_set=label_text)
 
     for client_dir in ("KP-kallat-properties", "PRO-prosper-realestate",
                        "VGE-vongeyern-realestate", "MRD-meridianview-realty"):
@@ -490,10 +500,12 @@ def t8_check4_structural_sweep():
     # does not actually guarantee; the correct guarantee is "explained and
     # small," not "zero."
     divisor, cap = inv["constants"]["role_count_divisor"], inv["constants"]["role_count_cap"]
+    all_upticks = []          # every N where an uptick was found, explained or not
     unexplained_upticks = []
     max_uptick = 0.0
     for n in range(2, 401):
         if per_user_values[n - 1] > per_user_values[n - 2] + 1e-9:
+            all_upticks.append(n)
             jump = per_user_values[n - 1] - per_user_values[n - 2]
             max_uptick = max(max_uptick, jump)
             is_role_step = pe.role_count(n, divisor, cap) != pe.role_count(n - 1, divisor, cap)
@@ -515,9 +527,18 @@ def t8_check4_structural_sweep():
           f"(got N={first_breach})", first_breach == CHECK_4_STRUCTURAL_BREACH_N)
     check("T8: once breached, check_4 NEVER recovers through N=400 (progressive divergence, not noise)",
           not ever_recovers_after_breach, f"last_pass={last_pass}, first_breach={first_breach}")
+    # comparison_set=all_upticks (2026-08-06, meta-guard wiring): the check
+    # is "every uptick found traces to an explained cause" -- the collection
+    # actually being universally quantified over is all_upticks (every N an
+    # uptick occurred at), NOT unexplained_upticks. If total_hours(N)/N were
+    # ever perfectly monotone (zero upticks anywhere in N=1..400), this
+    # would vacuously pass without the explanation logic having examined a
+    # single real uptick.
     check("T8: every total_hours(N)/N uptick traces to role_count/hypercare/QA-doc-rounding "
-          f"step boundaries -- none unexplained (found {len(unexplained_upticks)})",
-          len(unexplained_upticks) == 0, f"unexplained at N={unexplained_upticks}")
+          f"step boundaries -- none unexplained (found {len(unexplained_upticks)} of "
+          f"{len(all_upticks)} upticks examined)",
+          len(unexplained_upticks) == 0, f"unexplained at N={unexplained_upticks}",
+          comparison_set=all_upticks)
     check(f"T8: largest single uptick is small ({max_uptick:.3f} h/user) against the "
           f"overall decline from {per_user_values[0]:.1f} to {per_user_values[-1]:.2f} h/user",
           max_uptick < 1.0)

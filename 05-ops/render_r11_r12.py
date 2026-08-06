@@ -16,17 +16,41 @@ Design:
     strings themselves.
   - Pre-render gate: refuses to render for any client that is not clean
     on BOTH T10 and T12 (reuses test_pricing_engine.py's own check
-    functions -- no separate, divergent gate logic).
+    functions -- no separate, divergent gate logic), AND on spec_binding
+    (FIELD_SOURCE_MAP itself matches a frozen, independently-written
+    expected-source table -- catches a swapped MAP entry, which
+    label_binding_check below cannot, since that only inspects rendered
+    text), AND on legal_identity_gate (06-brand/entity/legal-identity.yaml
+    has no unresolved RESOLVE placeholder -- refuses before printing any
+    VAT clause otherwise, per 2026-08-06 review).
   - Post-render drift check (T11): re-extracts every numeral that looks
     like a rendered AED/hour figure from the output text and confirms it
     traces to a value FIELD_SOURCE_MAP actually emitted. Fails the build,
     writes nothing, on any figure that doesn't trace.
+  - Post-render label-binding check (T11): pins each rendered label to
+    the one FIELD_SOURCE_MAP key it may read from; catches a figure
+    swapped between two labels, which drift_check alone cannot (both
+    values remain in the emitted set either way).
+  - Post-render reconciliation check (T11): asserts
+    mobilisation_fee_aed + subscription_fee_aed_mo*12 == year1_total_aed
+    on the actual emitted values -- not printed as a decorative line
+    unless it's true.
+  - Post-render display-name check (T11): the Scope section shows
+    human-readable package names (PACKAGE_DISPLAY_NAMES, presentation
+    only); this check re-maps the displayed names back to package ids
+    and confirms the resulting set equals values['work_packages']
+    one-to-one -- no package silently dropped, added, or duplicated by
+    the display-name substitution.
+  - Client-facing output never names a YAML field path, a commit hash, a
+    check name (T10/T12/T11), or a policy filename. Anything internal
+    (e.g. the withheld-figure note) goes to a separate, clearly-marked
+    non-client file: 04-draft/_INTERNAL_render-log.md.
   - Output is Markdown only. No PDF generation, no HTML in this pass.
 
 Usage:
     python render_r11_r12.py <client-dir-name>
-Exits non-zero (no files written) if the client is refused or the drift
-check fails.
+Exits non-zero (no files written) if the client is refused or any T11
+post-render check fails.
 """
 import os
 import re
@@ -62,6 +86,14 @@ def pre_render_gate(client):
                         "MRD-meridianview-realty only per the 2026-08-06 approval; no other "
                         "client may render this pass, independent of the check results below.")
     reasons.extend(client_failures)
+
+    spec_violations = spec_binding_check()
+    if spec_violations:
+        reasons.extend(f"FIELD_SOURCE_MAP spec-binding violation: {v}" for v in spec_violations)
+
+    legal_reasons = legal_identity_gate()
+    reasons.extend(legal_reasons)
+
     return (len(reasons) == 0), reasons
 
 
@@ -86,6 +118,7 @@ FIELD_SOURCE_MAP = {
     "financed_remainder_aed": ("pricing-worksheet.yaml: number_3_financing.deferred_aed", lambda ws, brief, pol: ws["number_3_financing"]["deferred_aed"]),
     "uplift_pct":             ("pricing-worksheet.yaml: number_3_financing.uplift_pct", lambda ws, brief, pol: ws["number_3_financing"]["uplift_pct"]),
     "recovery_monthly_aed":   ("pricing-worksheet.yaml: number_3_financing.recovery_monthly_aed", lambda ws, brief, pol: ws["number_3_financing"]["recovery_monthly_aed"]),
+    "platform_portion_aed":   ("pricing-worksheet.yaml: assembly.option_a.platform_portion_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["platform_portion_aed"]),
     "subscription_fee_aed_mo":("pricing-worksheet.yaml: assembly.option_a.subscription_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["subscription_aed"]),
     "payment_cadence":        ("pricing-worksheet.yaml: payment_cadence", lambda ws, brief, pol: ws["payment_cadence"]),
     "year1_total_aed":        ("pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["year1_client_cost_aed"]),
@@ -96,9 +129,159 @@ FIELD_SOURCE_MAP = {
 # monthly_billing_deviation withheld per the approved spec until its
 # surcharge_pct is cited to a policy field -- deliberately NOT in the map
 # above. If a future pass adds it, it must land here with its own
-# extractor, never as a bare literal in a template string.
+# extractor, never as a bare literal in a template string. INTERNAL ONLY:
+# never printed in client-facing R11/R12 output (2026-08-06 review) --
+# written to _INTERNAL_render-log.md by build() instead. See withheld
+# note text below for the field path/policy citation; that citation
+# itself is exactly the kind of internal vocabulary that must not reach
+# a client.
 WITHHELD = ["monthly_billing_deviation.surcharge_pct -- uncited to any policy.yaml field, "
             "per the approved R11/R12 spec's withhold rule (CHANGELOG.md pricing v3.1 addenda)"]
+
+
+# ---------------------------------------------------------------------
+# Spec-binding check (T11, 2026-08-06). label_binding_check further down
+# proves rendered TEXT matches FIELD_SOURCE_MAP -- it says nothing about
+# whether FIELD_SOURCE_MAP itself still says what it's supposed to.
+# Swapping two entries' (source_path, extractor) pairs in the map would
+# pass drift_check (values still trace to something emitted) AND
+# label_binding_check (the swapped map is now internally self-consistent
+# -- the label reads whatever the swapped extractor returns and reports
+# it correctly). Only a comparison against a source EXTERNAL to
+# FIELD_SOURCE_MAP can catch that. EXPECTED_FIELD_SOURCES is that
+# external source: written independently, by hand, not derived from the
+# map it checks.
+#
+# RECONCILED 2026-08-06 (corrected same day -- see below): the flatter
+# paths ("assembly.subscription_fee_aed_mo", "assembly.year1_total_aed")
+# are NOT fictional. They are exactly what Kallat's, Prosper's, and VGE's
+# worksheets actually use -- a flat `assembly:` block
+# (pricing-worksheet.yaml e.g. KP-kallat-properties:129-137). MRD alone
+# wraps the same fields in an `assembly.option_a:` block
+# (pricing-worksheet.yaml:97-119) -- a vestige of a planned `option_b`
+# (zero-mobilisation) alternative that was later withdrawn (see MRD
+# pricing-worksheet.yaml:120, "option_b ... is WITHDRAWN"); Kallat/
+# Prosper/VGE never had an option_b concept, so their schema stayed flat.
+# This divergence is real and, as far as this repo's own files show,
+# undocumented (no CHANGELOG.md entry explains it). Since
+# render_r11_r12.py is scoped to MRD only (ALLOWED_CLIENTS), the paths
+# below are correct for the one client this renderer is authorized to
+# read -- but this table would need a second, client-specific branch
+# before ALLOWED_CLIENTS could ever be widened; flagged, not fixed here,
+# since widening scope is explicitly out of bounds this pass.
+EXPECTED_FIELD_SOURCES = {
+    "client_legal_name":       "client-brief.yaml: client.legal_name",
+    "decision_maker":          "client-brief.yaml: client.decision_maker",
+    "term_months":              "pricing-worksheet.yaml: inputs.term_months",
+    "edition":                  "pricing-worksheet.yaml: inputs.edition",
+    "work_packages":            "pricing-worksheet.yaml: number_2_build.delivery_hours[*].package",
+    "build_value_aed":          "pricing-worksheet.yaml: number_2_build.build_value_aed",
+    "mobilisation_fee_aed":     "pricing-worksheet.yaml: number_3_financing.mobilisation_aed",
+    "financed_remainder_aed":   "pricing-worksheet.yaml: number_3_financing.deferred_aed",
+    "uplift_pct":               "pricing-worksheet.yaml: number_3_financing.uplift_pct",
+    "recovery_monthly_aed":     "pricing-worksheet.yaml: number_3_financing.recovery_monthly_aed",
+    "platform_portion_aed":     "pricing-worksheet.yaml: assembly.option_a.platform_portion_aed",
+    "subscription_fee_aed_mo":  "pricing-worksheet.yaml: assembly.option_a.subscription_aed",
+    "payment_cadence":          "pricing-worksheet.yaml: payment_cadence",
+    "year1_total_aed":          "pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed",
+    "vat_registered":           "policy.yaml: vat.registered",
+    "charge_vat":               "policy.yaml: vat.charge_vat",
+}
+
+
+def spec_binding_check():
+    """Field-by-field comparison of FIELD_SOURCE_MAP's declared source path
+    against EXPECTED_FIELD_SOURCES, independent of any rendered text.
+    Returns a list of violation strings (empty = clean)."""
+    violations = []
+    for field, expected_source in EXPECTED_FIELD_SOURCES.items():
+        entry = FIELD_SOURCE_MAP.get(field)
+        if entry is None:
+            violations.append(f"'{field}' expected in FIELD_SOURCE_MAP (source: {expected_source}) but missing")
+            continue
+        actual_source, _extractor = entry
+        if actual_source != expected_source:
+            violations.append(f"'{field}' expected source '{expected_source}', "
+                               f"FIELD_SOURCE_MAP declares '{actual_source}'")
+    extra = set(FIELD_SOURCE_MAP) - set(EXPECTED_FIELD_SOURCES)
+    for field in sorted(extra):
+        violations.append(f"'{field}' present in FIELD_SOURCE_MAP but not in EXPECTED_FIELD_SOURCES -- "
+                           "add it to the frozen table before it can ship")
+    return violations
+
+
+# ---------------------------------------------------------------------
+# Display-name mapping (2026-08-06). Presentation only -- must never
+# change which packages render, only how their id is shown. Scoped to
+# the package ids that actually appear in MRD's own worksheet (no work
+# on any other client's catalogue this pass). Deliberately a plain dict
+# indexed with [] (not .get()): an unmapped package id must raise, never
+# silently fall back to showing the raw identifier -- that fallback is
+# exactly the defect this mapping exists to close.
+# ---------------------------------------------------------------------
+PACKAGE_DISPLAY_NAMES = {
+    "discovery": "Discovery & Requirements",
+    "property_unit_register": "Property & Unit Register",
+    "tenancies_contracts_reminders": "Tenancies, Contracts & Reminders",
+    "invoicing_trn": "Invoicing (TRN-ready)",
+    "maintenance_invoice_from_request": "Maintenance-to-Invoice Workflow",
+    "crm_leads": "CRM & Lead Management",
+    "reports_dashboard": "Reporting Dashboard",
+}
+
+
+def display_name_check(rendered_scope_names, source_package_ids):
+    """T11: confirms the displayed name list maps back to source_package_ids
+    one-to-one -- no package silently dropped, added, or duplicated by the
+    display-name substitution. Returns a list of violation strings."""
+    reverse = {v: k for k, v in PACKAGE_DISPLAY_NAMES.items()}
+    violations = []
+    if len(reverse) != len(PACKAGE_DISPLAY_NAMES):
+        violations.append("PACKAGE_DISPLAY_NAMES has duplicate display names -- reverse mapping is not 1:1")
+    recovered_ids = []
+    for name in rendered_scope_names:
+        if name not in reverse:
+            violations.append(f"displayed name '{name}' does not map back to any known package id")
+            continue
+        recovered_ids.append(reverse[name])
+    if sorted(recovered_ids) != sorted(source_package_ids):
+        violations.append(f"recovered id set {sorted(recovered_ids)} != source id set {sorted(source_package_ids)}")
+    return violations
+
+
+# ---------------------------------------------------------------------
+# Legal-identity gate (2026-08-06). The VAT sentence asserts a legal fact
+# about the entity (registered/not registered for UAE VAT). If
+# legal-identity.yaml still carries an unresolved RESOLVE placeholder --
+# the file's own documented failure mode, see its header comment -- that
+# fact is unverified and must not be printed. Checked as part of the
+# pre-render gate, not a template-level omission, so a bad legal-identity
+# file refuses the whole build rather than silently shipping a
+# VAT-clause-shaped hole.
+# ---------------------------------------------------------------------
+def _flatten_strings(obj):
+    if isinstance(obj, dict):
+        for v in obj.values():
+            yield from _flatten_strings(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _flatten_strings(v)
+    elif isinstance(obj, str):
+        yield obj
+
+
+def legal_identity_gate():
+    path = os.path.join(REPO_ROOT, "06-brand", "entity", "legal-identity.yaml")
+    if not os.path.exists(path):
+        return [f"06-brand/entity/legal-identity.yaml is missing -- cannot verify any legal fact, "
+                "including the VAT clause; refusing"]
+    identity = pe._load(path)
+    unresolved = [s for s in _flatten_strings(identity) if s.strip().upper() == "RESOLVE"]
+    if unresolved:
+        return [f"06-brand/entity/legal-identity.yaml still has {len(unresolved)} unresolved RESOLVE "
+                "placeholder(s) -- refusing to emit the VAT clause (or the rest of this build) until "
+                "resolved, per the file's own documented failure mode"]
+    return []
 
 
 def load_context(client):
@@ -112,7 +295,41 @@ def load_context(client):
         v = extractor(ws, brief, pol)
         values[label] = v
         emitted.append((label, v, source_path))
+
+    # Derived, disclosed intermediate (2026-08-06): platform_portion_aed +
+    # recovery_monthly_aed, BEFORE the nearest-10 rounding that produces
+    # subscription_fee_aed_mo. Rendered so the subscription's components
+    # visibly sum to something (1,677), with the rounding step shown
+    # explicitly, rather than three numbers that don't sum on the page.
+    # Declared here -- not a bare template literal -- so drift_check can
+    # trace it like every other rendered figure.
+    values["subscription_raw_sum_aed"] = values["platform_portion_aed"] + values["recovery_monthly_aed"]
+    emitted.append(("subscription_raw_sum_aed", values["subscription_raw_sum_aed"],
+                     "derived: platform_portion_aed + recovery_monthly_aed, pre-rounding"))
     return values, emitted
+
+
+def reconciliation_check(values):
+    """T11: mobilisation_fee_aed + subscription_fee_aed_mo*12 must equal
+    year1_total_aed exactly. Returns (ok, computed_year1)."""
+    computed = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * 12
+    return computed == values["year1_total_aed"], computed
+
+
+def _extract_r11_scope_names(rendered_text):
+    m = re.search(r"## Scope\n(.*?)\n##", rendered_text, re.S)
+    if not m:
+        return []
+    return [line[2:] for line in m.group(1).splitlines() if line.startswith("- ")]
+
+
+def _extract_r12_scope_names(rendered_text):
+    # "; " (not ",") -- at least one display name (tenancies_contracts_reminders)
+    # legitimately contains a comma, so comma-splitting would corrupt it.
+    m = re.search(r"\|\s*Scope\s*\|\s*(.*?)\s*\|\s*\n", rendered_text)
+    if not m:
+        return []
+    return [s.strip() for s in m.group(1).split(";")]
 
 
 # ---------------------------------------------------------------------
@@ -155,6 +372,7 @@ LABEL_FIELD_BINDING = {
     "Implementation Value": "build_value_aed",
     "Mobilisation Fee": "mobilisation_fee_aed",
     "Financed Remainder": "financed_remainder_aed",
+    "Platform Portion": "platform_portion_aed",
     "Recovery (monthly, over the term)": "recovery_monthly_aed",
     "Subscription Fee": "subscription_fee_aed_mo",
     "Year-1 Total": "year1_total_aed",
@@ -180,10 +398,11 @@ def label_binding_check(rendered_text, values):
 
 
 def render_r11(client, values):
-    packages = "\n".join(f"- {p}" for p in values["work_packages"])
+    packages = "\n".join(f"- {PACKAGE_DISPLAY_NAMES[p]}" for p in values["work_packages"])
     vat_line = ("SGC TECH AI is not currently registered for UAE VAT, and no VAT is charged on this proposal."
                 if values["charge_vat"] is False else
                 "VAT is charged at the prevailing rate on this proposal.")
+    year1_check_aed = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * 12
     text = f"""# Standalone Quotation
 
 **Client:** {values['client_legal_name']}
@@ -201,22 +420,26 @@ def render_r11(client, values):
 - Mobilisation Fee (due at kickoff): AED {_fmt_aed(values['mobilisation_fee_aed'])}
 - Financed Remainder: AED {_fmt_aed(values['financed_remainder_aed'])}
 - Financing Uplift: {values['uplift_pct']*100:.0f}%
-- Recovery (monthly, over the term): AED {_fmt_aed(values['recovery_monthly_aed'])}
 - Subscription Fee: AED {_fmt_aed(values['subscription_fee_aed_mo'])} / month
+    - Platform Portion: AED {_fmt_aed(values['platform_portion_aed'])}
+    - Recovery (monthly, over the term): AED {_fmt_aed(values['recovery_monthly_aed'])}
+    - Subtotal: AED {_fmt_aed(values['subscription_raw_sum_aed'])} -- rounded to the nearest 10 = AED {_fmt_aed(values['subscription_fee_aed_mo'])}
 - Payment Cadence: {values['payment_cadence']}
 - Year-1 Total: AED {_fmt_aed(values['year1_total_aed'])}
 
+## Reconciliation
+Mobilisation (AED {_fmt_aed(values['mobilisation_fee_aed'])}) + Subscription (AED {_fmt_aed(values['subscription_fee_aed_mo'])}) x 12 months = AED {_fmt_aed(year1_check_aed)} = Year-1 Total
+
 ## VAT
 {vat_line}
-
-## Withheld pending resolution
-{chr(10).join('- ' + w for w in WITHHELD)}
 """
     return text
 
 
 def render_r12(client, values):
-    packages = ", ".join(values["work_packages"])
+    # "; " not ", " -- tenancies_contracts_reminders's display name itself
+    # contains a comma; a comma-joined list would be ambiguous to re-parse.
+    packages = "; ".join(PACKAGE_DISPLAY_NAMES[p] for p in values["work_packages"])
     text = f"""# Commercial Summary — {values['client_legal_name']}
 
 | | |
@@ -263,18 +486,51 @@ def build(client, write=True):
             print(f"  R12: {v}")
         return 1
 
-    print(f"=== BUILD OK: {client} (T10, T12, T11 drift + label-binding all clean) ===")
+    reconciled, computed_year1 = reconciliation_check(values)
+    if not reconciled:
+        print(f"=== BUILD FAILED (T11 reconciliation check): {client} ===")
+        print(f"  mobilisation({values['mobilisation_fee_aed']}) + subscription({values['subscription_fee_aed_mo']})*12 "
+              f"= {computed_year1} != year1_total_aed({values['year1_total_aed']})")
+        return 1
+
+    display_r11 = display_name_check(_extract_r11_scope_names(r11), values["work_packages"])
+    display_r12 = display_name_check(_extract_r12_scope_names(r12), values["work_packages"])
+    if display_r11 or display_r12:
+        print(f"=== BUILD FAILED (T11 display-name check): {client} ===")
+        for v in display_r11:
+            print(f"  R11: {v}")
+        for v in display_r12:
+            print(f"  R12: {v}")
+        return 1
+
+    print(f"=== BUILD OK: {client} (T10, T12, spec-binding, legal-identity, T11 drift + "
+          f"label-binding + reconciliation + display-name all clean) ===")
     if write:
         out_dir = os.path.join(REPO_ROOT, "02-clients", client, "04-draft")
         os.makedirs(out_dir, exist_ok=True)
         r11_path = os.path.join(out_dir, "MRD-2026-SUB-01_Rev3_Quotation.md")
         r12_path = os.path.join(out_dir, "MRD-2026-SUB-01_Rev3_Summary.md")
+        log_path = os.path.join(out_dir, "_INTERNAL_render-log.md")
         with open(r11_path, "w", encoding="utf-8") as fh:
             fh.write(r11)
         with open(r12_path, "w", encoding="utf-8") as fh:
             fh.write(r12)
+        with open(log_path, "w", encoding="utf-8") as fh:
+            fh.write(
+                "# INTERNAL render log -- NOT client-facing. Do not attach, forward, or send.\n"
+                f"# Client: {client}  Build: MRD-2026-SUB-01_Rev3\n\n"
+                "## Withheld figures (omitted from client output, not just relabeled)\n"
+                + "\n".join("- " + w for w in WITHHELD) + "\n\n"
+                "## Gate results\n"
+                f"- spec_binding_check: clean ({len(EXPECTED_FIELD_SOURCES)} fields checked)\n"
+                f"- legal_identity_gate: clean\n"
+                f"- reconciliation_check: {values['mobilisation_fee_aed']} + "
+                f"{values['subscription_fee_aed_mo']}*12 = {computed_year1} == "
+                f"{values['year1_total_aed']}\n"
+            )
         print(f"  wrote {r11_path}")
         print(f"  wrote {r12_path}")
+        print(f"  wrote {log_path} (internal only)")
     return 0
 
 

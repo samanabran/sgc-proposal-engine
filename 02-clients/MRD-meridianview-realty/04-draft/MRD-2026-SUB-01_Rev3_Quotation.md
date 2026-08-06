@@ -4,13 +4,13 @@
 **Attention:** Omar Al Farsi
 
 ## Scope
-- discovery
-- property_unit_register
-- tenancies_contracts_reminders
-- invoicing_trn
-- maintenance_invoice_from_request
-- crm_leads
-- reports_dashboard
+- Discovery & Requirements
+- Property & Unit Register
+- Tenancies, Contracts & Reminders
+- Invoicing (TRN-ready)
+- Maintenance-to-Invoice Workflow
+- CRM & Lead Management
+- Reporting Dashboard
 
 ## Term & Edition
 - Term: 24 months
@@ -21,13 +21,15 @@
 - Mobilisation Fee (due at kickoff): AED 5,280
 - Financed Remainder: AED 10,719
 - Financing Uplift: 18%
-- Recovery (monthly, over the term): AED 527
 - Subscription Fee: AED 1,680 / month
+    - Platform Portion: AED 1,150
+    - Recovery (monthly, over the term): AED 527
+    - Subtotal: AED 1,677 -- rounded to the nearest 10 = AED 1,680
 - Payment Cadence: quarterly_in_advance
 - Year-1 Total: AED 25,440
 
+## Reconciliation
+Mobilisation (AED 5,280) + Subscription (AED 1,680) x 12 months = AED 25,440 = Year-1 Total
+
 ## VAT
 SGC TECH AI is not currently registered for UAE VAT, and no VAT is charged on this proposal.
-
-## Withheld pending resolution
-- monthly_billing_deviation.surcharge_pct -- uncited to any policy.yaml field, per the approved R11/R12 spec's withhold rule (CHANGELOG.md pricing v3.1 addenda)
