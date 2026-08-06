@@ -17,8 +17,9 @@
 | Data portability | Unconditional export | — |
 | Exit | No exit fee; unrecovered clawback balance only | — |
 
-**Aggregate credit cap: 10% of annual contract value (AED 1,680 × 12 ×
-10% = AED 2,016) across all guarantees combined, per term.**
+**Aggregate credit cap: 10% of annual contract value (10% × 12 × the
+Subscription Fee stated in §10) across all guarantees combined, per
+term.**
 
 These guarantees are void where the triggering delay or shortfall is
 caused by the Client — including late provision of data files or

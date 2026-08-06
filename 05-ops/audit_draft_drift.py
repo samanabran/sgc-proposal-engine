@@ -83,7 +83,12 @@ SOURCE_REGISTRY = [
     ("10-commercial-terms.md", 17, "AED 5,040", "quarterly_billing_aed", "worksheet", "derived: subscription_aed * 3"),
     ("10-commercial-terms.md", 33, "18%", None, "worksheet", "pricing-worksheet.yaml: number_3_financing.uplift_pct"),
     ("10-commercial-terms.md", 34, "AED 527", "recovery_monthly_aed", "worksheet", "pricing-worksheet.yaml: number_3_financing.recovery_monthly_aed"),
-    ("11-support-sla.md", 20, "AED 2,016", "annual_credit_cap_aed", "worksheet", "derived: subscription_aed * 12 * 0.10 (10% aggregate cap)"),
+    # 2026-08-06 (final pass): rewritten to reference "the Subscription Fee
+    # stated in Section 10" instead of restating a computed AED figure --
+    # no independent literal to audit here anymore, so it can't re-stale on
+    # the next subscription move. Registry entry retired, not re-added as
+    # a figure; see CHANGELOG.md for the fix and why a hardcoded number
+    # keeps recurring otherwise.
 ]
 
 # Figures found in the 13-section set with NO entry above -- genuinely

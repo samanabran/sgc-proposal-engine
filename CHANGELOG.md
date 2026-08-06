@@ -1609,15 +1609,31 @@ performed on any of the three beyond this count, per instruction.
 (`05-ops/audit_draft_drift.py`, MRD only, not wired into any build/gate).
 Three-tier resolution (worksheet → client-brief.yaml → named
 knowledge-layer file), each figure carrying an explicit named source, not
-a wildcard. Final run after the fixes below:
-**22 matched, 0 stale, 12 unsourced** (of 34 figures classified). The 12
-unsourced are timeline/SLA/notice-period figures (go-live weeks, day-30/
-day-60 adoption checkpoints, 24-hour email SLA, 30-day non-renewal
-notice) that don't trace to the worksheet, the brief, or a named
-knowledge-layer file in this repo — flagged as a distinct category from
-"stale," since no field anywhere claims to back them (nothing to
-correct against; a policy owner would need to either cite them or
-confirm they're standard boilerplate).
+a wildcard.
+
+**CORRECTION 2026-08-06 (later same day): this entry previously showed
+only the post-fix number and did not distinguish it from the
+classification run. Restated properly below.**
+
+- **Classification run** (before any 03-draft edit, the actual output of
+  running the audit against the as-found files): **15 matched, 7 stale,
+  12 unsourced** (of 34 figures). This is the number that matters for
+  "how broken was the document" — it is what the audit was built to
+  produce, and what the stale-figure table below was drawn from.
+- **Verification run** (after the 7 fixes in commit `21c843e`, confirming
+  the fixes actually landed and nothing else regressed): **22 matched, 0
+  stale, 12 unsourced**. This is a confirmation that a specific set of
+  edits worked, not a fresh classification — the 22 is 15+7, the 7
+  fixed figures moving from stale to matched, nothing more.
+
+The 12 unsourced (unchanged across both runs) are timeline/SLA/
+notice-period figures (go-live weeks, day-30/day-60 adoption
+checkpoints, 24-hour email SLA, 30-day non-renewal notice) that don't
+trace to the worksheet, the brief, or a named knowledge-layer file in
+this repo — flagged as a distinct category from "stale," since no field
+anywhere claims to back them (nothing to correct against; a policy
+owner would need to either cite them or confirm they're standard
+boilerplate).
 
 **Stale figures fixed (7) — old → new, source, and why each isn't a typo
 fix:**
@@ -1653,17 +1669,32 @@ dispute-and-jurisdiction clause remains separately blocked (governing
 law/forum, unrelated to the signature block).
 
 **Margin — cts_total provenance and the gate's own definition.**
-`cts_total_aed` (520, MRD) is not hand-entered: it's a sum of cited
-sub-fields — `hosting_allocation_aed` (360 × (5/20), both constants
-cited at `policy.yaml:71-72`), `tooling_aed` (50, cited at
-`policy.yaml:73: tooling_flat_aed` — note the worksheet field name and
-the policy field name don't match, a naming drift worth fixing
-separately), `support_labour_aed` (ceil(5/5)×280, cited at
+`cts_total_aed` (520, MRD) is a sum of sub-fields, three of which
+genuinely cite a policy field in the worksheet's own inline comment:
+`hosting_allocation_aed` (360 × (5/20), constants cited at
+`policy.yaml:71-72`), `support_labour_aed` (ceil(5/5)×280, cited at
 `policy.yaml:74-75`), `account_mgmt_aed` (100, cited at
-`policy.yaml:76: account_mgmt_aed.tier_5`). Every component traces; only
-the `cts_total_aed` summary line itself carries an arithmetic comment
-rather than a citation, the same pattern already flagged and guarded for
-`total_hours_all_in`-style fields elsewhere in this repo.
+`policy.yaml:76: account_mgmt_aed.tier_5`).
+
+**CORRECTION 2026-08-06 (later same day): the fourth component,
+`tooling_aed` (50), was previously reported as "cited at
+policy.yaml:73." That was wrong, and worth naming precisely because it's
+exactly the failure mode this whole audit exists to catch. The worksheet
+line `tooling_aed: 50` (`pricing-worksheet.yaml:22`) carries no comment
+at all — no field reference, no formula. `policy.yaml:73:
+tooling_flat_aed: 50` was found by matching the VALUE (50) and a similar
+NAME ("tooling"), not by following a citation the worksheet actually
+makes. A value match is not a trace: two unrelated fields could
+coincidentally share a value, and the worksheet field name
+(`tooling_aed`) doesn't literally match the policy field name
+(`tooling_flat_aed`) either. This component is properly UNSOURCED, same
+category as the 12 figures in the drift audit above, not "cited."**
+
+Net: 3 of `cts_total_aed`'s 4 components genuinely cite a policy field;
+the 4th (`tooling_aed`) does not, and the `cts_total_aed` summary line
+itself carries only an arithmetic comment, not a citation, the same
+pattern already flagged and guarded for `total_hours_all_in`-style
+fields elsewhere in this repo.
 
 The 0.30 gate itself: `policy.yaml:88: gates.min_gross_margin: 0.30`.
 **The field carries no comment specifying which formula it was written
