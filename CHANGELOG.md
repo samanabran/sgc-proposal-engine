@@ -1470,3 +1470,75 @@ choice.
 No worksheet written. No scope removed. No price changed. No engine or
 policy change. No work performed on Kallat, Prosper, or VGE beyond
 reading and reporting.
+
+## MRD sibling-document reconciliation — 2026-08-06
+
+**G8_margin formula split, computed for MRD under both, logged as an
+undocumented inconsistency (not unified).** MRD's own stored G8 uses the
+build-margin formula: `(build_value_aed − internal_build_cost_aed) /
+build_value_aed` = (15,999 − 7,562) / 15,999 = **52.7%**. Computed
+separately under Kallat/Prosper's lifetime-commitment formula:
+`(full_24mo_commitment_aed − (internal_build_cost_aed + cts_total_aed ×
+24)) / full_24mo_commitment_aed` = (45,600 − (7,562 + 520×24)) / 45,600 =
+(45,600 − 20,042) / 45,600 = **56.0%**. MRD clears the 0.30 gate under
+both formulas — no change to MRD's cleared status. The split across the
+corpus: **MRD and VGE use the build-margin formula; Kallat and Prosper
+use the lifetime-commitment formula.** These measure different things
+(one-time build profitability vs. full-contract-including-cost-to-serve
+profitability) against the same nominal 0.30 floor, and nothing in this
+repo documents why the split exists or that it's intentional. Recorded
+here as a finding, not resolved -- unifying G8's definition is a policy
+decision, out of scope for this pass.
+
+**Client briefs contain session/prompt material, not only client
+facts — conclusion.** Kallat's and Prosper's `client-brief.yaml` and
+Kallat's `verbal-promises.md` contain first-person references to "the
+user" (the SGC operator running this repo/session), quoted operator
+instructions, and SDR persuasion-calibration notes, interleaved with
+genuine client-sourced fields in the same file:
+- `KP-kallat-properties/00-intake/client-brief.yaml:20-26` — edition
+  override_note quotes "user (2026-08-05) explicitly directed
+  Community-first: 'if they decide enterprise that's their choice but
+  right now no demand.'"
+- `KP-kallat-properties/00-intake/client-brief.yaml:44` — `subscription_affinity:
+  sdr_initiated # not client-stated; SDR strategy to disarm price objection`
+- `KP-kallat-properties/00-intake/client-brief.yaml:58-63` — `internal_only_disclaimer`:
+  "Per explicit user instruction (2026-08-05): this proposal is for
+  INTERNAL SDR review/signature only ... a revised internal draft to
+  formalize a disarm-hesitation pricing strategy"
+- `KP-kallat-properties/00-intake/verbal-promises.md:12-14` — three rows
+  sourced to "SDR disarm-hesitation strategy, 2026-08-05"
+- `PRO-prosper-realestate/00-intake/client-brief.yaml:23-29` — same
+  override_note pattern, "explicitly directed Community-first across
+  both deals in this pipeline run"
+- `PRO-prosper-realestate/00-intake/client-brief.yaml:51` — same
+  `sdr_initiated` pattern
+- `PRO-prosper-realestate/00-intake/client-brief.yaml:56-67` —
+  `disarm_hesitation_tweaks_scope_note`: "The 2026-08-05 disarm-hesitation
+  tweak bundle ... was confirmed by the user as calibrated to Kallat
+  specifically ('Kallat — AED 4,900 matches their numbers')" — this
+  quoted figure does not match Kallat's own worksheet (mobilisation_aed
+  22,429), see the reconciliation table above; it matches VGE's
+  mobilisation_aed (4,900) instead
+- `PRO-prosper-realestate/00-intake/client-brief.yaml:78-85` — same
+  `internal_only_disclaimer` pattern
+
+VGE's and MRD's briefs show none of this pattern — VGE's
+`subscription_affinity: explicit` is transcript-sourced and MRD's brief
+has zero hits on this sweep. **Conclusion: Kallat's and Prosper's briefs
+are not pure intake evidence.** They are a mix of client-sourced fields
+and contemporaneous session/operator narration recorded inline, with the
+provenance of each individual field distinguishable only by reading the
+surrounding prose (e.g. `sdr_initiated` is explicitly self-flagged as
+not client-stated, but the override_notes and disclaimers are not
+flagged as anything other than brief content). Any future automated
+consumer of these two briefs that treats every field as client-attested
+without reading the inline caveats will be wrong. This does not retract
+the underlying pricing conclusions already reached about Kallat or
+Prosper — it is a provenance-hygiene finding about the intake documents
+themselves.
+
+No worksheet written. No scope removed. No price changed. No engine or
+policy change. No work performed on Kallat, Prosper, or VGE beyond
+reading and reporting. No edits made to the 13-section MRD proposal
+(03-draft/) -- reconciliation table only, pending approval.

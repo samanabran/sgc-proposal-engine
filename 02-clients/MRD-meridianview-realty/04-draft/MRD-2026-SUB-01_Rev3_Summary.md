@@ -2,6 +2,7 @@
 
 | | |
 |---|---|
+| Reference | MRD-2026-SUB-01 |
 | Edition | community |
 | Term | 24 months |
 | Scope | Discovery & Requirements; Property & Unit Register; Tenancies, Contracts & Reminders; Invoicing (TRN-ready); Maintenance-to-Invoice Workflow; CRM & Lead Management; Reporting Dashboard |
@@ -10,3 +11,4 @@
 | Subscription Fee | AED 1,680 / month |
 | Payment Cadence | quarterly_in_advance |
 | Year-1 Total | AED 25,440 |
+| Total 24-Month Contract Value | AED 45,600 |

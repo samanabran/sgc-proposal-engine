@@ -107,23 +107,24 @@ def _fmt_aed(n):
 
 
 FIELD_SOURCE_MAP = {
-    "client_legal_name":      ("client-brief.yaml: client.legal_name", lambda ws, brief, pol: brief["client"]["legal_name"]),
-    "decision_maker":         ("client-brief.yaml: client.decision_maker", lambda ws, brief, pol: brief["client"]["decision_maker"]),
-    "term_months":            ("pricing-worksheet.yaml: inputs.term_months", lambda ws, brief, pol: ws["inputs"]["term_months"]),
-    "edition":                ("pricing-worksheet.yaml: inputs.edition", lambda ws, brief, pol: ws["inputs"]["edition"]),
+    "client_legal_name":      ("client-brief.yaml: client.legal_name", lambda ws, brief, pol, manifest: brief["client"]["legal_name"]),
+    "decision_maker":         ("client-brief.yaml: client.decision_maker", lambda ws, brief, pol, manifest: brief["client"]["decision_maker"]),
+    "term_months":            ("pricing-worksheet.yaml: inputs.term_months", lambda ws, brief, pol, manifest: ws["inputs"]["term_months"]),
+    "edition":                ("pricing-worksheet.yaml: inputs.edition", lambda ws, brief, pol, manifest: ws["inputs"]["edition"]),
     "work_packages":          ("pricing-worksheet.yaml: number_2_build.delivery_hours[*].package",
-                                lambda ws, brief, pol: [e["package"] for e in ws["number_2_build"]["delivery_hours"]]),
-    "build_value_aed":        ("pricing-worksheet.yaml: number_2_build.build_value_aed", lambda ws, brief, pol: ws["number_2_build"]["build_value_aed"]),
-    "mobilisation_fee_aed":   ("pricing-worksheet.yaml: number_3_financing.mobilisation_aed", lambda ws, brief, pol: ws["number_3_financing"]["mobilisation_aed"]),
-    "financed_remainder_aed": ("pricing-worksheet.yaml: number_3_financing.deferred_aed", lambda ws, brief, pol: ws["number_3_financing"]["deferred_aed"]),
-    "uplift_pct":             ("pricing-worksheet.yaml: number_3_financing.uplift_pct", lambda ws, brief, pol: ws["number_3_financing"]["uplift_pct"]),
-    "recovery_monthly_aed":   ("pricing-worksheet.yaml: number_3_financing.recovery_monthly_aed", lambda ws, brief, pol: ws["number_3_financing"]["recovery_monthly_aed"]),
-    "platform_portion_aed":   ("pricing-worksheet.yaml: assembly.option_a.platform_portion_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["platform_portion_aed"]),
-    "subscription_fee_aed_mo":("pricing-worksheet.yaml: assembly.option_a.subscription_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["subscription_aed"]),
-    "payment_cadence":        ("pricing-worksheet.yaml: payment_cadence", lambda ws, brief, pol: ws["payment_cadence"]),
-    "year1_total_aed":        ("pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed", lambda ws, brief, pol: ws["assembly"]["option_a"]["year1_client_cost_aed"]),
-    "vat_registered":         ("policy.yaml: vat.registered", lambda ws, brief, pol: pol["vat"]["registered"]),
-    "charge_vat":             ("policy.yaml: vat.charge_vat", lambda ws, brief, pol: pol["vat"]["charge_vat"]),
+                                lambda ws, brief, pol, manifest: [e["package"] for e in ws["number_2_build"]["delivery_hours"]]),
+    "build_value_aed":        ("pricing-worksheet.yaml: number_2_build.build_value_aed", lambda ws, brief, pol, manifest: ws["number_2_build"]["build_value_aed"]),
+    "mobilisation_fee_aed":   ("pricing-worksheet.yaml: number_3_financing.mobilisation_aed", lambda ws, brief, pol, manifest: ws["number_3_financing"]["mobilisation_aed"]),
+    "financed_remainder_aed": ("pricing-worksheet.yaml: number_3_financing.deferred_aed", lambda ws, brief, pol, manifest: ws["number_3_financing"]["deferred_aed"]),
+    "uplift_pct":             ("pricing-worksheet.yaml: number_3_financing.uplift_pct", lambda ws, brief, pol, manifest: ws["number_3_financing"]["uplift_pct"]),
+    "recovery_monthly_aed":   ("pricing-worksheet.yaml: number_3_financing.recovery_monthly_aed", lambda ws, brief, pol, manifest: ws["number_3_financing"]["recovery_monthly_aed"]),
+    "platform_portion_aed":   ("pricing-worksheet.yaml: assembly.option_a.platform_portion_aed", lambda ws, brief, pol, manifest: ws["assembly"]["option_a"]["platform_portion_aed"]),
+    "subscription_fee_aed_mo":("pricing-worksheet.yaml: assembly.option_a.subscription_aed", lambda ws, brief, pol, manifest: ws["assembly"]["option_a"]["subscription_aed"]),
+    "payment_cadence":        ("pricing-worksheet.yaml: payment_cadence", lambda ws, brief, pol, manifest: ws["payment_cadence"]),
+    "year1_total_aed":        ("pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed", lambda ws, brief, pol, manifest: ws["assembly"]["option_a"]["year1_client_cost_aed"]),
+    "vat_registered":         ("policy.yaml: vat.registered", lambda ws, brief, pol, manifest: pol["vat"]["registered"]),
+    "charge_vat":             ("policy.yaml: vat.charge_vat", lambda ws, brief, pol, manifest: pol["vat"]["charge_vat"]),
+    "reference_number":       ("manifest.yaml: opportunity_id", lambda ws, brief, pol, manifest: manifest["opportunity_id"]),
 }
 
 # monthly_billing_deviation withheld per the approved spec until its
@@ -186,6 +187,7 @@ EXPECTED_FIELD_SOURCES = {
     "year1_total_aed":          "pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed",
     "vat_registered":           "policy.yaml: vat.registered",
     "charge_vat":               "policy.yaml: vat.charge_vat",
+    "reference_number":         "manifest.yaml: opportunity_id",
 }
 
 
@@ -289,10 +291,11 @@ def load_context(client):
     ws = pe._load(os.path.join(client_dir, "02-calc", "pricing-worksheet.yaml"))
     brief = pe._load(os.path.join(client_dir, "00-intake", "client-brief.yaml"))
     pol = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    manifest = pe._load(os.path.join(client_dir, "manifest.yaml"))
     values = {}
     emitted = []  # (label, value, source_path) -- feeds the drift check
     for label, (source_path, extractor) in FIELD_SOURCE_MAP.items():
-        v = extractor(ws, brief, pol)
+        v = extractor(ws, brief, pol, manifest)
         values[label] = v
         emitted.append((label, v, source_path))
 
@@ -306,14 +309,33 @@ def load_context(client):
     values["subscription_raw_sum_aed"] = values["platform_portion_aed"] + values["recovery_monthly_aed"]
     emitted.append(("subscription_raw_sum_aed", values["subscription_raw_sum_aed"],
                      "derived: platform_portion_aed + recovery_monthly_aed, pre-rounding"))
+
+    # Derived, disclosed (2026-08-06): full-term (24-month) contract value --
+    # mobilisation + subscription*term_months. Year-1 alone understates what
+    # a 24-month term actually commits the client to. Declared here, not a
+    # template literal, same discipline as subscription_raw_sum_aed above.
+    values["full_term_commitment_aed"] = (values["mobilisation_fee_aed"]
+                                           + values["subscription_fee_aed_mo"] * values["term_months"])
+    emitted.append(("full_term_commitment_aed", values["full_term_commitment_aed"],
+                     "derived: mobilisation_fee_aed + subscription_fee_aed_mo * term_months"))
     return values, emitted
 
 
 def reconciliation_check(values):
     """T11: mobilisation_fee_aed + subscription_fee_aed_mo*12 must equal
-    year1_total_aed exactly. Returns (ok, computed_year1)."""
-    computed = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * 12
-    return computed == values["year1_total_aed"], computed
+    year1_total_aed, AND mobilisation_fee_aed + subscription_fee_aed_mo*
+    term_months must equal full_term_commitment_aed (the second is a
+    self-consistency check, not a cross-check against a separate stored
+    field -- MRD's worksheet schema has no full-term figure of its own to
+    compare against, unlike Kallat/Prosper/VGE's flat assembly block which
+    does; see the EXPECTED_FIELD_SOURCES note on the schema divergence).
+    Returns (ok, computed_year1, computed_full_term)."""
+    computed_year1 = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * 12
+    computed_full_term = (values["mobilisation_fee_aed"]
+                           + values["subscription_fee_aed_mo"] * values["term_months"])
+    ok = (computed_year1 == values["year1_total_aed"]
+          and computed_full_term == values["full_term_commitment_aed"])
+    return ok, computed_year1, computed_full_term
 
 
 def _extract_r11_scope_names(rendered_text):
@@ -376,6 +398,7 @@ LABEL_FIELD_BINDING = {
     "Recovery (monthly, over the term)": "recovery_monthly_aed",
     "Subscription Fee": "subscription_fee_aed_mo",
     "Year-1 Total": "year1_total_aed",
+    "Total 24-Month Contract Value": "full_term_commitment_aed",
 }
 
 
@@ -403,8 +426,10 @@ def render_r11(client, values):
                 if values["charge_vat"] is False else
                 "VAT is charged at the prevailing rate on this proposal.")
     year1_check_aed = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * 12
+    full_term_check_aed = values["mobilisation_fee_aed"] + values["subscription_fee_aed_mo"] * values["term_months"]
     text = f"""# Standalone Quotation
 
+**Reference:** {values['reference_number']}
 **Client:** {values['client_legal_name']}
 **Attention:** {values['decision_maker']}
 
@@ -426,9 +451,13 @@ def render_r11(client, values):
     - Subtotal: AED {_fmt_aed(values['subscription_raw_sum_aed'])} -- rounded to the nearest 10 = AED {_fmt_aed(values['subscription_fee_aed_mo'])}
 - Payment Cadence: {values['payment_cadence']}
 - Year-1 Total: AED {_fmt_aed(values['year1_total_aed'])}
+- Total {values['term_months']}-Month Contract Value: AED {_fmt_aed(values['full_term_commitment_aed'])}
 
 ## Reconciliation
-Mobilisation (AED {_fmt_aed(values['mobilisation_fee_aed'])}) + Subscription (AED {_fmt_aed(values['subscription_fee_aed_mo'])}) x 12 months = AED {_fmt_aed(year1_check_aed)} = Year-1 Total
+- Mobilisation (AED {_fmt_aed(values['mobilisation_fee_aed'])}) + Subscription (AED {_fmt_aed(values['subscription_fee_aed_mo'])}) x 12 months = AED {_fmt_aed(year1_check_aed)} = Year-1 Total
+- Mobilisation (AED {_fmt_aed(values['mobilisation_fee_aed'])}) + Subscription (AED {_fmt_aed(values['subscription_fee_aed_mo'])}) x {values['term_months']} months = AED {_fmt_aed(full_term_check_aed)} = Total {values['term_months']}-Month Contract Value
+
+The AED {_fmt_aed(values['recovery_monthly_aed'])}/month recovery portion of the Subscription Fee runs for the full {values['term_months']}-month term and is fully collected by the end of month {values['term_months']} — it does not extend beyond the term. The Subscription Fee itself does not reduce at that point: it continues at the same AED {_fmt_aed(values['subscription_fee_aed_mo'])}/month rate, month-to-month, after the initial term.
 
 ## VAT
 {vat_line}
@@ -444,6 +473,7 @@ def render_r12(client, values):
 
 | | |
 |---|---|
+| Reference | {values['reference_number']} |
 | Edition | {values['edition']} |
 | Term | {values['term_months']} months |
 | Scope | {packages} |
@@ -452,6 +482,7 @@ def render_r12(client, values):
 | Subscription Fee | AED {_fmt_aed(values['subscription_fee_aed_mo'])} / month |
 | Payment Cadence | {values['payment_cadence']} |
 | Year-1 Total | AED {_fmt_aed(values['year1_total_aed'])} |
+| Total 24-Month Contract Value | AED {_fmt_aed(values['full_term_commitment_aed'])} |
 """
     return text
 
@@ -486,11 +517,13 @@ def build(client, write=True):
             print(f"  R12: {v}")
         return 1
 
-    reconciled, computed_year1 = reconciliation_check(values)
+    reconciled, computed_year1, computed_full_term = reconciliation_check(values)
     if not reconciled:
         print(f"=== BUILD FAILED (T11 reconciliation check): {client} ===")
         print(f"  mobilisation({values['mobilisation_fee_aed']}) + subscription({values['subscription_fee_aed_mo']})*12 "
-              f"= {computed_year1} != year1_total_aed({values['year1_total_aed']})")
+              f"= {computed_year1} (year1_total_aed={values['year1_total_aed']})")
+        print(f"  mobilisation({values['mobilisation_fee_aed']}) + subscription({values['subscription_fee_aed_mo']})*"
+              f"{values['term_months']} = {computed_full_term} (full_term_commitment_aed={values['full_term_commitment_aed']})")
         return 1
 
     display_r11 = display_name_check(_extract_r11_scope_names(r11), values["work_packages"])
@@ -510,7 +543,16 @@ def build(client, write=True):
         os.makedirs(out_dir, exist_ok=True)
         r11_path = os.path.join(out_dir, "MRD-2026-SUB-01_Rev3_Quotation.md")
         r12_path = os.path.join(out_dir, "MRD-2026-SUB-01_Rev3_Summary.md")
-        log_path = os.path.join(out_dir, "_INTERNAL_render-log.md")
+        # 2026-08-06: moved OUT of 04-draft/ (the client deliverable folder) into
+        # 02-calc/, which is already the established internal-only working area
+        # (worksheet, gate-report, risk-assessment all live there and are never
+        # sent). A "do not forward" header next to the deliverables is still a
+        # forwarding risk if someone drags the whole draft folder into an email --
+        # this closes that regardless of what the header says. No packaging/send
+        # script exists yet in this repo to "confirm excludes underscore files"
+        # against, so moving the file is the only concrete guarantee available now.
+        calc_dir = os.path.join(REPO_ROOT, "02-clients", client, "02-calc")
+        log_path = os.path.join(calc_dir, "_internal-render-log.md")
         with open(r11_path, "w", encoding="utf-8") as fh:
             fh.write(r11)
         with open(r12_path, "w", encoding="utf-8") as fh:
@@ -524,14 +566,58 @@ def build(client, write=True):
                 "## Gate results\n"
                 f"- spec_binding_check: clean ({len(EXPECTED_FIELD_SOURCES)} fields checked)\n"
                 f"- legal_identity_gate: clean\n"
-                f"- reconciliation_check: {values['mobilisation_fee_aed']} + "
+                f"- reconciliation_check (year-1): {values['mobilisation_fee_aed']} + "
                 f"{values['subscription_fee_aed_mo']}*12 = {computed_year1} == "
                 f"{values['year1_total_aed']}\n"
+                f"- reconciliation_check (full term): {values['mobilisation_fee_aed']} + "
+                f"{values['subscription_fee_aed_mo']}*{values['term_months']} = {computed_full_term} == "
+                f"{values['full_term_commitment_aed']}\n"
             )
         print(f"  wrote {r11_path}")
         print(f"  wrote {r12_path}")
-        print(f"  wrote {log_path} (internal only)")
+        print(f"  wrote {log_path} (internal only, outside the deliverable folder)")
     return 0
+
+
+# ---------------------------------------------------------------------
+# Issue-promotion gate (2026-08-06, PROPOSED -- not wired into build()
+# above and not invoked by anything yet; no 04-draft -> 05-issued
+# promotion script exists in this repo for it to gate. Defined here, in
+# the one file that currently understands both the worksheet and the
+# manifest, so whichever script eventually does the copy/move can import
+# and call it first. Read-only: never writes, never moves a file itself.
+# ---------------------------------------------------------------------
+def issue_promotion_gate(client):
+    """Refuses promotion of `client`'s current revision from 04-draft to
+    05-issued while manifest.yaml's issued_date is empty OR the current
+    revision's 13-next-steps.md signature block still contains a RESOLVE
+    placeholder. Returns a list of blocking reasons (empty = clear to
+    issue)."""
+    client_dir = os.path.join(REPO_ROOT, "02-clients", client)
+    manifest = pe._load(os.path.join(client_dir, "manifest.yaml"))
+    current_revision = manifest.get("current_revision")
+    reasons = []
+
+    revisions = {r["ref"]: r for r in manifest.get("revisions", [])}
+    rev = revisions.get(current_revision)
+    if rev is None:
+        return [f"manifest.yaml current_revision '{current_revision}' not found in revisions[] -- cannot verify issued_date"]
+    if not (rev.get("issued_date") or "").strip():
+        reasons.append(f"manifest.yaml revisions[{current_revision}].issued_date is empty -- "
+                        "not yet issued, refusing promotion to 05-issued")
+
+    next_steps_path = os.path.join(client_dir, "03-draft", current_revision, "13-next-steps.md")
+    if not os.path.exists(next_steps_path):
+        reasons.append(f"{next_steps_path} not found -- cannot verify the signature block")
+    else:
+        with open(next_steps_path, "r", encoding="utf-8") as fh:
+            next_steps_text = fh.read()
+        m = re.search(r"## Signature block(.*)", next_steps_text, re.S)
+        signature_section = m.group(1) if m else next_steps_text
+        if "RESOLVE" in signature_section:
+            reasons.append(f"{next_steps_path}'s signature block still contains a RESOLVE placeholder -- "
+                            "refusing promotion to 05-issued")
+    return reasons
 
 
 if __name__ == "__main__":

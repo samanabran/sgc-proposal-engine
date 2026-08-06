@@ -5,6 +5,7 @@
 - monthly_billing_deviation.surcharge_pct -- uncited to any policy.yaml field, per the approved R11/R12 spec's withhold rule (CHANGELOG.md pricing v3.1 addenda)
 
 ## Gate results
-- spec_binding_check: clean (16 fields checked)
+- spec_binding_check: clean (17 fields checked)
 - legal_identity_gate: clean
-- reconciliation_check: 5280 + 1680*12 = 25440 == 25440
+- reconciliation_check (year-1): 5280 + 1680*12 = 25440 == 25440
+- reconciliation_check (full term): 5280 + 1680*24 = 45600 == 45600
