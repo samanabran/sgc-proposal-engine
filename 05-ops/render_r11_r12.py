@@ -620,6 +620,39 @@ def issue_promotion_gate(client):
     return reasons
 
 
+# ---------------------------------------------------------------------
+# 04-draft hygiene check (2026-08-06). The underscore-prefix convention
+# for internal-only files (_INTERNAL_render-log.md) had no enforcement
+# behind it -- the file just moved to 02-calc/ (see build() above), but
+# nothing stopped a future internal artifact from landing in 04-draft/
+# again. This asserts the folder contains exactly the expected
+# deliverable filenames and nothing else.
+# ---------------------------------------------------------------------
+EXPECTED_04_DRAFT_FILES = {
+    "MRD-2026-SUB-01_Rev3_Quotation.md",
+    "MRD-2026-SUB-01_Rev3_Summary.md",
+}
+
+
+def draft_folder_hygiene_check(client):
+    """Returns a list of violation strings (empty = clean): any file in
+    04-draft/ not in EXPECTED_04_DRAFT_FILES, or any expected file
+    missing."""
+    out_dir = os.path.join(REPO_ROOT, "02-clients", client, "04-draft")
+    if not os.path.isdir(out_dir):
+        return [f"{out_dir} does not exist"]
+    actual = {f for f in os.listdir(out_dir) if os.path.isfile(os.path.join(out_dir, f))}
+    violations = []
+    unexpected = actual - EXPECTED_04_DRAFT_FILES
+    missing = EXPECTED_04_DRAFT_FILES - actual
+    for f in sorted(unexpected):
+        violations.append(f"unexpected file in 04-draft/: {f} -- either rename to a client deliverable "
+                           "or move to 02-calc/ (internal) or 05-issued/ (issued)")
+    for f in sorted(missing):
+        violations.append(f"expected deliverable missing from 04-draft/: {f}")
+    return violations
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         sys.exit(build(sys.argv[1]))
@@ -629,4 +662,12 @@ if __name__ == "__main__":
         rc = build(client, write=(client in ALLOWED_CLIENTS))
         exit_code = exit_code or rc
         print()
+    hygiene = draft_folder_hygiene_check(ALLOWED_CLIENTS[0])
+    if hygiene:
+        print(f"=== 04-draft HYGIENE CHECK FAILED: {ALLOWED_CLIENTS[0]} ===")
+        for v in hygiene:
+            print(f"  {v}")
+        exit_code = 1
+    else:
+        print(f"=== 04-draft hygiene check OK: {ALLOWED_CLIENTS[0]} ===")
     sys.exit(exit_code)

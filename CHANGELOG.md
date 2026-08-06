@@ -1542,3 +1542,185 @@ No worksheet written. No scope removed. No price changed. No engine or
 policy change. No work performed on Kallat, Prosper, or VGE beyond
 reading and reporting. No edits made to the 13-section MRD proposal
 (03-draft/) -- reconciliation table only, pending approval.
+
+## MRD 03-draft correction — 2026-08-06 (second pass)
+
+**Exposure confirmed: housekeeping, not a correction notice.** Checked
+manifest.yaml revision history, `05-issued/` contents, and
+`git log --follow` on every file in `03-draft/MRD-2026-SUB-01_Rev3/`
+before touching anything. Rev3's `issued_date` is empty and its manifest
+note is explicit: "this revision has not yet been sent to the client."
+The only issued revisions are Rev1 (2026-06-15) and Rev2 (2026-07-02),
+both retracted, both living in `05-issued/` — and both quote an entirely
+different, already-acknowledged-defective figure set (AED 690/hour, AED
+879/month subscription; see their own RETRACTION-NOTICE.md files).
+Neither issued document contains AED 24,688, AED 25,680, or any other
+Rev3-vintage figure. **Nothing carrying a stale Rev3 figure ever left
+the building.**
+
+**Provenance of the 13-section prose set.** All 13 files were created in
+one commit, `a405109` ("v2 checkpoint 5"), 2026-08-03, `Co-Authored-By:
+Claude Sonnet 5` — i.e. AI-assisted throughout; no file in this set has
+ever been purely hand-typed with no model involvement, per git history.
+Exactly one file has been touched since: `10-commercial-terms.md`, once,
+by `0daab40` (2026-08-05, also AI-assisted), which resynced it from a
+then-current 1,650→1,700 correction — itself now one correction cycle
+behind, since the worksheet moved 1,700→1,680 the next day (2026-08-06).
+`01-executive-summary.md` has one additional touch (`1a0b990`,
+2026-08-04) but that edit was a VAT-wording change only, not a figure —
+its AED 24,688 has been untouched since original creation, the oldest
+vintage in the set. The other 11 files have never been edited since
+2026-08-03 at all.
+
+`01-templates/proposal/` contains no literal AED figures (grepped, zero
+hits) — every commercial cell is a `[bracket placeholder]`. This defect
+class does not regenerate from the templates themselves; it comes from
+filling a template in once and never resyncing the filled copy against a
+worksheet that keeps moving.
+
+**Cross-client staleness count (read-only, Kallat/Prosper/VGE — no
+edits, no figures moved).** All three carry the same defect class, more
+severely than MRD:
+- **Kallat** (`03-draft/KP-2026-SUB-01_Rev1/`, this IS
+  `manifest.yaml: current_revision`, status `draft`): every worksheet-tied
+  commercial figure checked (mobilisation, subscription, quarterly
+  billing, Year-1 total, full-term commitment — ~13 occurrences) is
+  stale, by a large margin (mobilisation printed AED 48,686 vs. current
+  worksheet AED 22,429). The 4 Phase-2-catalogue figures match (knowledge
+  layer hasn't moved). Hour figure "192 hours" is the frozen pre-recompute
+  total (current: 104.734h).
+- **Prosper** (`03-draft/PRO-2026-SUB-01_Rev1/`, current revision,
+  status `draft`): same pattern, ~9 stale commercial figures (mobilisation
+  printed AED 38,544 vs. current AED 22,002), 4 Phase-2 figures match.
+- **VGE** (`03-draft/VGE-2026-SUB-01_Rev3/`, current revision, status
+  `draft`): same pattern and the largest relative gap found — mobilisation
+  printed AED 27,255 vs. current worksheet AED 4,900 (>5x), subscription
+  AED 7,176 vs. current AED 1,650 (>4x). The draft's two-column
+  Option A/B commercial table itself appears to predate the "Option B
+  (zero mobilisation) withdrawn" decision reflected in the current
+  worksheet.
+
+None of these three has ever been issued (`05-issued/` is empty --
+`.gitkeep` only -- for both Kallat and Prosper; VGE's Rev1/Rev2 are
+marked `superseded`, not sent under Rev3's numbers). No further work
+performed on any of the three beyond this count, per instruction.
+
+**Item-2 drift check, implemented report-only**
+(`05-ops/audit_draft_drift.py`, MRD only, not wired into any build/gate).
+Three-tier resolution (worksheet → client-brief.yaml → named
+knowledge-layer file), each figure carrying an explicit named source, not
+a wildcard. Final run after the fixes below:
+**22 matched, 0 stale, 12 unsourced** (of 34 figures classified). The 12
+unsourced are timeline/SLA/notice-period figures (go-live weeks, day-30/
+day-60 adoption checkpoints, 24-hour email SLA, 30-day non-renewal
+notice) that don't trace to the worksheet, the brief, or a named
+knowledge-layer file in this repo — flagged as a distinct category from
+"stale," since no field anywhere claims to back them (nothing to
+correct against; a policy owner would need to either cite them or
+confirm they're standard boilerplate).
+
+**Stale figures fixed (7) — old → new, source, and why each isn't a typo
+fix:**
+
+| File:line | Old | New | Source |
+|---|---|---|---|
+| `13-next-steps.md:6` | AED 4,888 | AED 5,280 | `pricing-worksheet.yaml: number_3_financing.mobilisation_aed` |
+| `12-why-sgc.md:27` | AED 24,688 | AED 25,440 | `pricing-worksheet.yaml: assembly.option_a.year1_client_cost_aed` |
+| `01-executive-summary.md:21` | AED 24,688 | AED 25,440 | same |
+| `10-commercial-terms.md:8` | AED 1,700/mo | AED 1,680/mo | `pricing-worksheet.yaml: assembly.option_a.subscription_aed` |
+| `10-commercial-terms.md:9` | AED 25,680 | AED 25,440 | same as above |
+| `10-commercial-terms.md:17` | AED 5,100 (typed) | AED 5,040 (AED 1,680 × 3, shown derived) | derived from subscription_aed, not typed |
+| `11-support-sla.md:20` | AED 1,980 (10% of stale annual) | AED 2,016 (AED 1,680 × 12 × 10%, shown derived) | derived from subscription_aed |
+
+**Two of these are terms changes, not typo fixes, named as such:**
+`11-support-sla.md`'s aggregate SLA credit cap moving AED 1,980 → 2,016
+**raises SGC's own contractual liability by AED 36** — this is a
+commitment increasing, not a display correction. `10-commercial-terms.md`'s
+quarterly billing figure is now rendered as an explicit derivation
+(subscription × 3) rather than a typed literal, closing the exact defect
+class (a hand-typed figure silently drifting from its own formula) that
+this whole audit exists to catch.
+
+**RESOLVE signature block fixed.** `13-next-steps.md`'s SGC TECH AI
+column showed `RESOLVE`/`RESOLVE` for Name/Title despite
+`06-brand/entity/legal-identity.yaml` being resolved since 2026-08-04 —
+filled from that file: Name = `contact.actual_signer`
+("Renbran Anthony Madelo"), Title = "Founder & CEO" (per the same
+field's inline comment). The adjacent internal NOTE, which still claimed
+the signature block "cannot render ... until" legal-identity.yaml is
+resolved, was itself stale and corrected in the same edit — §09's
+dispute-and-jurisdiction clause remains separately blocked (governing
+law/forum, unrelated to the signature block).
+
+**Margin — cts_total provenance and the gate's own definition.**
+`cts_total_aed` (520, MRD) is not hand-entered: it's a sum of cited
+sub-fields — `hosting_allocation_aed` (360 × (5/20), both constants
+cited at `policy.yaml:71-72`), `tooling_aed` (50, cited at
+`policy.yaml:73: tooling_flat_aed` — note the worksheet field name and
+the policy field name don't match, a naming drift worth fixing
+separately), `support_labour_aed` (ceil(5/5)×280, cited at
+`policy.yaml:74-75`), `account_mgmt_aed` (100, cited at
+`policy.yaml:76: account_mgmt_aed.tier_5`). Every component traces; only
+the `cts_total_aed` summary line itself carries an arithmetic comment
+rather than a citation, the same pattern already flagged and guarded for
+`total_hours_all_in`-style fields elsewhere in this repo.
+
+The 0.30 gate itself: `policy.yaml:88: gates.min_gross_margin: 0.30`.
+**The field carries no comment specifying which formula it was written
+against** — unlike `absolute_margin_floor` two lines below it (which at
+least names G23), `min_gross_margin` doesn't name a formula or a G-number
+inline. Given every corpus client existed under the build-margin
+convention before Kallat/Prosper's lifetime-commitment formula appeared,
+the more likely original calibration target is Formula A (build margin)
+— but this is an inference from ordering, not a citation, and is
+reported as such, not asserted as fact.
+
+**VGE's Formula A numerator inherits the pin's provenance.** VGE's own
+G8 margin (48.9%) is computed against `build_value_aed: 14,800` — the
+brief-pinned figure whose own provenance was already downgraded this
+session (`brief_pin_variance`'s basis is internal self-attestation
+between `manifest.yaml:100` and `pricing-worksheet.yaml:143-145`, not an
+external source; see the provenance-floor register above). VGE's margin
+result is therefore only as trustworthy as that pin. Not re-verified or
+changed here — logged as an inherited-provenance finding, same discipline
+as the rest of this register. Formulas remain unmixed per instruction:
+MRD/VGE keep Formula A, Kallat/Prosper keep Formula B.
+
+**Item 5 follow-through.** Grepped every function in `05-ops/*.py` for
+the four narration field names (`override_note`,
+`internal_only_disclaimer`, `disarm_hesitation_tweaks_scope_note`,
+`subscription_affinity`) — zero hits. **No engine path, including T12,
+has ever parsed these fields**; they are free-text YAML string blocks,
+never consumed programmatically. The one figure that exists only in a
+narration line with no structured backing anywhere: Prosper's
+`disarm_hesitation_tweaks_scope_note` quotes "Kallat — AED 4,900 matches
+their numbers" — this number has no structured field in Prosper's own
+brief or worksheet (Prosper's actual mobilisation is 22,002), and does
+not match Kallat's structured `mobilisation_fee_aed` (22,429) either; it
+happens to equal VGE's `mobilisation_aed` (4,900), a third, unrelated
+client's field. **Confirmed no narration text has reached a
+client-facing artifact that was ever issued** — Kallat's and Prosper's
+`05-issued/` are both empty. One partial exception worth naming: Kallat's
+own (never-issued) draft, `03-draft/KP-2026-SUB-01_Rev1/10-commercial-terms.md:60`,
+uses the phrase "this proposal's original disarm-hesitation intent" in
+prose that would be client-facing if this draft were ever sent as-is —
+internal strategy vocabulary, not raw session/prompt text, but the same
+risk class: it has not reached a client only because the document itself
+never has.
+
+**validate.py's `check_r11_r12_deliverables` — untouched, logged as an
+open question for a human, not fixed.** It still fails for MRD (globs
+`*.pdf`, we emit Markdown) and was left exactly as written. Amending the
+check to match the artifact we happened to produce would be the mirror
+image of the Kallat scope-padding finding earlier in this register —
+there, inputs were moved to clear `check_4`; here, the check's own
+definition would be moved to clear an unchanged output. **Either PDF
+generation needs separate authorization, or a human amends the check's
+own definition** — this repo does not get to pick which, and this pass
+didn't.
+
+No engine or policy change. No worksheet writes. No scope removal. No
+PDF generation. No work on any client but MRD beyond the authorized
+read-only count above. Two commits: renderer/checks/CHANGELOG first,
+the seven 03-draft prose corrections second, kept separate so the prose
+diff is reviewable on its own.
