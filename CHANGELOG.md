@@ -1434,3 +1434,39 @@ check-classification logic rather than being purely additive like T12.
 No worksheet written. No scope removed. No price changed. No engine or
 policy change. No work performed on Kallat, Prosper, or VGE beyond
 reading and reporting.
+
+## Provenance floor — 2026-08-06
+
+**Statement of limits of in-repo forensics.** Every check this audit has
+applied (T10 stored-vs-derived, T11 drift + label-binding, T12 input-layer
+provenance, plus the worksheet-internal T9, the Kallat Rev1 fixture T7,
+and the check_4 structural sweep T8) reads from artifacts committed to
+this repository. They can prove that a value is internally consistent,
+is cited to a policy field, and traces to a sourced document. They
+cannot prove that the sourced document reflects what the client actually
+said at the time of saying it. Below is the open-question register: for
+each question the repo cannot answer from its own bytes, the single
+piece of external evidence that, if produced, would settle it.
+
+| # | Open question | In-repo evidence | Single external evidence that would settle it |
+|---|---|---|---|
+| Q1 | **Did Ms. Nadja (VGE) actually request a 7-package build, or did SGC derive that scope internally?** | `brief.scope_signals.work_packages_requested: []` (empty) vs `worksheet.delivery_hours` (7 packages, 37h). Risk-assessment has no RFI on this scope | **Recording or written confirmation from the 2026-08-03 call** (or a follow-up email exchange) where Ms. Nadja names any of `discovery`, `property_unit_register`, `tenancies_contracts_reminders`, `invoicing_trn`, `maintenance_invoice_from_request`, `crm_leads`, `reports_dashboard` — OR a separate written acceptance of these packages after the call. Currently absent |
+| Q2 | **What is the agreed headcount for Kallat, and is it really 40?** | Two transcripts cited; `call-transcript-2026-07-16-internal-prep.md` self-labels "no client present"; no client-side statement of users_now in any committed doc | **Email or chat log from Sadique Abbas (Kallat Sales Manager)** stating current agent count — OR the relevant RERA-registered broker count if that is the binding figure. Either one, in a timestamped medium, would settle it |
+| Q3 | **Is Prosper's users_now=31 sourced from a client-confirmed figure, or an external estimate (CRM Lead x_employee_count)?** | `brief.scale.users_now=31` traces to CRM Lead 8407's `x_employee_count` outside this repo. Documented as "externally sourced, unverified by this audit" in `USERS_NOW_PROVENANCE` | **A direct confirmation from Louai Khzam (Prosper Owner)** of employee count, in a timestamped medium. Verbal-promises.md currently logs nothing on headcount for this client |
+| Q4 | **Is the shared `base_scope_hours=47` engine default the consequence of Kallat's unrequested set, or did it exist independently and Kallat happen to match it?** | `verbal-promises.md:row 2` documents the shared-baseline language; git history shows Kallat and Prosper padded in the same commit `525940d`. Direction is "pragmatically indeterminate" — see prior addendum | **Internal Slack or commit-discussion record** (pre-2026-08-05) where the 47h default is established AND a contemporaneous record of whether Kallat's scope was ever trimmed to match it, or whether the default came from an earlier sanctioned baseline. Without one, the repo supports both readings |
+| Q5 | **Is VGE's `brief_pin_variance.which_governs: pinned` a deliberate client-facing quote decision, or an authoring artifact that escaped review?** | `brief_pin_variance` field exists; an internal note says "client never sees the mechanical alternative." No client-side acknowledgment of the choice | **Recorded client confirmation** (Rev2 issue, Rev3 reading-room exchange, or a follow-up email) that VGE accepted the subscription structure independent of the per-package mechanical alternative. Currently absent |
+| Q6 | **Are the MRD margin numbers (52.7% in G8 vs the 6.3%/3.4% in the rationale prose) intentionally two different denominators?** | G8: `(build_value − internal_cost)/build_value`. Rationale prose: `(incumbent − proposal)/incumbent`. Both numbers are arithmetically correct; they measure different things. The worksheet never disambiguates | **A single prose rewrite in the worksheet** that names both denominators and explains why they coexist — OR an explicit chart in the deal package showing both side by side. This is an internal-only fix, no external evidence required |
+| Q7 | **Should the verification framework's `CHECK_4_STRUCTURAL_BREACH_N=19` be per-client (runtime-computed) or repo-global (the current hardcoded 19)?** | Currently global. Per-client proposal approved but not yet implemented (prior addendum). Doesn't change any stored figure | **A single sentence from the policy owner** confirming the breach threshold is allowed to vary by segment under pricing v3.x, OR confirming it must stay repo-global. No client-facing impact either way |
+| Q8 | **Are VGE's 7 undocumented packages a billing event or a delivery event?** | `brief_pin_variance: which_governs: pinned` keeps the client on 8,150/mo regardless of scope; `internal_build_cost_aed=7,562` is the SGC-side cost. Both arithmetically correct; tier classification in `SCOPE_EXPOSURE_TIER` (DELIVERY-COMMITMENT EXPOSURE) | **A signed acknowledgment from VGE** of the 7-package scope (settles Q1 and Q8 in one document) — OR a contract amendment that explicitly absorbs or excludes them. The brief and worksheet agree on math; they disagree on characterization |
+
+**The provenance floor, in one sentence:** in-repo forensics is
+exhausted for Q1, Q2, Q3, Q5, Q7, Q8; q4 is pragmatically indeterminate
+without pre-commit discussions; q6 is a disambiguation rewrite in the
+worksheet itself, not an external question. Production of any of the
+single-evidence items above would either fix a downstream gate, retire
+a question from this register, or convert it to a documented policy
+choice.
+
+No worksheet written. No scope removed. No price changed. No engine or
+policy change. No work performed on Kallat, Prosper, or VGE beyond
+reading and reporting.

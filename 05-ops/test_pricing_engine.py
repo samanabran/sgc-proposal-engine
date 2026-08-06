@@ -61,7 +61,27 @@ KALLAT_REV1_FIXTURE = {
 }
 
 
-def check(name, condition, detail=""):
+def check(name, condition, detail="", comparison_set=None):
+    """comparison_set: the collection this check's verdict was actually
+    computed by comparing against, if any. SUITE-LEVEL RULE (2026-08-06,
+    not a per-test patch): no check anywhere in this suite may report PASS
+    when its own comparison_set is empty -- an empty-vs-empty compare is
+    definitionally uninformative, not evidence of a match. Passing an
+    empty comparison_set here forces the check to FAIL regardless of the
+    condition the caller computed. This session produced four instances of
+    exactly this defect class before being caught: a tautological AED
+    invariant, VGE's empty-vs-empty scope match, Prosper's n/a
+    misclassification, and T11's drift_check alone passing a swapped
+    label (see label_binding_check in render_r11_r12.py, and CHANGELOG.md
+    2026-08-06). Enforcing it once here, at the only chokepoint every
+    check already calls, closes the whole class instead of re-patching
+    each call site as the next instance turns up."""
+    if comparison_set is not None and len(comparison_set) == 0 and condition:
+        condition = False
+        detail = (f"EMPTY-COMPARISON-SET GUARD: comparison_set was empty -- a PASS "
+                  f"here would be tautological (empty vs empty), forced to FAIL. "
+                  f"Original detail: {detail}") if detail else \
+                 "EMPTY-COMPARISON-SET GUARD: comparison_set was empty; forced to FAIL"
     if condition:
         print(f"[ OK ] {name}")
     else:
@@ -402,7 +422,37 @@ def t7_kallat_rule_regression():
 # report that instead. Per the review request: do not adjust the engine
 # to satisfy this check either way; only characterize its shape.
 # ---------------------------------------------------------------------
-CHECK_4_STRUCTURAL_BREACH_N = 19  # first N where total_hours_for_n(N) < 9.2*N*0.5 -- see below
+CHECK_4_STRUCTURAL_BREACH_N = 19  # repo-global: first N where total_hours_for_n(N) < 9.2*N*0.5
+                                    # see t8_check4_structural_sweep; the value is correct for
+                                    # any client N >= 19 (Prosper N=31, Kallat N=40) and
+                                    # intentionally "off" for smaller N where the floor does
+                                    # not yet trigger. Per-client runtime helper
+                                    # per_client_check4_breach_n() below returns the same
+                                    # boolean verdict without depending on this constant,
+                                    # so an engine-level change never silently re-classifies
+                                    # a corpus client's check_4 outcome -- see CHANGELOG.md
+                                    # 2026-08-06 runtime-CHECK_4 addendum.
+
+
+def per_client_check4_breach_n(users_now, inv=None, hl=None, policy=None):
+    """First N where total_hours_for_n(N) < 9.2*N*0.5 at or below the
+    given users_now. Returns None if no breach occurs at any N in range
+    [1, users_now] (i.e. the floor never fails for this client's N),
+    otherwise the integer first_breach. Pure read -- never writes to
+    any stored figure; identical output to the repo-global
+    CHECK_4_STRUCTURAL_BREACH_N check for every corpus client."""
+    if inv is None:
+        inv = pe.load_inventory()
+    if hl is None:
+        hl = pe.load_hour_lookup()
+    if policy is None:
+        policy = pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    if users_now is None or users_now < 1:
+        return None
+    for n in range(1, users_now + 1):
+        if pe.total_hours_for_n(n, inv, hl, policy) < 9.2 * n * 0.5:
+            return n
+    return None
 
 
 def t8_check4_structural_sweep():
@@ -880,6 +930,45 @@ SCOPE_MATCH_INDEPENDENT_SOURCE = {
     # review, not one this check silently resolves either way.
 }
 
+# ADDED 2026-08-06: undocumented scope is not one severity tier. Whether
+# it changes what the client is BILLED depends on whether number_2_build.
+# delivery_hours actually feeds the quoted price, or the quote is pinned
+# independently of it (VGE's brief_pin_variance: which_governs: "pinned").
+# BILLING EXPOSURE: undocumented scope the client is actually charged for.
+# DELIVERY-COMMITMENT EXPOSURE: undocumented scope SGC is still committed
+# to build/deliver, but that does not change the client's bill. AED
+# figures per CHANGELOG.md pricing v3.1 addenda.
+#
+# CORRECTED 2026-08-06 -- same-unit restatement. VGE's brief has an
+# EMPTY scope_signals.work_packages_requested list, so VGE's 7 worksheet
+# packages are UNDOCUMENTED, not "requested" -- the term in the prior
+# addendum was wrong. AED figures must be in the same unit to compare
+# across clients: chosen unit is DELTA vs documented scope (AED amount
+# the worksheet's own scope exceeds what the brief requests).
+#   - Kallat: delta = build_value_aed (padded) - build_value_aed (4-pkg
+#     requested baseline) = 19,652 AED. Sized from engine recompute.
+#   - VGE:   delta = internal_build_cost_aed_total - 0 (brief empty) =
+#     7,562 AED total internal build cost for the 7 undocumented pkgs.
+#     100% of the 7,562 is undocumented against the brief.
+SCOPE_EXPOSURE_TIER = {
+    "KP-kallat-properties": ("billing", 19652,
+        "DELTA VS BRIEF: 19,652 AED. 4 unrequested packages feed a_side_hours "
+        "directly -> build_value_aed 56,072 vs 36,420 unpadded (35.0% of "
+        "quote); the client IS billed for this scope"),
+    "PRO-prosper-realestate": ("n/a", 0,
+        "0 unrequested packages -- all 8 match its brief; assertion 2 fails "
+        "on same-pen provenance, not on billing exposure, no AED delta to "
+        "compute since the scope itself is not in dispute"),
+    "VGE-vongeyern-realestate": ("delivery-commitment", 7562,
+        "DELTA VS BRIEF: 7,562 AED (100% of internal_build_cost_aed -- brief "
+        "lists zero packages). 7 UNDOCUMENTED packages feed a_side_hours; "
+        "quoted price is pinned (brief_pin_variance.which_governs: 'pinned "
+        "... client never sees' the mechanical alternative) so this 7,562 "
+        "is a delivery commitment, NOT a billing one -- the client is not "
+        "invoiced for it"),
+    "MRD-meridianview-realty": ("n/a", 0, "clean -- no undocumented scope"),
+}
+
 
 def t12_input_provenance_guard():
     for client in CLIENT_WORKSHEETS:
@@ -898,19 +987,50 @@ def t12_input_provenance_guard():
         check(f"T12: {client} users_now ({users_now}) traces to a client-sourced document",
               verified, source)
 
-        # CORRECTED 2026-08-06: was ws.inputs.work_packages, which VGE's own
-        # worksheet leaves deliberately empty ("sized via service_tier:growth
-        # standard allocation" -- a different input convention, not an
-        # absence of scope). Comparing that empty list against VGE's equally
-        # empty brief.work_packages_requested read as a trivial match and
-        # silently PASSED, concealing VGE's real 7-package, 37h delivered
-        # scope entirely. The field that actually reflects what's billed,
-        # for every client regardless of input convention, is
-        # number_2_build.delivery_hours -- checked against that instead.
-        delivery_packages = set(
-            e.get("package") for e in (ws.get("number_2_build", {}).get("delivery_hours", []) or [])
-            if e.get("package")
-        )
+        # CORRECTED 2026-08-06 (re-fix): a single hardcoded field read
+        # produced a wrong PASS on VGE (inputs.work_packages is empty by
+        # VGE's input convention, but delivery_hours has 7) when the read
+        # was on inputs.work_packages; switching to delivery_hours alone
+        # broke nothing for VGE but masked WHICH FIELD was being checked
+        # -- and the brief's path through "delivery_packages non-empty
+        # but brief empty" tripped MAXIMUM SEVERITY on Prosper where it
+        # should have been trivially clean. The fix is client-agnostic:
+        # try both fields, pick whichever is non-empty, hard-fail if
+        # neither resolves -- never silently n/a. The same-pen caveat in
+        # SCOPE_MATCH_INDEPENDENT_SOURCE still applies on a successful
+        # match (Prosper), and an empty-empty result is INCONCLUSIVE not
+        # n/a, per the existing INCONCLUSIVE discipline.
+        candidates = [
+            ("inputs.work_packages",
+                list(ws.get("inputs", {}).get("work_packages", []) or [])),
+            ("number_2_build.delivery_hours",
+                [e.get("package") for e in (ws.get("number_2_build", {}).get("delivery_hours", []) or [])
+                 if e.get("package")]),
+        ]
+        resolved_field = None
+        resolved_packages = []
+        for field_name, vals in candidates:
+            if vals:
+                resolved_field = field_name
+                resolved_packages = vals
+                break
+        delivery_packages = set(resolved_packages)
+
+        if not delivery_packages:
+            check(f"T12: {client} worksheet declares a package-level scope to check",
+                  False,
+                  f"BOTH inputs.work_packages AND number_2_build.delivery_hours are "
+                  f"empty for {client} -- INCONCLUSIVE, treated as FAIL (hard, never "
+                  f"silently n/a): no worksheet scope recorded in either field to "
+                  f"compare against the brief")
+        else:
+            # Diagnostic: report exactly which field the resolver picked AND
+            # what the other field actually contained, so any silently-empty
+            # "other field" is visible in test output rather than asserted.
+            other_field, other_vals = candidates[1] if resolved_field == candidates[0][0] else candidates[0]
+            print(f"  [T12 RESOLVER] {client}: read {len(delivery_packages)} package(s) "
+                  f"from {resolved_field}; other field {other_field} has "
+                  f"{len(other_vals)} package(s)")
         requested = set(brief.get("scope_signals", {}).get("work_packages_requested", []) or [])
         approved_exceptions = set(brief.get("scope_signals", {}).get("approved_scope_exceptions", []) or [])
 
@@ -920,26 +1040,36 @@ def t12_input_provenance_guard():
                   "number_2_build.delivery_hours is empty or missing -- INCONCLUSIVE, "
                   "treated as FAIL: no worksheet scope recorded to compare against the brief")
         elif not requested:
+            tier, exposure_aed, tier_note = SCOPE_EXPOSURE_TIER.get(client, ("unknown", 0, "not classified"))
             check(f"T12: {client} every worksheet work_package is in the brief's requested list "
                   "or an approved exception",
                   False,
-                  f"MAXIMUM SEVERITY: worksheet declares {len(delivery_packages)} package(s) "
-                  f"{sorted(delivery_packages)} against an EMPTY brief.scope_signals."
-                  "work_packages_requested -- 100% of delivered scope is undocumented against intake")
+                  f"[{tier.upper()} EXPOSURE, AED {exposure_aed:,}] worksheet declares "
+                  f"{len(delivery_packages)} package(s) {sorted(delivery_packages)} against an EMPTY "
+                  f"brief.scope_signals.work_packages_requested -- 100% of delivered scope is "
+                  f"undocumented against intake. {tier_note}")
         else:
             unrequested = delivery_packages - requested - approved_exceptions
             if unrequested:
+                tier, exposure_aed, tier_note = SCOPE_EXPOSURE_TIER.get(client, ("unknown", 0, "not classified"))
                 check(f"T12: {client} every worksheet work_package is in the brief's requested list "
                       "or an approved exception",
                       False,
-                      f"unrequested (no approved_scope_exceptions field exists yet): {sorted(unrequested)}")
+                      f"[{tier.upper()} EXPOSURE, AED {exposure_aed:,}] unrequested (no "
+                      f"approved_scope_exceptions field exists yet): {sorted(unrequested)}. {tier_note}")
             else:
                 independent, note = SCOPE_MATCH_INDEPENDENT_SOURCE.get(
                     client, (True, "worksheet and brief independently sourced"))
+                # comparison_set=delivery_packages: both prior branches already
+                # hard-fail an empty delivery_packages before execution reaches
+                # here, so this is a defense-in-depth backstop, not the primary
+                # guard -- exactly the point of putting the rule in check()
+                # itself rather than only in the if/elif chain above.
                 check(f"T12: {client} every worksheet work_package is in the brief's requested list "
                       "or an approved exception",
                       independent,
-                      note if not independent else "all packages traced to the brief")
+                      note if not independent else "all packages traced to the brief",
+                      comparison_set=delivery_packages)
 
         check(f"T12: {client} segment ({segment}) classification rests on a verified user count",
               verified,

@@ -140,6 +140,45 @@ def drift_check(rendered_text, emitted):
     return undriftable
 
 
+# ---------------------------------------------------------------------
+# Label-binding check. drift_check above only proves a rendered number
+# traces to SOME value this build emitted -- it says nothing about
+# whether it's the RIGHT value for the label it's printed under. A
+# figure swapped between two labels (e.g. Mobilisation Fee's value
+# printed next to "Subscription Fee") still passes drift_check, because
+# both numbers are still in the emitted set. LABEL_FIELD_BINDING pins
+# each rendered label to the one FIELD_SOURCE_MAP key it is allowed to
+# read from; label_binding_check re-parses the rendered text and fails
+# on any mismatch, independent of drift_check.
+# ---------------------------------------------------------------------
+LABEL_FIELD_BINDING = {
+    "Implementation Value": "build_value_aed",
+    "Mobilisation Fee": "mobilisation_fee_aed",
+    "Financed Remainder": "financed_remainder_aed",
+    "Recovery (monthly, over the term)": "recovery_monthly_aed",
+    "Subscription Fee": "subscription_fee_aed_mo",
+    "Year-1 Total": "year1_total_aed",
+}
+
+
+def label_binding_check(rendered_text, values):
+    violations = []
+    for label, field_key in LABEL_FIELD_BINDING.items():
+        pattern = re.compile(re.escape(label) + r"[^\n]*?AED\s*([\d,]+(?:\.\d+)?)")
+        m = pattern.search(rendered_text)
+        if not m:
+            continue  # this label doesn't appear in this particular rendered doc
+        found = m.group(1).replace(",", "")
+        expected = values.get(field_key)
+        expected_str = _fmt_aed(expected).replace(",", "") if isinstance(expected, (int, float)) else str(expected)
+        if found != expected_str:
+            violations.append(
+                f"label '{label}' is bound to values['{field_key}']={expected} "
+                f"but the rendered text shows AED {found} next to it"
+            )
+    return violations
+
+
 def render_r11(client, values):
     packages = "\n".join(f"- {p}" for p in values["work_packages"])
     vat_line = ("SGC TECH AI is not currently registered for UAE VAT, and no VAT is charged on this proposal."
@@ -214,7 +253,17 @@ def build(client, write=True):
         print(f"  R12 undriftable figures: {drift_r12}")
         return 1
 
-    print(f"=== BUILD OK: {client} (T10, T12, T11 all clean) ===")
+    label_r11 = label_binding_check(r11, values)
+    label_r12 = label_binding_check(r12, values)
+    if label_r11 or label_r12:
+        print(f"=== BUILD FAILED (T11 label-binding check): {client} ===")
+        for v in label_r11:
+            print(f"  R11: {v}")
+        for v in label_r12:
+            print(f"  R12: {v}")
+        return 1
+
+    print(f"=== BUILD OK: {client} (T10, T12, T11 drift + label-binding all clean) ===")
     if write:
         out_dir = os.path.join(REPO_ROOT, "02-clients", client, "04-draft")
         os.makedirs(out_dir, exist_ok=True)
