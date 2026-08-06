@@ -29,6 +29,23 @@ the transcript itself. Identification as Prosper rests on:
 This is a reasonable inference, not a confirmed fact — flagged the same way
 this repo flags any unconfirmed intake input (see risk-assessment.yaml).
 
+**Provenance upgraded 2026-08-06** — first independent external
+corroboration found for any transcript in this four-client corpus.
+Gmail search turned up two Otter.ai meeting-summary notification emails,
+both dated 2026-07-17, to `scholarixglobal@gmail.com`: one snippet reads
+"focused on Scholarix Global's system functionalities and addressing
+client needs," the other "focused on demonstrating... system features,
+particularly employee check[-in]..." — matching this file's own summary
+(system walkthrough, attendance/check-in demo) precisely. This is
+corroboration from a third-party system (Otter.ai's own automated
+notification, surfaced via Gmail) independent of this repo's own
+authored content — not another SGC document repeating the same claim.
+See `HANDOVER.md` §8.7 for the full search record. Does not resolve the
+identification-basis question above (still a reasonable inference, not a
+confirmed client identity) — it confirms the meeting happened on this
+date and covered these topics, which was not independently established
+before.
+
 ## Summary
 
 An internal rehearsal for a live product demo: the presenter (Speaker 1)

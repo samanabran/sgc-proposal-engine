@@ -9,7 +9,7 @@ edition: "community"
 vertical: "real-estate-brokerage-uae"
 
 stage: draft                # intake | risk_assessed | calc | draft | review | issued | won | lost
-current_revision: "PRO-2026-SUB-01_Rev1"
+current_revision: "PRO-2026-SUB-01_Rev2"
 knowledge_version_used: "pricing v2.1 (2026-08-05)"
 
 risk_band: "elevated"         # placeholder-driven — see 02-calc/risk-assessment.yaml
@@ -74,17 +74,34 @@ escalations:
     raised_by: "SGC Tech AI SDR (agent-assisted)"
     issue: >
       An earlier, unsigned phased/fixed-fee proposal ("PROSPER x SGC
-      Implementation Proposal - 2026", CRM attachment ID 5306, sent 21
-      July 2026) exists on CRM Lead 8407, built outside this repo's
-      governance, using AED 690/hr and AED 650/hr (both on this repo's
+      Implementation Proposal - 2026", CRM attachment ID 5306, sent 22
+      July 2026 09:44 UTC — DATE CORRECTED 2026-08-06, was misstated as
+      "21 July"; see resolution below) exists on CRM Lead 8407, built
+      outside this repo's governance, using AED 690/hr (`rate-card.yaml:37`)
+      and AED 650/hr (`rate-card.yaml:52`, both on this repo's
       rate-card.yaml forbidden_rates list). This SUB-model rebuild
       intentionally does not reconcile line-by-line against it — different
       rate card, different commercial model entirely, same treatment as
-      Kallat's prior PRJ doc.
+      Kallat's prior PRJ doc. It was rejected by the client 27 July 2026
+      ("the cost is currently too high for us") — see
+      `00-intake/_source-documents/email-2026-07-27_rejection_fwd-2026-07-28.eml`.
     resolution: >
       Documented, not reconciled. Both documents remain associated with
       CRM Lead 8407; this repo's PRO-2026-SUB-01_Rev1 is the governed
-      artifact going forward.
+      artifact going forward. DATE CORRECTION 2026-08-06: this entry
+      previously stated the PRJ doc was "sent 21 July 2026" — hard
+      evidence (full SMTP header chain on the forwarded rejection email,
+      cross-checked against both quoted reply headers) shows the actual
+      send was 22 July 2026, 09:44 UTC. The 21 July date most likely
+      conflated the CRM attachment's own internal/upload date with the
+      actual email send date — one day earlier, never independently
+      verified before this pass. Checked whether anything else in this
+      repo reasoned from the 21 July date: `client-brief.yaml:88` carried
+      the same "dated 21 July" language (corrected in the same pass,
+      2026-08-06) and nothing else in `manifest.yaml`, `deal-card.md`, or
+      `verbal-promises.md` depends on the exact send date beyond that one
+      other citation — no downstream figure, gate, or sequencing
+      conclusion was built on the 1-day error.
   - date: "2026-08-05"
     raised_by: "SGC Tech AI SDR (agent-assisted)"
     issue: >
@@ -143,6 +160,54 @@ escalations:
       recompute.
 
 revisions:
+  - ref: "PRO-2026-SUB-01_Rev2"
+    issued_date: ""
+    path: "03-draft/PRO-2026-SUB-01_Rev2/"
+    status: "draft"
+    notes: >
+      Deliberately trimmed, priority-led cut of Rev1's numbers — NOT the
+      full 13-section proposal per `01-templates/proposal/_section-map.md`
+      — by explicit user instruction 2026-08-06 ("no need to scope all in
+      the proposal only the priorities"). No repricing occurred; every
+      figure traces unchanged to the already-gate-passed Rev1
+      pricing-worksheet.yaml (build_value_aed 55,006; mobilisation 22,002;
+      recovery 1,623/mo at 24mo). Built from a new source,
+      "Talha's Meeting Notes_otter_ai_transcript.txt" (a recorded,
+      two-speaker walkthrough, shared by user 2026-08-06) plus direct user
+      framing of the priority. IDENTITY CORRECTED 2026-08-06:
+      `00-intake/_source-documents/email-2026-07-27_rejection_fwd-2026-07-28.eml`
+      proves Talha Sheraz is SGC's own Business Development Executive
+      (both client replies open "Dear Talha," his signature confirms the
+      title) — NOT a Prosper contact. `risk-assessment.yaml`'s "assigned
+      to Talha 2026-07-01" note is CRM-lead-ownership (an SGC rep assigned
+      to the deal), now confirmed rather than merely inferred, and
+      identifies the account, not a client-side speaker. Whether the
+      transcript's separate "Speaker 1" voice is Dian Sajulga or another
+      SGC colleague remains genuinely unconfirmed either way — see
+      `verbal-promises.md`'s 2026-08-06 identity-correction note for the
+      full reasoning. Two user decisions applied: (1) "monthly installment for
+      build payoff" = reframe the existing Recovery Component as a labeled
+      build-payoff instalment, not a new mobilisation-instalment structure
+      (that option was offered and declined — would have required
+      re-running the payment-plan worksheet and gates G3/G6/G12); (2) new
+      out-of-catalogue asks surfaced in the transcript (commission
+      calculation + clawback engine, KYC/AML automated gating, e-learning/
+      LMS, agent leaderboard dashboard, multi-company/Lebanon, Outlook/
+      Gmail sync, conversational AI assistant) are OMITTED from this draft
+      entirely, by explicit user instruction — not silently missing, see
+      `00-intake/verbal-promises.md` #12. Commission/KYC additionally
+      confirmed to have zero priceable basis anywhere in this repo
+      (`financing-amortization.md`: "no commission/sales-comp-plan document
+      exists anywhere in this repo"). One genuinely new priced element:
+      Portal Sync (Property Finder AED 3,900 + Bayut/Dubizzle AED 3,400,
+      one-time) surfaced as the priority Phase 2 add-on, addressing the
+      multi-source-lead-capture / per-lead-portal-cost pain point raised —
+      this was already in `phase2-catalogue.yaml`, not a new price. Same
+      internal-only status as Rev1 preserved: routed to Docuseal, no
+      external client recipient, BANT gate still open per CRM. See
+      `00-intake/verbal-promises.md` #11-#12 for full origin/classification
+      of every new item, and `02-calc/risk-assessment.yaml` (unchanged,
+      still elevated band, three inputs still RESOLVE).
   - ref: "PRO-2026-SUB-01_Rev1"
     issued_date: ""
     path: "03-draft/PRO-2026-SUB-01_Rev1/"

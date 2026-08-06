@@ -16,6 +16,70 @@ EXCLUDED / NOT APPLIED.
 | 9 | **Native iOS/Android mobile app** ("Native Odoo app for updating leads and logging visits") | Prior PRJ doc §07, presented as a Phase 1 deliverable | **PRICED (equivalent capability)** — Community edition excludes `official_mobile_app` (`editions.yaml`), but delivers the same underlying use case (update leads, log visits, from any phone) via a fully responsive mobile-optimised browser experience, no install required. Presented in §07 as the mobile-access capability of this proposal, not framed as a gap against the prior document — 2026-08-05 user decision: keep Community, describe the browser experience on its own terms rather than as a shortfall |
 | 10 | Payroll/commission engine, full accounting, board-ready BI | Prior PRJ doc §09 (its own unpriced Phase 3) | EXCLUDED — same conclusion independently reached via this repo's catalogue (no basis), consistent with the prior document's own phasing |
 
+| 11 | Multi-source lead capture (portals, direct, referral) into one CRM, framed against the recurring cost of per-lead portal charges — client is frustrated that paid leads scatter across sources with nothing forcing a controlled pipeline | User-supplied context, 2026-08-06, plus `document:Talha's Meeting Notes_otter_ai_transcript.txt` (a recorded, two-speaker walkthrough — CRM lead-stage restrictions, agent performance dashboard, e-learning, commission/KYC-AML workflow, multi-company/Lebanon, AI assistant) | PRICED (partial) — the underlying centralized-CRM-with-stage-gating capability is already base scope (`crm_leads`, `users_roles_agent_perf`, priced in the passed Rev1 worksheet). Automated portal-side lead capture (Property Finder / Bayut sync) is DEFERRED — Phase 2, `phase2-catalogue.yaml` (`portal_sync_property_finder` AED 3,900, `portal_sync_bayut_dubizzle` AED 3,400 one-time), conditional on the 5 client-side preconditions in `portal_dependency_note` |
+| 12 | Agent performance dashboard/leaderboard, e-learning/onboarding LMS, commission calculation + clawback engine, KYC/AML automated workflow gating commission release, multi-company/multi-branch (incl. Lebanon), Outlook/Gmail sync, conversational AI assistant ("SGC AI Brain") | `document:Talha's Meeting Notes_otter_ai_transcript.txt` (full transcript, same identity caveat as #11 below) | **NOT APPLIED, omitted entirely from Rev2 by explicit user instruction (2026-08-06)** — "no need to scope all in the proposal, only the priorities." Commission engine and KYC/AML automation additionally have **no priceable basis anywhere in this repo's knowledge layer** — `financing-amortization.md` confirms no commission/sales-comp-plan document exists in this repo at all (same open item already flagged in `phase2-catalogue.yaml`'s `commission_impact` note). Not to be silently reintroduced into a future revision without a real scoping/pricing exercise first |
+
+## Portal Sync correction, 2026-08-06 — logged as previously scoped
+
+**Finding (established in the 2026-08-06 scope-reconciliation pass, not
+repeated here in full — see `manifest.yaml`'s Rev2 entry and item 5 of
+that pass)**: the client's own requirements document lists "Portal
+Tracking" as **Nice to Have** (§6), describing passive visibility of
+where a listing was posted (Property Finder, Bayut, Dubizzle, website,
+social media) — a tracking field. Rev2
+(`03-draft/PRO-2026-SUB-01_Rev2/`) led with the catalogued **Portal
+Sync** add-on (AED 3,900 + 3,400, an active bi-directional feed/API
+integration per `phase2-catalogue.yaml`'s own `portal_dependency_note`)
+as the headline priority. That overstates what was actually asked for —
+a materially larger, differently-scoped capability positioned as the
+answer to a Nice to Have tracking request.
+
+**Correction, logged formally**: Portal Sync must not lead any future
+revision of this proposal. If offered at all, it stays a disclosed,
+Phase 2, opt-in add-on — not the headline. Rev2's existing draft file is
+NOT edited in this pass (no client-facing draft work authorized this
+pass beyond the answered question form, see manifest.yaml) — this entry
+exists so the correction is on record before Rev2 is ever touched again,
+not as a substitute for actually fixing the draft.
+
+## Identity correction, 2026-08-06 — "Talha's Meeting Notes" transcript
+
+**Corrected**: `00-intake/_source-documents/email-2026-07-27_rejection_fwd-2026-07-28.eml`
+proves **Talha Sheraz is SGC's own Business Development Executive** (both
+client replies open "Dear Talha," his own signature confirms the title) —
+**not a Prosper contact**. `risk-assessment.yaml`'s "assigned to Talha
+2026-07-01" note was always correctly read as CRM-lead-ownership (an SGC
+rep assigned to the deal), and rows #11/#12 above never asserted Talha
+was client-side — but "assigned to Talha" is now a **confirmed** basis
+for treating a transcript titled "Talha's Meeting Notes" as plausibly his
+own recording of a Prosper meeting (he owns this account), not merely a
+phonetic-name coincidence. Tightened above accordingly.
+
+**Not corrected, because the evidence doesn't support it either way**:
+whether "Speaker 1" *within* that transcript (the second, non-Talha
+voice — asking about Lebanon expansion, "our CEO's goal," accounts/KYC,
+Outlook integration, "we are commission based") is Dian Sajulga or
+another SGC colleague. The rejection email establishes who Talha is; it
+says nothing about who Speaker 1 is in a separate document. Speaker 1's
+content (idiosyncratic operational specifics: a named expansion market,
+an internal headcount band, a compensation structure) reads more like
+genuine client disclosure than an internal rehearsal script — unlike the
+*other*, already-logged 2026-07-17 transcript, which self-declares in
+its own header "internal rehearsal... not present: any Prosper
+representative." That distinction is a real basis for treating this
+transcript as more likely genuinely client-present, not less — but it
+remains an inference, not a confirmed fact, and is left exactly that
+hedged rather than flipped to "internal notes" on the strength of a
+finding (who Talha is) that doesn't bear on the question (who Speaker 1
+is).
+
+**What rested on this**: only `manifest.yaml`'s Rev2 revision entry and
+rows #11/#12 above — checked, neither the Rev2 draft prose
+(`03-draft/PRO-2026-SUB-01_Rev2/`) nor its rendered HTML names "Talha"
+anywhere, so nothing client-facing was built on the identity question
+either way. `deal-card.md` and `HANDOVER.md` do not mention "Talha" at
+all (checked 2026-08-06) — nothing to correct in either file.
+
 ## Cross-reference note
 
 Item #9's underlying use case (agents updating leads and logging visits

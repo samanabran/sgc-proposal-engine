@@ -85,9 +85,12 @@ notes:
     CRM.
   prior_document_conflict: >
     An earlier, unsigned phased/fixed-fee proposal ("PROSPER x SGC
-    Implementation Proposal - 2026", CRM attachment ID 5306, dated 21 July
-    2026) exists on CRM Lead 8407, built outside this repo's governance.
-    It uses AED 690/hr and AED 650/hr (both on rate-card.yaml's
+    Implementation Proposal - 2026", CRM attachment ID 5306, sent 22 July
+    2026 09:44 UTC — DATE CORRECTED 2026-08-06, see manifest.yaml for the
+    full correction; previously misstated here as "dated 21 July") exists
+    on CRM Lead 8407, built outside this repo's governance.
+    It uses AED 690/hr (`rate-card.yaml:37`) and AED 650/hr
+    (`rate-card.yaml:52`, both on rate-card.yaml's
     forbidden_rates list) and promises a native iOS/Android mobile app
     (Community edition excludes official_mobile_app per editions.yaml —
     see verbal-promises.md). This SUB-model rebuild uses only this repo's

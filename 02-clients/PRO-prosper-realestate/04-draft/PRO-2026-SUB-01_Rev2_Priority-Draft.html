@@ -1,0 +1,201 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>PRO-2026-SUB-01_Rev2 — Priority Draft</title>
+<style>
+@page { size: A4; margin: 20mm 18mm; }
+body { font-family: 'IBM Plex Sans', Arial, sans-serif; color: #1C2430; line-height: 1.5; font-size: 10.5pt; }
+h1 { font-size: 20pt; color: #1C2430; border-bottom: 2px solid #B79554; padding-bottom: 6px; margin-top: 0; }
+h2 { font-size: 13pt; color: #1C2430; margin-top: 20px; border-top: 1px solid #D9C08A; padding-top: 10px; }
+h3 { font-size: 11.5pt; color: #5F6775; margin-top: 14px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; }
+th, td { border: 1px solid #D9C08A; padding: 5px 8px; text-align: left; }
+th { background: #ECE7DF; font-weight: 600; }
+blockquote { border-left: 3px solid #B79554; margin: 10px 0; padding: 6px 14px; background: #F7F4EE; font-style: italic; }
+.internal-banner { background: #1C2430; color: #F7F4EE; padding: 10px 16px; font-weight: 600; text-align: center; margin-bottom: 14px; }
+.scope-note { background: #F7F4EE; border: 1px solid #D9C08A; padding: 10px 14px; margin-bottom: 18px; font-size: 9.5pt; }
+.cover { text-align: center; padding-top: 20mm; margin-bottom: 20mm; }
+.cover h1 { border: none; font-size: 24pt; }
+code { background: #ECE7DF; padding: 1px 4px; border-radius: 2px; font-size: 9pt; }
+hr { border: none; border-top: 1px solid #D9C08A; margin: 18px 0; }
+</style>
+</head><body>
+<div class="internal-banner">INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION — SDR REVIEW/SIGNATURE ONLY</div>
+<h1>PRO-2026-SUB-01 — Revision 2 (Priority Draft)</h1>
+
+<p><strong>Prosper Intl Real Estate L.L.C · Subscription Recovery Model</strong></p>
+<p>Prepared by SGC TECH AI · 2026-08-06</p>
+
+<blockquote>⚠ <strong>INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION.</strong> Same status as Rev1:</blockquote>
+<blockquote>routed for SDR review/signature via Docuseal only. The underlying CRM</blockquote>
+<blockquote>"Pipeline Gate Review: incomplete" (2026-08-02) has not been closed, and</blockquote>
+<blockquote>three risk-assessment inputs remain unconfirmed placeholders (see</blockquote>
+<blockquote><code>02-calc/risk-assessment.yaml</code>). This document does not resolve either —</blockquote>
+<blockquote>it exists alongside them.</blockquote>
+
+<blockquote><strong>Scope note</strong>: by explicit instruction (2026-08-06), this revision is a</blockquote>
+<blockquote>deliberately trimmed, priority-led cut of the same gate-passed Rev1</blockquote>
+<blockquote>numbers — not the full 13-section proposal (<code>01-templates/proposal/</blockquote>
+<blockquote>_section-map.md</code>). It leads with the one requirement singled out as the</blockquote>
+<blockquote>priority and the two commercial framings requested, and stays silent on</blockquote>
+<blockquote>everything else already covered in Rev1 (full As-Is/To-Be, Why SGC,</blockquote>
+<blockquote>support SLA detail). Full detail is available in Rev1 on request.</blockquote>
+
+<hr>
+
+<h2>1. Executive Summary</h2>
+
+<p>Prosper's leads arrive from more than one place — property portals, direct</p>
+<p>enquiries, referrals — and today nothing forces a paid lead through a</p>
+<p>controlled pipeline before it can be marked lost or simply go quiet. Every</p>
+<p>lead that scatters or falls through is money already spent. This is the</p>
+<p>priority this draft leads with.</p>
+
+<p>The commercial structure answers the other two things asked for directly:</p>
+<p>the build cost is paid off <strong>inside</strong> the monthly subscription — no</p>
+<p>separate implementation invoice — and the ongoing platform is billed as its</p>
+<p>own clearly labelled <strong>System Infrastructure & Support Management</strong> line,</p>
+<p>not bundled invisibly into a single number.</p>
+
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>Recommended option</td><td>24-month term (preferred)</td></tr>
+<tr><td>Combined monthly subscription</td><td>AED 5,270/mo</td></tr>
+<tr><td>Mobilisation at Kickoff</td><td>AED 22,002</td></tr>
+<tr><td>Year 1 investment</td><td>AED 85,242</td></tr>
+<tr><td>Timeline to go-live</td><td>4–6 weeks from kickoff</td></tr>
+</table>
+
+<hr>
+
+<h2>2. Priority Requirement — Unified Lead Capture</h2>
+
+<p><strong>The problem, as raised:</strong> leads come in from multiple sources — portal</p>
+<p>listings, direct enquiries, referrals — and get scattered across agents and</p>
+<p>channels with no single system of record. Nothing currently stops a lead</p>
+<p>from being pushed straight to "Not Interested" or "Lost" without a reason</p>
+<p>logged, so leads that cost real money to acquire go missing quietly, and</p>
+<p>management only finds out after the fact.</p>
+
+<p><strong>What's included (base scope — already priced, already gate-passed):</strong></p>
+
+<ul>
+<li><strong>One centralized CRM</strong> for every lead regardless of source — portal, direct, referral, or walk-in — so nothing lives only in an agent's phone or a spreadsheet.</li>
+<li><strong>Stage-gated pipeline</strong>: a lead cannot be moved to a closed/lost stage without a reason logged first. No more silent drops.</li>
+<li><strong>Role-based visibility</strong>: admins and management see the full pipeline and stage-movement history; agents see what's relevant to them.</li>
+</ul>
+
+<p><strong>Priority add-on (optional, Phase 2 — quoted separately, never bundled into base scope):</strong></p>
+
+<p><strong>Portal Sync</strong> — direct automated feed from Property Finder and Bayut</p>
+<p>straight into the same CRM, so a portal lead lands in the system the</p>
+<p>moment it arrives instead of being manually re-keyed (or missed).</p>
+
+<table>
+<tr><th>Item</th><th>Price</th><th>Unit</th></tr>
+<tr><td>Property Finder sync</td><td>AED 3,900</td><td>one-time</td></tr>
+<tr><td>Bayut / Dubizzle sync</td><td>AED 3,400</td><td>one-time</td></tr>
+</table>
+
+<p>This is conditional on the client side, not SGC: a valid RERA/DLD licence</p>
+<p>and agency ID, the agency's own portal-side verification being complete,</p>
+<p>listings meeting the portal's image/data standards, and an active portal</p>
+<p>subscription that includes feed/API access. SGC's fee covers building the</p>
+<p>sync — the client's own portal subscription remains a separate, ongoing</p>
+<p>cost that SGC does not quote.</p>
+
+<hr>
+
+<h2>3. What Else Is In Base Scope (brief)</h2>
+
+<p>Property/unit register, tenancy & contract tracking, TRN-compliant</p>
+<p>invoicing, reporting dashboards, and migration of 500 historical records</p>
+<p>are also included — same base scope as Rev1, not restated in full detail</p>
+<p>here per the priority-led format of this draft.</p>
+
+<hr>
+
+<h2>4. Commercial Structure</h2>
+
+<h3>4a. Build Cost — Paid Off Monthly (no separate invoice)</h3>
+
+<p>Rather than a large one-time implementation fee, the build is recovered</p>
+<p><strong>inside</strong> the subscription across the term.</p>
+
+<table>
+<tr><th></th><th>AED</th></tr>
+<tr><td>Total implementation value</td><td>55,006</td></tr>
+<tr><td>Mobilisation at Kickoff (40% — elevated risk band)</td><td>22,002</td></tr>
+<tr><td>Remaining build value, paid off monthly</td><td>33,004</td></tr>
+</table>
+
+<table>
+<tr><th>Term</th><th>Monthly build-payoff instalment</th><th>Instalments</th></tr>
+<tr><td><strong>24 months (preferred)</strong></td><td><strong>AED 1,623/mo</strong></td><td>24</td></tr>
+<tr><td>12 months (alternative)</td><td>AED 2,915/mo</td><td>12</td></tr>
+</table>
+
+<blockquote>Deferring the build carries a <strong>18%</strong> financing component (24-month</blockquote>
+<blockquote>option; <strong>6%</strong> on the 12-month option), reflected in the recovery</blockquote>
+<blockquote>portion of your subscription fee. Settling the build in full at kickoff</blockquote>
+<blockquote>removes this component entirely.</blockquote>
+
+<blockquote>If this subscription is terminated before the end of the committed term</blockquote>
+<blockquote>for any reason other than SGC TECH AI's material breach, the unrecovered</blockquote>
+<blockquote>balance of the implementation value becomes immediately due and payable.</blockquote>
+
+<h3>4b. System Infrastructure & Support Management (ongoing)</h3>
+
+<p>A separate, clearly labelled monthly line covering hosting, platform</p>
+<p>tooling, support, and account management for your full 31-person team —</p>
+<p>for as long as the subscription is active, at the same rate before and</p>
+<p>after the build is fully paid off (no step-up once recovery ends).</p>
+
+<table>
+<tr><th></th><th>AED/mo</th></tr>
+<tr><td><strong>System Infrastructure & Support Management</strong></td><td><strong>3,648</strong></td></tr>
+</table>
+
+<h3>4c. Combined Monthly Subscription Fee</h3>
+
+<table>
+<tr><th>Term</th><th>Infrastructure Management</th><th>Build Payoff Instalment</th><th><strong>Total/mo</strong></th></tr>
+<tr><td><strong>24 months (preferred)</strong></td><td>3,648</td><td>1,623</td><td><strong>5,270</strong></td></tr>
+<tr><td>12 months (alternative)</td><td>3,648</td><td>2,915</td><td><strong>6,560</strong></td></tr>
+</table>
+
+<h3>4d. Billing Cadence & Kickoff Payment</h3>
+
+<ul>
+<li>Standard cadence: <strong>quarterly in advance</strong> — AED 15,810/quarter (24mo) or AED 19,680/quarter (12mo).</li>
+<li>Monthly billing available as a disclosed deviation at <strong>+3%</strong> (AED 5,430/mo, 24-month term).</li>
+<li><strong>Due at Kickoff</strong>: Mobilisation (22,002) + Quarter 1 (15,810) = <strong>AED 37,812</strong>.</li>
+</ul>
+
+<h3>4e. Totals</h3>
+
+<table>
+<tr><th></th><th>24-month (preferred)</th><th>12-month (alternative)</th></tr>
+<tr><td>Year 1 total</td><td>AED 85,242</td><td>—</td></tr>
+<tr><td>Full-term commitment</td><td>AED 148,482</td><td>AED 100,722</td></tr>
+</table>
+
+<hr>
+
+<h2>5. Next Steps</h2>
+
+<p>Same standing as Rev1 — internal review only:</p>
+
+<ol>
+<li>Close the CRM "Pipeline Gate Review: incomplete" flag before this (or any revision) reopens the actual client conversation.</li>
+<li>Verify the three unconfirmed risk-assessment inputs (entity age, VAT registration, trade licence validity).</li>
+<li>If it proceeds externally: freeze and issue per the standard runbook, routed through Zoho Sign to the real client signatories — never Docuseal, which stays internal-only.</li>
+</ol>
+
+<table>
+<tr><th></th><th>SDR</th><th>Reviewer</th></tr>
+<tr><td>Name</td><td></td><td></td></tr>
+<tr><td>Date</td><td></td><td></td></tr>
+<tr><td>Signature</td><td></td><td></td></tr>
+</table>
+
+</body></html>

@@ -62,12 +62,33 @@ figures this pass beyond the earlier read-only count.
 
 ### PRO-prosper-realestate
 
-Zero issued revisions — same pattern as Kallat (`PRO-2026-SUB-01_Rev1`,
-`issued_date: ""`, `05-issued/` empty). Current draft stale against its
-own worksheet (mobilisation printed AED 38,544 vs. current AED 22,002).
-T10: 3/3 pass. T12: 2 of 3 assertions fail (`users_now` unverified;
-same-pen scope match, not independently corroborated — no billing
-exposure, since 8/8 packages match the brief). Not rendered by R11/R12.
+Zero issued revisions of this repo's own SUB-model — same pattern as
+Kallat (`PRO-2026-SUB-01_Rev1`, `issued_date: ""`, `05-issued/` empty).
+Current draft stale against its own worksheet (mobilisation printed AED
+38,544 vs. current AED 22,002). T10: 3/3 pass. T12: 2 of 3 assertions
+fail (`users_now` unverified; same-pen scope match, not independently
+corroborated — no billing exposure, since 8/8 packages match the brief).
+Not rendered by R11/R12.
+
+**Added 2026-08-06, same shape as MRD's finding above**: this repo's own
+SUB-model was never sent — but a *different*, ungoverned document was,
+and the client has already rejected it. **The client's only live
+commercial understanding of "SGC's price" rests on a document no gate in
+this repo has ever inspected**: "PROSPER x SGC Implementation Proposal -
+2026" (CRM attachment 5306), sent 22 Jul 2026 09:44 UTC, quoting AED
+45,000 fixed Phase 1 + AED 1,450/mo mandatory Platform Care Plan at AED
+690/hr and AED 650/hr — both on `rate-card.yaml`'s forbidden-rates list
+(`rate-card.yaml:37`, `:52`). Rejected 27 Jul 2026: *"the cost is
+currently too high for us, and we are not planning to use a CRM at the
+moment"* (`00-intake/_source-documents/
+email-2026-07-27_rejection_fwd-2026-07-28.eml`). **Client holds figures
+we no longer stand behind — same framing as MRD's AED 879/month, but
+where MRD's stale figure is this repo's own prior work, Prosper's stale
+figure was never this repo's to begin with.** Worse: even this repo's
+most stripped-down traceable-scope configuration (AED 67,086 Year-1, see
+`manifest.yaml` 2026-08-06 entry) still prices above what was already
+rejected as too expensive (AED 60,950–62,400 Year-1). Trimming scope
+alone does not close this gap.
 
 ### VGE-vongeyern-realestate
 
@@ -99,6 +120,9 @@ artifact or answer — not by more in-repo analysis.
 | 2 | VGE: is the brief-pinned AED 14,800 Implementation Value / AED 1,650 Subscription Fee (and the four figures downstream of it) a deliberate, client-confirmed quote, or an authoring artifact? | ______ | The original brief document itself (not in this repo — `01-source/README.md:1`: "No raw client materials were provided") or a client-side re-confirmation at Rev3 issue. |
 | 3 | Prosper: is `users_now=31` (CRM Lead 8407's `x_employee_count`) an accurate, current headcount? | ______ | Direct confirmation from Louai Khzam (Owner) or Dian Sajulga (authorized operational contact), in a timestamped medium. |
 | 4 | MRD: what is Rev1/Rev2's actual retraction status vis-à-vis the client? | ______ | Evidence of the correction communication (if one happened) — or, if none exists, a decision on whether Rev3's issue must be framed as a price correction rather than a first quote. |
+| 5 | Prosper: the client's only live commercial understanding rests on a document (attachment 5306, AED 45,000 + 1,450/mo, forbidden rates) that no gate in this repo has inspected, and it was already rejected on cost. Even the most stripped-down traceable-scope reconfiguration (AED 67,086 Year-1) still prices above the rejected figure (~AED 61,000). | ______ | A decision on commercial strategy before any further client-facing work: whether to pursue a Must Have-only build (pending scope-removal authorization — none of the 7 gaps are priceable regardless), a different rate/margin structure, or hold. Not resolvable by more in-repo analysis — the unit economics (structural overlays + 18% financing uplift) are the actual driver, not the per-hour rate or scope size — see §8 below. |
+| 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) is a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. |
+| 7 | Prosper: the platform/CTS floor (AED 3,648/mo, headcount-driven, `policy.yaml:70-87`) does not move when scope is cut — see §8.5. At the theoretical limit of zero build value, the floor alone over 24 months (AED 87,552) still exceeds the PRJ document's entire 24-month figure (~AED 79,800, itself unverified per #6). No configuration this repo is authorized to build can beat the rejected number on price. | ______ | A pricing-model decision (rate, uplift, or platform-floor structure) — explicitly out of this pass's constraint. See §9 recommendation. |
 
 ---
 
@@ -247,3 +271,336 @@ for every deal. Not implemented this pass — report only, per instruction.
 
 All checks green for MRD's Rev3 (renderer side). **Still not clear for
 issue** — see the headline at the top of this file.
+
+---
+
+## 8. Prosper — attachment 5306 retrieval, per-agent finding, catalogue gap register (2026-08-06)
+
+### 8.1 Attachment 5306 — not retrieved, every PRJ figure is now UNVERIFIED
+
+Searched the one Gmail account this session has access to
+(`scholarixglobal@gmail.com` — **not** `renbranmadelo@gmail.com` as
+requested; that account is not the one connected here) for the proposal
+subject, "Prosper," `prosperuae.com`, "5306," "Talha," "Sajulga," and the
+22 Jul 09:44 UTC window. Found: two Otter.ai meeting-summary emails from
+2026-07-17 (corroborating the *already-logged* internal demo-prep
+transcript — one snippet reads "particularly employee check[-in]...",
+matching that transcript's own content) and one Otter.ai email
+confirming Talha's personal address is `talhasheraz9803@gmail.com`. **No
+trace of the proposal send, attachment 5306, or any Prosper-side
+correspondence.**
+
+This isn't just an account mismatch. The rejection email's own SMTP
+headers (`00-intake/_source-documents/
+email-2026-07-27_rejection_fwd-2026-07-28.eml`) show the real thread ran
+on `mail.sgctech.ai` via SOGoMail — SGC's own private mail server, not
+Gmail at all. Gmail was structurally never going to contain it, account
+mismatch or not.
+
+**Every PRJ-document figure in this repo's comparisons is UNVERIFIED as
+of this pass** — AED 45,000, AED 1,450/mo, the AED 690/650 rates, the
+Care Plan start month (11 vs 12 months), and the resulting Year-1/24-month
+totals. All of it is a secondhand account (this repo's own prior
+`deal-card.md`/`client-brief.yaml` description of a document nobody in
+this audit has read), not a verified extraction. Marked as such
+everywhere it's used going forward, including the client's own AED
+45,000/1,450 — the only numbers we currently believe they're holding.
+
+### 8.2 Per-agent finding — rule out as a positioning device for Prosper
+
+Question 11 of the client's own requirements document ("What is the
+monthly cost per user?") makes per-agent cost the client's *own chosen*
+comparator. Config (ii) (traceable scope only): **AED 147/agent/month**
+(31 users, itself unverified — see decision #3 above). Against the PRJ
+document's own implied per-agent figure (~AED 58, using its own 25-user
+Phase-1 scope cap as denominator, now additionally unverified per §8.1):
+**we lose by roughly 2.5×, even on the most favorable configuration we
+have.** This holds even accounting for the PRJ figure's own uncertainty
+— closing a 2.5× gap would require the PRJ figure to be wrong by a
+factor this repo has no basis to assume.
+
+**Per-agent framing is ruled out as a positioning device for this deal.**
+It may still be valid framing elsewhere (a different client, a different
+segment, a different unit-cost structure) — this finding is specific to
+Prosper's numbers, not a general claim about per-agent framing itself.
+
+### 8.3 Catalogue gap register — nine unpriceable requirements
+
+| Requirement | Client priority | Demonstrated on a call? | Any catalogue file references it? |
+|---|---|---|---|
+| Attendance Tracker | Must Have | Yes — `call-transcript-2026-07-17-internal-demo-prep.md`, rehearsed at length | No — checked `hour-lookup.yaml`, `phase2-catalogue.yaml` in full |
+| Employee Records | Must Have | Not specifically | No |
+| Task Management | Must Have | Not specifically | No |
+| Calendar | Must Have | Not specifically | No |
+| Approval System | Must Have | Not specifically (adjacent: commission/allowance approval mentioned in "Talha's Meeting Notes") | No |
+| Commission Tracking | Must Have | Yes — "Talha's Meeting Notes," commission engine + clawback logic walked through in depth | No — also confirmed absent from `financing-amortization.md`'s own commission-comp-plan check |
+| WhatsApp/Email Integration | Must Have | Partially — Outlook/Gmail sync shown in "Talha's Meeting Notes"; WhatsApp named in the prior PRJ doc's §08 | No — `verbal-promises.md` already logged WhatsApp as DEFERRED, no priceable basis |
+| Expense Tracking | Nice to Have | Not specifically | No |
+| Payroll Support | Nice to Have | Yes — attendance-to-payroll-to-WPS flow rehearsed in depth in the same demo-prep transcript | No |
+
+**Assessment: this is a catalogue gap, not a Prosper-specific one.** All
+nine sit in domains (HR/attendance, payroll/WPS, commission/comp-plan
+logic, generic task/calendar/approval workflow) that `hour-lookup.yaml`'s
+real-estate-brokerage-uae v2 catalogue never covered at any point in this
+corpus — the same absences would surface on any brokerage RFP of this
+shape, not just Prosper's. Confirmed by the fact that Kallat's own
+`x_bant_need` independently raised attendance/payroll-adjacent asks with
+the identical "no priceable basis" outcome, unconnected to this pass.
+No other client's files were touched to reach this conclusion — this is
+an assessment of the catalogue's coverage, not of any other client's
+deal.
+
+### 8.4 Pricing-model contribution, isolated (report only, no repricing)
+
+Delta between config (ii) (AED 67,086 Year-1) and the PRJ document's own
+figure (AED 60,950–62,400 Year-1, **now unverified**, see §8.1) ≈
+AED 4,686–6,136.
+
+- **Financing uplift, fully isolated within our own model** (build_value
+  held constant at 30,916, uplift set to 0% vs. the actual 18%):
+  contributes exactly **AED 1,680 to Year-1, AED 3,360 to the 24-month
+  total**. This is the one component precisely quantifiable without
+  needing PRJ's internals.
+- **Rate is not the driver — it runs the other way.** Recomputing config
+  (ii)'s same 40 a_side_hours at PRJ's own disclosed rates (690/650,
+  averaged to 670) instead of our 525 AED/hr blended rate produces a
+  *higher* build_value (AED 37,920 vs. 30,916) — our rate is lower than
+  PRJ's, not higher. Whatever makes PRJ's total cheaper, it is not a
+  lower hourly rate.
+- **The remainder (the larger share of the gap) cannot be cleanly
+  isolated into "scope" without PRJ's own internal hour breakdown**,
+  which §8.1 establishes we don't have. The likely candidates — PM 15%,
+  contingency 5%, hypercare AED 3,920, Class B per-user provisioning, the
+  CTS/platform floor — are structural additions in our model that a flat
+  Phase-1 fee may or may not have carried; guessing which would be
+  inventing PRJ's structure, not reporting it. Flagged as the honest
+  limit of what this pass can quantify, not glossed over.
+
+### 8.5 Monthly decomposed, both configurations — the decisive finding
+
+Confirmed (verified by direct execution): the platform/CTS portion is
+**AED 3,648/mo in both config (i) and config (ii) — unchanged by scope
+reduction.**
+
+| | Config (i) 8 pkg | Config (ii) 4 pkg |
+|---|---|---|
+| Platform/CTS portion | 3,648/mo | 3,648/mo (**identical**) |
+| Recovery portion | 1,623/mo | 912/mo |
+| Subscription total | 5,270/mo | 4,560/mo |
+| Mobilisation | 22,002 | 12,366 |
+
+**What drives the 3,648 floor — headcount, not edition, not scope**
+(`02-calc/pricing-worksheet.yaml:27-34,113`, formula in
+`00-knowledge/pricing/policy.yaml:70-87`):
+
+```
+hosting_allocation_aed = hosting_node_true_cost_aed(360) × (users/hosting_node_user_capacity(20)) = 360×(31/20) = 558
+support_labour_aed     = ceil(users/5) pods × support rate  = 7 × 280 = 1,960
+account_mgmt_aed       = tier lookup (policy.yaml:76: tier_5=100/tier_10=200/tier_20=350) — 31 exceeds every band, uses 350
+tooling_aed            = 50
+cts_total_aed = 558+1960+350+50 = 2,918
+platform_floor_aed = cts_total_aed × platform_floor_multiplier(1.25, policy.yaml:87) = 2,918×1.25 = 3,647.5 → 3,648
+```
+
+Every input is `users_now` (31) or a fixed policy constant. Community
+edition's `licences_aed: 0` is already reflected — the floor isn't an
+edition cost, it's what serving 31 users on an ongoing basis (hosting +
+support pods + account management) actually costs, marked up 25%. It
+cannot go below what 31 users costs to serve regardless of how many
+work packages are cut.
+
+**24-month split, against PRJ (all PRJ figures UNVERIFIED, §8.1):**
+
+| | Config (i) | Config (ii) | PRJ (unverified) |
+|---|---|---|---|
+| Mobilisation | 22,002 | 12,366 | 45,000 |
+| Platform total (24×3,648) | 87,552 | 87,552 (**same**) | — |
+| Recovery total | 38,945 | 21,889 | — |
+| Recurring total (24×1,450) | — | — | 34,800 |
+| **24-month total** | **148,482** | **121,806** | **~79,800** |
+
+**The platform line alone (87,552) exceeds PRJ's entire recurring
+commitment (34,800) by AED 52,752 — larger than the full 42,006 gap
+between config (ii)'s total and PRJ's total.** Confirmed by direct
+computation, not estimation. Pushed to the theoretical limit — mobilisation
+at zero, i.e. zero implementation value, zero build — the platform floor
+alone over 24 months (87,552) still exceeds PRJ's entire 24-month figure
+(79,800) by **AED 7,752**.
+
+**Scope reduction structurally cannot close this gap.** We could drop to
+a single work package and still lose the 24-month comparison, because
+the floor that can't be cut (headcount-driven CTS) already exceeds the
+number we're being compared against, before a single hour of build is
+added back in. This is a pricing-model question — the rate and the
+uplift are both out of this pass's constraint — not a scoping one.
+
+### 8.6 `known-defects.md` #2 — citation is broken, substance predates the contamination
+
+Checked whether the scaffold's "never copy a peer client's folder (see
+`known-defects.md` #2)" guidance (`02-clients/_SCAFFOLD/README.md:5`)
+predates or postdates the four contamination instances. **Both, in a way
+worth stating precisely:**
+
+- In the **first commit** (`cb2f194`, 2026-08-03 23:09), `known-defects.md`'s
+  actual #2 **was** "SDR copies a peer's client folder instead of
+  `_SCAFFOLD`" — verbatim the guidance the scaffold README cites, and it
+  predates the contamination-causing commit (`525940d`, 2026-08-05
+  15:06) by about a day and a half.
+- The **rewrite commit** (`1a0b990`, 2026-08-04 00:09, "known-defects
+  rewrite") replaced the entire list with the current MRD-focused
+  20-defect set. The new #2 is "Off-card rate. AED 690/hr blended rate"
+  — an unrelated topic. **The scaffold README's citation was never
+  updated and is now a dangling reference** — as of this commit, #2 does
+  not say what the README claims it says.
+
+Net finding: **the substance of the warning genuinely predates the
+contamination and was in force when it happened** — the four instances
+occurred despite, not before, written guidance existing. But the live
+citation in the repo today is broken and would mislead anyone who
+followed it to verify the claim, exactly as it did here. Not fixed in
+this pass (`00-knowledge/` is read-only to this agent per `AGENTS.md`'s
+access model) — flagged for whoever owns that file to either restore a
+#2 entry on this topic or repoint the citation.
+
+### 8.7 Headcount — what population 31 counts, and whether it's the right one
+
+`client-brief.yaml: scale.users_now: 31` traces to CRM Lead 8407's
+`x_employee_count` field and this repo's own Rev1 prose ("31 employees
+— agents, admin staff, managers, and a partner/founder sponsor") — a
+**total team headcount**, not a paid-seat or salaried count.
+
+**Cross-read against "Talha's Meeting Notes"**: "the paid ones are only
+like how many... below 10... your agent is commission based... yeah we
+are commission based." **Not necessarily a contradiction** — a small
+salaried core (<10) plus a larger pool of commission-only agents is a
+completely ordinary brokerage structure, and 31 could be the sum of
+both. But it raises the real commercial question the client's own
+document doesn't resolve: **does every one of the 31 need a paid system
+seat?**
+
+One data point cuts toward "yes": the client's requirements document's
+§7 "User Roles" Must Have explicitly lists **Agent** as one of four
+access-role tiers (Agent, Admin, Manager, CEO) — agents are meant to have
+individual logins, not just salaried admin staff. That supports counting
+agents in the user population, but doesn't confirm the exact figure 31,
+or whether *all* agents (vs. only active/producing ones) would hold an
+account.
+
+**This is not a rounding question.** `scale.users_now` (31) directly
+sets:
+- **Segment** (`policy.yaml:26-29`): 31 exceeds `smb`'s `max_users: 30`
+  ceiling **by exactly one**, forcing `mid_market` classification —
+  `blended_rate_aed: 525` instead of `smb`'s `395` (a 33% higher rate).
+  If the true relevant population is 30 or fewer, the segment flips and
+  the rate drops.
+- **Hypercare pods**: `ceil(31/5) = 7` pods, driving the AED 3,920
+  hypercare cost. A lower N drops both the pod count and this cost.
+- **Platform/CTS floor** (§8.5): `hosting_allocation`, `support_labour`,
+  and `account_mgmt` in `cts_total_aed` all scale directly with N. A
+  lower true population would lower the AED 3,648 floor itself — the one
+  line §8.5 shows cannot otherwise be reduced by cutting scope.
+
+**Question to put to Dian, precisely**: *"Of the 31 people on the team,
+how many would need their own individual login to the system — every
+agent included, since your own requirements document lists 'Agent' as
+one of the four access levels — or is it a smaller group (for example,
+only actively selling agents, or only salaried staff)?"* This single
+answer resolves the T12 provenance gap (decision #3) and directly tests
+whether the segment/rate/platform-floor boundary case is real or an
+artifact of counting the wrong population. Not resolved further in this
+pass — report only, no repricing.
+
+### 8.8 Entity facts — confirmed still open, mobilisation still contingent
+
+Checked the new requirements document against `risk-assessment.yaml`'s
+three `RESOLVE` placeholders. It supplies the registered office address
+(`Office 3804-05, Concord Tower, Dubai Media City`) — already known,
+already matched in `client-brief.yaml`, and touches none of the three
+open inputs.
+
+| Placeholder | Status |
+|---|---|
+| `entity_age_years` | Still `RESOLVE` — nothing in the new document addresses company age |
+| `vat_registered` | Still `RESOLVE` — nothing addresses VAT registration status |
+| `trade_licence_valid` | Still `RESOLVE` — nothing addresses trade licence validity |
+
+**All three remain open.** Mobilisation is confirmed still contingent
+between **AED 22,002** (current, elevated band, 40%) and **AED 18,152**
+(if 2-3 placeholders resolve favorably, moderate band, 33%) — see the
+2026-08-06 manifest entry for the full computation. Nothing in this pass
+changes that finding; it's restated here because item 8 asked for
+confirmation, not because new evidence moved it.
+
+### 8.9 Otter.ai/Gmail corroboration — first independent external evidence in the corpus
+
+Gmail search (§8.1) surfaced two Otter.ai meeting-summary notification
+emails, both 2026-07-17, to `scholarixglobal@gmail.com`: "Meeting Summary
+for Scholarix Global's Meeting Notes" (12:17 UTC, snippet: "focused on
+Scholarix Global's system functionalities and addressing client needs")
+and a second (12:48 UTC, snippet: "focused on demonstrating... system
+features, particularly employee check[-in]..."). Both snippets match the
+*already-logged* `00-intake/call-transcript-2026-07-17-internal-demo-prep.md`
+content precisely (its own summary covers system-functionality walkthrough
+and an attendance/check-in demo). A third Otter.ai email confirms Talha's
+personal account, `talhasheraz9803@gmail.com`, requested the full
+transcript.
+
+**This is the first time any transcript in the four-client corpus has
+independent corroboration from a system outside the transcript file
+itself** — a third-party notification service (Otter.ai, via Gmail),
+not another document this repo's own SDR authored. Provenance grade for
+`call-transcript-2026-07-17-internal-demo-prep.md` is upgraded
+accordingly — see that file's own identification section, updated in
+this pass. This does **not** extend to "Talha's Meeting Notes" (the
+separate, undated transcript underlying Rev2's priority framing) — no
+Gmail trace of that recording exists; its provenance stands as already
+graded (reasonable inference, not independently confirmed).
+
+---
+
+## 9. Prosper — final recommendation (2026-08-06, this is the last pass)
+
+**The honest set is exactly two options, not three.** §8.5 establishes
+that the platform/CTS floor alone — headcount-driven, unrelated to
+scope, unrelated to which of the 8 (or 4, or 1) work packages are
+priced — exceeds the PRJ document's entire 24-month figure even at the
+theoretical limit of zero implementation value. **No configuration this
+repo is authorized to build prices below the number that was already
+rejected.** A price-based recovery is not available without a rate,
+uplift, or platform-floor structural change — all explicitly out of this
+pass's authorization. That is the finding, not a hedge around it.
+
+**Option 1 — Return the answered question form
+(`03-draft/PRO-Requirements-Answered_2026-08-06.md`), no price attached,
+as a relationship move.** Answers all 14 questions honestly (13 of 14 —
+Q11 held on headcount), states the nine gaps directly rather than
+burying them, and asks the one question (headcount) that's been
+genuinely outstanding since intake. Costs nothing, demonstrates the
+competence a generic 3-phase template proposal didn't, and matches the
+client's own stated posture ("we will keep your details on file... may
+reach out to you again") — this doesn't try to reopen a commercial
+conversation they've already closed on cost, it just finally answers
+what they actually asked.
+
+**Option 2 — Decline directly**, stating plainly which nine
+requirements are outside what we can deliver today and that our current
+pricing structure doesn't beat their already-rejected number even at
+zero scope. More honest than saying nothing; forecloses the relationship
+sooner than necessary given they haven't shut the door.
+
+**Option 3 — go back at a materially different price shape** — explicitly
+requires authorization this pass doesn't have (rate, uplift, or
+platform-floor structure are all out of constraint). Not a real third
+option today; naming it as available would be the least-bad-option trap
+this recommendation is deliberately not falling into.
+
+**Recommendation: Option 1.** The client hasn't refused future contact,
+the answered form costs nothing to send, and it's the first genuinely
+honest response this deal has produced — the 22 July proposal answered
+none of the 14 questions; this one answers 13 outright and names the
+exact question needed to close the 14th. Whether Q12's AED 12,366 figure
+travels with it is a judgment call: leaving it in shows we're not
+hiding a number; pulling it out keeps the door fully open to have the
+headcount conversation first, before any figure is back on the table.
+Both are defensible — this is the one open call left, and it's yours,
+not the agent's.
