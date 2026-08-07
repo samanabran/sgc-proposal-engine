@@ -104,6 +104,36 @@ escalations:
       2026-08-05) remains open independently of this recompute -- this is
       a pricing-model correction, not a deal-stage change.
 
+  - date: "2026-08-07"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Stages 0-4 forensic pass (see CHANGELOG.md 2026-08-07 entry).
+      Confirmed: (1) a written figure DID reach the client 2026-07-23 —
+      SGC-KP-2026-07, AED 48,450-123,250 one-time + AED 2,800-6,300/mo
+      hosting, ungoverned, same class as Prosper's attachment 5306
+      (HANDOVER.md §11); (2) users_now=40 is UNSOURCED (T12 provenance
+      ledger, test_pricing_engine.py) and, unlike Prosper, this deal has
+      no seat-band to absorb the uncertainty -- 40 vs 30 moves the
+      segment/rate directly, a 27.8% swing in build_value_aed
+      (HANDOVER.md §12); (3) the AED 19,652 unrequested-scope delta
+      (35.0% of build_value_aed) is confirmed copy-paste contamination
+      from VGE/MRD's worksheets, the only such confirmed instance in the
+      corpus (CHANGELOG.md).
+    resolution: >
+      T12 held hard-blocking -- no non-blocking rationale, no labelled
+      illustration authorized until users_now is confirmed. Confirmation
+      question drafted for Sadique Abbas (decision-maker) and routed as
+      an ordinary SDR follow-up through Johnny Gurrera --
+      00-intake/sdr-followup-headcount-2026-08-07.md. Commits nothing,
+      quotes no figure, so does not require the stamp-SDR-John-stamp
+      sequence. Held, not sent. Three hygiene fixes applied same day:
+      04-draft stale render quarantined, gate-report.md marked
+      SUPERSEDED in place, risk-assessment.yaml:18 citation corrected
+      (value/band unchanged). Stage 5 (pricing) explicitly held pending
+      Sadique's reply -- when it resumes, the SGC-KP-2026-07 anchor
+      comparison must be computed against both PRJ tier ends (AED 48,450
+      and AED 123,250), not a single midpoint (HANDOVER.md §11).
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

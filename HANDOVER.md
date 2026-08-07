@@ -60,6 +60,16 @@ scope padding, AED 19,652 — see §2). Not rendered by R11/R12
 (`ALLOWED_CLIENTS` is MRD-only). No work performed on this client's
 figures this pass beyond the earlier read-only count.
 
+**Updated 2026-08-07** — the stale 04-draft render is now quarantined
+(`04-draft/_quarantine/`) and `02-calc/gate-report.md` is marked
+SUPERSEDED in place; `02-calc/risk-assessment.yaml:18`'s citation is
+corrected (value/band unchanged, still `raw_score: 52`, `elevated`);
+`validate.py` gained check_19 (internal-vocabulary leak — Kallat's
+`03-draft/` currently fails it, correctly, on 3 hits). Unlike Prosper's
+T12, **Kallat's T12 stays hard-blocking — no non-blocking rationale, no
+illustrative figure** — see §12. Also now a confirmed instance of §11's
+ungoverned-PRJ-anchor class (SGC-KP-2026-07, sent 2026-07-23).
+
 ### PRO-prosper-realestate
 
 Zero issued revisions of this repo's own SUB-model — same pattern as
@@ -663,3 +673,79 @@ floor's own governing gate) — nothing was ever committed to a file with
 the wrong number, and no decision was made on the strength of the error.
 Recorded here because a chat-only error should still be owned, not
 because anything downstream needs correcting.
+
+---
+
+## 11. Cross-client class: ungoverned PRJ-model documents functioning as price anchors (2026-08-07)
+
+Kallat's Stage 0 exposure check (see `CHANGELOG.md` 2026-08-07 entry)
+surfaced the same shape of defect §8.1 already logged for Prosper — this
+section names it as a class, across both confirmed instances, rather
+than treating either as a one-off.
+
+**The pattern**: a proposal document built entirely outside this repo's
+governance (different rate card, no gate check, no `manifest.yaml`
+record until after the fact) was sent to the client, the client reacted
+to it commercially, and this repo's own governed SUB-model rebuild has
+never been reconciled against it line-by-line. The client's live
+commercial understanding of "SGC's price" rests on a document no check
+in this repo has ever inspected.
+
+| Client | Document | Sent | Client reaction | Rate basis | Status |
+|---|---|---|---|---|---|
+| **Kallat** | SGC-KP-2026-07 | 2026-07-23 | 2026-07-24: general price pushback, no specific figure named as rejected | AED 425/hr flat tiered rate. Real rate-card value (`rate-card.yaml:54`, `qa_engineer` L1) applied as a blanket tier rate, not a wholly off-card number — correction to this repo's own prior "not on rate-card.yaml" framing, which overstated the defect | Confirmed |
+| **Prosper** | "PROSPER x SGC Implementation Proposal - 2026" (CRM attachment 5306) | 2026-07-22 09:44 UTC | 2026-07-27: explicit rejection on cost | AED 690/hr and AED 650/hr, both literally on `rate-card.yaml: forbidden_rates` | Confirmed (§8.1) |
+| **VGE** | — | — | — | — | Unchecked. No PRJ-type document referenced in VGE's readable text files this pass, but that's a text-search absence, not a mailbox/CRM check — the same kind of check that took a dedicated retrieval attempt to even attempt for Prosper (§8.1) and still failed. |
+| **MRD** | — | — | — | — | Unchecked, same caveat as VGE. Note MRD's own defect (§1, §2 #4) is a different shape — this repo's *own* prior issued figures (AED 879/mo, Rev1/Rev2) never retracted to the client — not an ungoverned foreign document. Worth distinguishing: MRD may have zero PRJ-class exposure and still have live anchor exposure of a different kind. |
+
+**Two confirmed, two unchecked — do not read "two confirmed" as "the
+other two are clean."** A dedicated mailbox/CRM search is the only way
+to close VGE and MRD, per how hard §8.1's search for attachment 5306
+turned out to be even when actively looking (wrong Gmail account tried,
+real thread lived on a different mail server entirely).
+
+**Kallat's anchor inverts Prosper's problem, it doesn't repeat it.**
+Prosper's PRJ figure sits *below* what this repo's governed model can
+price at any configuration — a pure floor problem (§8.5, §9). Kallat's
+SUB mobilisation (AED 22,429) sits *below* the PRJ range's one-time
+floor (AED 48,450), while the SUB monthly (AED 5,850) sits *inside* the
+PRJ's own disclosed monthly-hosting range (AED 2,800–6,300/mo) — not
+cleanly above or below either end. Whether the governed model reads
+cheaper or dearer than what Sadique Abbas believes he was quoted depends
+on which PRJ tier he's anchored to, and the entry/term comparison can
+point opposite ways (cheaper on mobilisation, level-to-dearer over 24
+months, or the reverse). **When Stage 5 runs, compute the comparison
+against both PRJ tier ends (AED 48,450 and AED 123,250) explicitly — a
+single midpoint comparison would hide exactly the case that matters,
+and this should not be discovered live in a client meeting.**
+
+---
+
+## 12. Kallat — headcount is a hard block, not a sizing question (2026-08-07)
+
+Contrast with §10's Prosper entry, stated explicitly so the difference
+isn't lost: **Prosper's T12 failure shipped non-blocking** because its
+2026-08-07 seat-band restructure decoupled the quoted figure from the
+exact `users_now` value — banding absorbed the uncertainty. **Kallat has
+no equivalent band.** `users_now` (40) sits one user-band above `smb`'s
+30-user ceiling; crossing it sets the segment (`mid_market` vs `smb`),
+which sets the blended rate (525 vs 395 AED/hr), which moves
+`build_value_aed` by 27.8% (`CHANGELOG.md` 2026-08-06 entry). No band
+width absorbs a rate-card change — this is a structural dependency on
+the number itself, not a range the number falls somewhere inside of.
+
+**T12 stays hard-blocking for Kallat by design. No non-blocking
+rationale applies, and no labelled-illustration figure (the kind Q11
+used for Prosper) is authorized until `users_now` is confirmed.**
+
+Confirmation question drafted for **Sadique Abbas** (Sales Manager,
+decision-maker per `client-brief.yaml`/`manifest.yaml` — not either call
+transcript's participants, both SGC-internal) —
+`00-intake/sdr-followup-headcount-2026-08-07.md`. Routed as an ordinary
+SDR follow-up through **Johnny Gurrera** (logged the 2026-07-24 client
+call) rather than the stamp→SDR→John→stamp sequence: it commits nothing
+and quotes no figure, so that gate doesn't apply. Held, not sent.
+
+**Decision #1 in §2 above is the resolving action for this entry too** —
+this doesn't add a new decision, it records that the question is now
+drafted and routed, not that headcount is resolved.

@@ -1,5 +1,20 @@
 # Gate Report — KP-2026-SUB-01_Rev1
 
+> **⚠ SUPERSEDED 2026-08-07 — the three numbers below are stale.** This
+> report was run before the 2026-08-05 pricing v3.0 recompute (commit
+> `525940d`, which deleted `overlays.rollout_hours_per_user` and replaced
+> it with the Class A-D cost model) and was never re-run afterward. It
+> still asserts "all 41 gates pass" against Build Value AED 121,716,
+> Mobilisation AED 48,686, Subscription Fee AED 7,790/mo — none of which
+> match the current `02-calc/pricing-worksheet.yaml` (Build Value AED
+> 56,072, Mobilisation AED 22,429, Subscription Fee AED 5,850/mo).
+> **Do not treat "RESULT: clean" below as current.** The worksheet's own
+> `gates:` block is the live source of truth; re-run `05-ops/validate.py`
+> and regenerate this file before this deal moves past internal review.
+> Preserved below unmodified as the historical record of what Rev1's
+> initial gate pass actually said, per this repo's own convention of not
+> rewriting superseded figures in place.
+
 Run against `pricing-worksheet.yaml` (this revision) per
 `00-knowledge/commercial-rules/{subscription,payment-plan,protection}-guardrails.md`
 and `05-ops/validate.py`. **All 41 gates pass** (`RESULT: clean`, 14/14

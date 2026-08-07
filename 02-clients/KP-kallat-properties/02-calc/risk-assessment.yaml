@@ -15,7 +15,7 @@ inputs:
   payment_history_sgc: none         # confirmed — first engagement with SGC
   decision_maker: manager           # confirmed — Sadique Abbas, "Sales Manager" per CRM contact_name
   incumbent_churn_signal: abandoned_systems   # confirmed — Zapier + manual portal posting + Google Sheets per discovery notes
-  peak_exposure_aed_band: "15-40k"  # computed from this worksheet's build_value (~21,554) — see pricing-worksheet.yaml
+  peak_exposure_aed_band: "15-40k"  # computed from this worksheet's financed remainder (33,643) — see pricing-worksheet.yaml exposure.contractual_peak_aed (corrected 2026-08-07: prior comment cited "~21,554" attributed to build_value, matching neither the current build_value_aed (56,072) nor the correct basis; convention confirmed against VGE/MRD/Prosper's risk-assessment.yaml, all of which key this band off contractual_peak_aed, not build_value_aed — value/band unchanged, citation only)
 
 scoring:
   raw_score: 52

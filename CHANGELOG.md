@@ -1755,3 +1755,172 @@ PDF generation. No work on any client but MRD beyond the authorized
 read-only count above. Two commits: renderer/checks/CHANGELOG first,
 the seven 03-draft prose corrections second, kept separate so the prose
 diff is reviewable on its own.
+
+## 2026-08-07 — Kallat stages 0-4 close-out: two scope metrics named, PRJ-anchor class logged, three hygiene fixes, headcount confirmed blocking
+
+Follow-up to the 2026-08-06 Kallat forensic pass above. Three corrections
+and three authorized fixes, no engine/policy/worksheet writes, no Stage 5
+(pricing) work — reported and held per explicit instruction.
+
+### Register: "unrequested scope" vs "untraceable scope" are two different metrics
+
+A prior turn compared Kallat's AED 19,652 (35.0%) directly against a
+Prosper figure of AED 24,090 (43.8%) as if they measured the same thing.
+They don't — recorded here, by name, so the comparison isn't repeated:
+
+- **Unrequested scope** (Kallat's metric): work packages present in
+  `number_2_build.delivery_hours` that do **not** appear in the client's
+  own `client-brief.yaml: scope_signals.work_packages_requested` list.
+  Kallat: 4 of 8 packages (`discovery`, `property_unit_register`,
+  `tenancies_contracts_reminders`, `invoicing_trn`) — AED 19,652 delta,
+  35.0% of quoted `build_value_aed` (56,072). Independently re-derived
+  this session (recomputed the worksheet formula with only the 4
+  requested packages: AED 36,420 vs 56,072 = 19,652 delta) — see the
+  2026-08-06 entry above and `05-ops/test_pricing_engine.py`'s
+  `SCOPE_EXPOSURE_TIER["KP-kallat-properties"]`.
+- **Untraceable scope** (Prosper's metric, per Renbran, 2026-08-07
+  correction): work packages billed with no link to the client's own
+  requirements document, regardless of whether they match Prosper's
+  `client-brief.yaml` request list. Prosper: AED 24,090, 43.8%. **Stated
+  here as reported, not independently re-derived this session** — no
+  plain-text artifact in this repo currently carries this figure (checked
+  `manifest.yaml`, `02-calc/*.yaml`, `04-review/qa-checklist.md`; only
+  binary-PDF false-positive hits on the literal digits). Flagged the same
+  way attachment 5306's PRJ figures are flagged in `HANDOVER.md` §8.1 —
+  real, attributed, not yet corroborated by an in-repo document.
+- **Prosper has zero unrequested-scope packages** — confirmed, matches
+  `SCOPE_EXPOSURE_TIER["PRO-prosper-realestate"]` exactly (`("n/a", 0,
+  "0 unrequested packages -- all 8 match its brief")`). Untraceable scope
+  and unrequested scope are not in tension for Prosper: a package can
+  match the client's own requested list (so it's not "unrequested") while
+  still having no traceable link to the requirements document itself (so
+  it can still be "untraceable"). Two independent axes, not two names for
+  the same defect.
+- **Kallat is the only client in the corpus with confirmed copy-paste
+  contamination** (the 4 packages match VGE's and MRD's `delivery_hours`
+  name-and-hour-value exactly, and don't match Kallat's own brief at
+  all — see 2026-08-06 entry). **Prosper's defect is same-pen
+  provenance**, not copy-paste: its own 8 packages do match its own
+  brief, but brief and worksheet were first committed together in
+  `525940d` (the same commit that padded Kallat's scope), so the "match"
+  is not independent corroboration (`SCOPE_MATCH_INDEPENDENT_SOURCE` in
+  `test_pricing_engine.py`). Different defect classes; do not treat one
+  as evidence for the other's severity.
+
+### Cross-client class: ungoverned PRJ-model documents functioning as price anchors
+
+Logged in full in `HANDOVER.md` (new section) — summarized here for the
+pricing-audit trail. Two confirmed instances, same shape:
+
+| Client | Document | Sent | Client reaction | Rate basis |
+|---|---|---|---|---|
+| Kallat | SGC-KP-2026-07 | 2026-07-23 | 2026-07-24, general price pushback, no specific figure rejected | AED 425/hr flat tiered rate — **correction to this repo's own prior framing**: `client-brief.yaml`/`manifest.yaml` describe this as "not on rate-card.yaml" — imprecise. AED 425 *is* a real rate-card value (`rate-card.yaml:54`, `qa_engineer`, L1), just not a role Kallat's PRJ scope would plausibly bill at that tier as a blanket rate. Not the same defect class as Prosper's forbidden-list violation below; restated accurately rather than repeating the inherited claim unchecked. |
+| Prosper | "PROSPER x SGC Implementation Proposal - 2026" (CRM attachment 5306) | 2026-07-22 09:44 UTC | 2026-07-27, explicit rejection on cost | AED 690/hr and AED 650/hr — both literally on `rate-card.yaml: forbidden_rates` (`:37`, `:52`) |
+
+Both: built outside this repo's governance, never reconciled line-by-line
+against the governed SUB-model rebuild, and are the client's *only* live
+written commercial understanding — this repo's own SUB-model drafts have
+never been issued to either client (`manifest.yaml: issued_date: ""`,
+both). **VGE and MRD: unchecked, not confirmed clean.** No PRJ-type
+document is referenced in either client's readable text files this
+session, but neither client's `client-brief.yaml` narrates its own prior
+documents the way Kallat's and Prosper's do (a text-search absence is not
+the same as a mailbox/CRM check, which this pass did not run for VGE/MRD
+— see attachment-5306 retrieval difficulty in `HANDOVER.md` §8.1 for why
+that check is nontrivial).
+
+**Kallat's anchor inverts Prosper's problem rather than repeating it.**
+Prosper's PRJ figure is *below* what this repo's governed model can
+price at any configuration (§8.5, `HANDOVER.md`) — a floor problem.
+Kallat's SUB mobilisation (AED 22,429) sits **below** the PRJ one-time
+range's floor (AED 48,450), while the SUB monthly (AED 5,850) sits
+**inside** the PRJ's disclosed monthly hosting range (AED 2,800–6,300) —
+not above or below it cleanly. Depending which PRJ tier Sadique Abbas
+believes he was quoted, the governed SUB model could read cheaper on
+entry (mobilisation) and comparable-to-dearer over the term (monthly ×
+24), or the reverse. **Stage 5, when it runs, must compute the comparison
+against both PRJ tier ends (AED 48,450 and AED 123,250), not a single
+midpoint** — noted here and in `manifest.yaml`'s 2026-08-07 escalation so
+this isn't rediscovered live in a client meeting.
+
+### Headcount: T12 stays hard-blocking, no illustrative figure
+
+**Unlike Prosper (`HANDOVER.md` §10, 2026-08-07, "T12 shipped
+non-blocking"), Kallat's T12 failure cannot be shipped around.** Prosper's
+seat-band restructure decoupled its quoted figure from the exact
+`users_now` value, so an unverified headcount didn't move the headline
+price. Kallat has no equivalent band: `users_now` (40 vs. the `smb`
+ceiling of 30) sets the **segment** directly (`mid_market` vs `smb`),
+which sets the **blended rate** (525 vs 395 AED/hr), which moves
+`build_value_aed` by 27.8% (see 2026-08-06 entry above). There is no band
+wide enough to absorb a rate-card change — this is a structural
+dependency, not a sizing uncertainty. **No non-blocking rationale
+applies here, and no labelled-illustration figure is authorized until
+`users_now` is confirmed.** T12 remains a hard FAIL/blocker for Kallat by
+design.
+
+**Action taken**: confirmation question drafted for Sadique Abbas
+(decision-maker, per `client-brief.yaml`/`manifest.yaml` — not the
+transcript participants, who are all SGC-internal), routed as an
+ordinary SDR follow-up through Johnny Gurrera (the SDR who logged the
+2026-07-24 client call) rather than through the stamp→SDR→John→stamp
+sequence — it commits nothing and quotes no figure, so that gate does
+not apply. See `manifest.yaml`'s 2026-08-07 escalation entry and
+`00-intake/sdr-followup-headcount-2026-08-07.md` for the drafted
+question. Held, not sent — per standing instruction, no email is
+auto-sent at any stage.
+
+### Three fixes applied (hygiene only — no figures changed)
+
+1. **Quarantined** `04-draft/KP-2026-SUB-01_Rev1_Internal.html` and
+   `.pdf` to `04-draft/_quarantine/` (git-tracked rename) — both
+   rendered before the 2026-08-05 v3.0 recompute and never
+   re-rendered, still showing build value 121,716 / mobilisation 48,686
+   / subscription 7,790 against the current worksheet's 56,072 / 22,429
+   / 5,850. Never issued to the client. `_quarantine/NOTICE.md` added
+   explaining why, mirroring Prosper's existing `_quarantine/` precedent.
+2. **`02-calc/gate-report.md` marked SUPERSEDED in place** — a banner at
+   the top states plainly that "all 41 gates pass" in that file was
+   computed against the same stale pre-recompute figures, points to the
+   live worksheet, and instructs a re-run before this deal moves past
+   internal review. Historical content below the banner left unmodified,
+   consistent with this repo's convention of preserving superseded
+   figures rather than rewriting them.
+3. **`02-calc/risk-assessment.yaml:18` comment corrected, value
+   unchanged.** Was: `computed from this worksheet's build_value
+   (~21,554)` — matched neither the current `build_value_aed` (56,072)
+   nor the correct basis. Corrected to cite `exposure.contractual_peak_aed`
+   (33,643), matching the convention actually used in VGE/MRD/Prosper's
+   own `risk-assessment.yaml` files. `raw_score` (52) and `band`
+   (elevated) confirmed unchanged after the edit — the current numeric
+   outcome was already right, only its citation was wrong. Flagged
+   because, uncorrected, a future editor "fixing" the comment by plugging
+   in the literal `build_value_aed` would have pushed `raw_score` to 60 —
+   the top edge of the elevated band, one point from `high` (which would
+   require `mobilisation_50pct + pdc_full_balance + guarantee` instead of
+   the current instrument set).
+4. **`validate.py` check_19 added** (`INTERNAL_VOCABULARY_PHRASES`),
+   separate from check_18 by design — a narration/strategy leak
+   (`disarm-hesitation`) and a risk-input-is-a-guess leak
+   (`placeholder-driven`) are a different failure class from a
+   commercial-claim leak, and should fail distinguishably. Scoped to
+   `03-draft/`+`05-issued/` (same as check_18), narrow substring list
+   only (no generic words like "internal"/"draft") so the deliberate
+   "INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION" banner is never
+   caught. Ran against Kallat: correctly fails on 3 hits
+   (`09-partnership-terms.md`, `10-commercial-terms.md`,
+   `13-next-steps.md`, all "placeholder-driven"/"disarm-hesitation") —
+   confirms the check works and that Kallat's `03-draft/` genuinely has
+   not been cleaned of this vocabulary yet. `validate.py 02-clients/
+   KP-kallat-properties/` now correctly reports `NOT clean` (5 failures:
+   3 new check-19 hits, plus the pre-existing R11/R12 failures — Kallat
+   is not in `ALLOWED_CLIENTS`, unrelated to this pass). `validate.md`
+   updated to document check 19 and the new 1–13,16–19 gate-failure
+   range.
+
+No engine or policy change. No worksheet writes. No repricing. No
+Stage 5 work. `05-ops/validate.py`/`validate.md` (audit tooling, not
+engine/policy), `HANDOVER.md`, `manifest.yaml`, `02-calc/gate-report.md`
+(banner only), `02-calc/risk-assessment.yaml` (comment only), and
+`04-draft/` (file move only) are the only touched paths besides this
+file.

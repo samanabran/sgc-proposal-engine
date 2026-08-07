@@ -78,6 +78,31 @@ def _has_nearby_negation(text, match_start, window=60):
 
 COMMUNITY_ONLY_FORBIDDEN = ["Odoo Enterprise", "iOS / Android app", "iOS/Android app"]
 
+# check_19, separate from check_18 on purpose: check_18 catches commercial
+# CLAIMS that would misrepresent terms to a client (a promise, a rate, a
+# VAT position). This list catches internal NARRATION about SGC's own
+# authoring/strategy process leaking into client-facing prose — a
+# different failure mode with a different fix (delete the sentence, not
+# renegotiate the term). Evidence-based, not a generic ban list: each
+# entry below is a phrase actually found leaking into a draft this repo
+# audited (Kallat 2026-08-07 pass) — add to it as found, don't
+# pre-populate with hypotheticals.
+#   - "disarm-hesitation": names SGC's own negotiating posture
+#     (found: KP-2026-SUB-01 03-draft/10-commercial-terms.md).
+#   - "placeholder-driven": discloses that a risk/scoring input is an
+#     unconfirmed guess, not a verified fact — worse than a strategy
+#     leak, since it undermines the numbers themselves, not just the
+#     framing (found: KP-2026-SUB-01 03-draft/09-partnership-terms.md).
+# Deliberately narrow substring matches (not generic words like
+# "internal" or "draft") so the required "INTERNAL DRAFT — NOT FOR
+# CLIENT TRANSMISSION" banner and other intentional internal-only
+# disclaimers are never caught by this check — those are correct,
+# required text, not a leak.
+INTERNAL_VOCABULARY_PHRASES = [
+    "disarm-hesitation",
+    "placeholder-driven",
+]
+
 # Files where forbidden phrases are EXPECTED to appear (they name the
 # phrases as a reference list) — excluded from check 18.
 FORBIDDEN_PHRASE_EXEMPT_SUFFIXES = (
@@ -388,6 +413,21 @@ def check_18_forbidden_phrases(result, draft_files, edition):
                     if not _has_nearby_negation(text, m.start()):
                         result.fail("18. forbidden phrase", f"affirmative '{p}' claim found in {f}")
     result.ok("18. no forbidden phrases found outside exempt/historical reference files")
+
+
+def check_19_internal_vocabulary(result, draft_files):
+    """Internal narration/strategy vocabulary leaking into client-facing
+    draft prose — distinct failure mode from check_18 (commercial
+    claims), see INTERNAL_VOCABULARY_PHRASES comment above for why this
+    is a separate check rather than folded into check_18's list."""
+    for f in draft_files:
+        if any(f.endswith(s) for s in FORBIDDEN_PHRASE_EXEMPT_SUFFIXES) or _is_retracted_historical(f):
+            continue
+        text = open(f, encoding="utf-8").read()
+        for p in INTERNAL_VOCABULARY_PHRASES:
+            if p.lower() in text.lower():
+                result.fail("19. internal vocabulary leak", f"'{p}' found in {f}")
+    result.ok("19. no internal narration/strategy vocabulary found outside exempt/historical reference files")
 
 
 # ---------------------------------------------------------------------
@@ -741,6 +781,7 @@ def run(client_dir):
     check_14_entity(result)
     check_16_verbal_promises(result, client_dir)
     check_18_forbidden_phrases(result, draft_files, edition)
+    check_19_internal_vocabulary(result, draft_files)
 
     # V1-V5 + R1-R12 (additive, D-11/pricing-engine-cost-class-model.md Rev.2)
     check_v1_effort_reconciliation(result, ws)

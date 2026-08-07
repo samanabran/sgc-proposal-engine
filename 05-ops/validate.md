@@ -1,6 +1,6 @@
 # Running the Gate Check
 
-`validate.py` (Python, stdlib + PyYAML only) implements the 18 checks
+`validate.py` (Python, stdlib + PyYAML only) implements the 19 checks
 below against a client folder. Run it before every human review, and
 before every issue.
 
@@ -11,7 +11,7 @@ python 05-ops/validate.py 02-clients/{client}/
 Exit code 0 means clean. Non-zero means at least one check failed — the
 script prints which one and why, then exits.
 
-## The 18 checks
+## The 19 checks
 
 1. All pricing YAMLs parse; no `forbidden_rates` (690) anywhere in the
    client folder.
@@ -54,14 +54,24 @@ script prints which one and why, then exits.
     extended to any other brokerage`, `no VAT applies`, `VAT-registered`,
     `Odoo Enterprise` (if edition = community), `iOS / Android app` (if
     edition = community).
+19. No internal narration/strategy vocabulary anywhere in the draft or
+    issued document — a distinct failure mode from check 18: these
+    phrases don't misstate a commercial term, they leak SGC's own
+    authoring process or an unconfirmed-input caveat into client-facing
+    prose. Currently: `disarm-hesitation`, `placeholder-driven`
+    (`INTERNAL_VOCABULARY_PHRASES` in `validate.py` — extend as found,
+    evidence-based, not pre-populated with hypotheticals). Scoped to
+    exclude the deliberate "INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION"
+    banner and similar required disclaimers by keeping the phrase list
+    narrow rather than by any line-level exemption logic.
 
 ## Reading the output
 
-The script separates **gate failures** (checks 1–13, 16–18 — these block
+The script separates **gate failures** (checks 1–13, 16–19 — these block
 a deal from being commercially or legally sound) from the **entity
 resolution blocker** (check 14 — this blocks issue specifically because
 a real fact is genuinely still unknown, not because anything about the
-deal itself is wrong). A client folder that passes checks 1–13 and 15–18
+deal itself is wrong). A client folder that passes checks 1–13 and 15–19
 but fails check 14 is commercially clean and administratively blocked —
 report it that way, don't conflate the two.
 
