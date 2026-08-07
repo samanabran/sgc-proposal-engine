@@ -1924,3 +1924,85 @@ engine/policy), `HANDOVER.md`, `manifest.yaml`, `02-calc/gate-report.md`
 (banner only), `02-calc/risk-assessment.yaml` (comment only), and
 `04-draft/` (file move only) are the only touched paths besides this
 file.
+
+## 2026-08-07 (continued) — un-gating correction, review_stamp_check() built, mailbox-search downgrade, third Kallat transcript
+
+Same-day follow-up to the entry above. Four items, in the order Bran
+raised them.
+
+**1) Over-gating corrected.** A prior turn added a Bran→John approval
+gate and "take-it-or-leave-it" framing to the drafted headcount question
+for Sadique. Both wrong: that gate sequence is for anything carrying a
+figure or a commitment, and this carries neither; "take-it-or-leave-it"
+belongs to a priced offer, not a free scoping question. Reverted to the
+direct Johnny Gurrera → Sadique route. Bran's message in this session is
+treated as the review — the draft asking him to approve his own review
+was circular. The `bran@sgctech.ai` Gmail draft could not be deleted (no
+`delete_draft` tool in this session's toolset) — neutralized via
+`update_draft` instead, left for manual deletion.
+
+**2) `review_stamp_check()` built, not deferred to send time** — the
+reason it exists is to catch prose that changed after review; a check
+written the day something's ready to ship gets written to pass, not to
+test. Added to `render_r11_r12.py`'s `pre_render_gate()`. Refuses unless
+`04-draft/_review-stamp.yaml` exists, `decision == "approved"`, and
+`reviewed_commit` matches the current commit touching the client's
+reviewed material (`00-intake/`, `02-calc/`, `03-draft/`, `manifest.yaml`
+— `04-draft/` itself excluded so writing/regenerating a render doesn't
+invalidate its own review). Verified against both real corpus cases:
+Kallat's stamp (`025dc08`) passes clean; MRD — no stamp yet — now
+correctly refuses at the gate. That refusal is expected, not a
+regression: MRD was already documented as "not clear for issue"
+independent of check status.
+
+**3) Every negative finding built on this session's Gmail search is
+unsafe, not false — downgraded, not reversed.** Confirmed directly (not
+inferred from a prior session's note): `search_threads` with `to:me` —
+Gmail's own resolution of "me" to the authenticated account — resolves
+to `scholarixglobal@gmail.com` on live inbox results. This is the
+account MRD's retraction-artifact search and Prosper's attachment-5306
+search both ran against. The real conclusion, now stated plainly in
+`HANDOVER.md` §13/§14: client correspondence for these deals lives on
+`mail.sgctech.ai` behind SOGo webmail (confirmed by the 5306 rejection
+reply's own SMTP headers) — Gmail was never going to hold it, independent
+of which Gmail account. Every affected finding in `HANDOVER.md` (top
+headline, §1 MRD section, §8.1 Prosper section, §2 decisions #4/#6)
+downgraded to "not established — searched wrong mailbox," explicitly not
+reversed: MRD's retraction still isn't found, attachment 5306 still isn't
+retrieved, neither figure changes. A new highest-value, blank-owner
+decision (§2 #8) logs the actual unblock: a read path to
+`mail.sgctech.ai`/SOGo, which could resolve MRD's blocker outright and
+recover 5306 directly.
+
+**4) A third Kallat transcript surfaced — T12's headcount assertion now
+passes.** Bran supplied a previously-missing, undated discovery/demo call
+transcript (Sadique Abbas present). Direct exchange: asked "How many
+agents do you have right now?", Sadique answers "We have approximately
+40 or 15, approximate" — almost certainly a garbled "40 or 50,"
+corroborated independently by the 2026-07-16 internal call's own
+"40 people... 50 then" recollection. Added verbatim to
+`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md`;
+`client-brief.yaml:12`'s citation corrected to point at it;
+`USERS_NOW_PROVENANCE` in `test_pricing_engine.py` upgraded to verified
+(same tier as VGE's client-direct-but-approximate quote, not MRD's exact
+"Five people"). **Re-ran T12 directly**: Kallat's headcount assertion and
+the segment-classification assertion (contingent on it) now both PASS —
+only the unrequested-scope assertion (unrelated 4-package contamination)
+still fails.
+
+**What this does and doesn't change**: the specific structural risk
+flagged in the prior entry — 40 vs. 30 crossing the `smb`/`mid_market`
+boundary — is substantially de-risked, since both ends of Sadique's own
+"40 or 50" range clear the 30-user ceiling. It does **not** fully resolve
+headcount — "approximate" is Sadique's own word, and 40 is the low end of
+his range, not a confirmed figure. The drafted SDR follow-up still has
+value for a precise number. Whether this is sufficient to proceed past
+T12 to Stage 5 is explicitly left as Bran's call, not decided by this
+pass — no pricing work performed on the strength of this transcript.
+
+No engine or policy change. No worksheet writes. No repricing. No Stage 5
+work. Files touched beyond this one: `render_r11_r12.py`, `HANDOVER.md`,
+`manifest.yaml`, `00-intake/sdr-followup-headcount-2026-08-07.md`,
+`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md` (new),
+`00-intake/client-brief.yaml` (citation only), `test_pricing_engine.py`
+(`USERS_NOW_PROVENANCE` entry only), `04-draft/_review-stamp.yaml` (new).

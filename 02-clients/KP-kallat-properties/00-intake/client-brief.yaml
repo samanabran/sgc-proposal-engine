@@ -9,7 +9,7 @@ client:
   contact_phone: "+971 54 791 6003"
 
 scale:
-  users_now: 40                          # per discovery call: "40-50 sales agents"; lower confirmed bound used
+  users_now: 40                          # CORRECTED CITATION 2026-08-07: was cited to "discovery call" generically, but neither transcript in this repo at the time actually contained it (T12 UNSOURCED, see test_pricing_engine.py history). Now sourced: 00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md, Sadique Abbas (client, present), asked "How many agents do you have right now?", answered "We have approximately 40 or 15, approximate" (transcription almost certainly garbles "40 or 50"). Client-direct, agent-specific, but Sadique's own word is "approximate" -- 40 is the lower end of his own range, not a precise confirmed count. SDR follow-up drafted to pin down the exact figure (00-intake/sdr-followup-headcount-2026-08-07.md).
   users_12mo: 40
   segment: mid_market                     # 40 users exceeds smb max_users (30) — policy.yaml segments
 

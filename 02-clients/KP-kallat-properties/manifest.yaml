@@ -206,6 +206,38 @@ escalations:
       entirely, scholarixglobal@gmail.com was never going to contain it,
       account mismatch or not. Logged in HANDOVER.md as a new finding.
 
+  - date: "2026-08-07"
+    raised_by: "Bran (supplied the file directly)"
+    issue: >
+      A third Kallat call transcript, previously missing from this repo,
+      was supplied: a discovery/demo call, date unconfirmed but likely
+      pre-2026-07-16, with Sadique Abbas present (client-side), Johnny
+      Gurrera, and an SGC voice credited "Scholarix Global Consultant".
+      Directly answers the T12 headcount-provenance gap: asked "How many
+      agents do you have right now?", Sadique answers "We have
+      approximately 40 or 15, approximate" -- almost certainly a garbled
+      "40 or 50", corroborated independently by the 2026-07-16 internal
+      call's own "40 people... 50 then" recollection.
+    resolution: >
+      00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md added,
+      verbatim, with provenance notes and the transcription anomaly
+      flagged rather than silently corrected. client-brief.yaml:12's
+      citation corrected to point at this file instead of a generic
+      "discovery call" reference. USERS_NOW_PROVENANCE in
+      test_pricing_engine.py upgraded from UNSOURCED to verified (same
+      tier as VGE's client-direct-but-approximate quote). Re-ran T12:
+      Kallat's headcount assertion and the segment-classification
+      assertion (contingent on it) now both PASS -- only the unrelated
+      unrequested-scope assertion (the 4-package contamination) still
+      fails. Does NOT fully resolve headcount: Sadique's own word is
+      "approximate", and 40 is the low end of the range he gave, not a
+      confirmed figure -- the drafted SDR follow-up
+      (00-intake/sdr-followup-headcount-2026-08-07.md) still has value
+      for pinning down the exact number before Stage 5 prices against
+      it. Whether this is now sufficient to proceed past T12 is Bran's
+      call; not decided unilaterally by this pass. Logged in full in
+      HANDOVER.md section 12.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

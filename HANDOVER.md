@@ -6,9 +6,15 @@ needed a one-line verification to state accurately, that's noted inline;
 nothing here required opening a new investigation thread.
 
 **Headline: MRD is not clear for issue, independent of any gate/check
-status.** See §1 below — there is no artifact in this repo documenting
-that the client was ever told Rev1/Rev2's figures were wrong. The
-client's last actual communicated understanding is AED 879/month.
+status.** See §1 below — no artifact in this repo, and no artifact found
+by this session's mailbox search, documents that the client was ever
+told Rev1/Rev2's figures were wrong. **That mailbox search is now known
+to be unsafe — see §14: it searched `scholarixglobal@gmail.com`, which
+is not where this deal's client correspondence lives.** Not established
+either way, not ruled out. On the evidence this repo can actually stand
+behind (its own files), the client's last communicated understanding is
+still AED 879/month — that part doesn't change, only the confidence
+behind "no retraction exists anywhere" does.
 
 ---
 
@@ -27,10 +33,22 @@ and the Rev2 equivalent exist and are thorough — but they are internal
 engineering post-mortems (defect lists, written as part of this rebuild).
 **Neither records a date or a channel by which the client was told Rev1
 or Rev2 was withdrawn.** No email log, no call note, no client-facing
-correction exists anywhere in this repo. Per the instruction that
-prompted this check: that means MRD is not clear for issue regardless of
-check status — the client's live understanding, as far as this repo's
-evidence goes, is still Rev2's AED 879/month.
+correction exists anywhere in this repo's own files.
+
+**The mailbox-search leg of this finding is downgraded, not reversed
+(2026-08-07 — see §14).** This session's negative Gmail search results
+all came from `scholarixglobal@gmail.com`, an account now confirmed to
+not be where this deal's client correspondence lives (§14's SMTP-header
+evidence points at `mail.sgctech.ai`/SOGo). **Correct statement: "no
+retraction artifact found" is NOT ESTABLISHED as "no retraction artifact
+exists" — the search covered this repo's own files (still solid) and one
+Gmail account (not solid, wrong mailbox).** Per the instruction that
+prompted this check, the practical conclusion is unchanged for now — MRD
+is still not clear for issue on the evidence actually in hand — but the
+reason has narrowed: it's not "no retraction exists," it's "this repo
+cannot currently prove one does or doesn't." A read path to
+`mail.sgctech.ai`/SOGo (§14, §2 decision #8) is the one thing that
+resolves this cleanly either way.
 
 **Current gate/check status (Rev3, in-repo only)**: all 41 pricing gates
 pass (manifest.yaml). Renderer (R11/R12): T10, T12, spec-binding,
@@ -129,10 +147,11 @@ artifact or answer — not by more in-repo analysis.
 | 1 | Kallat: is the AED 19,652 unrequested-scope delta (4 packages, 35% of quoted build value) authorized, and is `users_now=40` real? | ______ | A written client confirmation (email/chat) naming the 4 extra packages as agreed, OR a scope trim to the 4 originally-requested packages. Separately: any timestamped client-side statement of headcount (both call transcripts are internal-only or lack a figure). |
 | 2 | VGE: is the brief-pinned AED 14,800 Implementation Value / AED 1,650 Subscription Fee (and the four figures downstream of it) a deliberate, client-confirmed quote, or an authoring artifact? | ______ | The original brief document itself (not in this repo — `01-source/README.md:1`: "No raw client materials were provided") or a client-side re-confirmation at Rev3 issue. |
 | 3 | Prosper: is `users_now=31` (CRM Lead 8407's `x_employee_count`) an accurate, current headcount? | ______ | Direct confirmation from Louai Khzam (Owner) or Dian Sajulga (authorized operational contact), in a timestamped medium. |
-| 4 | MRD: what is Rev1/Rev2's actual retraction status vis-à-vis the client? | ______ | Evidence of the correction communication (if one happened) — or, if none exists, a decision on whether Rev3's issue must be framed as a price correction rather than a first quote. |
+| 4 | MRD: what is Rev1/Rev2's actual retraction status vis-à-vis the client? **Updated 2026-08-07**: this repo's own files show no correction; a Gmail search of `scholarixglobal@gmail.com` also found none, but that account is confirmed (§14) not to be where this deal's correspondence lives — the Gmail leg is not established, not a real "checked, clean" result. | ______ | Evidence of the correction communication (if one happened, likely on `mail.sgctech.ai`/SOGo per §14 — see decision #8) — or, if none exists, a decision on whether Rev3's issue must be framed as a price correction rather than a first quote. |
 | 5 | Prosper: the client's only live commercial understanding rests on a document (attachment 5306, AED 45,000 + 1,450/mo, forbidden rates) that no gate in this repo has inspected, and it was already rejected on cost. Even the most stripped-down traceable-scope reconfiguration (AED 67,086 Year-1) still prices above the rejected figure (~AED 61,000). | ______ | A decision on commercial strategy before any further client-facing work: whether to pursue a Must Have-only build (pending scope-removal authorization — none of the 7 gaps are priceable regardless), a different rate/margin structure, or hold. Not resolvable by more in-repo analysis — the unit economics (structural overlays + 18% financing uplift) are the actual driver, not the per-hour rate or scope size — see §8 below. |
-| 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) is a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. |
+| 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. **Updated 2026-08-07**: the retrieval attempt searched `scholarixglobal@gmail.com`, now confirmed (§14) not to be the mailbox this thread lives in — "not retrieved" was never "not retrievable." Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) remains a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. See decision #8 — a general mailbox read path may make this individual ask unnecessary. |
 | 7 | Prosper: the platform/CTS floor (AED 3,648/mo, headcount-driven, `policy.yaml:70-87`) does not move when scope is cut — see §8.5. At the theoretical limit of zero build value, the floor alone over 24 months (AED 87,552) still exceeds the PRJ document's entire 24-month figure (~AED 79,800, itself unverified per #6). No configuration this repo is authorized to build can beat the rejected number on price. | ______ | A pricing-model decision (rate, uplift, or platform-floor structure) — explicitly out of this pass's constraint. See §9 recommendation. |
+| 8 | **Highest-value open item (added 2026-08-07, §14).** Client correspondence for these deals lives on `mail.sgctech.ai` behind SOGo webmail, not in the `scholarixglobal@gmail.com` account this session is connected to (confirmed by the attachment-5306 rejection reply's own SMTP headers, §8.1/§14) — and possibly also not in `renbranmadelo@gmail.com`, the account this session's own setup notes as intended but never actually connects to. Every negative finding in this repo built on a Gmail search (MRD's retraction search, decision #4; Prosper's attachment-5306 search, decision #6) is unsafe until this is resolved — both are downgraded to "not established," not reversed, pending it. | ______ | A read path (webmail login, IMAP, or an export) to `mail.sgctech.ai`/SOGo — or confirmation of what `renbranmadelo@gmail.com` actually contains, if that's the intended account. Whoever owns SGC's mail infrastructure. Resolving this potentially unblocks MRD outright (if a retraction communication exists there) and recovers attachment 5306 directly, without needing Talha specifically (decision #6). |
 
 ---
 
@@ -288,7 +307,7 @@ issue** — see the headline at the top of this file.
 
 ### 8.1 Attachment 5306 — not retrieved, every PRJ figure is now UNVERIFIED
 
-Searched the one Gmail account this session has access to
+Searched the one Gmail account this session had access to
 (`scholarixglobal@gmail.com` — **not** `renbranmadelo@gmail.com` as
 requested; that account is not the one connected here) for the proposal
 subject, "Prosper," `prosperuae.com`, "5306," "Talha," "Sajulga," and the
@@ -296,25 +315,38 @@ subject, "Prosper," `prosperuae.com`, "5306," "Talha," "Sajulga," and the
 2026-07-17 (corroborating the *already-logged* internal demo-prep
 transcript — one snippet reads "particularly employee check[-in]...",
 matching that transcript's own content) and one Otter.ai email
-confirming Talha's personal address is `talhasheraz9803@gmail.com`. **No
-trace of the proposal send, attachment 5306, or any Prosper-side
-correspondence.**
+confirming Talha's personal address is `talhasheraz9803@gmail.com`.
 
-This isn't just an account mismatch. The rejection email's own SMTP
-headers (`00-intake/_source-documents/
+**"No trace of the proposal send, attachment 5306, or any Prosper-side
+correspondence" — downgraded 2026-08-07, per §14: NOT ESTABLISHED, wrong
+mailbox searched.** This was written as a negative finding ("not there")
+when it should have been written as an inconclusive one ("not found in
+the one account checked, and that account is now confirmed to not be
+where this correspondence lives"). Not reversed — attachment 5306 is
+still not retrieved, still not read by anyone in this audit — just no
+longer treated as evidence of absence.
+
+The reasoning for *why* was correct even when the account-mismatch
+framing understated it: the rejection email's own SMTP headers
+(`00-intake/_source-documents/
 email-2026-07-27_rejection_fwd-2026-07-28.eml`) show the real thread ran
 on `mail.sgctech.ai` via SOGoMail — SGC's own private mail server, not
-Gmail at all. Gmail was structurally never going to contain it, account
-mismatch or not.
+Gmail at all. **Gmail was structurally never going to contain it — not
+because of which Gmail account, but because it isn't a Gmail thread.**
+See §14 for the account-identity confirmation and §2 decision #8 for the
+resulting highest-value open item: a read path to `mail.sgctech.ai`/SOGo.
 
-**Every PRJ-document figure in this repo's comparisons is UNVERIFIED as
-of this pass** — AED 45,000, AED 1,450/mo, the AED 690/650 rates, the
-Care Plan start month (11 vs 12 months), and the resulting Year-1/24-month
-totals. All of it is a secondhand account (this repo's own prior
-`deal-card.md`/`client-brief.yaml` description of a document nobody in
-this audit has read), not a verified extraction. Marked as such
-everywhere it's used going forward, including the client's own AED
-45,000/1,450 — the only numbers we currently believe they're holding.
+**Every PRJ-document figure in this repo's comparisons remains
+UNVERIFIED, for the same reason as before, now stated more precisely:**
+AED 45,000, AED 1,450/mo, the AED 690/650 rates, the Care Plan start
+month (11 vs 12 months), and the resulting Year-1/24-month totals are
+still a secondhand account (this repo's own prior `deal-card.md`/
+`client-brief.yaml` description of a document nobody in this audit has
+read), not a verified extraction — that conclusion doesn't depend on
+which mailbox was searched and stands unchanged. What changes is only
+the framing of the *search itself*: "not found" reads as a completed,
+authoritative search; the accurate framing is "not found by a search of
+the wrong mailbox," which is a much weaker and more reversible state.
 
 ### 8.2 Per-agent finding — rule out as a positioning device for Prosper
 
@@ -756,6 +788,36 @@ Corrected same day per direct instruction; `manifest.yaml`'s two
 2026-08-07 escalation entries record both the mistake and the fix
 rather than rewriting history.
 
+**Major update, same day: a third transcript surfaced, and T12's
+headcount assertion now passes.** A previously-missing, undated
+discovery/demo call transcript (supplied 2026-08-07, Sadique Abbas
+present) was added:
+`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md`. Direct
+exchange: asked "How many agents do you have right now?", Sadique
+answers "We have approximately 40 or 15, approximate" — almost certainly
+a garbled "40 or 50," corroborated independently by the internal
+2026-07-16 call's own "40 people... 50 then" recollection.
+`USERS_NOW_PROVENANCE` in `test_pricing_engine.py` upgraded to verified
+(same tier as VGE's "boutique brokerage" quote — client-direct and
+agent-specific, not a precise confirmed count). **Re-ran T12 directly**:
+Kallat's headcount assertion now `[ OK ]`, and the segment-classification
+assertion (contingent on it) also now `[ OK ]` — the only remaining T12
+failure for Kallat is the unrelated unrequested-scope one (§11/CHANGELOG,
+the 4-package contamination, unaffected by this).
+
+**What this changes and what it doesn't.** The specific structural risk
+flagged above — 40 vs. 30 crossing the `smb`/`mid_market` boundary — is
+substantially de-risked: both ends of Sadique's own "40 or 50" range
+clear the 30-user `smb` ceiling, so the segment call is very unlikely to
+flip regardless of exactly where in that range the true number sits.
+**It does not fully resolve the question**: "approximately... approximate"
+is Sadique's own hedge, not a firm count, and 40 is the low end of the
+range he gave, not a midpoint or confirmed figure. **This does not
+unilaterally clear Stage 5** — that's a materially better position than
+UNSOURCED, but the drafted SDR follow-up still has real value for a
+precise figure before pricing against it, and whether this is now
+sufficient to proceed is Bran's call, not this session's to make alone.
+
 ---
 
 ## 13. Confirmed: this session's Gmail tooling authenticates as `scholarixglobal@gmail.com`, not `renbranmadelo@gmail.com` (2026-08-07)
@@ -777,18 +839,30 @@ account identity had been checked. No indication that draft failed to
 create, so `scholarixglobal@gmail.com` does have working send/draft
 capability — the issue is which mailbox it is, not whether it works.
 
-**This plausibly explains attachment 5306's disappearance, not just
-coincides with it.** §8.1 already found the actual Prosper rejection
-thread's SMTP headers point to `mail.sgctech.ai` via SOGoMail — a
-company mail server, not Gmail at all. If client correspondence for
-these deals generally lives there (or in `renbranmadelo@gmail.com`,
-per this session's own account table, which this session has never had
-access to), `scholarixglobal@gmail.com` was never going to contain it,
-independent of anything about attachment 5306 specifically. **Not fully
-closed**: this confirms the account this session is authenticated as,
-not why that's the account connected, nor whether `renbranmadelo@gmail.com`
-or `mail.sgctech.ai` would actually contain Kallat's or Prosper's missing
-correspondence — that requires access this session doesn't have.
+**The real conclusion, stated plainly: client correspondence for these
+deals lives on `mail.sgctech.ai` behind SOGo webmail, not in Gmail at
+all — so the Gmail connection was never going to hold it, independent of
+which Gmail account.** §8.1 already found the actual Prosper rejection
+thread's SMTP headers point there. That is not a coincidence sitting
+next to this account-mismatch finding — it is the explanation for it.
+Every negative result this session got from `scholarixglobal@gmail.com`
+(attachment 5306, and — downgraded above per this section — MRD's
+retraction search) was always going to come back empty, regardless of
+whether the connected account had been `scholarixglobal@gmail.com`,
+`renbranmadelo@gmail.com` (this session's own account table lists this
+as the intended connection, and this session has never actually had
+access to it), or any other Gmail address. **Absence of evidence from
+Gmail, in general, is not evidence of absence for these deals — the
+evidence lives elsewhere.**
+
+**What this confirms vs. what it doesn't**: confirmed — this session's
+tooling authenticates as `scholarixglobal@gmail.com`; confirmed — at
+least one relevant thread (the 5306 rejection reply) ran on
+`mail.sgctech.ai`/SOGo. **Not yet confirmed**: that *all* relevant
+correspondence (MRD's, Kallat's) also lives there rather than being
+scattered across multiple systems, and this session still has no read
+access to `mail.sgctech.ai`/SOGo to check directly. Getting that access
+is now logged as the highest-value open item — §2 decision #8.
 
 **Decision #1 in §2 above is the resolving action for this entry too** —
 this doesn't add a new decision, it records that the question is now

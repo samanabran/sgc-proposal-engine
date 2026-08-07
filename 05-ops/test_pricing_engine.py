@@ -909,11 +909,25 @@ def t9_worksheet_internal_consistency():
 USERS_NOW_PROVENANCE = {
     # client: (verified: bool, source) -- audited 2026-08-06, see
     # CHANGELOG.md pricing v3.1 addenda for the full derivation of each.
-    "KP-kallat-properties": (False,
-        "UNSOURCED -- client-brief.yaml:12 cites both call transcripts, "
-        "neither contains a client-side headcount statement; "
-        "call-transcript-2026-07-16-internal-prep.md's own header: "
-        "'no client present'"),
+    "KP-kallat-properties": (True,
+        "UPGRADED 2026-08-07 -- previously UNSOURCED (both then-logged "
+        "transcripts lacked a client-side statement). A third transcript, "
+        "supplied 2026-08-07, undated, was missing from this repo until "
+        "now: 00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md. "
+        "Direct, client-present exchange (~13:04-13:33): asked 'How many "
+        "agents do you have right now?', Sadique Abbas answers 'We have "
+        "approximately 40 or 15, approximate' -- transcription almost "
+        "certainly garbles '40 or 50' (matches, independently, the "
+        "internal 2026-07-16 call's own '40 people... 50 then' recollection). "
+        "Weaker tier than MRD's exact 'Five people': client-direct and "
+        "agent-specific, like VGE's Nadja quote, but Sadique's own word is "
+        "'approximate' and the transcribed number itself is internally "
+        "inconsistent (40 vs 15) -- verified=True reflects genuine "
+        "client-sourcing, NOT a precise confirmed headcount. The drafted "
+        "SDR follow-up (00-intake/sdr-followup-headcount-2026-08-07.md) "
+        "still has value for pinning down the exact figure before Stage 5 "
+        "prices against it -- this upgrades provenance, it doesn't resolve "
+        "the number."),
     "PRO-prosper-realestate": (False,
         "externally sourced, unverified by this audit -- users_now=31 "
         "traces to CRM Lead 8407's x_employee_count field, outside this "
