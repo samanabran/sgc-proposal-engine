@@ -22,11 +22,11 @@ the end rather than folded quietly into "yes, with customization."
 **1. Can your system support CRM, admin, KPI tracking, and ERP features in one platform?**
 
 **Partial.** Yes for CRM (leads, clients, deal pipeline), admin/role
-management, KPI/reporting dashboards, and core property/ERP functions
-(property register, TRN-compliant invoicing) — all in one Odoo platform.
-**Not included**: task management, calendar/scheduling, approval
-workflows, or commission tracking as standalone modules — see the gap
-list below.
+management, and KPI/reporting dashboards — all in one Odoo platform.
+**Not included in the current quote**: TRN-compliant invoicing (a real
+capability, just not in this scope — see the gap list below), task
+management, calendar/scheduling, approval workflows, or commission
+tracking as standalone modules.
 
 **2. Can we customize the fields based on our company requirements?**
 
@@ -79,21 +79,20 @@ there's just nothing to install.
 
 **11. What is the monthly cost per user?**
 
-**Held.** This depends on confirming how many of your 31 team members
-would need an individual system login — see the headcount question
-below. We're not willing to quote a per-user figure against a number we
-haven't confirmed with you.
+**AED 4,560 per month, flat, covering a band of up to 35 users** — not a
+per-seat charge, so it doesn't change within that range. Every role your
+own document lists as needing system access (Agent, Admin, Manager, CEO)
+counts toward the band. Worked out per person at your current headcount
+of 31 (itself **not yet confirmed** — see the question below), that's
+**AED 147/user/month, shown here only as an illustration of what the
+flat fee works out to, not a separate quoted rate.** If you grow past 35,
+we re-quote for the next band rather than scaling automatically.
 
 **12. Is there a setup fee or customization fee?**
 
-**AED 12,366 at kickoff, labelled: traceable-scope configuration only**
-— covering the property register, CRM/leads, roles, and reporting scope
-that maps directly to your own Must Have list (see the gap list below
-for what this figure does *not* include). This is one of three
-configurations priced internally; this is the one that most closely
-matches what you actually asked for, not our full standard package.
-*[Whether this figure is included when this form is sent is a separate,
-still-open decision — see the note at the end of this document.]*
+**AED 12,366 at kickoff** — covering the scope that maps directly to
+your own Must Have list (see the gap list below for what this figure
+does *not* include), not our full standard package.
 
 **13. Do you provide training for our team?**
 
@@ -129,6 +128,18 @@ Attendance in particular were discussed in real depth on our last call —
 we're not pretending they weren't raised. They would each need a real
 scoping and estimation exercise before we could put a number on them,
 which we haven't done, and won't invent a figure for now.
+
+**A different category, worth distinguishing**: TRN-compliant invoicing
+is not in this quote either, but not because it's unpriceable — it's a
+real, deliverable capability we simply didn't include in this
+narrowed-down scope. If you want it, it's addable, priced separately
+rather than assumed included.
+
+**AI capability, excluded explicitly.** No AI usage credits or
+assistant functionality are included in this quote. We know an AI
+assistant, API-key based configuration, and a Telegram-based lead
+capture bot were all demonstrated live in our conversations — that
+demonstration is not part of what's priced here.
 
 ## One thing we need from you before we can finish question 11
 
