@@ -54,6 +54,7 @@ post-render check fails.
 """
 import os
 import re
+import subprocess
 import sys
 import io
 import contextlib
@@ -64,6 +65,71 @@ import pricing_engine as pe  # noqa: E402
 import test_pricing_engine as tpe  # noqa: E402  -- reused for the pre-render gate only
 
 ALLOWED_CLIENTS = ["MRD-meridianview-realty"]
+
+
+# ---------------------------------------------------------------------
+# review_stamp_check() (2026-08-07). Named in the original Kallat
+# instruction, built now rather than at send time on purpose: a check
+# written the day something's actually ready to go out gets written to
+# pass, not to test. This stamp (02-clients/{client}/04-draft/
+# _review-stamp.yaml) is the artifact it verifies against.
+#
+# "Matches the current prose commit" is scoped to the material a review
+# actually covers -- 00-intake/, 02-calc/, 03-draft/, and manifest.yaml
+# -- deliberately excluding 04-draft/ itself (rendered output and the
+# stamp file live there; including them would make writing the stamp
+# invalidate itself, and would make regenerating a render invalidate a
+# still-valid review of the underlying commercial content).
+# ---------------------------------------------------------------------
+REVIEWED_MATERIAL_SUBPATHS = ("00-intake", "02-calc", "03-draft", "manifest.yaml")
+
+
+def _current_prose_commit(client_dir):
+    """Hash of the most recent commit touching this client's reviewed
+    material (see REVIEWED_MATERIAL_SUBPATHS). Returns None if git isn't
+    available or no commit touches those paths (e.g. uncommitted-only
+    material -- treated as unreviewable, not as matching any stamp)."""
+    paths = [os.path.join(client_dir, p) for p in REVIEWED_MATERIAL_SUBPATHS]
+    try:
+        out = subprocess.run(
+            ["git", "log", "-1", "--format=%H", "--", *paths],
+            cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    commit = out.stdout.strip()
+    return commit or None
+
+
+def review_stamp_check(client):
+    """Refuses to treat this client as send-ready unless
+    04-draft/_review-stamp.yaml exists, decision == 'approved', and
+    reviewed_commit matches the current prose commit (see
+    _current_prose_commit) -- so any edit to the reviewed material after
+    the stamp was written invalidates it automatically, with no separate
+    invalidation step required. Returns a list of blocking reason
+    strings (empty = clear)."""
+    client_dir = os.path.join(REPO_ROOT, "02-clients", client)
+    stamp_path = os.path.join(client_dir, "04-draft", "_review-stamp.yaml")
+    if not os.path.exists(stamp_path):
+        return [f"{stamp_path} does not exist -- no review stamp on record, refusing"]
+
+    stamp = pe._load(stamp_path)
+    for field in ("reviewer", "timestamp", "decision", "reviewed_commit"):
+        if not stamp.get(field):
+            return [f"{stamp_path} missing required field '{field}'"]
+    if stamp["decision"] != "approved":
+        return [f"{stamp_path} decision is '{stamp['decision']}', not 'approved' -- refusing"]
+
+    current_commit = _current_prose_commit(client_dir)
+    if current_commit is None:
+        return [f"could not determine the current prose commit for {client_dir} "
+                "(git unavailable or no commit touches the reviewed paths) -- refusing"]
+    if current_commit != stamp["reviewed_commit"]:
+        return [f"{stamp_path} reviewed_commit={stamp['reviewed_commit']} does not match "
+                f"the current commit touching this client's reviewed material ({current_commit}) "
+                "-- content has changed since review, stamp invalidated, refusing"]
+    return []
 
 
 # ---------------------------------------------------------------------
@@ -93,6 +159,9 @@ def pre_render_gate(client):
 
     legal_reasons = legal_identity_gate()
     reasons.extend(legal_reasons)
+
+    stamp_reasons = review_stamp_check(client)
+    reasons.extend(stamp_reasons)
 
     return (len(reasons) == 0), reasons
 
