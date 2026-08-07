@@ -738,6 +738,24 @@ to close VGE and MRD, per how hard §8.1's search for attachment 5306
 turned out to be even when actively looking (wrong Gmail account tried,
 real thread lived on a different mail server entirely).
 
+**A sibling class, distinct from the table above, found 2026-08-08**:
+those rows are documents that came from *outside* this repo's
+governance entirely. Kallat's quarantined `04-draft/` HTML/PDF are
+different — produced *inside* this repo, but by
+`02-clients/KP-kallat-properties/04-draft/assemble_and_render.py`, a
+standalone script with no relationship to `render_r11_r12.py`'s
+`ALLOWED_CLIENTS`/`review_stamp_check()`/T10-T12 gate. It reads
+`03-draft/` markdown directly and writes client-shaped HTML/PDF via
+Playwright, run by hand, checked against nothing. `ALLOWED_CLIENTS` has
+been MRD-only since the day it was created (2026-08-06, `b3e8cd3`) — but
+that was never the relevant fact, since Kallat's renders never went
+through that pipeline to be excluded from in the first place. Full
+detail: `02-clients/KP-kallat-properties/manifest.yaml`, 2026-08-08
+entry, and `04-review/internal-review-request-2026-08-08.md`. Worth
+checking whether VGE, MRD, or PRO have an equivalent standalone render
+script before assuming R11/R12's gate is the only path to a client-shaped
+artifact anywhere in this repo — not checked this pass.
+
 **Kallat's anchor inverts Prosper's problem, it doesn't repeat it.**
 Prosper's PRJ figure sits *below* what this repo's governed model can
 price at any configuration — a pure floor problem (§8.5, §9). Kallat's

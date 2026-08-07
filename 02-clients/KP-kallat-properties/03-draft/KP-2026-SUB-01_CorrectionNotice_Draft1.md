@@ -52,6 +52,17 @@ RERA-licensed agency) holds the portal-side access, SGC builds against
 it. That resolves the logical tension: charging a fee and disclaiming
 accreditation are not actually contradictory once the fee is understood
 as build labor, not a pass-through of a partnership SGC doesn't have.
+Item 3 revised again 2026-08-08 (third pass): added the AED 7,300
+combined total (Sadique asked about all three portals on the call, not
+one at a time — splitting the figure and leaving the addition to him
+would repeat the soft-pedalling this letter exists to correct). Broken
+the feed/API-access precondition out into its own paragraph with an
+explicit admission that we don't know whether Kallat's current
+subscriptions include it or what each portal charges to add it — that
+clause was a trailing subclause in the prior version, which quietly
+introduced a second unquantified cost in the same paragraph as the
+correction of the first one.
+
 **COMMERCIAL RISK, not just a caveat** — raised to that level 2026-08-08
 per instruction. No file anywhere in this repo records a completed
 portal_sync delivery for any client — VGE, MRD, and PRO all show this
@@ -162,14 +173,22 @@ especially since data security was the first thing you raised.
 First, cost: we told you the only cost involved is the portal's own API
 fee, with the connection itself being "one click" at no charge from us.
 Our current catalogue rate is different: AED 3,900 one-time for
-Property Finder, and AED 3,400 one-time for Bayut/Dubizzle together, for
-the integration work itself — separate from whatever subscription each
-portal charges you directly, and contingent on your own portal account
-already including feed/API access. Second,
-accreditation: we referred to our system as "already accredited by" all
-three portals. That's not something we hold — the sync is built against
-your own portal access, not a partnership status on our side — and we
-shouldn't have described it as an existing accreditation.
+Property Finder, and AED 3,400 one-time for Bayut/Dubizzle together —
+AED 7,300 one-time in total if you want all three connected. That's for
+the integration work itself, separate from whatever subscription each
+portal charges you directly.
+
+On that point: connecting any of the three also requires your own
+portal account to already include feed or API access, not just a
+standard listing account. We don't know whether your current
+subscriptions include that, or what each portal charges to add it if
+they don't — that's a question for your own portal account managers,
+not something we can price from our side.
+
+Second, accreditation: we referred to our system as "already accredited
+by" all three portals. That's not something we hold — the sync is built
+against your own portal access, not a partnership status on our side —
+and we shouldn't have described it as an existing accreditation.
 
 We'd rather send you this correction now than have you discover any of
 it after signing. The priced proposal, including how we've structured

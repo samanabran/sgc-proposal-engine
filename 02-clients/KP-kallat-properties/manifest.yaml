@@ -596,6 +596,61 @@ escalations:
       "passes"/"clean" reference in this repo's history is a single
       sub-check in isolation, not a real render.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Item 3 needs the combined AED 7,300 total (Sadique asked about all
+      three portals, not one at a time) and the feed/API-access
+      precondition needs its own sentence admitting we don't know that
+      cost, not a trailing subclause. Gate finding needs to be narrower
+      and sharper: ALLOWED_CLIENTS fails Kallat before the T12 checks are
+      load-bearing, meaning those checks have never actually been tested
+      against this deal -- record that, and decide explicitly that
+      nobody adds Kallat to ALLOWED_CLIENTS, including to render this
+      letter. Question: quarantined Kallat HTML/PDF renders exist despite
+      MRD being the sole allowed client with no stamp -- how were they
+      produced, and is the quarantine set the actual full population of
+      Kallat artifacts?
+    resolution: >
+      Item 3 rewritten: states AED 3,900 + AED 3,400 = AED 7,300 combined
+      if all three portals are wanted; feed/API-access precondition now
+      its own paragraph, stating plainly SGC doesn't know whether
+      Kallat's subscriptions include it or what each portal charges to
+      add it, and directing Sadique to his own portal account managers.
+      Gate finding sharpened in 04-review/internal-review-request-2026-08-08.md:
+      ALLOWED_CLIENTS is ground 1 and short-circuits before grounds 2-4
+      are load-bearing -- the T12 checks have never once been the actual
+      barrier on this deal, only the allowlist has. Decision recorded:
+      nobody adds Kallat to ALLOWED_CLIENTS, not to test, not to render
+      this letter -- it ships, if approved, as a hand-reviewed document
+      outside the render path entirely, stated explicitly rather than
+      left to be discovered later as an undocumented ungoverned artifact
+      (HANDOVER.md §11's failure shape, avoided by naming it up front).
+      Question answered by reading the actual script: the quarantined
+      renders were produced by
+      02-clients/KP-kallat-properties/04-draft/assemble_and_render.py, a
+      standalone Playwright script with no relationship to
+      render_r11_r12.py -- imports none of its gating, checks nothing,
+      runs by hand. Added 2026-08-05 (525940d), a day before
+      ALLOWED_CLIENTS existed at all (2026-08-06, b3e8cd3) -- there was
+      never a window when the allowlist included Kallat; its renders
+      simply never went through that pipeline. Confirms the gate's
+      coverage is nominal, not comprehensive. Population re-checked:
+      repo-wide search for any KP-2026-SUB-01 file outside this client's
+      folder found nothing, no untracked Kallat files anywhere, current
+      04-draft/ (outside _quarantine/) holds only the script and
+      _review-stamp.yaml. The prior per-user grep's population is
+      confirmed complete as of today -- a snapshot fact, not a structural
+      guarantee, since the script remains live and ungated. Checked
+      whether the 07-options-inclusions.md SUPERSEDED annotation would
+      survive a re-render: the script's markdown converter doesn't handle
+      strikethrough (tildes would print literally) but does handle bold
+      and blockquotes, so the "SUPERSEDED -- DO NOT QUOTE" text and the
+      top-of-file banner would both still render and stay visible.
+      Decision #10 (signatory) left open per instruction -- Bran
+      confirming with the person directly, not an inference; signature
+      block unchanged (no name).
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

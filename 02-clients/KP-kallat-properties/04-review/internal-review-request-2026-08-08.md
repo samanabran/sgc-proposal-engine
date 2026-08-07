@@ -128,19 +128,79 @@ reviewed material). `review_stamp_check('MRD-meridianview-realty')` also
 refuses right now — but for a different reason again: no
 `_review-stamp.yaml` file exists for MRD at all.
 
-**What this means plainly**: Kallat has never once cleared this gate.
-Anything described elsewhere in this repo's history as "verified,"
-"clean," or "passes" for Kallat refers to one sub-check in isolation at
-one point in time (e.g. `CHANGELOG.md:1953`'s "Kallat's stamp passes
-clean," which was `review_stamp_check()` alone, snapshotted at commit
-`025dc08`) — never the full gate, and never a real render. `ALLOWED_CLIENTS`
-being MRD-only predates that snapshot and made the full gate a fail
-throughout, independent of stamp status. Two different, independent
-gates, both statements true at their respective times — not a
-contradiction, but also not evidence anything on Kallat has ever
-actually rendered clean end-to-end.
+**Precision on what this means, narrower than "never cleared end-to-end"**:
+ground 1 (`ALLOWED_CLIENTS`) is an allowlist — it fails Kallat before
+grounds 2–4 are ever load-bearing. That means the substantive checks (T12
+headcount, T12 unrequested scope, T12 segment) have never once been the
+thing actually holding this deal back — the allowlist has always gotten
+there first. Practical consequence: **if anyone ever adds Kallat to
+`ALLOWED_CLIENTS` to unblock a render, three checks that have never run
+to green against this client's real data become the only thing standing
+between Kallat and a render** — not three checks with a track record of
+catching problems here, three checks that have simply never been tested
+against this deal because ground 1 always short-circuited first.
+
+**Decision, recorded here**: nobody adds Kallat to `ALLOWED_CLIENTS` —
+not to test, not to render this correction letter. This letter ships, if
+and when Bran approves it, as a **hand-reviewed document outside the
+render path entirely** — it is not going to touch `review_stamp_check()`
+or `pre_render_gate()` before going to Sadique, because those gates are
+not going to be opened for Kallat to let it. That needs to be explicit
+and on record, because otherwise this becomes a client-facing artifact
+that never touched the gate and nobody wrote that down — exactly the
+"ungoverned document" failure shape this repo has flagged elsewhere
+(HANDOVER.md §11), just self-aware about it this time instead of
+discovered after the fact.
+
+## How were the quarantined Kallat renders actually produced?
+
+Checked directly, not assumed. `04-draft/_quarantine/KP-2026-SUB-01_Rev1_Internal.html`
+and `.pdf` were produced by
+`02-clients/KP-kallat-properties/04-draft/assemble_and_render.py` — a
+**separate, standalone script**, unrelated to `render_r11_r12.py`. It
+reads the 13 section files directly from
+`03-draft/KP-2026-SUB-01_Rev1/*.md`, converts them with its own small
+markdown-to-HTML function, and writes straight to
+`04-draft/KP-2026-SUB-01_Rev1_Internal.html`/`.pdf` via Playwright. Read
+the whole file: it imports nothing from `render_r11_r12.py`,
+`test_pricing_engine.py`, or `pricing_engine.py` — no `ALLOWED_CLIENTS`
+check, no `review_stamp_check()`, no T10/T12 gate, nothing. It's run by
+hand (`python assemble_and_render.py`) by anyone with repo access and
+Playwright installed, whenever they choose.
+
+Timing rules out "there was a window when the allowlist was open":
+`assemble_and_render.py` was added 2026-08-05 (commit `525940d`);
+`ALLOWED_CLIENTS` didn't exist until the next day, 2026-08-06 (`b3e8cd3`),
+and has been MRD-only since the moment it was created. There was never a
+time the allowlist included Kallat — it's simpler and worse than that:
+**Kallat's renders were never subject to that gate at all**, because
+they go through a completely different pipeline that has no gate of its
+own. Confirms your hypothesis directly: the gate's coverage is nominal —
+`render_r11_r12.py` governs only its own pipeline, and Kallat's actual
+client-shaped artifacts were, and still can be, produced entirely
+outside it.
+
+**Is the quarantine set the full population?** Checked, as of 2026-08-08:
+a repo-wide search for any `KP-2026-SUB-01`-named file outside
+`02-clients/KP-kallat-properties/` found nothing; `git status` shows no
+untracked Kallat files anywhere; the live `04-draft/` directory
+(outside `_quarantine/`) contains only the script itself and
+`_review-stamp.yaml`, no stray render. So as a snapshot, yes — the
+population already grepped (`03-draft/` plus `04-draft/_quarantine/`) is
+complete, and the per-user-figure finding stands as reported. **This is
+a snapshot fact, not a structural guarantee**: `assemble_and_render.py`
+is live and re-runnable at any moment by anyone, independent of any gate
+in this repo. One mitigating detail, checked rather than assumed: its
+markdown converter handles `**bold**`, headers, tables, and blockquotes,
+but not `~~strikethrough~~` — so if someone re-ran it today, the tildes
+around the superseded row would print literally rather than rendering as
+strikethrough, but the bold "**SUPERSEDED 2026-08-08 — DO NOT QUOTE**"
+text and the blockquote banner at the top of
+`07-options-inclusions.md` would both render correctly and stay visible.
+The annotation would survive a re-render; the gate around whether a
+re-render should happen at all still doesn't exist.
 
 A fresh, hash-matched `04-draft/_review-stamp.yaml` entry is required
-before this letter is ever send-ready, once you've reviewed it — and
-even then, `ALLOWED_CLIENTS` would need to be widened before Kallat
-could render through this pipeline at all, which is out of scope here.
+before this letter is ever send-ready through the governed path — moot
+for this specific letter per the decision above, since it isn't taking
+that path, but still the standard for anything that does.
