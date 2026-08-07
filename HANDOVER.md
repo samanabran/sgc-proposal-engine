@@ -9,7 +9,7 @@ nothing here required opening a new investigation thread.
 status.** See §1 below — no artifact in this repo, and no artifact found
 by this session's mailbox search, documents that the client was ever
 told Rev1/Rev2's figures were wrong. **That mailbox search is now known
-to be unsafe — see §14: it searched `scholarixglobal@gmail.com`, which
+to be unsafe — see §13: it searched `scholarixglobal@gmail.com`, which
 is not where this deal's client correspondence lives.** Not established
 either way, not ruled out. On the evidence this repo can actually stand
 behind (its own files), the client's last communicated understanding is
@@ -36,9 +36,9 @@ or Rev2 was withdrawn.** No email log, no call note, no client-facing
 correction exists anywhere in this repo's own files.
 
 **The mailbox-search leg of this finding is downgraded, not reversed
-(2026-08-07 — see §14).** This session's negative Gmail search results
+(2026-08-07 — see §13).** This session's negative Gmail search results
 all came from `scholarixglobal@gmail.com`, an account now confirmed to
-not be where this deal's client correspondence lives (§14's SMTP-header
+not be where this deal's client correspondence lives (§13's SMTP-header
 evidence points at `mail.sgctech.ai`/SOGo). **Correct statement: "no
 retraction artifact found" is NOT ESTABLISHED as "no retraction artifact
 exists" — the search covered this repo's own files (still solid) and one
@@ -47,7 +47,7 @@ prompted this check, the practical conclusion is unchanged for now — MRD
 is still not clear for issue on the evidence actually in hand — but the
 reason has narrowed: it's not "no retraction exists," it's "this repo
 cannot currently prove one does or doesn't." A read path to
-`mail.sgctech.ai`/SOGo (§14, §2 decision #8) is the one thing that
+`mail.sgctech.ai`/SOGo (§13, §2 decision #8) is the one thing that
 resolves this cleanly either way.
 
 **Current gate/check status (Rev3, in-repo only)**: all 41 pricing gates
@@ -147,11 +147,12 @@ artifact or answer — not by more in-repo analysis.
 | 1 | Kallat: is the AED 19,652 unrequested-scope delta (4 packages, 35% of quoted build value) authorized, and is `users_now=40` real? | ______ | A written client confirmation (email/chat) naming the 4 extra packages as agreed, OR a scope trim to the 4 originally-requested packages. Separately: any timestamped client-side statement of headcount (both call transcripts are internal-only or lack a figure). |
 | 2 | VGE: is the brief-pinned AED 14,800 Implementation Value / AED 1,650 Subscription Fee (and the four figures downstream of it) a deliberate, client-confirmed quote, or an authoring artifact? | ______ | The original brief document itself (not in this repo — `01-source/README.md:1`: "No raw client materials were provided") or a client-side re-confirmation at Rev3 issue. |
 | 3 | Prosper: is `users_now=31` (CRM Lead 8407's `x_employee_count`) an accurate, current headcount? | ______ | Direct confirmation from Louai Khzam (Owner) or Dian Sajulga (authorized operational contact), in a timestamped medium. |
-| 4 | MRD: what is Rev1/Rev2's actual retraction status vis-à-vis the client? **Updated 2026-08-07**: this repo's own files show no correction; a Gmail search of `scholarixglobal@gmail.com` also found none, but that account is confirmed (§14) not to be where this deal's correspondence lives — the Gmail leg is not established, not a real "checked, clean" result. | ______ | Evidence of the correction communication (if one happened, likely on `mail.sgctech.ai`/SOGo per §14 — see decision #8) — or, if none exists, a decision on whether Rev3's issue must be framed as a price correction rather than a first quote. |
+| 4 | MRD: what is Rev1/Rev2's actual retraction status vis-à-vis the client? **Updated 2026-08-07**: this repo's own files show no correction; a Gmail search of `scholarixglobal@gmail.com` also found none, but that account is confirmed (§13) not to be where this deal's correspondence lives — the Gmail leg is not established, not a real "checked, clean" result. | ______ | Evidence of the correction communication (if one happened, likely on `mail.sgctech.ai`/SOGo per §13 — see decision #8) — or, if none exists, a decision on whether Rev3's issue must be framed as a price correction rather than a first quote. |
 | 5 | Prosper: the client's only live commercial understanding rests on a document (attachment 5306, AED 45,000 + 1,450/mo, forbidden rates) that no gate in this repo has inspected, and it was already rejected on cost. Even the most stripped-down traceable-scope reconfiguration (AED 67,086 Year-1) still prices above the rejected figure (~AED 61,000). | ______ | A decision on commercial strategy before any further client-facing work: whether to pursue a Must Have-only build (pending scope-removal authorization — none of the 7 gaps are priceable regardless), a different rate/margin structure, or hold. Not resolvable by more in-repo analysis — the unit economics (structural overlays + 18% financing uplift) are the actual driver, not the per-hour rate or scope size — see §8 below. |
-| 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. **Updated 2026-08-07**: the retrieval attempt searched `scholarixglobal@gmail.com`, now confirmed (§14) not to be the mailbox this thread lives in — "not retrieved" was never "not retrievable." Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) remains a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. See decision #8 — a general mailbox read path may make this individual ask unnecessary. |
+| 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. **Updated 2026-08-07**: the retrieval attempt searched `scholarixglobal@gmail.com`, now confirmed (§13) not to be the mailbox this thread lives in — "not retrieved" was never "not retrievable." Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) remains a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. See decision #8 — a general mailbox read path may make this individual ask unnecessary. |
 | 7 | Prosper: the platform/CTS floor (AED 3,648/mo, headcount-driven, `policy.yaml:70-87`) does not move when scope is cut — see §8.5. At the theoretical limit of zero build value, the floor alone over 24 months (AED 87,552) still exceeds the PRJ document's entire 24-month figure (~AED 79,800, itself unverified per #6). No configuration this repo is authorized to build can beat the rejected number on price. | ______ | A pricing-model decision (rate, uplift, or platform-floor structure) — explicitly out of this pass's constraint. See §9 recommendation. |
-| 8 | **Highest-value open item (added 2026-08-07, §14).** Client correspondence for these deals lives on `mail.sgctech.ai` behind SOGo webmail, not in the `scholarixglobal@gmail.com` account this session is connected to (confirmed by the attachment-5306 rejection reply's own SMTP headers, §8.1/§14) — and possibly also not in `renbranmadelo@gmail.com`, the account this session's own setup notes as intended but never actually connects to. Every negative finding in this repo built on a Gmail search (MRD's retraction search, decision #4; Prosper's attachment-5306 search, decision #6) is unsafe until this is resolved — both are downgraded to "not established," not reversed, pending it. | ______ | A read path (webmail login, IMAP, or an export) to `mail.sgctech.ai`/SOGo — or confirmation of what `renbranmadelo@gmail.com` actually contains, if that's the intended account. Whoever owns SGC's mail infrastructure. Resolving this potentially unblocks MRD outright (if a retraction communication exists there) and recovers attachment 5306 directly, without needing Talha specifically (decision #6). |
+| 8 | **Highest-value open item (added 2026-08-07, §13).** Client correspondence for these deals lives on `mail.sgctech.ai` behind SOGo webmail, not in the `scholarixglobal@gmail.com` account this session is connected to (confirmed by the attachment-5306 rejection reply's own SMTP headers, §8.1/§13) — and possibly also not in `renbranmadelo@gmail.com`, the account this session's own setup notes as intended but never actually connects to. Every negative finding in this repo built on a Gmail search (MRD's retraction search, decision #4; Prosper's attachment-5306 search, decision #6) is unsafe until this is resolved — both are downgraded to "not established," not reversed, pending it. | ______ | A read path (webmail login, IMAP, or an export) to `mail.sgctech.ai`/SOGo — or confirmation of what `renbranmadelo@gmail.com` actually contains, if that's the intended account. Whoever owns SGC's mail infrastructure. Resolving this potentially unblocks MRD outright (if a retraction communication exists there) and recovers attachment 5306 directly, without needing Talha specifically (decision #6). |
+| 9 | **Kallat — second blocker ahead of headcount (added 2026-08-07, §14.4).** On a client-present call (2026-07-16), Sadique was told directly, as a differentiator against conventional CRMs: "Our system, when you pay for it, you have everything at your disposal... right from the get go" — not squeezed per-user, no extra charge for additional features. The governed SUB-model is a flat-monthly-for-a-seat-band subscription with priced add-ons (portal sync, AI scoring) — both arguably contradict that promise on their face. Sending the band presentation as currently designed risks reading as exactly what he was told SGC doesn't do. | ______ | A decision on how pricing is presented to this client specifically — a genuinely flat all-inclusive figure with no visible per-user mechanics, a direct conversation addressing/reframing the earlier promise before any figure is sent, or another approach. Not resolvable by more in-repo analysis; blocks Stage 5 presentation independent of and in addition to the headcount block (decision #1). |
 
 ---
 
@@ -318,7 +319,7 @@ matching that transcript's own content) and one Otter.ai email
 confirming Talha's personal address is `talhasheraz9803@gmail.com`.
 
 **"No trace of the proposal send, attachment 5306, or any Prosper-side
-correspondence" — downgraded 2026-08-07, per §14: NOT ESTABLISHED, wrong
+correspondence" — downgraded 2026-08-07, per §13: NOT ESTABLISHED, wrong
 mailbox searched.** This was written as a negative finding ("not there")
 when it should have been written as an inconclusive one ("not found in
 the one account checked, and that account is now confirmed to not be
@@ -333,7 +334,7 @@ email-2026-07-27_rejection_fwd-2026-07-28.eml`) show the real thread ran
 on `mail.sgctech.ai` via SOGoMail — SGC's own private mail server, not
 Gmail at all. **Gmail was structurally never going to contain it — not
 because of which Gmail account, but because it isn't a Gmail thread.**
-See §14 for the account-identity confirmation and §2 decision #8 for the
+See §13 for the account-identity confirmation and §2 decision #8 for the
 resulting highest-value open item: a read path to `mail.sgctech.ai`/SOGo.
 
 **Every PRJ-document figure in this repo's comparisons remains
@@ -788,35 +789,36 @@ Corrected same day per direct instruction; `manifest.yaml`'s two
 2026-08-07 escalation entries record both the mistake and the fix
 rather than rewriting history.
 
-**Major update, same day: a third transcript surfaced, and T12's
-headcount assertion now passes.** A previously-missing, undated
-discovery/demo call transcript (supplied 2026-08-07, Sadique Abbas
-present) was added:
-`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md`. Direct
+**A third transcript surfaced same day — briefly changed T12, then
+reverted by direct ruling.** A previously-missing discovery/demo call
+transcript (Sadique Abbas present, date now confirmed **2026-07-16,
+9:51am, 25 min**, via Otter.ai notification metadata) was added:
+`00-intake/call-transcript-2026-07-16-discovery-demo.md`. Direct
 exchange: asked "How many agents do you have right now?", Sadique
-answers "We have approximately 40 or 15, approximate" — almost certainly
-a garbled "40 or 50," corroborated independently by the internal
-2026-07-16 call's own "40 people... 50 then" recollection.
-`USERS_NOW_PROVENANCE` in `test_pricing_engine.py` upgraded to verified
-(same tier as VGE's "boutique brokerage" quote — client-direct and
-agent-specific, not a precise confirmed count). **Re-ran T12 directly**:
-Kallat's headcount assertion now `[ OK ]`, and the segment-classification
-assertion (contingent on it) also now `[ OK ]` — the only remaining T12
-failure for Kallat is the unrelated unrequested-scope one (§11/CHANGELOG,
-the 4-package contamination, unaffected by this).
+answers "We have approximately 40 or 15, approximate." An earlier pass
+this session read that as a garbled "40 or 50" and upgraded
+`USERS_NOW_PROVENANCE` accordingly — **reverted the same day, per direct
+ruling.** Two reasons, stated precisely: (1) reading "15" as "50" is
+reconstruction, not reading — Sadique qualifies the number twice in one
+sentence, answering informally; (2) more fundamentally, Kallat is a group
+spanning multiple businesses across different industries (Sadique
+himself, same call, ~11:04-11:12) — even a precise figure from this
+exchange wouldn't establish which entity it counts, or whether the
+system is meant to size one brokerage or several. **`USERS_NOW_PROVENANCE`
+is back to unverified. T12 stays a hard block, unchanged from the entry
+above.** The drafted SDR follow-up now carries two questions: precise
+headcount, and which Kallat Group entities would be on the system — see
+`00-intake/sdr-followup-headcount-2026-08-07.md`.
 
-**What this changes and what it doesn't.** The specific structural risk
-flagged above — 40 vs. 30 crossing the `smb`/`mid_market` boundary — is
-substantially de-risked: both ends of Sadique's own "40 or 50" range
-clear the 30-user `smb` ceiling, so the segment call is very unlikely to
-flip regardless of exactly where in that range the true number sits.
-**It does not fully resolve the question**: "approximately... approximate"
-is Sadique's own hedge, not a firm count, and 40 is the low end of the
-range he gave, not a midpoint or confirmed figure. **This does not
-unilaterally clear Stage 5** — that's a materially better position than
-UNSOURCED, but the drafted SDR follow-up still has real value for a
-precise figure before pricing against it, and whether this is now
-sufficient to proceed is Bran's call, not this session's to make alone.
+**The transcript's date also resolves the SGC-KP-2026-07 sequencing
+question.** 2026-07-16, 9:51am — the same morning as, and preceding, the
+already-logged internal prep call (that call's own Otter notifications
+run 12:47pm-1:31pm the same day). Discovery call (AM) → internal debrief
+(PM, same day) → SGC-KP-2026-07 sent 7 days later (2026-07-23) → client
+price pushback the next day (2026-07-24). This transcript is very likely
+the actual source material SGC-KP-2026-07 was built from — see §15 for
+what else this call surfaces, most of it more consequential than
+headcount.
 
 ---
 
@@ -867,3 +869,90 @@ is now logged as the highest-value open item — §2 decision #8.
 **Decision #1 in §2 above is the resolving action for this entry too** —
 this doesn't add a new decision, it records that the question is now
 drafted and routed, not that headcount is resolved.
+
+---
+
+## 14. Kallat — 2026-07-16 discovery/demo call: verbal exposure, gap register, scope signal (2026-08-07)
+
+Full transcript: `00-intake/call-transcript-2026-07-16-discovery-demo.md`.
+Headcount handled in §12 above (T12 stays blocked). Everything below is
+what else that call surfaces — most of it more consequential than
+headcount, per direct instruction.
+
+### 14.1 Verbal exposure — full detail in `verbal-promises.md` rows 9-13
+
+| # | What was said | Who / when | Why it matters |
+|---|---|---|---|
+| 9 | "You have everything at your disposal... right from the get go," said directly against per-user monthly pricing and per-feature upcharges | Johnny, ~9:11 | **Serious finding, not a footnote.** Conflicts with the governed SUB-model's seat-band monthly structure and with phase2 add-on pricing — both are exactly the "pay by user, pay extra for features" pattern this promise disclaims. See §14.4 — new Stage 5 blocker. |
+| 10 | Cybercrime/hacking "completely implausible" | Johnny, ~1:48 | Unqualified absolute guarantee on the client's first-raised concern. Unbackable — needs written correction before signing. |
+| 11 | Portal connection "one click," fees are the portal's not SGC's; software "already accredited by" Bayut/Property Finder/dubizzle | Consultant, ~7:16-21:19 | Conflicts with planned Portal Sync add-on pricing (`phase2-catalogue.yaml`). Accreditation claim checked against the full `00-knowledge/` tree — UNSOURCED, no partnership record exists anywhere in this repo. |
+| 12 | Named another client and disclosed their monthly Property Finder spend (~AED 30,000/mo) | Consultant, ~7:16-7:48 | Third-party confidentiality breach, independent of this deal — see §14.2. |
+| 13 | Spontaneous pre-Kickoff sandbox/demo access offer | Consultant, ~24:12 | Timeline correction to `verbal-promises.md` row 6: this offer predates and contradicts the "2026-08-05 deliberate concession, reversing 2026-07-16 policy" framing — the practice was already happening the same day the policy is dated to. |
+
+### 14.2 Known-defects.md candidate — flagged, not written (00-knowledge/ is read-only to this agent)
+
+Row 12 above is a distinct defect class from anything already in
+`known-defects.md`'s 20-item MRD-derived list: an SGC representative
+disclosing one client's identity and specific commercial terms to a
+different prospect, unprompted, as a sales point. Not a pricing defect,
+not specific to Kallat — a disclosure-hygiene defect that could recur on
+any call. Recommended for the Commercial Desk to add as its own numbered
+entry; this agent cannot write to `00-knowledge/` (per `AGENTS.md`'s
+access table — Commercial Desk write, agent read-only).
+
+### 14.3 Gap register — demoed on the call, checked against the catalogue
+
+Built the same way as Prosper's (`§8.3`): from what was actually shown
+and discussed, not from the brief.
+
+| Feature | Demonstrated on this call? | Catalogue reference? |
+|---|---|---|
+| AI lead-probability scoring | Yes — walked through in detail (~14:56-16:20), "give you a percentage of the probability of closing" | Yes — already priced as an add-on, `ai_lead_scorer_lite` (AED 495/mo), per `verbal-promises.md` #2. Already correctly excluded from base scope. |
+| Agent commission calculation | Yes — "our commission calculation for the agents... very streamlined... it will just automatically calculate" (~23:12) | **No** — `phase2-catalogue.yaml` has only a `commission_impact` note stating no commission/comp-plan document exists anywhere in this repo; no priceable line item. Same gap already established on Prosper (`HANDOVER.md` §8.3). |
+| Auto-reconciliation of client/landlord payments | Yes — "without your accountant having a headache... it will be auto reconciled" (~23:12) | **No catalogue entry at all** — checked `hour-lookup.yaml` and `phase2-catalogue.yaml` in full, zero matches for reconciliation. |
+| Client/landlord payment portals | Yes — "we can also give portal access for the clients... if you have landlords... they can see their dashboards... pay directly" (~23:03-23:12) | **No catalogue entry** — zero matches for "landlord" or a client-payment-portal concept anywhere in the pricing knowledge layer. |
+| Live-synced website module with auto-brochure generation | Yes — demoed live (~21:31-22:57), "once you upload in the CRM, it fetch into website... directly, live" | **Different feature from what exists in catalogue.** `phase2-catalogue.yaml`'s `website_lead_capture` (AED 2,400 one-time) is a lead-capture widget, not a full property-listing-synced site with auto-brochure generation. Neither the demoed module nor "website cleanup, SEO, social media consultancy" (which Sadique separately and explicitly asks for, ~12:00) has a real catalogue match — consistent with `verbal-promises.md` row 5's existing EXCLUDED classification for website/SEO work, now confirmed against the actual demo rather than just the old PRJ doc. |
+
+**Assessment, same shape as Prosper's §8.3 finding**: this is a catalogue
+gap, not a Kallat-specific one — commission logic, payment reconciliation,
+and landlord/client portals sit in domains (financial operations,
+multi-party portal access) the real-estate-brokerage-uae catalogue has
+never covered. The AI-scoring line is the one exception, already handled
+correctly.
+
+### 14.4 New Stage 5 blocker — presentation approach, ahead of headcount
+
+**Decision needed, second blocker ahead of headcount** (added to §2
+below as decision #9): the governed SUB-model's flat-monthly-for-a-band
+presentation is in direct tension with a promise already made to this
+client, on a client-present call, as an explicit differentiator — "not
+paying per user, not paying extra for features." Sending the band
+framing as currently designed risks landing as exactly the thing Johnny
+told Sadique SGC doesn't do. **No repricing or re-presentation performed
+this pass** — report only, per instruction. Options this repo can name
+without deciding between them: (a) present a genuinely flat, all-inclusive
+figure with no visible per-user mechanics anywhere in the client-facing
+text, accepting whatever margin results; (b) have Bran/Johnny address the
+promise directly and reframe expectations before any figure is sent; (c)
+something else entirely. Not this session's call.
+
+### 14.5 Scope signal and one correction to this session's own earlier framing
+
+Sadique's own redirect (~18:55, "let me have the proposal on the... open
+property management... that is something which is aligning with what we
+are looking for") names **property management** and **portal integration**
+as his stated priority on this call. `client-brief.yaml`'s
+`work_packages_requested` (`crm_leads`, `users_roles_agent_perf`,
+`reports_dashboard`, `data_migration_500`) contains neither as a named
+item — worth checking against `property_unit_register` (already in the
+worksheet, but as one of the four *unrequested* packages per §11/
+CHANGELOG's contamination finding) before assuming it's simply missing.
+
+**Correction, checked directly rather than assumed**: an instruction this
+pass characterized the incumbent system (Zapier automation) as something
+"the brief records as not described." **Not accurate** —
+`client-brief.yaml:31` already reads `incumbent_system: "Zapier
+automation (lead distribution) + Google Sheets (reporting/pipeline)"`,
+matching the transcript's own Zapier mention (~13:40) exactly. Stated
+plainly rather than silently agreed with: this specific point was already
+correctly captured before this session touched the file.

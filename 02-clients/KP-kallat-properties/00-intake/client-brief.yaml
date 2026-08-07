@@ -9,7 +9,7 @@ client:
   contact_phone: "+971 54 791 6003"
 
 scale:
-  users_now: 40                          # CORRECTED CITATION 2026-08-07: was cited to "discovery call" generically, but neither transcript in this repo at the time actually contained it (T12 UNSOURCED, see test_pricing_engine.py history). Now sourced: 00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md, Sadique Abbas (client, present), asked "How many agents do you have right now?", answered "We have approximately 40 or 15, approximate" (transcription almost certainly garbles "40 or 50"). Client-direct, agent-specific, but Sadique's own word is "approximate" -- 40 is the lower end of his own range, not a precise confirmed count. SDR follow-up drafted to pin down the exact figure (00-intake/sdr-followup-headcount-2026-08-07.md).
+  users_now: 40                          # UNSOURCED -- RE-AFFIRMED 2026-08-07 (Bran, direct ruling). A discovery-call transcript exists (00-intake/call-transcript-2026-07-16-discovery-demo.md, date confirmed via Otter.ai), and Sadique does answer a headcount question, but "We have approximately 40 or 15, approximate" is double-hedged and off-the-cuff, and Kallat is a multi-business group -- a number here wouldn't establish which entity it counts even if precise. Not treated as sourcing this field. SDR follow-up now asks both the precise headcount and which Kallat Group entities would be on the system (00-intake/sdr-followup-headcount-2026-08-07.md). T12 stays blocking.
   users_12mo: 40
   segment: mid_market                     # 40 users exceeds smb max_users (30) — policy.yaml segments
 

@@ -219,7 +219,7 @@ escalations:
       "40 or 50", corroborated independently by the 2026-07-16 internal
       call's own "40 people... 50 then" recollection.
     resolution: >
-      00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md added,
+      00-intake/call-transcript-2026-07-16-discovery-demo.md added,
       verbatim, with provenance notes and the transcription anomaly
       flagged rather than silently corrected. client-brief.yaml:12's
       citation corrected to point at this file instead of a generic
@@ -237,6 +237,57 @@ escalations:
       it. Whether this is now sufficient to proceed past T12 is Bran's
       call; not decided unilaterally by this pass. Logged in full in
       HANDOVER.md section 12.
+
+  - date: "2026-08-07"
+    raised_by: "Bran (direct ruling, in chat)"
+    issue: >
+      The T12 upgrade in the entry immediately above is reversed. "We
+      have approximately 40 or 15, approximate" is double-hedged and
+      answered off-the-cuff -- reading it as "40 or 50" is reconstruction,
+      not reading. Separately, Kallat is a multi-business group (same
+      call, ~11:04-11:12) -- even a precise number wouldn't establish
+      which entity it counts. Full call reviewed in detail: the call's
+      date is now confirmed 2026-07-16, 9:51am, 25min (Otter.ai
+      notification metadata, same morning as the already-logged internal
+      prep call that afternoon) -- explains SGC-KP-2026-07's origin and
+      shape. The call surfaces several findings more consequential than
+      headcount: a per-user pricing promise (Johnny, ~9:11) directly
+      conflicting with the governed band-subscription model; an
+      unqualified "completely implausible" cybercrime guarantee (Johnny,
+      ~1:48); portal fee/accreditation claims (Consultant, ~7:16-21:19)
+      conflicting with planned add-on pricing, accreditation UNSOURCED; a
+      third-party confidentiality breach (another client's identity and
+      spend disclosed, ~7:16-7:48); a demoed-but-unpriceable feature set
+      (commission calc, payment auto-reconciliation, landlord/client
+      portals -- none in the catalogue); and a scope signal (Sadique's
+      own stated priority is property management + portal integration,
+      not fully reflected in work_packages_requested).
+    resolution: >
+      USERS_NOW_PROVENANCE reverted to unverified in test_pricing_engine.py
+      -- re-ran T12, confirmed back to 3/3 failures for Kallat.
+      client-brief.yaml:12 citation corrected to state the ruling.
+      00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md
+      renamed to call-transcript-2026-07-16-discovery-demo.md with the
+      confirmed date and full findings written into its header.
+      SDR follow-up (00-intake/sdr-followup-headcount-2026-08-07.md)
+      updated to a two-part question: precise headcount, and which
+      Kallat Group entities would be on the system. verbal-promises.md
+      rows 9-13 added (verbatim quotes, timestamps, classifications).
+      HANDOVER.md section 14 added (full verbal-exposure table, gap
+      register built the same way as Prosper's, known-defects.md
+      candidate flagged for the Commercial Desk since 00-knowledge/ is
+      read-only to this agent). Corrected this session's own earlier,
+      inaccurate claim that client-brief.yaml doesn't describe the
+      Zapier incumbent system -- it already did, verified directly.
+      Confirmed the Odoo platform being named to the client is NOT a
+      violation -- matches approved disclosure language in
+      edition-and-upgrades.md.
+      NEW BLOCKER, second one ahead of headcount (HANDOVER.md section 2
+      decision #9): how to present pricing to a client already told,
+      verbatim, that he isn't paying per user and isn't paying extra for
+      features. Stage 5 stays held on BOTH blockers -- headcount
+      (decision #1) and this presentation decision (decision #9). No
+      repricing, no presentation work performed this pass.
 
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"

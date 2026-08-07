@@ -1962,7 +1962,7 @@ Gmail's own resolution of "me" to the authenticated account — resolves
 to `scholarixglobal@gmail.com` on live inbox results. This is the
 account MRD's retraction-artifact search and Prosper's attachment-5306
 search both ran against. The real conclusion, now stated plainly in
-`HANDOVER.md` §13/§14: client correspondence for these deals lives on
+`HANDOVER.md` §13/§13: client correspondence for these deals lives on
 `mail.sgctech.ai` behind SOGo webmail (confirmed by the 5306 rejection
 reply's own SMTP headers) — Gmail was never going to hold it, independent
 of which Gmail account. Every affected finding in `HANDOVER.md` (top
@@ -1981,7 +1981,7 @@ agents do you have right now?", Sadique answers "We have approximately
 40 or 15, approximate" — almost certainly a garbled "40 or 50,"
 corroborated independently by the 2026-07-16 internal call's own
 "40 people... 50 then" recollection. Added verbatim to
-`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md`;
+`00-intake/call-transcript-2026-07-16-discovery-demo.md`;
 `client-brief.yaml:12`'s citation corrected to point at it;
 `USERS_NOW_PROVENANCE` in `test_pricing_engine.py` upgraded to verified
 (same tier as VGE's client-direct-but-approximate quote, not MRD's exact
@@ -2003,6 +2003,73 @@ pass — no pricing work performed on the strength of this transcript.
 No engine or policy change. No worksheet writes. No repricing. No Stage 5
 work. Files touched beyond this one: `render_r11_r12.py`, `HANDOVER.md`,
 `manifest.yaml`, `00-intake/sdr-followup-headcount-2026-08-07.md`,
-`00-intake/call-transcript-discovery-demo-DATE-UNCONFIRMED.md` (new),
+`00-intake/call-transcript-2026-07-16-discovery-demo.md` (new),
 `00-intake/client-brief.yaml` (citation only), `test_pricing_engine.py`
 (`USERS_NOW_PROVENANCE` entry only), `04-draft/_review-stamp.yaml` (new).
+
+## 2026-08-07 (continued, same day) — headcount ruling reversed, call re-read in full, second Stage 5 blocker
+
+Bran's direct correction to item 4 of the entry immediately above: the
+T12 upgrade was wrong, and there was more in that call than headcount.
+
+**Headcount reverted.** "We have approximately 40 or 15, approximate" is
+double-hedged, off-the-cuff — reading it as "40 or 50" was reconstruction,
+not reading. Separately and more fundamentally: Kallat is a multi-business
+group (Sadique, same call, ~11:04-11:12) — a precise number from this
+exchange wouldn't establish which entity it counts regardless. Reverted
+`USERS_NOW_PROVENANCE` in `test_pricing_engine.py`; re-ran T12, confirmed
+back to 3/3 failures for Kallat. SDR follow-up now carries a second
+question: which Kallat Group entities would be on the system.
+
+**Date resolved.** The call is 2026-07-16, 9:51am, 25 minutes — confirmed
+via the Otter.ai notification's own metadata (Gmail search,
+`scholarixglobal@gmail.com`), not file-download timestamps. Same morning
+as, and preceding, the already-logged internal prep call (that one's
+Otter notifications run 12:47pm-1:31pm the same day). Discovery call (AM)
+→ internal debrief (PM) → SGC-KP-2026-07 sent 7 days later → client price
+pushback the next day — this transcript is very likely SGC-KP-2026-07's
+actual source material. File renamed
+`call-transcript-2026-07-16-discovery-demo.md`.
+
+**Verbal exposure logged, `verbal-promises.md` rows 9-13**: a per-user
+pricing promise (Johnny, ~9:11) that conflicts directly with the governed
+band-subscription model — flagged as a Stage 5 presentation constraint,
+not a footnote; an unqualified "completely implausible" cybercrime
+guarantee (Johnny, ~1:48) on the client's first-raised concern; portal
+fee/accreditation claims (Consultant, ~7:16-21:19) conflicting with
+planned add-on pricing, accreditation checked against the full
+`00-knowledge/` tree and found UNSOURCED; a third-party confidentiality
+breach (another client's identity and monthly spend disclosed,
+~7:16-7:48) — flagged for `known-defects.md` as its own class (not
+written — `00-knowledge/` is read-only to this agent); and a timeline
+correction to row 6 (sandbox access was already offered, unprompted, the
+same day the "don't proactively offer" policy is dated to).
+
+**Gap register built** (`HANDOVER.md` §14.3, same method as Prosper's
+§8.3): commission calculation and payment auto-reconciliation, both
+demoed, have zero catalogue entries; client/landlord payment portals,
+demoed, same gap; AI scoring already correctly priced as an add-on; the
+demoed live-synced website module is a different, larger feature than
+the catalogue's `website_lead_capture` line.
+
+**Two corrections to this session's own earlier claims, verified rather
+than assumed**: the incumbent system (Zapier) *is* already correctly
+recorded in `client-brief.yaml` — an instruction describing it as
+undescribed was checked and found inaccurate, stated plainly rather than
+silently agreed with. Naming "Odoo" to the client on the call is *not* a
+violation — matches approved disclosure language already in
+`edition-and-upgrades.md`.
+
+**New Stage 5 blocker, second one ahead of headcount** (`HANDOVER.md` §2
+decision #9): the client was told, verbatim, "you have everything at
+your disposal... right from the get go" as an explicit anti-per-user
+differentiator. The governed model is a flat-monthly-for-a-seat-band
+subscription with priced add-ons — in tension with that promise on its
+face. Stage 5 stays held on both blockers. No repricing, no presentation
+work performed.
+
+No engine or policy change. No worksheet writes. No repricing. No Stage 5
+work. Files touched: `test_pricing_engine.py`, `client-brief.yaml`,
+`00-intake/call-transcript-2026-07-16-discovery-demo.md` (renamed +
+rewritten header), `00-intake/sdr-followup-headcount-2026-08-07.md`,
+`00-intake/verbal-promises.md`, `HANDOVER.md`, `manifest.yaml`.

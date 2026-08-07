@@ -1,45 +1,62 @@
 # Call Transcript — Kallat Properties Discovery/Demo Call
 
-**Date: UNCONFIRMED.** Filename carries no date because the source file
-(`Scholarix Global's Meeting Notes_otter_ai_transcript.txt`, supplied
-2026-08-07) has none in its own header. Inferred to predate
-2026-07-16: `call-transcript-2026-07-16-internal-prep.md` is an
-SGC-internal prep call ahead of sending SGC-KP-2026-07, and this call
-ends with Sadique asking for that same proposal to be sent — so this
-call is very likely the discovery/demo session SGC-KP-2026-07 (sent
-2026-07-23) was built from. **Not confirmed against a calendar or CRM
-timestamp — get the real date before citing this file's date anywhere
-client-facing.**
+**Date: CONFIRMED 2026-07-16, 9:51am, 25 minutes.** Established via
+Gmail search (`no-reply@otter.ai`, `scholarixglobal@gmail.com`) for the
+Otter.ai meeting-summary notification, sent 2026-07-16 06:21 UTC,
+subject "Meeting Summary for Scholarix Global's Meeting Notes," body:
+*"Scholarix Global Consultant has shared notes from Scholarix Global's
+Meeting Notes, Jul 16. Sadique and Johnny Gurrera discussed the need for
+a user-friendly, secure, and accurate CRM system... integrate with
+various property portals like Bayut and Property Finder... currently
+uses Zapier for automation... AI-powered lead scoring, automatic
+property posting, and client portal access for payments"* — matches this
+transcript's content exactly, and the stated 25-minute duration matches
+this transcript's own final timestamp (25:28). Not a file-metadata
+inference (the downloaded `.txt`'s own timestamps only show the
+2026-08-07 download, and were not used to date this call) — a direct,
+independent, timestamped external record.
+
+**Sequencing, now resolved**: this call is the **same morning** as
+`call-transcript-2026-07-16-internal-prep.md` (that call's own three
+Otter notifications run 12:47pm-1:31pm UTC the same day — afternoon,
+after this one). Discovery/demo call (AM) → SGC-internal debrief (PM,
+same day) → SGC-KP-2026-07 sent 7 days later (2026-07-23) → client price
+pushback the next day (2026-07-24). This transcript is very likely the
+actual source material SGC-KP-2026-07 was built from — its property-
+management focus, portal-integration emphasis, and AI-scoring framing
+all trace directly to what Sadique asks for and is shown on this call.
 
 **Source:** Otter.ai transcript, file titled "Scholarix Global's Meeting
 Notes" — this is the same Otter.ai notification subject line already
 logged in `HANDOVER.md` §8.9/§8.1 in connection with **Prosper's**
 2026-07-17 demo-prep call. **This transcript is not that one** — the
 content below is a Kallat-specific call (Sadique Abbas, real-estate
-CRM/property-portal discussion, Kallat's own "40 or 50 agents" figure).
-Otter.ai evidently reused a generic "Scholarix Global's Meeting Notes"
-title across multiple unrelated recordings — the filename alone is not
-a reliable client identifier. Flagging this so nobody assumes this file
-belongs to Prosper because of the title, or that Prosper's already-logged
-version of that title is this content.
+CRM/property-portal discussion). Otter.ai evidently reused a generic
+"Scholarix Global's Meeting Notes" title across multiple unrelated
+recordings — the filename alone is not a reliable client identifier.
 
 **Participants:** Sadique Abbas (Kallat Properties — client, present),
 Johnny Gurrera (SGC SDR), a second SGC voice credited "Scholarix Global
-Consultant" (address as "sir," self-identifies as having "worked in
-Samana before" and implementing similar systems at "Ax Capital" —
-referred to once as "mr. Brand," almost certainly an Otter.ai
-mis-transcription of "Mr. Bran," i.e. Renbran Madelo — **not confirmed,
-flagging the inference rather than asserting it as fact**).
+Consultant" (self-identifies as having "worked in Samana before" and
+implementing similar systems at "Ax Capital" — referred to once as "mr.
+Brand," almost certainly an Otter.ai mis-transcription of "Mr. Bran,"
+i.e. Renbran Madelo — **not confirmed, flagging the inference rather
+than asserting it as fact**). **Attribution incomplete**: at 4:06-4:14
+Sadique says "One more person is there," and a "Speaker 2" appears
+briefly (4:11) — never named or role-identified anywhere in the
+transcript. Whoever this is took no recorded speaking part beyond that
+one line, but was present and unidentified for at least part of the call.
 
-**Why this matters — resolves, in part, the T12 headcount provenance
-gap.** Prior state (per `CHANGELOG.md`, `HANDOVER.md` §12,
-`test_pricing_engine.py`'s `USERS_NOW_PROVENANCE`): `users_now=40` was
-UNSOURCED — no document anywhere had a client-side headcount statement.
-**This transcript is that statement.** See the exchange below.
+**Operational note, unrelated to pricing/scope**: demo login credentials
+("Username is admin and password is admin") were spoken aloud, in full,
+on this recorded call (~5:29) and are now sitting in a transcript in
+this repo. Worth a line to whoever owns the demo environment
+(`demo.sgctech.ai`) — not this session's call to action on, flagged for
+awareness.
 
 ---
 
-## Key exchange (headcount)
+## Key exchange (headcount) — RULING: does NOT upgrade T12, stays UNSOURCED
 
 > **Scholarix Global Consultant** [~13:04]: Okay, sir. For that, because
 > you have mentioned of mostly client side and your inventory and your
@@ -49,31 +66,73 @@ UNSOURCED — no document anywhere had a client-side headcount statement.
 >
 > **Sadique** [~13:28]: We have approximately 40 or 15, approximate.
 
-**Transcription note, stated plainly rather than silently corrected:**
-"40 or 15" is almost certainly an Otter.ai mishearing of "40 or 50" —
-Sadique's own phrasing elsewhere is consistently a range ("approximate"),
-and this matches, independently, the internal recollection already
-logged in `call-transcript-2026-07-16-internal-prep.md`: *"This 2800 per
-month because there are 40 people involved, and it's 50 then plus 700
-dirhams"* — a different SGC-internal speaker, a different call, the same
-"40... then 50" shape. Two independent renderings of the same
-approximate range is reasonable corroboration for "40-50," but **neither
-is a precise, confirmed count, and this transcript's own raw text says
-"15," not "50" — flagged, not silently fixed.**
+**Corrected ruling, 2026-08-07 (Bran, direct instruction) — reverses this
+file's own earlier framing.** An earlier pass on this file read "40 or
+15" as a garbled "40 or 50" and upgraded `T12`'s provenance grade on that
+basis. **That was reconstruction, not reading, and it's reverted.**
+Verbatim, Sadique qualifies the number twice in one sentence
+("approximately... approximate") while answering off the top of his head
+in a live call — and Kallat is explicitly a **group spanning different
+businesses and industries** (Sadique himself, ~11:04-11:12: "you're part
+of the group, right? It's a Kallat group... different businesses across
+the industry, different industry" — confirmed by him). A headcount given
+informally in that context is ambiguous about *which entity* it counts,
+independent of whether the number itself is 40, 50, or something else —
+even a precise figure wouldn't resolve which of the Kallat Group's
+businesses it describes, or whether this system is meant to size one
+brokerage or several. **`USERS_NOW_PROVENANCE` in `test_pricing_engine.py`
+is reverted to unverified; `users_now=40` remains UNSOURCED; T12 stays a
+hard block.** See `00-intake/sdr-followup-headcount-2026-08-07.md` for
+the now-two-part SDR follow-up this drives: (1) precise headcount, (2)
+which Kallat Group entities would actually be on the system.
 
-**What this does and doesn't resolve:**
-- **Does resolve**: the number is genuinely client-sourced, direct,
-  client-present, and specifically answers a question about *agents*
-  (not total staff, not seats) — a materially stronger provenance grade
-  than "UNSOURCED."
-- **Does not resolve**: the exact figure (40? 50? something in between?
-  "approximate" is Sadique's own word), and whether every one of those
-  agents needs a paid system login (the same open question §8.7 raised
-  for Prosper's 31). The drafted SDR follow-up
-  (`00-intake/sdr-followup-headcount-2026-08-07.md`) still has value for
-  pinning down the precise number and the agents-vs-access-only split —
-  this transcript upgrades the provenance grade, it doesn't replace the
-  need for a precise confirmed figure before Stage 5 prices against it.
+---
+
+## Other findings from this call — see cross-references, not duplicated here
+
+Full detail logged in `00-intake/verbal-promises.md` (verbatim quotes,
+classifications), `manifest.yaml` (escalation entry), and `HANDOVER.md`
+§15 (Kallat gap register + verbal-exposure summary). Index, so a reader
+of this transcript alone knows where to look:
+
+- **Per-user pricing promise** (~9:11, Johnny) — conflicts directly with
+  the governed SUB-model's seat-band monthly subscription structure.
+  Flagged as a **Stage 5 presentation constraint**, not a footnote — see
+  `HANDOVER.md` §15 and the new decision it raises.
+- **Unqualified security guarantee** (~1:48, Johnny) — "completely
+  implausible" that hacking/cybercrime could occur. Absolute, unbackable,
+  on the client's first-raised concern. Needs correcting in writing
+  before signing.
+- **Portal fee/accreditation claims** (~7:16-21:19, Consultant) —
+  portal connection framed as free/one-click to the client; "already
+  accredited by" Bayut/Property Finder/dubizzle — UNSOURCED anywhere in
+  this repo. Conflicts with the planned Portal Sync add-on pricing
+  (`phase2-catalogue.yaml`).
+- **Third-party confidentiality breach** (~7:16, Consultant) — names
+  another client and discloses their monthly Property Finder spend.
+  Independent of this deal; candidate for `known-defects.md` as its own
+  class (flagged for the Commercial Desk — `00-knowledge/` is read-only
+  to this agent).
+- **Demoed-but-unpriceable features**: AI lead-probability scoring
+  (already priced as an add-on, `ai_lead_scorer_lite`), agent commission
+  calculation (no `hour-lookup.yaml` entry, same gap as Prosper), auto-
+  reconciliation of client/landlord payments (no catalogue entry at all),
+  client/landlord portals (no catalogue entry), live-synced website
+  module (a *different* feature from the catalogue's
+  `website_lead_capture`, which is a lead-capture widget, not a full
+  synced site). Full gap register in `HANDOVER.md` §15.
+- **Scope signal**: Sadique's own redirect (~18:55) names "property
+  management" and portal integration as his actual priority —
+  `client-brief.yaml`'s `work_packages_requested` list doesn't contain
+  either as named items. Separately, incumbent system (Zapier + Google
+  Sheets) *is* already correctly recorded in `client-brief.yaml` — not a
+  gap, confirmed by re-reading the file directly.
+- **Odoo named to the client** ("this is Udo platform," ~20:39) — checked
+  against `00-knowledge/clause-library/edition-and-upgrades.md`, which
+  itself models "Your platform is built on Odoo..." as approved
+  disclosure language. **Not a violation** — naming the base platform is
+  expected; only naming the *edition* (Community vs Enterprise) unasked
+  is the actual constraint, and that wasn't crossed here.
 
 ---
 

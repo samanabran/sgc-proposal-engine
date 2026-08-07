@@ -28,6 +28,18 @@ which sets the hourly rate, which moves the quoted build value by ~28%.
 There is no safe range to price into until this is confirmed — do not send
 any figure ahead of Sadique's answer.
 
+**Ruling, 2026-08-07 (Bran, direct)**: a discovery-call transcript
+(`00-intake/call-transcript-2026-07-16-discovery-demo.md`, date confirmed
+via Otter.ai) has Sadique answering a headcount question directly — "We
+have approximately 40 or 15, approximate" — but double-hedged and given
+off-the-cuff. **This does not resolve headcount and T12 stays a hard
+block.** A second reason makes it worse than a fuzzy number: the same
+call has Sadique describing Kallat as **a group spanning different
+businesses across different industries** — so even a precise figure from
+that exchange wouldn't establish which entity it's counting, or whether
+this system is meant to size one brokerage or several businesses in the
+group. The question below now has two parts for exactly that reason.
+
 ---
 
 ## Draft message (Johnny → Sadique)
@@ -37,14 +49,22 @@ any figure ahead of Sadique's answer.
 > Quick follow-up while we finalize the proposal on our end — want to make
 > sure we're scoping this correctly before we come back to you with numbers.
 >
-> When you mentioned 40–50 people earlier, were you referring specifically
+> Two things:
+>
+> 1. When you mentioned 40–50 people earlier, were you referring specifically
 > to active sales agents taking client-facing leads, or does that number
 > also include admin/ops/management staff who'd need system access? And is
 > 40 the number you'd want us to plan around today, or should we be sizing
 > for the higher end of that range?
 >
-> A rough split is completely fine here — e.g. "about X client-facing,
-> Y access-only" — you don't need an exact headcount for us to move forward.
+> 2. You'd mentioned Kallat is part of a group with businesses across a
+> few different industries — for this system, are we scoping just the
+> real estate/brokerage side, or would other businesses in the group be
+> on it too? Just want to make sure we're sizing the right thing.
+>
+> A rough split is completely fine on both — e.g. "about X client-facing,
+> Y access-only" and "just the brokerage" or "brokerage plus [X]" — you
+> don't need exact numbers for us to move forward.
 >
 > Thanks — will follow up once we hear back.
 >
@@ -58,4 +78,7 @@ Per runbook, log Sadique's reply (whatever it is, including "don't know")
 to this file and to `manifest.yaml` on receipt, then update
 `00-intake/client-brief.yaml:12` and `02-calc/pricing-worksheet.yaml:
 inputs.users_now` accordingly before Stage 5 resumes. Until a reply lands,
-Stage 5 stays held per explicit instruction.
+Stage 5 stays held per explicit instruction. **Both parts of this
+question need an answer before headcount is considered resolved** — a
+number alone, without the entity-scope answer, is not sufficient given
+the group-structure finding above.
