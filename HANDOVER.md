@@ -746,6 +746,50 @@ SDR follow-up through **Johnny Gurrera** (logged the 2026-07-24 client
 call) rather than the stamp→SDR→John→stamp sequence: it commits nothing
 and quotes no figure, so that gate doesn't apply. Held, not sent.
 
+**Same-day correction, worth recording**: an intermediate pass added a
+Bran→John approval gate and "take-it-or-leave-it" framing to this
+question before it was corrected back to the above. Neither belonged
+here — the gate sequence is for figures/commitments, this question
+carries neither, and "take-it-or-leave-it" reads as pressure on a free
+scoping question, not the priced offer that framing actually belongs to.
+Corrected same day per direct instruction; `manifest.yaml`'s two
+2026-08-07 escalation entries record both the mistake and the fix
+rather than rewriting history.
+
+---
+
+## 13. Confirmed: this session's Gmail tooling authenticates as `scholarixglobal@gmail.com`, not `renbranmadelo@gmail.com` (2026-08-07)
+
+§8.1 already found `scholarixglobal@gmail.com` empty when searching for
+Prosper's attachment 5306, but treated the account identity itself as
+inferred from the session setup, not independently confirmed. **Now
+directly verified**: `search_threads` with query `to:me` — Gmail's own
+resolution of "me" to the authenticated account — returned live inbox
+results (a Zapier task-replay alert, two Resend quota-alert emails, all
+2026-08-07) every one of which lists `toRecipients: ["scholarixglobal@gmail.com"]`.
+Not a config file read, not a memory citation — the mailbox's own
+messages confirm which account this is.
+
+Separately, this session created a Gmail draft to `bran@sgctech.ai`
+(Kallat internal-review request, later superseded/neutralized — see
+`manifest.yaml` 2026-08-07 entries) from this same account, before the
+account identity had been checked. No indication that draft failed to
+create, so `scholarixglobal@gmail.com` does have working send/draft
+capability — the issue is which mailbox it is, not whether it works.
+
+**This plausibly explains attachment 5306's disappearance, not just
+coincides with it.** §8.1 already found the actual Prosper rejection
+thread's SMTP headers point to `mail.sgctech.ai` via SOGoMail — a
+company mail server, not Gmail at all. If client correspondence for
+these deals generally lives there (or in `renbranmadelo@gmail.com`,
+per this session's own account table, which this session has never had
+access to), `scholarixglobal@gmail.com` was never going to contain it,
+independent of anything about attachment 5306 specifically. **Not fully
+closed**: this confirms the account this session is authenticated as,
+not why that's the account connected, nor whether `renbranmadelo@gmail.com`
+or `mail.sgctech.ai` would actually contain Kallat's or Prosper's missing
+correspondence — that requires access this session doesn't have.
+
 **Decision #1 in §2 above is the resolving action for this entry too** —
 this doesn't add a new decision, it records that the question is now
 drafted and routed, not that headcount is resolved.

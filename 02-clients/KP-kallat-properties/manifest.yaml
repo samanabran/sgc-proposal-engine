@@ -164,6 +164,48 @@ escalations:
       case a different sending account is needed for this to land
       correctly in Bran's inbox.
 
+  - date: "2026-08-07"
+    raised_by: "Bran (direct instruction, in chat)"
+    issue: >
+      The routing correction immediately above over-gated a question
+      that carries no figure and no commitment. Explicit correction: the
+      headcount question routes through Johnny as an ordinary SDR
+      follow-up and does not need the stamp-SDR-John-stamp sequence --
+      that sequence is for anything carrying a figure or a commitment,
+      which this doesn't. Bran/John approval and the
+      "take-it-or-leave-it" framing (appropriate to a priced offer, not
+      a free scoping question we're asking the client to answer) are
+      both removed. Bran's message in this session is treated as the
+      review/approval itself -- the draft asking him to approve his own
+      review was circular.
+    resolution: >
+      00-intake/sdr-followup-headcount-2026-08-07.md reverted to the
+      direct Johnny Gurrera -> Sadique Abbas route, take-it-or-leave-it
+      language removed entirely. No Gmail draft created for the
+      Johnny->Sadique message -- prepared as a file only, ready for
+      Johnny to send from his own inbox; this session doesn't hold his
+      address or a legitimate sending identity for him.
+      04-draft/_review-stamp.yaml written recording Bran's approval
+      (reviewer, ISO timestamp, decision, reviewed commit hash) per
+      review_stamp_check(). The prior turn's bran@sgctech.ai Gmail draft
+      could not be deleted -- no delete_draft tool is available in this
+      session's Gmail toolset (create_draft, list_drafts, search_threads,
+      get_message, get_thread, label/unlabel, update_draft only) --
+      neutralized via update_draft instead (subject/body replaced with a
+      superseded notice) and left for manual deletion.
+      CONFIRMED (not inferred from a prior session's note): this
+      session's Gmail tooling is authenticated as
+      scholarixglobal@gmail.com, verified directly via a `to:me` search
+      resolving to that address on live inbox results (quota-alert and
+      Zapier notification emails, 2026-08-07). This is the same account
+      HANDOVER.md section 8.1 already found empty when searching for
+      Prosper's attachment 5306 -- now confirmed as a likely reason why:
+      if client correspondence for these deals lives on
+      mail.sgctech.ai/SOGo (as section 8.1 also found for the 5306
+      rejection reply's own SMTP headers) or in a different mailbox
+      entirely, scholarixglobal@gmail.com was never going to contain it,
+      account mismatch or not. Logged in HANDOVER.md as a new finding.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
