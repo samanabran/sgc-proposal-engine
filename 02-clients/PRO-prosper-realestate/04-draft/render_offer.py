@@ -217,7 +217,39 @@ def reconciliation_check(values):
     if values["subscription_fee_aed_mo_config_ii"] < floor_at_band_top:
         violations.append(f"G1 platform-floor breach at band top (N={n}): quoted subscription "
                            f"{values['subscription_fee_aed_mo_config_ii']} < floor {floor_at_band_top}")
-    return violations
+
+    # Margin gate (policy.yaml:88 min_gross_margin=0.30) at the SAME band-top
+    # edge, not just N=31. Revenue is flat across the band (full_term_
+    # commitment doesn't change with actual headcount); cost is not --
+    # both CTS and Class B per-user provisioning scale with N, so the top
+    # of the band is where margin is thinnest. internal_build_cost is
+    # recomputed here via the real engine functions (pe.b_hours_for_branch,
+    # pe.hypercare_hours_for_n), not hand-derived -- a prior hand-derived
+    # pass in this session's chat output (never committed to any file,
+    # confirmed by repo-wide grep) omitted hypercare hours from
+    # total_hours_all_in and understated internal_build_cost as 7,362
+    # instead of the correct ~9,462. Corrected here, checked at the point
+    # that actually matters (band top), not silently left as a chat-only
+    # error.
+    a_side_hours_config_ii = 40  # a_hours(31) + qa(3) + doc(2) + training(4), scope-driven, invariant in N
+    b_hours_at_band_top, _ = pe.b_hours_for_branch(n, "m")
+    hypercare_hours_at_band_top = pe.hypercare_hours_for_n(n)
+    total_hours_at_band_top = a_side_hours_config_ii + b_hours_at_band_top + hypercare_hours_at_band_top
+    internal_build_cost_at_band_top = round(total_hours_at_band_top * 150)
+    full_term = values["full_term_commitment_aed_config_ii"]
+    cost_over_term_at_band_top = internal_build_cost_at_band_top + cts_total_at_band_top * values["term_months"]
+    margin_at_band_top = (full_term - cost_over_term_at_band_top) / full_term
+    min_gross_margin = 0.30  # policy.yaml:88
+    absolute_margin_floor = 0.25  # policy.yaml:89, G23
+    if margin_at_band_top < absolute_margin_floor:
+        violations.append(f"ABSOLUTE margin floor breach at band top (N={n}): {margin_at_band_top:.4f} "
+                           f"< {absolute_margin_floor} (G23, policy.yaml:89) -- STOP, report, do not absorb")
+    elif margin_at_band_top < min_gross_margin:
+        violations.append(f"min_gross_margin gate breach at band top (N={n}): {margin_at_band_top:.4f} "
+                           f"< {min_gross_margin} (policy.yaml:88) -- flag for review")
+    return violations, dict(margin_at_band_top=margin_at_band_top,
+                             internal_build_cost_at_band_top=internal_build_cost_at_band_top,
+                             cts_total_at_band_top=cts_total_at_band_top)
 
 
 AED_NUMBER_RE = re.compile(r"AED\s*([\d,]+(?:\.\d+)?)")
@@ -284,14 +316,19 @@ def main():
     for label, value, source in emitted:
         print(f"  {label} = {value!r}\n    <- {source}")
 
-    recon_violations = reconciliation_check(values)
+    recon_violations, recon_detail = reconciliation_check(values)
     print("\n=== RECONCILIATION CHECK ===")
     if recon_violations:
         for v in recon_violations:
             print(f"  FAIL: {v}")
         print("REFUSED -- no files written.")
         return 1
-    print("  PASS -- subscription, per-user, and mobilisation all reconcile.")
+    print("  PASS -- subscription, per-user illustration, mobilisation, quarterly, full-term, "
+          "G1 platform-floor, and margin gates all reconcile/clear.")
+    print(f"  Margin at band top (N={values['seat_band_max']}): {recon_detail['margin_at_band_top']:.2%} "
+          f"(internal_build_cost {recon_detail['internal_build_cost_at_band_top']}, "
+          f"cts_total {recon_detail['cts_total_at_band_top']:.0f}) -- "
+          f"vs. min_gross_margin 30% (policy.yaml:88) and absolute floor 25% (policy.yaml:89)")
 
     print("\n=== VALUES FOR MARKDOWN AUTHORING ===")
     for k, v in sorted(values.items()):

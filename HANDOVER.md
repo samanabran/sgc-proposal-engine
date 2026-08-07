@@ -604,3 +604,62 @@ hiding a number; pulling it out keeps the door fully open to have the
 headcount conversation first, before any figure is back on the table.
 Both are defensible — this is the one open call left, and it's yours,
 not the agent's.
+
+---
+
+## 10. Prosper — Rev3 sent, known-state additions (2026-08-07)
+
+The offer and answer form were sent (walk-away held in reserve). Three
+items to record as **known state, not resolved state** — the offer is
+out the door; these don't block that, but they shouldn't quietly age
+into "handled" either.
+
+**T12 shipped non-blocking.** `render_offer.py`'s pre-render gate
+reports T12's three failing assertions in full (`users_now` unverified,
+package-list not independently corroborated, segment classification
+rests on an unverified count) but does not refuse the render on them —
+a documented exception, not a silent override, justified by the
+2026-08-07 seat-band restructure (the quoted AED 4,560/mo no longer
+asserts `users_now` as fact). **The reasoning holds. The fact remains
+open.** `users_now=31` is still unverified by this audit
+(`USERS_NOW_PROVENANCE` in `test_pricing_engine.py`), and Q11's AED
+147/user illustration in the sent answer form rests on it directly,
+labelled as an illustration but still built from an unconfirmed number.
+An unverified figure is now in the client's hands. Decision #3 in
+Section 2 above (confirm `users_now`) remains the resolving action —
+this entry doesn't add a new decision, it records that Rev3 shipped
+without waiting for that one to close, on the reasoning that the
+headline figure doesn't depend on it. If Dian's reply gives a real
+headcount, retire this entry; until then it's a live gap, not a footnote.
+
+**Margin gate verified at the band's actual worst case, not just at
+N=31.** Revenue is flat across the seat band (full-term commitment
+doesn't move with actual headcount inside it); cost isn't — both CTS
+and Class B per-user provisioning scale with N, so the top of the band
+(35) is where margin is thinnest. Checked directly (`render_offer.py`
+`reconciliation_check`, using `pe.b_hours_for_branch` and
+`pe.hypercare_hours_for_n`, not a hand-derived shortcut): **margin at
+N=35 is 33.18%** (internal_build_cost 9,635, cts_total 2,990) — clears
+both `policy.yaml:88` (min_gross_margin 0.30) and `policy.yaml:89` (G23
+absolute floor 0.25) with room, though less room than the N=31 basis
+case (34.74%).
+
+**Correction, stated plainly**: computing the margin check above
+surfaced a real error in this session's own earlier chat output (never
+committed to any file — confirmed by a repo-wide grep for the specific
+figure before writing this entry). Several turns back,
+`internal_build_cost` for config (ii) was reported as **7,362 AED**,
+computed by hand as `a_side_hours(40) + class_b(9.081) = 49.081h × 150`
+— which omits hypercare hours entirely. The correct figure, matching
+the same formula this repo's own worksheets use throughout (and now
+verified against the real engine functions, not hand-derived), is
+`a_side_hours(40) + class_b(9.081) + hypercare(14) = 63.081h × 150 =
+9,462 AED` at N=31. Margin percentages quoted earlier in chat (~36–36.5%)
+were correspondingly overstated — the correct N=31 figure is 34.74%.
+**Every actual conclusion this session reached still holds** (build
+value still clears internal build cost by a wide margin; all margin
+gates still pass at every configuration checked, including the platform
+floor's own governing gate) — nothing was ever committed to a file with
+the wrong number, and no decision was made on the strength of the error.
+Recorded here because a chat-only error should still be owned, not
+because anything downstream needs correcting.
