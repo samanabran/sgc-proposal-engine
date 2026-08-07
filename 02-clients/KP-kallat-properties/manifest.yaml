@@ -134,6 +134,36 @@ escalations:
       comparison must be computed against both PRJ tier ends (AED 48,450
       and AED 123,250), not a single midpoint (HANDOVER.md §11).
 
+  - date: "2026-08-07"
+    raised_by: "SGC Tech AI SDR (agent-assisted)"
+    issue: >
+      Routing correction to the entry immediately above: the headcount
+      confirmation question does not go straight to Johnny Gurrera.
+      Instruction (2026-08-07, same day): internal review first -- Bran
+      reviews/approves, then it routes to John, with a note that he
+      should talk to Sadique about it directly, presented as
+      take-it-or-leave-it, and that clear, confirmed commitment from
+      Sadique is required before anything further is sent. Only after
+      that does any version reach Sadique.
+    resolution: >
+      Internal-review draft created as an actual Gmail draft (not sent)
+      to bran@sgctech.ai, subject "[Kallat KP-2026-SUB-01] Internal
+      review -- headcount confirmation to Sadique (hold for your
+      approval)", created 2026-08-07 10:49 UTC, thread
+      19fdbd7544ad31e8. Summarizes the T12 blocker and the drafted
+      Johnny->Sadique question, asks Bran to approve before anything
+      moves further, and states the John/take-it-or-leave-it/
+      clear-commitment routing plan for after approval. Nothing sent to
+      John or Sadique -- both remain not-yet-drafted, contingent on
+      Bran's approval. Full routing status:
+      00-intake/sdr-followup-headcount-2026-08-07.md. Note: the
+      connected Gmail account is scholarixglobal@gmail.com (not
+      renbranmadelo@gmail.com or any SGC-domain sender address) -- same
+      account-mismatch caveat already logged for Prosper's attachment
+      5306 investigation (HANDOVER.md §8.1); flagged in the held file in
+      case a different sending account is needed for this to land
+      correctly in Bran's inbox.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

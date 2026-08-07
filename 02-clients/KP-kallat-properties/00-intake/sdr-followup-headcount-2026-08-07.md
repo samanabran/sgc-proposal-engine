@@ -2,10 +2,34 @@
 
 **Purpose:** resolve the unsourced `users_now` figure blocking Stage 5
 pricing (see `manifest.yaml` 2026-08-07 escalation, `CHANGELOG.md` and
-`HANDOVER.md` §12). Commits nothing, quotes no figure — routed as an
-ordinary SDR follow-up, not through the stamp→SDR→John→stamp sequence.
+`HANDOVER.md` §12). Commits nothing, quotes no figure.
 
-**Route:** Johnny Gurrera (SDR, logged the 2026-07-24 client call) → Sadique
+**Route, per instruction (2026-08-07, updated):** internal review first,
+not directly to Johnny. Bran (`bran@sgctech.ai`) reviews/approves →
+forwarded to John, with a note that he should talk to Sadique about it
+directly, presented as take-it-or-leave-it, and that clear, confirmed
+commitment from Sadique is required before anything further is sent →
+only then does a version reach Sadique (via Johnny Gurrera, SDR who
+logged the 2026-07-24 client call, or directly by John — Bran/John's
+call).
+
+## Routing status
+
+| Step | Status | Detail |
+|---|---|---|
+| 1. Internal review draft → Bran | **Sent as a Gmail draft, held (not sent)** | `bran@sgctech.ai`, subject "[Kallat KP-2026-SUB-01] Internal review — headcount confirmation to Sadique (hold for your approval)", created 2026-08-07 10:49 UTC, thread `19fdbd7544ad31e8`. Summarizes the blocker and the drafted message below, asks for approval before anything moves further. |
+| 2. Forward to John | **Not created — waiting on Bran's approval** | To include: the drafted question below, plus the note that John should talk to Sadique directly, take-it-or-leave-it framing, clear commitment required before sending further. |
+| 3. To Sadique | **Not created** | Contingent on step 2. |
+
+Nothing has been sent to Sadique or to anyone outside SGC. The one
+Gmail account connected to this session is `scholarixglobal@gmail.com`
+(per prior Prosper attachment-5306 investigation, `HANDOVER.md` §8.1) —
+the draft above was created from that account, addressed to Bran; if
+that's not the right sending account for this to look right in his
+inbox, say so and I'll recreate it from the correct one.
+
+**Original route (superseded by the above, kept for reference):**
+Johnny Gurrera (SDR, logged the 2026-07-24 client call) → Sadique
 Abbas, Sales Manager, `sales@kallatproperties.com` / `+971 54 791 6003`.
 
 **Why this is blocking, not routine:** for this deal specifically, headcount
