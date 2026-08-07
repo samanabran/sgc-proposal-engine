@@ -52,16 +52,23 @@ RERA-licensed agency) holds the portal-side access, SGC builds against
 it. That resolves the logical tension: charging a fee and disclaiming
 accreditation are not actually contradictory once the fee is understood
 as build labor, not a pass-through of a partnership SGC doesn't have.
-**What this does NOT establish, checked and not found**: no file
-anywhere in this repo records a completed portal_sync delivery for any
-client — VGE, MRD, and PRO all show this item at DEFERRED/proposal
-stage, none at delivered. So technical delivery under current access
-terms is documented as a priced, governed offering, not as a
-demonstrated instance. The letter below states the fee and the
-access-contingency plainly; it does NOT claim delivery has been proven
-elsewhere, because that claim isn't sourced. If Bran knows of a
-completed instance outside this repo, worth adding before send — not
-added here on inference.
+**COMMERCIAL RISK, not just a caveat** — raised to that level 2026-08-08
+per instruction. No file anywhere in this repo records a completed
+portal_sync delivery for any client — VGE, MRD, and PRO all show this
+item at DEFERRED/proposal stage, none at delivered. The
+portal_dependency_note reconciles the *accreditation* contradiction (SGC
+needs none under this model), but it is governed provenance for the
+*number*, not evidence the number covers labour SGC has ever actually
+performed. This letter's whole purpose is correcting a previous
+under-quote; converting an unproven catalogue rate into a written,
+client-facing price in that same letter is a real risk of repeating the
+pattern it exists to fix, not a hypothetical. Two changes made because
+of this: (1) the letter now presents the figures as the *current
+catalogue rate*, not a stated fixed all-in cost for demonstrated work;
+(2) this is logged as a commercial risk for Bran in the review request,
+not filed as a background note about outside instances — flagged, not
+resolved, since no one in this session can confirm delivery capability
+from repo files alone.
 
 DECISION #9 STATUS — OPEN, NOT CLOSED, now annotated at the source too
 (see 03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md:10, marked
@@ -98,25 +105,25 @@ in time — not a contradiction. No new information changes this letter's
 status: Kallat could not render through R11/R12 then and cannot now,
 independent of stamp validity, and the stamp is separately invalid too.
 
-Routing per instruction, 2026-08-08: Bran review -> Johnny Gurrera
-(confirms commitment, signs) -> Bran final instruction to send. Not
-authorized for client contact until that sequence completes and a
-fresh, hash-matched 04-draft/_review-stamp.yaml entry exists.
+Routing per instruction, 2026-08-08: Bran review -> [signatory, per
+HANDOVER.md §2 decision #10, not yet recorded] -> Bran final instruction
+to send. Not authorized for client contact until that sequence
+completes, decision #10 is recorded, and a fresh, hash-matched
+04-draft/_review-stamp.yaml entry exists.
 
-SIGNATORY — checked for documentary evidence, found none. Searched
-10-signature/ (all files, incl. ADMIN-OPERATIONS-MANUAL.md), the
-render_r11_r12.py source, and every "John"-adjacent mention in
-HANDOVER.md/CHANGELOG.md/manifest.yaml: no file in this repo maps
-Johnny Gurrera to the "John" in manifest.yaml's "stamp-SDR-John-stamp"
-phrase, or establishes he holds a distinct formal-signatory role versus
-his ordinary-SDR role. The only basis for Johnny signing this letter is
-the user's own direct confirmation in this conversation (AskUserQuestion
-answer, 2026-08-08: "Same person — Johnny Gurrera") — a verbal/chat
-instruction, not a repository artifact. Stated plainly rather than
-presented as documented: if that's sufficient authority (the user is
-presumably positioned to know this fact directly), Johnny signs, as
-below. If a documentary record is wanted before this is treated as
-settled, none currently exists to point to.
+SIGNATORY — corrected 2026-08-08 (second correction). The previous
+revision kept Johnny Gurrera signed on the strength of an AskUserQuestion
+answer ("Same person — Johnny Gurrera"). Bran's follow-up: that basis
+points the wrong way — the instruction being cited is the same one where
+he separated Johnny's headcount lane from the formal signing lane and
+said in terms that Johnny is not the signatory here. No documentary
+mapping exists either (checked 10-signature/ in full, render_r11_r12.py,
+every John-adjacent mention in HANDOVER.md/CHANGELOG.md/manifest.yaml —
+nothing). Rather than infer again, this is now recorded as
+HANDOVER.md §2, decision #10 (added 2026-08-08), for Bran to answer on
+his own next pass: is Johnny Gurrera the "John" in the
+stamp-SDR-John-stamp sequence, yes or no. Until that row is filled in,
+the signature block below carries no name.
 
 SECURITY PARAGRAPH — revised per instruction to a strict two-sentence
 retraction: withdraws the claim, states nothing else. The prior version's
@@ -154,11 +161,11 @@ especially since data security was the first thing you raised.
 **3. On portal connections (Bayut, Property Finder, Dubizzle) — two corrections.**
 First, cost: we told you the only cost involved is the portal's own API
 fee, with the connection itself being "one click" at no charge from us.
-Our current position is different: connecting to Property Finder is a
-one-time AED 3,900 fee, and Bayut/Dubizzle together are a one-time AED
-3,400 fee, for the integration work itself — separate from whatever
-subscription each portal charges you directly, and contingent on your
-own portal account already including feed/API access. Second,
+Our current catalogue rate is different: AED 3,900 one-time for
+Property Finder, and AED 3,400 one-time for Bayut/Dubizzle together, for
+the integration work itself — separate from whatever subscription each
+portal charges you directly, and contingent on your own portal account
+already including feed/API access. Second,
 accreditation: we referred to our system as "already accredited by" all
 three portals. That's not something we hold — the sync is built against
 your own portal access, not a partnership status on our side — and we
@@ -170,17 +177,16 @@ the monthly fee, will follow separately once we've confirmed a couple of
 scoping details with you directly.
 
 Best regards,
-Johnny Gurrera
+[[signatory pending — see HANDOVER.md §2, decision #10]]
 SGC TECH AI
 
 ---
 Internal note (do not send as-is): log this correction in
 02-clients/KP-kallat-properties/manifest.yaml under a new escalation
-entry, and route per instruction — Bran review first, then Johnny
-Gurrera (confirming commitment and signing, per the stamp-SDR-John-stamp
-sequence — distinct from his un-gated headcount-question lane), then
-back to Bran for final instruction to send to Sadique Abbas
-(sales@kallatproperties.com / +971 54 791 6003). Do not send to the
-client until that full sequence completes and a fresh
-04-draft/_review-stamp.yaml entry is written hash-matched to the commit
-containing this file.
+entry, and route per instruction — Bran review first, then whoever
+HANDOVER.md §2 decision #10 identifies (confirming commitment and
+signing), then back to Bran for final instruction to send to Sadique
+Abbas (sales@kallatproperties.com / +971 54 791 6003). Do not send to
+the client until that full sequence completes, decision #10 is
+recorded, and a fresh 04-draft/_review-stamp.yaml entry is written
+hash-matched to the commit containing this file.

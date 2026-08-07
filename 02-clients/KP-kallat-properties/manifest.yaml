@@ -554,6 +554,48 @@ escalations:
       struck through and marked SUPERSEDED inline, plus a NOT SEND-READY
       banner added at the top of the file.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Security paragraph, provenance reconciliation, and the two-gate
+      resolution all accepted. Four remaining items: (1) the signatory
+      is still wrong -- Johnny Gurrera was kept on the strength of an
+      AskUserQuestion answer, but the instruction being cited is the
+      same one where Johnny was explicitly ruled out as signatory;
+      basis withdrawn, fix belongs to Bran, to be recorded in
+      HANDOVER.md under his name; (2) item 3 verbatim requested, not a
+      paraphrase; (3) the undelivered-portal-sync finding needs to be
+      framed as a commercial risk for Bran, and the figures should read
+      as a current catalogue rate rather than a fixed all-in cost; (4)
+      enumerate all four pre_render_gate() failure grounds, not just
+      two.
+    resolution: >
+      (1) Signature block emptied -- "SGC TECH AI" only, name removed.
+      HANDOVER.md §2 decision #10 added (Bran's own row, dated
+      2026-08-08, to be filled in on his next pass): is Johnny Gurrera
+      the "John" in the stamp-SDR-John-stamp sequence. Draft, review
+      request, and this manifest's routing language all updated to
+      point at that decision rather than assert an identity.
+      (2) Item 3 pasted verbatim in chat, not paraphrased.
+      (3) Reframed in the draft's internal header and the review request
+      as a commercial risk, not a background note: the
+      portal_dependency_note resolves the accreditation contradiction
+      but is provenance for the number, not evidence the number covers
+      labour SGC has performed; no client in this repo shows a
+      completed portal_sync instance. Client-facing wording changed
+      from "is a one-time AED 3,900 fee" to "our current catalogue rate
+      is ... AED 3,900 one-time" -- states the rate, not a claim that
+      the work has been done before.
+      (4) All four pre_render_gate('KP-kallat-properties') grounds
+      enumerated in full in 04-review/internal-review-request-2026-08-08.md:
+      not in ALLOWED_CLIENTS (predates everything else, set 2026-08-06);
+      T12 headcount unsourced; T12 unrequested scope (AED 19,652, 4
+      packages, no approved_scope_exceptions); T12 segment classification
+      depends on the same unverified headcount. Stated plainly: Kallat
+      has never once cleared this gate end-to-end -- every prior
+      "passes"/"clean" reference in this repo's history is a single
+      sub-check in isolation, not a real render.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

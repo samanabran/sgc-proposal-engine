@@ -1,10 +1,13 @@
 # Internal review request — Kallat correction notice (decision #9)
 
-**For:** Bran. **Routing:** Bran review → Johnny Gurrera (confirms
-commitment, signs — the stamp-SDR-John-stamp sequence, distinct from his
-un-gated headcount-question lane) → back to Bran for final instruction
-to send. Nothing goes to Sadique Abbas until that full sequence
-completes.
+**For:** Bran. **Routing:** Bran review → [signatory — HANDOVER.md §2
+decision #10, not yet recorded: is Johnny Gurrera the "John" in the
+stamp-SDR-John-stamp sequence?] → back to Bran for final instruction to
+send. Nothing goes to Sadique Abbas until that full sequence completes.
+The correction notice's signature block currently carries no name —
+your earlier chat instruction was that Johnny is not the signatory here,
+which an intervening question-and-answer in this session incorrectly
+overrode; withdrawn, see decision #10.
 
 **No longer using Gmail drafts for internal routing on this deal** — this
 replaces what would have been a third draft in a mailbox already
@@ -21,21 +24,33 @@ payment auto-reconciliation, landlord/client portals), the unqualified
 "completely implausible" cybercrime claim, and the portal
 accreditation/fee overstatement.
 
-## One thing still needs your input
+## Two things need your input
 
-1. **Portal delivery confirmation.** The letter states the AED
-   3,900/3,400 integration fee and explains why no SGC accreditation is
-   needed (client holds the portal-side access; SGC builds the sync
-   against it — `phase2-catalogue.yaml`'s own dependency model). What it
-   does NOT claim is that this has been delivered before: no file in
-   this repo records a completed portal_sync instance for any client
-   (VGE, MRD, PRO are all still at DEFERRED/proposal stage). If you know
-   of a completed instance outside this repo, worth adding before send —
-   not assumed here.
+1. **Signatory — HANDOVER.md §2, decision #10 (added 2026-08-08).** Is
+   Johnny Gurrera the "John" in manifest.yaml's "stamp-SDR-John-stamp"
+   sequence? No file in this repo answers it. This is a fact about SGC's
+   own people — record it in that row on your next pass, not something
+   further search here can resolve.
+
+2. **Commercial risk: undelivered portal integration.** No file anywhere
+   in this repo records a completed portal_sync instance for *any*
+   client — VGE, MRD, and PRO are all still at DEFERRED/proposal stage.
+   `phase2-catalogue.yaml`'s dependency note resolves the accreditation
+   contradiction (SGC needs none — the client holds portal-side access,
+   SGC builds against it), but it's governed provenance for the *number*,
+   not evidence the number covers labour SGC has ever performed. This
+   letter's purpose is correcting a previous under-quote; putting an
+   unproven catalogue rate into that same letter as a written,
+   client-facing price risks repeating the pattern it exists to fix. The
+   letter now frames the figures as the *current catalogue rate*, not a
+   stated fixed cost for demonstrated work — but the underlying risk
+   (has this integration ever actually been built, by anyone, under
+   current access terms?) is not resolved by that wording change and
+   needs your call before this goes to Sadique.
 
 Security paragraph is now a strict two-sentence retraction (no
 substitute claim) and the "everything at your disposal" tension is left
-alone entirely, per your last round's instructions — no open question on
+alone entirely, per your prior round's instructions — no open question on
 either of those.
 
 ## Also surfaced this pass — not part of this letter, but relevant
@@ -83,21 +98,49 @@ repo for any client — flagged above as something only you'd know.
 
 ## Review gate — re-verified by running the actual code, not just reading it
 
-```
-review_stamp_check('KP-kallat-properties') -> refuses (stamp hash mismatch)
-pre_render_gate('KP-kallat-properties')    -> refuses, 4 independent reasons
-  (ALLOWED_CLIENTS, T12 headcount, T12 unrequested scope, T12 segment)
-review_stamp_check('MRD-meridianview-realty') -> refuses (no stamp file exists)
-```
+`pre_render_gate('KP-kallat-properties')` returns `False` with **four
+independent reasons**, run live 2026-08-08 (not inferred from reading
+the source):
 
-`ALLOWED_CLIENTS = ["MRD-meridianview-realty"]` only, set 2026-08-06
-(commit b3e8cd3) and unchanged since — Kallat cannot render through
-R11/R12, independent of stamp status. This doesn't conflict with
-`CHANGELOG.md:1953`'s "Kallat's stamp passes clean" — that note is about
-`review_stamp_check()` alone, snapshotted the day the stamp was written
-(commit 025dc08), before this session's edits invalidated it. Two
-different, independent gates, both statements true at their respective
-times.
+1. **Not in `ALLOWED_CLIENTS`.** That list is `["MRD-meridianview-realty"]`
+   only, set 2026-08-06 (commit `b3e8cd3`, "Add R11/R12 renderer, scoped
+   to MRD only") and unchanged since. Kallat has never been eligible to
+   render through R11/R12 — this predates everything else on this list.
+2. **T12 headcount unsourced.** `users_now=40` re-affirmed UNSOURCED
+   2026-08-07 (Bran, direct ruling) — Sadique's own answer ("approximately
+   40 or 15, approximate") is double-hedged and off-the-cuff, and Kallat
+   is a multi-business group, so even a precise number wouldn't establish
+   which entity it counts. Hard block, unchanged by this pass.
+3. **T12 unrequested scope.** AED 19,652 of the quoted build value (35.0%)
+   comes from 4 work packages — `discovery`, `invoicing_trn`,
+   `property_unit_register`, `tenancies_contracts_reminders` — not in the
+   client's brief and with no `approved_scope_exceptions` field recording
+   authorization. The client is being billed for scope with no record of
+   having asked for it.
+4. **T12 segment classification depends on the unverified headcount.**
+   The `mid_market` segment (and the rate that follows from it) rests on
+   `users_now`, which check 2 above has never cleared — so the segment
+   itself is unverified, not just the headcount number in isolation.
+
+Plus a fifth, independent of all four: the review stamp itself is
+invalid (`reviewed_commit` doesn't match the current commit touching
+reviewed material). `review_stamp_check('MRD-meridianview-realty')` also
+refuses right now — but for a different reason again: no
+`_review-stamp.yaml` file exists for MRD at all.
+
+**What this means plainly**: Kallat has never once cleared this gate.
+Anything described elsewhere in this repo's history as "verified,"
+"clean," or "passes" for Kallat refers to one sub-check in isolation at
+one point in time (e.g. `CHANGELOG.md:1953`'s "Kallat's stamp passes
+clean," which was `review_stamp_check()` alone, snapshotted at commit
+`025dc08`) — never the full gate, and never a real render. `ALLOWED_CLIENTS`
+being MRD-only predates that snapshot and made the full gate a fail
+throughout, independent of stamp status. Two different, independent
+gates, both statements true at their respective times — not a
+contradiction, but also not evidence anything on Kallat has ever
+actually rendered clean end-to-end.
 
 A fresh, hash-matched `04-draft/_review-stamp.yaml` entry is required
-before this letter is ever send-ready, once you've reviewed it.
+before this letter is ever send-ready, once you've reviewed it — and
+even then, `ALLOWED_CLIENTS` would need to be widened before Kallat
+could render through this pipeline at all, which is out of scope here.
