@@ -998,3 +998,43 @@ automation (lead distribution) + Google Sheets (reporting/pipeline)"`,
 matching the transcript's own Zapier mention (~13:40) exactly. Stated
 plainly rather than silently agreed with: this specific point was already
 correctly captured before this session touched the file.
+
+### 14.6 Decision #9's correction notice drafted, reopened on inspection, and a stray Gmail draft neutralized (2026-08-08)
+
+The written correction §14.4 called for was drafted:
+`02-clients/KP-kallat-properties/03-draft/KP-2026-SUB-01_CorrectionNotice_Draft1.md`
+(commits `277c382`, `28b7e6f`). On review, the first pass had asserted
+decision #9 closed by reasoning ("the flat-monthly shape honours the
+promise") rather than by checking the actual draft set. It doesn't hold:
+grepping `03-draft/` and `04-draft/` (including
+`_quarantine/`, its HTML render, and its PDF via `pdftotext`) for a
+per-user figure found one live, non-quarantined instance —
+`03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md:10`, "AED
+250/user/month" for "Additional users beyond 40," stale against the
+2026-08-05 v3.0 recompute that deleted that exact line item
+(`additional_user`, replaced by `onboarding_fee_per_marginal_user` +
+`platform_capacity_fee`, `phase2-catalogue.yaml`). The same stale figure
+also appears in the quarantined HTML/PDF, as expected, but the
+`03-draft/` instance is not covered by `_quarantine/NOTICE.md` and would
+carry into any future render untouched. **Decision #9 is reopened** —
+full detail in `manifest.yaml`'s 2026-08-08 entries. Fixing
+`07-options-inclusions.md:10` is Stage 5 pricing content, out of scope
+for the correction notice and for the still-held Stage 5.
+
+Separately: an earlier pass in this same session created a Gmail draft
+to `bran@sgctech.ai` for this review (subject "[Kallat KP-2026-SUB-01]
+Internal review — correction notice to Sadique (decision #9)"), before
+being instructed to stop using Gmail for internal routing on this deal.
+Neutralized via `update_draft` — subject replaced with "[SUPERSEDED — do
+not use] was: Kallat KP-2026-SUB-01 internal review," body points at the
+repo file that replaced it. **Sits in the same account already flagged
+as likely wrong for this deal**: `scholarixglobal@gmail.com`, per §8.1's
+Prosper finding and the identical caveat logged in this file's Kallat
+manifest history (`manifest.yaml`, 2026-08-07 entry, draft id
+unrecorded there — this draft's id is `r233075915882888825`). No delete-
+draft tool available this session, so it stays in Drafts as a stub —
+logged here so whoever eventually opens that account and finds a
+superseded stub with no visible history knows what it was and that no
+further action is needed on it. Internal review requests for this deal
+now go into the repo as files
+(`02-clients/KP-kallat-properties/04-review/`), not Gmail drafts.

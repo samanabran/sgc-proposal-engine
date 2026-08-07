@@ -456,6 +456,35 @@ escalations:
       04-draft/_review-stamp.yaml entry before Johnny sees or signs it —
       not yet reviewed, not yet send-ready.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      04-review/ (new file added this session) sits adjacent to
+      04-draft/ (where review_stamp_check() reads _review-stamp.yaml) —
+      two sibling 04-prefixed directories, one gated and one not, with
+      04-review/'s status left unstated. Same shape as the ungoverned-
+      document class in HANDOVER.md §11; must not be left implicit.
+    resolution: >
+      Registered explicitly rather than folded into 04-draft/: 04-review/
+      predates this session (04-review/qa-checklist.md is part of the
+      original client scaffold, referenced by
+      00-knowledge/runbook/subscription-proposal-runbook.md step 7 --
+      "Complete 04-review/qa-checklist.md and 04-review/brand-qa-checklist.md")
+      and is the repo's existing convention for human-review-facing
+      artifacts, distinct from 04-draft/'s rendered-output-plus-stamp
+      role. Checked directly against review_stamp_check()'s code
+      (05-ops/render_r11_r12.py:104-132): REVIEWED_MATERIAL_SUBPATHS is
+      00-intake/02-calc/03-draft/manifest.yaml only -- 04-review/ was
+      never in scope, same as 04-draft/ itself (deliberately excluded,
+      per that function's own comment). Stated here so that status is
+      explicit, not inferred: 04-review/ holds human-readable review
+      material (qa-checklist.md, brand-qa-checklist.md, and now
+      internal-review-request-2026-08-08.md); it is not read by
+      review_stamp_check() and carries no gating authority of its own --
+      the only gate that determines send-readiness is
+      04-draft/_review-stamp.yaml, checked against 00-intake/, 02-calc/,
+      03-draft/, and this file.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
