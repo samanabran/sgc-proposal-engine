@@ -152,7 +152,7 @@ artifact or answer — not by more in-repo analysis.
 | 6 | Prosper: attachment 5306 (the actual rejected PRJ document) could not be retrieved this session — see §8. **Updated 2026-08-07**: the retrieval attempt searched `scholarixglobal@gmail.com`, now confirmed (§13) not to be the mailbox this thread lives in — "not retrieved" was never "not retrievable." Every PRJ figure used in this repo's comparisons (AED 45,000, 1,450/mo, the 690/650 rates, the Care Plan start month) remains a secondhand account, not a verified extraction. | **Talha Sheraz** | Named human action, not a dead end: the thread lives on SGC's own mail server (`mail.sgctech.ai`, SOGo webmail) in **Talha's own mailbox** — the sender of record on both the 22 Jul send and the 27 Jul rejection reply. Artifact to produce: "PROSPER x SGC Implementation Proposal 2026," CRM attachment 5306, sent 22 July 2026 09:44 UTC. Every PRJ figure stays UNVERIFIED until produced. See decision #8 — a general mailbox read path may make this individual ask unnecessary. |
 | 7 | Prosper: the platform/CTS floor (AED 3,648/mo, headcount-driven, `policy.yaml:70-87`) does not move when scope is cut — see §8.5. At the theoretical limit of zero build value, the floor alone over 24 months (AED 87,552) still exceeds the PRJ document's entire 24-month figure (~AED 79,800, itself unverified per #6). No configuration this repo is authorized to build can beat the rejected number on price. | ______ | A pricing-model decision (rate, uplift, or platform-floor structure) — explicitly out of this pass's constraint. See §9 recommendation. |
 | 8 | **Highest-value open item (added 2026-08-07, §13).** Client correspondence for these deals lives on `mail.sgctech.ai` behind SOGo webmail, not in the `scholarixglobal@gmail.com` account this session is connected to (confirmed by the attachment-5306 rejection reply's own SMTP headers, §8.1/§13) — and possibly also not in `renbranmadelo@gmail.com`, the account this session's own setup notes as intended but never actually connects to. Every negative finding in this repo built on a Gmail search (MRD's retraction search, decision #4; Prosper's attachment-5306 search, decision #6) is unsafe until this is resolved — both are downgraded to "not established," not reversed, pending it. | ______ | A read path (webmail login, IMAP, or an export) to `mail.sgctech.ai`/SOGo — or confirmation of what `renbranmadelo@gmail.com` actually contains, if that's the intended account. Whoever owns SGC's mail infrastructure. Resolving this potentially unblocks MRD outright (if a retraction communication exists there) and recovers attachment 5306 directly, without needing Talha specifically (decision #6). |
-| 9 | **Kallat — second blocker ahead of headcount (added 2026-08-07, §14.4).** On a client-present call (2026-07-16), Sadique was told directly, as a differentiator against conventional CRMs: "Our system, when you pay for it, you have everything at your disposal... right from the get go" — not squeezed per-user, no extra charge for additional features. The governed SUB-model is a flat-monthly-for-a-seat-band subscription with priced add-ons (portal sync, AI scoring) — both arguably contradict that promise on their face. Sending the band presentation as currently designed risks reading as exactly what he was told SGC doesn't do. | ______ | A decision on how pricing is presented to this client specifically — a genuinely flat all-inclusive figure with no visible per-user mechanics, a direct conversation addressing/reframing the earlier promise before any figure is sent, or another approach. Not resolvable by more in-repo analysis; blocks Stage 5 presentation independent of and in addition to the headcount block (decision #1). |
+| 9 | **Kallat — RESOLVED IN PRINCIPLE by Bran 2026-08-07, blocked in practice on drafting the correction (not requested yet).** On a client-present call (2026-07-16), Sadique was told, as a differentiator: "Our system, when you pay for it, you have everything at your disposal... right from the get go." **Ruling: the per-user promise is the smaller half of the exposure** — the gap register (§14.3: commission calc, payment auto-reconciliation, landlord/client portals, all demoed live, none in the catalogue) contradicts "everything right from the get-go" far more sharply than any seat-band structure would. A written correction to Kallat is required regardless of pricing shape, and must land before or with the price, never after. **Pricing shape follows from that**: flat monthly, no per-user rate anywhere in the document, no per-user derivation even as a labelled illustration, capacity stated as an operational ceiling rather than a pricing tier. Honours the "everything from the get-go" promise, bounds seat exposure across an unknown number of Kallat Group entities without needing headcount precision, and doesn't require walking back the one thing Sadique was told most emphatically. | **Bran** | The written correction to Kallat (addressing the gap-register features and the per-user framing together) — not drafted this pass, not requested yet. Once drafted, this decision is fully closed; the pricing *shape* itself needs no further decision. |
 
 ---
 
@@ -726,7 +726,7 @@ in this repo has ever inspected.
 
 | Client | Document | Sent | Client reaction | Rate basis | Status |
 |---|---|---|---|---|---|
-| **Kallat** | SGC-KP-2026-07 | 2026-07-23 | 2026-07-24: general price pushback, no specific figure named as rejected | AED 425/hr flat tiered rate. Real rate-card value (`rate-card.yaml:54`, `qa_engineer` L1) applied as a blanket tier rate, not a wholly off-card number — correction to this repo's own prior "not on rate-card.yaml" framing, which overstated the defect | Confirmed |
+| **Kallat** | SGC-KP-2026-07 | 2026-07-23 | 2026-07-24: general price pushback, no specific figure named as rejected | AED 425/hr flat tiered rate. Real rate-card value (`rate-card.yaml:54`, `qa_engineer` L1) applied as a blanket tier rate, not a wholly off-card number — correction to this repo's own prior "not on rate-card.yaml" framing, which overstated the defect | Confirmed. **Responsiveness checked, §14/§12**: partially responsive to Sadique's own 2026-07-16 requests (portal sync, AI scoring, website/SEO, group roadmap all trace to `verbal-promises.md`'s own sourcing), delivered via a generic tiered structure with at least one untraced addition (WhatsApp) — a mixed case, not confirmed as Prosper's clean "answered none of it" failure, and not confirmed otherwise either (document not retrieved). |
 | **Prosper** | "PROSPER x SGC Implementation Proposal - 2026" (CRM attachment 5306) | 2026-07-22 09:44 UTC | 2026-07-27: explicit rejection on cost | AED 690/hr and AED 650/hr, both literally on `rate-card.yaml: forbidden_rates` | Confirmed (§8.1) |
 | **VGE** | — | — | — | — | Unchecked. No PRJ-type document referenced in VGE's readable text files this pass, but that's a text-search absence, not a mailbox/CRM check — the same kind of check that took a dedicated retrieval attempt to even attempt for Prosper (§8.1) and still failed. |
 | **MRD** | — | — | — | — | Unchecked, same caveat as VGE. Note MRD's own defect (§1, §2 #4) is a different shape — this repo's *own* prior issued figures (AED 879/mo, Rev1/Rev2) never retracted to the client — not an ungoverned foreign document. Worth distinguishing: MRD may have zero PRJ-class exposure and still have live anchor exposure of a different kind. |
@@ -811,14 +811,46 @@ headcount, and which Kallat Group entities would be on the system — see
 `00-intake/sdr-followup-headcount-2026-08-07.md`.
 
 **The transcript's date also resolves the SGC-KP-2026-07 sequencing
-question.** 2026-07-16, 9:51am — the same morning as, and preceding, the
-already-logged internal prep call (that call's own Otter notifications
-run 12:47pm-1:31pm the same day). Discovery call (AM) → internal debrief
-(PM, same day) → SGC-KP-2026-07 sent 7 days later (2026-07-23) → client
-price pushback the next day (2026-07-24). This transcript is very likely
-the actual source material SGC-KP-2026-07 was built from — see §15 for
-what else this call surfaces, most of it more consequential than
-headcount.
+question — and corrects this entry's own earlier "same morning"
+framing.** Checked against the actual per-meeting timestamps inside each
+Otter notification (not send times, which was the earlier error): this
+call is **9:51am**; the internal prep call is two short segments at
+**4:51pm (13 min) and 5:16pm (10 min)** — same day, but ~7 hours later,
+not back-to-back. A third, unidentified 32-minute recording at 4:13pm
+also exists (Otter snippet only: "Speaker 1 expressed frustration about
+the difficulty of generating leads... a company expected a demo without
+a diagnostic phase") — matches no transcript currently in this repo,
+flagged and not chased further.
+
+**Consequence for the headcount provenance record, not the gate**: the
+internal prep call's "40 people... 50 then" line came ~7 hours *after*
+this call, from SGC's own team — **it is not independent corroboration
+of Sadique's headcount, it is SGC recalling what Sadique said earlier
+that day.** One source, counted twice, is a worse state than one weak
+source honestly labelled as such. Corrected in
+`call-transcript-2026-07-16-internal-prep.md` and this call's own
+transcript file; T12 was already, and remains, a hard block — this
+changes the record, not the gate.
+
+Sequencing itself still holds: discovery call (9:51am) → [unidentified
+call, 4:13pm] → internal debrief (4:51-5:26pm) → SGC-KP-2026-07 sent 7
+days later (2026-07-23) → client price pushback the next day
+(2026-07-24). **Whether SGC-KP-2026-07 addresses what Sadique asked
+for — checked, not assumed.** Document itself not retrievable this
+session (same limitation as attachment 5306 — two Gmail searches, no
+trace). From this repo's own secondhand descriptions: `verbal-promises.md`
+rows 1-2, 4-5 source portal sync, AI scoring, the group-level roadmap,
+and website/SEO to "the original discovery call (via SGC-KP-2026-07
+doc)" — all four trace directly to things Sadique raised on this call.
+Against that: the internal prep call describes it as a generic tiered
+structure (Tier 1 basic → Tier 3 "all services included," explicitly
+built to be "something better with similar scope" than a competitor's
+template) carrying at least one item (WhatsApp, Tier 2/3) that traces to
+nothing said on this call. **Best available read: partially responsive,
+delivered through a generic tier structure — a mixed case, not a clean
+match to Prosper's "answered none of the 14 questions" failure. Not
+confirmed either way without the actual document.** See §11's table,
+updated accordingly.
 
 ---
 
@@ -920,21 +952,31 @@ multi-party portal access) the real-estate-brokerage-uae catalogue has
 never covered. The AI-scoring line is the one exception, already handled
 correctly.
 
-### 14.4 New Stage 5 blocker — presentation approach, ahead of headcount
+### 14.4 Stage 5 presentation — RESOLVED IN PRINCIPLE by Bran, blocked in practice on the correction draft
 
-**Decision needed, second blocker ahead of headcount** (added to §2
-below as decision #9): the governed SUB-model's flat-monthly-for-a-band
-presentation is in direct tension with a promise already made to this
-client, on a client-present call, as an explicit differentiator — "not
-paying per user, not paying extra for features." Sending the band
-framing as currently designed risks landing as exactly the thing Johnny
-told Sadique SGC doesn't do. **No repricing or re-presentation performed
-this pass** — report only, per instruction. Options this repo can name
-without deciding between them: (a) present a genuinely flat, all-inclusive
-figure with no visible per-user mechanics anywhere in the client-facing
-text, accepting whatever margin results; (b) have Bran/Johnny address the
-promise directly and reframe expectations before any figure is sent; (c)
-something else entirely. Not this session's call.
+Ruling (2026-08-07, §2 decision #9): the per-user promise ("everything at
+your disposal... right from the get go") is the **smaller half** of the
+exposure this call created — §14.3's gap register (commission calc,
+payment auto-reconciliation, landlord/client portals, all demoed live,
+none in the catalogue) contradicts that promise far more sharply than
+any seat-band pricing structure would, since those features were shown
+working and aren't in the offer at all. **A written correction to Kallat
+is required regardless of which pricing shape is chosen, and it must
+land before or with the price, never after.**
+
+Once that's accepted, the pricing shape follows directly: **flat
+monthly, no per-user rate anywhere in the document, no per-user
+derivation even as a labelled illustration, with a capacity ceiling
+stated as an operational limit rather than a pricing tier.** This
+honours what Johnny actually said, keeps seat exposure bounded across an
+unknown number of Kallat Group entities without needing headcount
+precision first, and doesn't require walking back the one thing Sadique
+was told most emphatically.
+
+**Status: resolved shape, pending correction — not open.** The only
+remaining action is drafting the written correction (gap-register
+features + per-user framing, addressed together); not requested this
+pass, not drafted. No repricing or re-presentation performed.
 
 ### 14.5 Scope signal and one correction to this session's own earlier framing
 

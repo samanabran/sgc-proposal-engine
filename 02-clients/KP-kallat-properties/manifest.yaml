@@ -289,6 +289,64 @@ escalations:
       (decision #1) and this presentation decision (decision #9). No
       repricing, no presentation work performed this pass.
 
+  - date: "2026-08-07"
+    raised_by: "Bran (direct instruction, in chat)"
+    issue: >
+      Two follow-ups on the entry above. (1) If the demo call (9:51am)
+      and the internal prep call are both same-day, the prep call's "40
+      people... 50" line may not be independent corroboration of
+      headcount at all -- could be SGC's own team repeating what Sadique
+      said that morning. Establish the ordering from the two Otter
+      notifications. (2) The 7-day gap (demo 16 Jul, proposal 23 Jul,
+      pushback 24 Jul) settles that SGC-KP-2026-07 was the answer to
+      this call -- check whether it actually addresses what Sadique
+      asked for (property management, portal integration) or is the
+      generic tiered template, the same failure as Prosper's proposal
+      not answering the 14 questions.
+    resolution: >
+      Ordering established from the actual per-meeting timestamps inside
+      each Otter notification (not send times -- an earlier pass
+      conflated the two). Four recordings on 2026-07-16: this call,
+      9:51am/25min; an unidentified 32min call at 4:13pm (Otter snippet
+      only, matches no transcript in this repo, not chased further); the
+      internal prep call, two segments at 4:51pm/13min and 5:16pm/10min.
+      This call is first, ~7 hours before the prep call, not "same
+      morning" as an earlier pass stated. CONFIRMED: the prep call's "40
+      people... 50" line is SGC's own team recalling what Sadique said
+      earlier that day -- one source counted twice, not independent
+      corroboration. Does not change T12 (already, and still, a hard
+      block) -- corrected the provenance record only, in
+      call-transcript-2026-07-16-internal-prep.md,
+      call-transcript-2026-07-16-discovery-demo.md, and HANDOVER.md
+      section 12.
+      PRJ-scope check: SGC-KP-2026-07 itself not retrievable this
+      session (same limitation as attachment 5306 -- two Gmail searches,
+      no trace). From this repo's own secondhand descriptions
+      (verbal-promises.md rows 1-2, 4-5), the document DID carry portal
+      sync, AI scoring, the group-level roadmap, and website/SEO -- all
+      four traced to things Sadique raised on this call, via the
+      "original discovery call" sourcing already in this file. Against
+      that: the internal prep call describes it as a generic tiered
+      structure (Tier 1 basic -> Tier 3 all-inclusive, built to be
+      "something better with similar scope" than a competitor's
+      template) carrying at least one untraced addition (WhatsApp).
+      Assessment: partially responsive, delivered through a generic tier
+      structure -- a mixed case, not confirmed as Prosper's clean
+      "answered none of it" failure, and not confirmed otherwise either.
+      Logged in HANDOVER.md section 11's table.
+      Decision #9 (presentation approach) recorded as RESOLVED IN
+      PRINCIPLE per Bran's ruling, not open: the gap-register features
+      (commission, reconciliation, landlord/client portals -- demoed
+      live, zero catalogue basis) contradict the "everything from the
+      get-go" promise more sharply than any seat-band structure would, so
+      a written correction to Kallat is required regardless of pricing
+      shape and must land before or with the price. Pricing shape
+      follows: flat monthly, no per-user rate or derivation anywhere,
+      capacity stated as an operational ceiling not a pricing tier. Only
+      remaining action: drafting the correction -- not requested this
+      pass. Stage 5 now stays shut on headcount alone (decision #1);
+      decision #9 is closed pending only the correction draft.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

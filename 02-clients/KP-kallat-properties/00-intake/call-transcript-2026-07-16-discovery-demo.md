@@ -16,15 +16,62 @@ inference (the downloaded `.txt`'s own timestamps only show the
 2026-08-07 download, and were not used to date this call) — a direct,
 independent, timestamped external record.
 
-**Sequencing, now resolved**: this call is the **same morning** as
-`call-transcript-2026-07-16-internal-prep.md` (that call's own three
-Otter notifications run 12:47pm-1:31pm UTC the same day — afternoon,
-after this one). Discovery/demo call (AM) → SGC-internal debrief (PM,
-same day) → SGC-KP-2026-07 sent 7 days later (2026-07-23) → client price
-pushback the next day (2026-07-24). This transcript is very likely the
-actual source material SGC-KP-2026-07 was built from — its property-
-management focus, portal-integration emphasis, and AI-scoring framing
-all trace directly to what Sadique asks for and is shown on this call.
+**Sequencing, resolved precisely (corrected 2026-08-07 — an earlier pass
+conflated Otter notification *send* times with actual *meeting* times;
+fixed here against the real per-meeting timestamps in each notification
+body).** Four Otter recordings on 2026-07-16, in order:
+
+1. **9:51am, 25 min** — this call (Sadique, Johnny, Consultant).
+2. **4:13pm, 32 min** — unidentified. Otter summary snippet only:
+   "Speaker 1 expressed frustration about the difficulty of generating
+   leads... a company expected a demo without a diagnostic phase." Does
+   not match the content of any transcript currently in this repo. Not
+   retrieved or investigated further this pass — flagged so it isn't
+   lost, not chased down (not what was asked).
+3. **4:51pm, 13 min** — matches `call-transcript-2026-07-16-internal-prep.md`
+   ("Renbran Madelo discussed the functionalities...").
+4. **5:16pm, 10 min** — also matches that file ("Renbran Madelo discussed
+   the pricing and scope of work...").
+
+**This call is first, ~7 hours before the internal prep call (#3/#4),
+not "same morning" as an earlier pass on this file stated.** Consequence
+for the headcount provenance record, corrected in
+`call-transcript-2026-07-16-internal-prep.md` and
+`test_pricing_engine.py`: the internal call's "40 people... 50 then"
+line is SGC's own team recalling what Sadique said earlier that day —
+**one source (Sadique, once), not two independent ones.** Any framing in
+this repo describing them as independently corroborating "40-50" is
+wrong and has been corrected wherever it appeared. Doesn't change T12
+(already, and still, a hard block) — corrects the record only.
+
+Discovery/demo call (9:51am) → [unidentified call, 4:13pm] → SGC-internal
+debrief (4:51-5:26pm, same day) → SGC-KP-2026-07 sent 7 days later
+(2026-07-23) → client price pushback the next day (2026-07-24).
+
+**Whether SGC-KP-2026-07 actually addresses what Sadique asked for on
+this call — checked, not assumed, per direct instruction.** The document
+itself isn't retrievable this session (same account-mismatch limitation
+as Prosper's attachment 5306 — searched Gmail twice, no trace, consistent
+with client correspondence living on `mail.sgctech.ai`/SOGo per
+`HANDOVER.md` §13). From what this repo's own secondhand descriptions say
+about it, the honest answer is **probably not the generic-template
+failure mode, but not confirmed either way**: `verbal-promises.md` rows
+1-2, sourced explicitly to "the original discovery call (via SGC-KP-2026-07
+doc)," show the PRJ document carried portal sync (Bayut/Property
+Finder/dubizzle) and AI lead scoring — both things Sadique was shown and
+discussed on *this* call. Rows 4-5 (group-level roadmap, website/SEO)
+also trace to things Sadique raised here. Against that: the internal
+prep call describes it as a generic tiered structure (Tier 1 basic → Tier
+3 "all services included," built explicitly to be "something better with
+similar scope" than a competitor's template, not a from-scratch build
+around this call) with at least one line (WhatsApp, Tier 2/3) that
+doesn't trace to anything Sadique said here at all. **Best available
+read: partially responsive (portal sync, AI scoring, website/SEO, group
+roadmap all present), delivered through a generic tier structure (basic
+→ all-inclusive, some added content that wasn't asked for) — a mixed
+case, not a clean match to Prosper's "answered none of the 14 questions"
+failure.** See `HANDOVER.md` §11 for where this is logged against the
+ungoverned-PRJ-anchor class.
 
 **Source:** Otter.ai transcript, file titled "Scholarix Global's Meeting
 Notes" — this is the same Otter.ai notification subject line already

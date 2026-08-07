@@ -1,7 +1,24 @@
 # Internal Prep Call — Kallat Properties Proposal Prep
 
-**Date:** 2026-07-16 · **Source:** Otter.ai transcript, Scholarix internal team meeting
+**Date:** 2026-07-16, ~4:51pm-5:26pm (two short Otter segments, 13 min +
+10 min — confirmed 2026-08-07 via Gmail search of the Otter.ai
+notification metadata, not previously timestamped in this file) ·
+**Source:** Otter.ai transcript, Scholarix internal team meeting
 **Participants:** Renbran Madelo, Jan, John (SGC internal — no client present)
+
+**Ordering, established 2026-08-07 — read this before citing this call's
+"40 people... 50" line as headcount evidence.** This call is **same-day,
+~7 hours after** the Sadique discovery/demo call (2026-07-16, 9:51am —
+`call-transcript-2026-07-16-discovery-demo.md`), not a separate,
+independent occasion. "This 2800 per month because there are 40 people
+involved, and it's 50 then" is SGC's own internal team recalling what
+Sadique told Johnny and the consultant that same morning — **not a
+second, independent data point on headcount.** Any prior framing in this
+repo describing the two calls as "independent corroboration" of "40-50"
+is corrected: it's one source (Sadique, once) recorded twice by SGC's
+own process, not two sources agreeing. Does not change any gate — T12
+was already, and remains, a hard block on Kallat's headcount — this
+corrects the provenance record only.
 
 ## Summary
 

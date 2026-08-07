@@ -2073,3 +2073,55 @@ work. Files touched: `test_pricing_engine.py`, `client-brief.yaml`,
 `00-intake/call-transcript-2026-07-16-discovery-demo.md` (renamed +
 rewritten header), `00-intake/sdr-followup-headcount-2026-08-07.md`,
 `00-intake/verbal-promises.md`, `HANDOVER.md`, `manifest.yaml`.
+
+## 2026-08-07 (continued, same day) — corroboration correction, PRJ-scope check, decision #9 resolved
+
+Two follow-ups from Bran on the entry above: an ordering check the
+provenance record needed, and whether SGC-KP-2026-07 actually answered
+what Sadique asked for.
+
+**Ordering established from actual meeting timestamps, not notification
+send times (an earlier pass conflated the two).** Four Otter recordings
+on 2026-07-16: the discovery call, 9:51am/25min (already confirmed); an
+unidentified 32-minute call at 4:13pm matching no transcript in this
+repo (flagged, not chased); the internal prep call, two segments at
+4:51pm/13min and 5:16pm/10min. **The discovery call is first, ~7 hours
+before the prep call — not "same morning" as stated earlier the same
+day.** Consequence: the prep call's "40 people... 50 then" line is SGC's
+own team recalling what Sadique said that morning, not a second,
+independent source. One weak source counted twice is worse than one weak
+source honestly labelled — corrected in both transcript files and
+`HANDOVER.md` §12. **Does not change T12** — already, and still, a hard
+block. Corrects the record, not the gate.
+
+**PRJ-scope check.** SGC-KP-2026-07 itself remains unretrieved (two
+Gmail searches, no trace — same limitation as attachment 5306).
+`verbal-promises.md`'s own existing sourcing (rows 1-2, 4-5) shows the
+document carried portal sync, AI scoring, the group-level roadmap, and
+website/SEO — all four traceable to what Sadique raised on the 2026-07-16
+call. Against that, the internal prep call describes a generic tiered
+structure (basic → all-inclusive) built to be "something better with
+similar scope" than a competitor's template, carrying at least one
+untraced addition (WhatsApp). **Assessment: partially responsive,
+delivered through a generic tier structure — a mixed case, not confirmed
+as Prosper's clean "answered none of the 14 questions" failure, and not
+confirmed otherwise either without the actual document.** Logged in
+`HANDOVER.md` §11's table.
+
+**Decision #9 resolved in principle, recorded as such rather than
+open.** Bran's ruling: the per-user promise is the smaller half of the
+exposure — the gap register (commission, reconciliation, landlord/client
+portals, all demoed live, zero catalogue basis) contradicts "everything
+from the get-go" more sharply than any seat-band structure. A written
+correction to Kallat is required regardless of pricing shape and must
+land before or with the price. Pricing shape follows: flat monthly, no
+per-user rate or derivation anywhere in the document (not even as
+illustration), capacity stated as an operational ceiling, not a pricing
+tier. Only remaining action is drafting that correction — not requested
+this pass. **Stage 5 now stays shut on headcount alone (decision #1);
+decision #9 is closed pending only the correction draft.**
+
+No engine or policy change. No worksheet writes. No repricing. No Stage 5
+work. Files touched: `call-transcript-2026-07-16-internal-prep.md`,
+`call-transcript-2026-07-16-discovery-demo.md`, `HANDOVER.md`,
+`manifest.yaml`.
