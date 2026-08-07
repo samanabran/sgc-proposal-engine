@@ -1,8 +1,10 @@
 # Internal review request — Kallat correction notice (decision #9)
 
-**For:** Bran. **Routing:** Bran review → [signatory — pending, see open
-item below] → back to Bran for final instruction to send. Nothing goes
-to Sadique Abbas until that full sequence completes.
+**For:** Bran. **Routing:** Bran review → Johnny Gurrera (confirms
+commitment, signs — the stamp-SDR-John-stamp sequence, distinct from his
+un-gated headcount-question lane) → back to Bran for final instruction
+to send. Nothing goes to Sadique Abbas until that full sequence
+completes.
 
 **No longer using Gmail drafts for internal routing on this deal** — this
 replaces what would have been a third draft in a mailbox already
@@ -19,13 +21,9 @@ payment auto-reconciliation, landlord/client portals), the unqualified
 "completely implausible" cybercrime claim, and the portal
 accreditation/fee overstatement.
 
-## Two things need your input before this can move to the next step
+## One thing still needs your input
 
-1. **Signatory.** manifest.yaml's own "stamp-SDR-John-stamp" phrasing
-   doesn't establish whether that "John" is Johnny Gurrera in a more
-   formal capacity than his headcount-question lane, or a distinct
-   second person. Left unsigned in the letter rather than guessed.
-2. **Security paragraph.** Rewritten as a pure retraction of "completely
+1. **Security paragraph.** Rewritten as a pure retraction of "completely
    implausible" — states only what's already on record (Priority SLA
    tier) and invents nothing new. Flagging explicitly: this is a
    commercial judgment, not a legal one. If it needs to hold up in a

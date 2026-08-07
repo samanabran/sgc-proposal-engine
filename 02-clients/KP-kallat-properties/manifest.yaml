@@ -440,6 +440,22 @@ escalations:
       per instruction, no further Gmail drafts used for internal routing
       on this deal; review requests now go into the repo as files.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Signatory question from the entry immediately above, resolved:
+      confirmed "John" in the stamp-SDR-John-stamp sequence is Johnny
+      Gurrera, in a distinct, more formal capacity than his un-gated
+      headcount-question lane.
+    resolution: >
+      Draft and internal review-request file updated: Johnny Gurrera
+      restored as signatory on 03-draft/KP-2026-SUB-01_CorrectionNotice_Draft1.md,
+      with the routing stated explicitly as Bran-stamp -> Johnny confirms
+      commitment and signs -> Bran final instruction to send -> Sadique.
+      Still contingent on Bran's review and a fresh, hash-matched
+      04-draft/_review-stamp.yaml entry before Johnny sees or signs it —
+      not yet reviewed, not yet send-ready.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

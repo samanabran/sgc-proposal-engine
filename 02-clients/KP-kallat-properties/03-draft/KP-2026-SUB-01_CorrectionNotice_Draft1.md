@@ -72,15 +72,15 @@ see below] -> Bran final instruction to send. Not authorized for client
 contact until that sequence completes and a fresh, hash-matched
 04-draft/_review-stamp.yaml entry exists.
 
-OPEN ITEM — signatory. Previous version signed this "Johnny Gurrera" —
-wrong on inspection: Johnny's un-gated lane (351de57 -> 025dc08) was
-scoped specifically to the no-figure/no-commitment headcount question,
-and this letter carries several figures. manifest.yaml's own language
-elsewhere ("stamp-SDR-John-stamp sequence") is the source of "John" in
-this document's routing, but nothing in this repo establishes whether
-that's Johnny Gurrera acting in a different, more formal capacity, or a
-second, distinct person. Left unsigned pending that answer — do not
-default to Johnny Gurrera without confirming.
+SIGNATORY — confirmed 2026-08-08 (user, in chat): "John" in
+manifest.yaml's "stamp-SDR-John-stamp sequence" is Johnny Gurrera,
+acting in a distinct, more formal capacity than his un-gated headcount-
+question lane (351de57 -> 025dc08). That earlier un-gating applies only
+to no-figure/no-commitment follow-ups; this letter carries multiple AED
+figures, so it takes the Bran-stamp-Johnny-stamp path: Bran reviews,
+Johnny confirms commitment and signs, back to Bran for final instruction
+to send. Signed below accordingly — still contingent on Bran's review
+and a fresh, hash-matched review stamp before Johnny sees or signs it.
 
 OPEN ITEM — security paragraph. Revised to a pure retraction: withdraws
 the "completely implausible" claim and states only what's already on
@@ -137,15 +137,17 @@ the monthly fee, will follow separately once we've confirmed a couple of
 scoping details with you directly.
 
 Best regards,
-[[signatory pending — see internal note]]
+Johnny Gurrera
 SGC TECH AI
 
 ---
 Internal note (do not send as-is): log this correction in
 02-clients/KP-kallat-properties/manifest.yaml under a new escalation
-entry, and route per instruction — Bran review first, then [signatory
-role — pending], then back to Bran for final instruction to send to
-Sadique Abbas (sales@kallatproperties.com / +971 54 791 6003). Do not
-send to the client until that full sequence completes, the signatory
-question is resolved, and a fresh 04-draft/_review-stamp.yaml entry is
-written hash-matched to the commit containing this file.
+entry, and route per instruction — Bran review first, then Johnny
+Gurrera (confirming commitment and signing, per the stamp-SDR-John-stamp
+sequence — distinct from his un-gated headcount-question lane), then
+back to Bran for final instruction to send to Sadique Abbas
+(sales@kallatproperties.com / +971 54 791 6003). Do not send to the
+client until that full sequence completes and a fresh
+04-draft/_review-stamp.yaml entry is written hash-matched to the commit
+containing this file.
