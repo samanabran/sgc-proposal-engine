@@ -1,5 +1,10 @@
 # Options & Inclusions
 
+> **NOT SEND-READY (2026-08-08).** The "Additional users beyond 40" row
+> below is superseded and struck through — do not quote it. Decision #9
+> (manifest.yaml) is reopened because of this line; Stage 5 pricing stays
+> held until it's replaced with the current Class A-D model.
+
 ## Phase 2 options (not included in this proposal's pricing)
 
 | Option | Description | Reference price |
@@ -7,7 +12,7 @@
 | Portal sync — Property Finder | Automated listing sync and enquiry ingestion | AED 3,900 one-time — `phase2-catalogue.yaml`. Conditional on 5 preconditions (valid RERA/DLD licence, agency RERA ID, portal-side verification, image-standard compliance, Client's own portal API subscription in place) — **not yet confirmed for this deal, see verbal-promises.md** |
 | Portal sync — Bayut & Dubizzle | Automated listing sync and enquiry ingestion | AED 3,400 one-time — `phase2-catalogue.yaml`. Same preconditions as above |
 | AI Lead Scorer — Lite | Rule-based scoring | AED 495/mo — `phase2-catalogue.yaml` |
-| Additional users beyond 40 | Per-user, non-discountable | AED 250/user/month — `phase2-catalogue.yaml` |
+| ~~Additional users beyond 40~~ **SUPERSEDED 2026-08-08 — DO NOT QUOTE** | ~~Per-user, non-discountable~~ | ~~AED 250/user/month — `phase2-catalogue.yaml`~~ Stale against the 2026-08-05 v3.0 recompute, which deleted `additional_user` entirely and replaced it with `onboarding_fee_per_marginal_user` + `platform_capacity_fee` (see `phase2-catalogue.yaml`). Also pairs a per-user rate with the unsourced 40-headcount figure in one line — see manifest.yaml 2026-08-08 entry, decision #9 (reopened). Left here struck through, not deleted, so the correction is visible in-place; replace with the correct Class A-D lines before this section is ever rendered or issued — Stage 5, still held. |
 
 These are available to add at any point; adding one after go-live does not
 require re-opening this proposal, only a short scoping note and updated

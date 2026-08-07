@@ -485,6 +485,75 @@ escalations:
       04-draft/_review-stamp.yaml, checked against 00-intake/, 02-calc/,
       03-draft/, and this file.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Four further corrections, two blocking: (1) the security paragraph
+      still asserted a new, unrecorded claim (that the Priority SLA tier
+      was chosen because of this deal's security concern) immediately
+      after retracting a different overstatement; (2) the accreditation
+      correction and the AED 3,900/3,400 fee sit uneasily together --
+      needs reconciling or the letter contradicts itself; (3) Johnny
+      Gurrera's identity mapping to "John" in the stamp-SDR-John-stamp
+      sequence needs a documentary source, not just an inference; (4) the
+      AED 3,900/3,400 provenance needed full reconciliation against the
+      v3.0/v2.1 version numbers and confirmation of what a pre-2026-08-05
+      catalogue said, since the call being corrected predates the rate
+      card. Plus: resolve an apparent conflict between "Kallat's stamp
+      passes" (an earlier round) and "Kallat cannot render via R11/R12"
+      (this round), and quarantine or annotate the reopened decision #9
+      line today, not at Stage 5.
+    resolution: >
+      (1) Security paragraph cut to two sentences, retraction only --
+      "On the call we described cyberattacks against our system as
+      'completely implausible.' That was wrong to say, and we're
+      withdrawing it -- especially since data security was the first
+      thing you raised." No substitute claim.
+      (2) Reconciled via phase2-catalogue.yaml's own portal_dependency_note
+      (unchanged since 2026-08-03): the fee is for SGC's build labor,
+      contingent on the CLIENT's own portal subscription including
+      feed/API access (precondition 5) -- SGC never needs its own
+      portal accreditation under this model, so charging a fee and
+      disclaiming accreditation aren't actually contradictory. Checked
+      and explicitly NOT claimed in the letter: no file in this repo
+      records a completed portal_sync delivery for any client (VGE, MRD,
+      PRO all show this item at DEFERRED/proposal stage) -- the letter
+      states the fee and the access-contingency, not a proven delivery
+      track record. Flagged for Bran in case he knows of an outside
+      instance.
+      (3) Searched 10-signature/ in full (incl. ADMIN-OPERATIONS-MANUAL.md),
+      render_r11_r12.py, and every John-adjacent mention across
+      HANDOVER.md/CHANGELOG.md/manifest.yaml: no file establishes the
+      Johnny Gurrera <-> "John" mapping. The only basis is the user's own
+      direct confirmation in this conversation. Stated plainly in the
+      draft's internal header rather than presented as documented --
+      Johnny remains signatory on that basis, explicitly named as a
+      verbal instruction, not a repo artifact.
+      (4) policy.yaml (v3.1, "v3.0" = the 2026-08-05 overlay deletion)
+      and phase2-catalogue.yaml (v2.1, bumped same commit 525940d) are
+      two separate artifacts with independent version numbers -- not one
+      versioning scheme misread as two. git log -p confirms
+      portal_sync_property_finder/bayut_dubizzle were added in 1633e44
+      (2026-08-03, v2.0) and untouched by 525940d. No phase2-catalogue.yaml
+      existed before 2026-08-03 (repo's first commit is that date) -- so
+      no pre-call (2026-07-16) rate card ever existed to be accurate
+      against. Letter wording changed from "that's not accurate" to
+      "our current position is different" to reflect this.
+      Stamp/ALLOWED_CLIENTS conflict: re-ran review_stamp_check() and
+      pre_render_gate() live for both clients. Kallat: stamp invalid
+      (hash mismatch) AND 4 independent pre_render_gate failures
+      (ALLOWED_CLIENTS, T12 headcount, T12 unrequested scope, T12
+      segment-depends-on-headcount). MRD: no stamp file exists at all.
+      CHANGELOG.md:1953's "Kallat's stamp passes clean" is real but scoped
+      to review_stamp_check() alone, snapshotted at commit 025dc08 --
+      ALLOWED_CLIENTS was already MRD-only since 2026-08-06 (b3e8cd3),
+      predating that snapshot and unchanged since. Two independent gates,
+      both statements true, no contradiction.
+      Decision #9 line quarantined today, not deferred to Stage 5: see
+      03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md -- the row
+      struck through and marked SUPERSEDED inline, plus a NOT SEND-READY
+      banner added at the top of the file.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
