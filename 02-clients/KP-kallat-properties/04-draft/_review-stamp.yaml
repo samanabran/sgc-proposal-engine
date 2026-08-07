@@ -1,0 +1,30 @@
+# Review stamp — KP-2026-SUB-01
+# Written per review_stamp_check(): the reviewer, an ISO timestamp, a
+# decision, and the commit hash of the reviewed state. Any later edit to
+# the reviewed material invalidates this stamp — re-stamp after any
+# change to the files this stamp covers.
+
+reviewer: "Renbran Madelo (Bran)"
+timestamp: "2026-08-07T11:05:00Z"
+decision: "approved"
+reviewed_commit: "025dc0864be9c4c0d6c56b52c5683ca263d2474b"
+
+scope: >
+  Not an approval of priced offer prose — there is none yet; Stage 5
+  (pricing) remains held. This stamp records Bran's review/approval,
+  given directly in chat 2026-08-07, of two things: (1) the Stage 0-4
+  forensic findings and three hygiene fixes committed in ea044f9 (PRJ-
+  anchor class logged in HANDOVER.md, unrequested-vs-untraceable scope
+  metrics named in CHANGELOG.md, 04-draft stale render quarantined,
+  gate-report.md marked SUPERSEDED, risk-assessment.yaml:18 citation
+  corrected with raw_score unchanged at 52); and (2) the corrected,
+  un-gated routing of the headcount confirmation question to Sadique
+  Abbas via Johnny Gurrera (00-intake/sdr-followup-headcount-2026-08-07.md)
+  — no figure, no commitment, so no further stamp is required before
+  Johnny sends it.
+
+not_covered: >
+  Any priced offer, commercial terms, or client-facing document for
+  Kallat. review_stamp_check() must see a fresh stamp, hash-matched to
+  the commit containing that prose, before any such artifact is treated
+  as send-ready — this stamp does not pre-authorize that.
