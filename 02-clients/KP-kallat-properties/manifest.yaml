@@ -347,6 +347,99 @@ escalations:
       pass. Stage 5 now stays shut on headcount alone (decision #1);
       decision #9 is closed pending only the correction draft.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Decision #9 (2026-08-07 entry above, RESOLVED IN PRINCIPLE pending
+      only the correction draft) actioned: instruction to prepare the
+      written correction to Kallat and route it Bran review -> John ->
+      Bran final instruction to send, before any client contact.
+    resolution: >
+      Draft written: 03-draft/KP-2026-SUB-01_CorrectionNotice_Draft1.md.
+      Addresses HANDOVER.md §14.1-14.3's gap register (commission calc,
+      payment auto-reconciliation, landlord/client portals — demoed live,
+      no catalogue basis), the unqualified cybercrime "completely
+      implausible" guarantee (verbal-promises.md row 10), and the portal
+      accreditation/fee-framing claim (row 11 — AED 3,900 Property
+      Finder / AED 3,400 Bayut+Dubizzle one-time integration fees
+      actually apply; no accreditation with any of the three portals is
+      on record). Confirms the flat-monthly/no-per-user pricing shape
+      honours row 9's promise rather than contradicting it, per §14.4's
+      ruling. NOT sent to the client. Two open items flagged inline in
+      the draft: the security paragraph needs SGC-confirmed practices/
+      certifications (none on record in this repo to cite), and sender
+      identity (Johnny Gurrera made the promises being corrected;
+      confirm he also signs the correction). Gmail draft created to
+      bran@sgctech.ai per the requested routing — not sent, review only.
+      Needs a fresh 04-draft/_review-stamp.yaml entry, hash-matched to
+      this commit, before this is ever treated as send-ready — the
+      existing 2026-08-07 stamp explicitly does not cover it.
+
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Four corrections to the entry immediately above, one blocking:
+      (1) the AED 3,900/3,400 figures carried no provenance line —
+      replacing a corrected overstatement with an unsourced number is
+      worse than the original error; (2) decision #9 was declared closed
+      by argument ("shape honours the promise"), not verified — required
+      grepping the actual draft set for a leaked per-user figure; (3) the
+      security paragraph should retract only, not substitute a fresh
+      claim SGC can't source; (4) Johnny Gurrera was wrongly used as
+      signatory — his un-gated lane (351de57->025dc08) was scoped to the
+      no-figure/no-commitment headcount question specifically, not to a
+      document carrying multiple AED figures.
+    resolution: >
+      (1) Provenance confirmed and now cited in the draft's internal
+      header: 00-knowledge/pricing/phase2-catalogue.yaml v2.1,
+      effective_from 2026-08-05, items portal_sync_property_finder
+      (3900) and portal_sync_bayut_dubizzle (3400) — a governed,
+      versioned, dated rate card, not memory or a live lookup. Client-
+      facing text unchanged since the figures check out; the missing
+      piece was documenting the source, now done.
+      (2) Grepped 03-draft/ (non-quarantined) and 04-draft/_quarantine/
+      for per-user figures. Found one: 03-draft/KP-2026-SUB-01_Rev1/
+      07-options-inclusions.md:10, "AED 250/user/month" for "Additional
+      users beyond 40" — stale against the 2026-08-05 v3.0 recompute,
+      which deleted that exact line item (additional_user) and replaced
+      it with onboarding_fee_per_marginal_user + platform_capacity_fee.
+      Lives in the current, non-quarantined revision path, so it would
+      carry into any future render untouched by NOTICE.md's quarantine.
+      **Decision #9 is reopened** — the "closed pending only the
+      correction draft" note in the 2026-08-07 entry above is superseded
+      by this finding; the correction notice's premature "we're keeping
+      this promise" paragraph has been removed accordingly. Fixing
+      07-options-inclusions.md:10 is Stage 5 pricing content, out of
+      scope here and for the still-held Stage 5 — logged as its own open
+      finding, not fixed this pass.
+      (3) Security paragraph rewritten as a pure retraction: withdraws
+      "completely implausible," states only what's already on record
+      (the Priority SLA tier), invents nothing new. Flagged explicitly
+      in the draft as a commercial judgment, not a legal one — needs
+      counsel if it's meant to carry weight in a dispute.
+      (4) Signatory left open pending clarification: this repo's own
+      "stamp-SDR-John-stamp" phrasing (2026-08-07 entries above) doesn't
+      establish whether "John" is Johnny Gurrera acting in a different,
+      more formal capacity, or a distinct second person — asked the user
+      rather than guessing on a client-facing document's signatory.
+      Also verified against the actual review_stamp_check() code
+      (05-ops/render_r11_r12.py:104-132): 03-draft IS inside
+      REVIEWED_MATERIAL_SUBPATHS, so this letter was never actually
+      outside the gate; the gate is commit-hash-based, and the existing
+      2026-08-07 stamp (reviewed_commit 025dc0864be9c4c0d6c56b52c5683ca263d2474b)
+      was already invalidated by three later commits touching
+      manifest.yaml (08d2880, 7b91df2, 067ff04) before this session
+      began — review_stamp_check() has been correctly refusing Kallat as
+      send-ready since 2026-08-07. No separate ungoverned-document log
+      entry needed. Also noted: ALLOWED_CLIENTS in that script is
+      ["MRD-meridianview-realty"] only — Kallat cannot render through
+      R11/R12 regardless of stamp status.
+      Gmail draft to bran@sgctech.ai from the entry above neutralized
+      via update_draft (subject/body replaced with a superseded notice,
+      pointing at 04-review/internal-review-request-2026-08-08.md) —
+      per instruction, no further Gmail drafts used for internal routing
+      on this deal; review requests now go into the repo as files.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
