@@ -417,5 +417,10 @@ nothing):
 
 ---
 
-Decisions #8 and #10 remain yours. Signature block unchanged. Nothing
-sent, nothing frozen, no client contacted, `ALLOWED_CLIENTS` unchanged.
+Decisions #8, #10, and #11 remain yours. Signature block unchanged.
+Nothing sent, nothing frozen, no client contacted, `ALLOWED_CLIENTS`
+unchanged. Decision #11 (added 2026-08-08, HANDOVER.md §2): which
+DocuSeal account is `docuseal.sgctech.ai`'s real production instance —
+a supplied API token and the MCP-connected tools resolve to the same
+host but different accounts, not reconciled. Full detail:
+`04-review/internal-review-request-2026-08-08.md`.

@@ -1053,6 +1053,26 @@ escalations:
       first -- an empty result and a wrong account are indistinguishable
       from inside the query."
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      "Sent the internal review document to me now" -- the existing
+      Gmail draft (r4066885540188941194) predated the DocuSeal-routing
+      amendment and decision #11, so it no longer reflected current
+      state.
+    resolution: >
+      freeze-decision-package-2026-08-08.md's closing line updated to
+      name decisions #8, #10, AND #11 (was #8/#10 only). Gmail draft
+      r4066885540188941194 refreshed via update_draft with current
+      content: DocuSeal named as send path, the 7-item DocuSeal
+      prerequisites list (condensed, full detail pointed at
+      internal-review-request-2026-08-08.md), decision #11 explained in
+      the cover note, updated internal header (SEND MECHANISM,
+      corrected SIGNATORY framing, four-pass DECISION #9 status). Still
+      a draft, not sent -- no send tool exists in this session's
+      toolset, restated in the cover note along with the standing
+      account-mismatch caveat (scholarixglobal@gmail.com).
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
