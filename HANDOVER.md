@@ -769,6 +769,18 @@ to) is unknown — contents not read, per the same scope boundary. The
 repeated filename across two clients is itself worth someone's attention
 independent of what's inside either copy.
 
+**Coverage boundary, found the same day, candidate defect #24 (drafted,
+not written — see below)**: `validate.py`'s `gather_draft_files()`
+(checks 18/19/20) globs `{03-draft,05-issued}/**/*.md` only — never
+`04-draft/`, never `.html`/`.pdf`. It catches a leak in markdown before
+render; it cannot see one already rendered by `assemble_and_render.py`
+or hand-edited into HTML afterward — the exact population this section's
+findings established the repo can't otherwise account for. Not written
+to `00-knowledge/failure-modes/known-defects.md` directly — that path is
+Commercial Desk write, agent read-only, per `AGENTS.md`'s absolute
+rules. Full ready-to-paste entry text: `02-clients/KP-kallat-properties/
+manifest.yaml`, 2026-08-08 entry.
+
 **Kallat's anchor inverts Prosper's problem, it doesn't repeat it.**
 Prosper's PRJ figure sits *below* what this repo's governed model can
 price at any configuration — a pure floor problem (§8.5, §9). Kallat's

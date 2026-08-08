@@ -750,6 +750,48 @@ escalations:
       Prosper's duplicate-filename finding: left logged, closed, not
       reopened this pass.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Record the check_20 md-only coverage boundary as a named defect in
+      00-knowledge/failure-modes/known-defects.md, same class as the
+      provenance failure, phrased as a boundary rather than a bug, so a
+      future extension knows it was known.
+    resolution: >
+      NOT written to 00-knowledge/ directly -- AGENTS.md's "Absolute
+      rules" section names that path explicitly ("NEVER write to
+      00-knowledge/...") and its access table marks it Commercial Desk
+      write, agent read-only, with the documented alternative being
+      exactly this: log the escalation here and stop. Same boundary an
+      earlier session already respected for a different candidate
+      defect (HANDOVER.md §14.2, third-party-disclosure finding --
+      flagged, not written). Entry drafted below, ready to paste into
+      known-defects.md as #24 (the list currently ends at #23) by
+      whoever holds Commercial Desk write access:
+
+      "24. **A leak-detection check that only reads the input side of an
+      ungated render pipeline.** validate.py's check_20_per_user_rate_leak
+      (and check_18/19, sharing the same draft_files) scans only
+      {03-draft,05-issued}/**/*.md via gather_draft_files() -- never
+      04-draft/, never .html or .pdf. Discovered on Kallat
+      (KP-2026-SUB-01) 2026-08-08: assemble_and_render.py reads 03-draft/
+      directly and writes client-shaped HTML/PDF straight to 04-draft/
+      with no gate of its own -- no ALLOWED_CLIENTS check, no
+      review_stamp_check(), nothing -- so a leak already reached in a
+      rendered artifact, or hand-edited into HTML afterward, is invisible
+      to this check even after the markdown source is fixed. Not a bug in
+      check_20 -- a documented coverage boundary: the check governs
+      markdown before it's rendered, not output after the fact. Same
+      class as #23 (a validator's blind spot, found by actually
+      exercising it against real content), on the render-path side rather
+      than the phrase-matching side. Flagged so a future extension of
+      this check inherits a known boundary, not an unexplained gap."
+
+      Also flagged in HANDOVER.md §11 (root-level, not under
+      00-knowledge/) alongside this session's render-script findings, so
+      it's visible without depending on the Commercial Desk having
+      already actioned this manifest entry.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
