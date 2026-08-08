@@ -18,6 +18,45 @@ behind "no retraction exists anywhere" does.
 
 ---
 
+## 0. Standing operating rule (added 2026-08-08, Bran — applies beyond Kallat)
+
+**No send/no-send, freeze/no-freeze, or ship/hold decision belongs to the
+agent.** The job on any deal is to deliver as far as the request and
+prior setup allow, stop at the last reversible point, and hand it over.
+Every hesitation, objection, unverified figure, risk, or "I would not do
+this" goes into the same deliverable handed to the human — one clearly
+marked objections section, each item stating what it is, what it blocks,
+what would clear it, and whether it's agent judgment or an already-
+configured constraint. **Objections get logged, not acted on.** Nothing
+gets held back in chat-only prose, and nothing gets quietly decided by
+the agent simply stopping and not producing the artifact.
+
+**This does not remove hard constraints** — actions the agent does not
+take regardless of how far preparation goes: sending anything to a
+client (the human's trigger to pull, always), accessing a mailbox or
+external account beyond what's already been explicitly authorized, and
+writing to `00-knowledge/`/`01-templates/`/`06-brand/` (`AGENTS.md`'s
+absolute rules, not overridable by an in-chat instruction — see the
+2026-08-08 Kallat round where this was correctly routed to a
+ready-to-paste escalation instead of either complied with or silently
+dropped). Constraints stay constraints. Everything else that has been
+functioning as an informal stopping point on a given deal — a held
+pricing stage, an ungated render path, a blank signature block — gets
+prepared to the edge and handed over with the objection attached,
+instead of being used as a reason to halt output entirely.
+
+**Origin**: stated explicitly after two rounds on Kallat's
+`KP-2026-SUB-01` correction notice where checking the user's own framing
+against the actual code/file state (the `review_stamp_check()` gate
+location, then the `00-knowledge/` write restriction) caught a wrong
+assumption *of the user's*, not the agent's — worth generalizing rather
+than treating as one-off luck. See
+`02-clients/KP-kallat-properties/manifest.yaml` and
+`04-review/freeze-decision-package-2026-08-08.md` for the first
+deliverable built under this rule.
+
+---
+
 ## 1. Per-client status
 
 ### MRD-meridianview-realty

@@ -792,6 +792,49 @@ escalations:
       it's visible without depending on the Commercial Desk having
       already actioned this manifest entry.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat) -- standing rule, applies beyond Kallat"
+    issue: >
+      Authorization to read freeze_for_docuseal.py (read-only, no run,
+      no Kallat variant) and report client-generic/specific, input,
+      gating, template/account config, dispatch target, and Kallat-path
+      existence. Deliverable: one file with the correction letter in
+      full verbatim, every client-facing number collected into a single
+      block, and the DocuSeal findings -- not a summary, not a diff.
+      Standing rule stated: no send/freeze/ship decision belongs to the
+      agent; deliver to the last reversible point, log every objection
+      in the same file (what it is, what it blocks, what clears it,
+      judgment vs. constraint), hand over rather than halt. Three named
+      constraints still hold absolutely: sending to Sadique, accessing
+      mail.sgctech.ai, writing to 00-knowledge/.
+    resolution: >
+      freeze_for_docuseal.py read in full (Prosper's copy -- no Kallat
+      equivalent exists). Entirely Prosper-specific: hardcoded DRAFT_DIR,
+      hardcoded two-file DOCS list, hardcoded "PRO-2026-SUB-01" footer
+      string. Takes pre-existing HTML as input (not markdown) via
+      file:/// + Playwright print-to-PDF. No gate of any kind -- no
+      ALLOWED_CLIENTS, no review_stamp_check(), same ungated shape as
+      Kallat's own assemble_and_render.py. No DocuSeal API/template/
+      account reference anywhere in the file -- it only freezes locally
+      and hashes; actual DocuSeal submission is a separate, unread step.
+      Dispatches nothing -- no email, no network call, confirmed by
+      reading the full file. No Kallat path exists; creating one would
+      also require an HTML rendering of the correction letter, which
+      doesn't exist yet either (letter is markdown-only) -- neither
+      created this pass.
+      Deliverable written: 04-review/freeze-decision-package-2026-08-08.md
+      -- letter in full verbatim, single table of every client-facing
+      number (16 July x2, AED 3,900, AED 3,400, AED 7,300 -- confirmed
+      nothing else numeric appears in the sendable text), the
+      freeze_for_docuseal.py findings above, a 7-item logged-not-acted-on
+      objections section, and the three standing constraints stated as
+      constraints, not objections.
+      Standing rule recorded for future rounds, not just this one:
+      HANDOVER.md §0 (new section, added ahead of §1), citing this
+      round's freeze_for_docuseal.py read and last round's
+      00-knowledge/ routing as the two instances that motivated stating
+      it explicitly.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
