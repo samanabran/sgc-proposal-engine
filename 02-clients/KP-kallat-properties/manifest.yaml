@@ -862,6 +862,27 @@ escalations:
       (HANDOVER.md §8.1); decisions #8/#10 remain open; nothing has gone
       to Sadique or John.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Confirmed bran@sgctech.ai is the address the user actually checks
+      (resolves the recipient-address half of the earlier caveat).
+      Followed by: user reports not having received the internal review
+      proposal.
+    resolution: >
+      Expected, not a delivery failure: the prior round created a Gmail
+      DRAFT only (id r4066885540188941194) -- no send tool exists in
+      this session's toolset (create_draft/update_draft/search_threads/
+      etc., confirmed by ToolSearch, same limitation logged every prior
+      round on this deal). Nothing was ever dispatched, so nothing could
+      have arrived at bran@sgctech.ai regardless of address correctness.
+      The unresolved half of the earlier caveat stands: the draft sits
+      in scholarixglobal@gmail.com's Drafts folder, an account already
+      confirmed (HANDOVER.md §8.1) not to be where this deal's
+      correspondence lives -- the user needs to open that account's
+      Drafts folder directly and send it themselves, or provide a
+      different path if that account isn't accessible to them.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
