@@ -883,6 +883,63 @@ escalations:
       Drafts folder directly and send it themselves, or provide a
       different path if that account isn't accessible to them.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Amend the forward-looking routing statements in
+      04-review/internal-review-request-2026-08-08.md, the freeze-decision
+      package, and the correction notice's internal header to state
+      DocuSeal as the send path (chain unchanged: Bran stamps, John
+      signs, Bran final go-ahead, Sadique), with the repo-file handoff
+      reframed as the review mechanism it actually is, not the send
+      mechanism. History (HANDOVER.md §14.6, prior manifest entries,
+      both Gmail draft ids) stays exactly as written -- not touched.
+      Condition attached: verify the user's claim that DocuSeal is
+      already set up against the actual files/account before writing it
+      as fact -- if freeze_for_docuseal.py is Prosper-specific, needs a
+      gated render, or has no Kallat template/account equivalent, state
+      that as unmet prerequisites, not as a working path. Nothing built
+      to close any gap found. Two specific blockers to note: signature
+      block (decision #10) gates envelope creation; bran@sgctech.ai/
+      john@sgctech.ai sit behind decision #8's open access question.
+    resolution: >
+      Checked live before writing anything, using read-only DocuSeal
+      tools (search_templates, search_documents -- no template created,
+      nothing sent) plus a full 10-signature/ grep, not assumption:
+      (1) search_templates("Kallat") and ("KP-2026") both empty;
+      search_templates("2026") returns exactly two templates, both
+      Prosper's (id 3 PRO-2026-SUB-01_Rev3_Proposal, id 2
+      PRO-2026-SUB-01_Rev3_Offer_InternalReview) -- no Kallat template
+      exists. (2) freeze_for_docuseal.py (re-confirmed, already read two
+      rounds ago) is Prosper-specific and contains no DocuSeal API/
+      template/account call anywhere -- it never reaches DocuSeal itself,
+      only freezes a local hashed PDF. (3) No HTML rendering of the
+      correction letter exists (unchanged finding). (4) Grepped
+      10-signature/ for bran@sgctech.ai and john@sgctech.ai -- zero
+      matches, no signer-role config exists anywhere. (5) SMTP status
+      contested: 10-signature/deploy-docuseal/README.md claims Resend
+      SMTP configured but hedges "not yet confirmed by an actual sent"
+      email; a separate, earlier finding in this session's own memory
+      (not independently re-verified this pass, no settings-check tool
+      available) found SMTP not actually configured. Not resolved either
+      way -- stated as contested, not asserted as broken or working.
+      All five, plus the two named blockers (signature block/decision
+      #10, domain/decision #8), written into a new "DocuSeal
+      prerequisites" section in internal-review-request-2026-08-08.md as
+      a 7-item list, none framed as agent judgment -- verified facts and
+      Bran's own two open decisions.
+      Routing statements amended in all three files: DocuSeal named as
+      the intended send path once the chain clears, with the repo-file
+      handoff explicitly reframed as review-not-send mechanism, and
+      Gmail mentioned only in historical/contrastive context (why it
+      isn't the path), cross-referencing HANDOVER.md §14.6 rather than
+      restating it. Confirmed via grep: "Gmail" now appears exactly once
+      per file, in that historical framing, nowhere else. HANDOVER.md
+      §14.6 and all prior manifest entries (including both Gmail draft
+      ids) left byte-for-byte as written.
+      Freeze call remains unmade -- not asserted otherwise anywhere in
+      the amendment.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

@@ -153,6 +153,14 @@ to send. Not authorized for client contact until that sequence
 completes, decision #10 is recorded, and a fresh, hash-matched
 04-draft/_review-stamp.yaml entry exists.
 
+SEND MECHANISM — amended 2026-08-08: DocuSeal, not Gmail (Gmail was
+tried for internal routing and stopped two rounds ago -- HANDOVER.md
+§14.6, history unedited). No working Kallat DocuSeal path exists today
+-- no template, no HTML render of this letter, no signer-role config for
+bran@sgctech.ai/john@sgctech.ai, SMTP status contested. Full prerequisite
+list, checked live: 04-review/internal-review-request-2026-08-08.md.
+Nothing built to close the gap this pass.
+
 SIGNATORY — corrected 2026-08-08 (second correction). The previous
 revision kept Johnny Gurrera signed on the strength of an AskUserQuestion
 answer ("Same person — Johnny Gurrera"). Bran's follow-up: that basis

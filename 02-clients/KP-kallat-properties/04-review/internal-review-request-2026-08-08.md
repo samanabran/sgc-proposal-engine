@@ -1,19 +1,76 @@
 # Internal review request — Kallat correction notice (decision #9)
 
-**For:** Bran. **Routing:** Bran review → [signatory — HANDOVER.md §2
+**For:** Bran. **Chain:** Bran reviews and stamps → John signs → back to
+Bran for final go-ahead → Sadique. **Signatory:** [HANDOVER.md §2
 decision #10, not yet recorded: is Johnny Gurrera the "John" in the
-stamp-SDR-John-stamp sequence?] → back to Bran for final instruction to
-send. Nothing goes to Sadique Abbas until that full sequence completes.
-The correction notice's signature block currently carries no name —
-your earlier chat instruction was that Johnny is not the signatory here,
-which an intervening question-and-answer in this session incorrectly
-overrode; withdrawn, see decision #10.
+stamp-SDR-John-stamp sequence?] — an intervening question-and-answer in
+this session incorrectly inferred "yes" from a chat answer; withdrawn.
+Nothing goes to Sadique Abbas, and no DocuSeal envelope is prepared,
+until that full sequence completes.
 
-**No longer using Gmail drafts for internal routing on this deal** — this
-replaces what would have been a third draft in a mailbox already
-confirmed unreliable for Kallat/Prosper correspondence (HANDOVER.md
-§8.1). This file is the review request; the letter itself is at
-`03-draft/KP-2026-SUB-01_CorrectionNotice_Draft1.md`.
+**Send path: DocuSeal — amended 2026-08-08, prerequisites below still
+unmet, none built this pass.** This file is the review mechanism, not
+the send mechanism — it's how Bran reads and stamps the letter, the
+same role a Gmail draft would have played (Gmail was tried for that role
+two rounds ago and stopped — HANDOVER.md §14.6, both draft ids recorded
+there, marked superseded, history unedited). The intended dispatch
+mechanism once the chain clears is DocuSeal, matching how Prosper's
+Rev3 internal review moved. **That path is not usable for Kallat today**
+— see "DocuSeal prerequisites" below for exactly what's missing, checked
+live, not assumed. Nothing built to close the gap this pass: no Kallat
+script variant, no run, no `ALLOWED_CLIENTS` change.
+
+## DocuSeal prerequisites — what would have to be true, checked live, not assumed
+
+Checked directly against the repo and the connected DocuSeal account
+this session (`search_templates`, `search_documents` — read-only, no
+template created, nothing sent), not written on the assumption that a
+working Kallat path exists:
+
+1. **No Kallat template exists.** `search_templates("Kallat")` and
+   `search_templates("KP-2026")` both return empty. `search_templates("2026")`
+   returns exactly two templates, both Prosper's:
+   `PRO-2026-SUB-01_Rev3_Proposal` (id 3) and
+   `PRO-2026-SUB-01_Rev3_Offer_InternalReview` (id 2). Nothing to route
+   this letter through today.
+2. **The closest existing script doesn't reach DocuSeal at all.**
+   `freeze_for_docuseal.py` (Prosper's copy, read in full two rounds ago)
+   is entirely Prosper-specific (hardcoded paths/filenames) and contains
+   no DocuSeal API call, template ID, or account reference anywhere — it
+   only freezes local HTML to a hashed PDF. The actual DocuSeal
+   submission step, for Prosper or anyone else, isn't in that file and
+   wasn't investigated further.
+3. **No HTML rendering of the correction letter exists.** It lives only
+   as Markdown (`03-draft/KP-2026-SUB-01_CorrectionNotice_Draft1.md`).
+   `assemble_and_render.py` (Kallat's only render script) assembles the
+   13 numbered proposal sections, not this letter. Nothing to submit to
+   a template even if one existed.
+4. **No signer-role mapping exists.** Grepped `10-signature/` in full for
+   `bran@sgctech.ai` and `john@sgctech.ai` — zero matches. The
+   Bran-stamps/John-signs/Bran-final-go-ahead chain isn't configured
+   anywhere as DocuSeal signer roles; it would need to be built into
+   whatever template gets created.
+5. **SMTP/dispatch status for the DocuSeal instance is contested, not
+   confirmed.** `10-signature/deploy-docuseal/README.md` states SMTP is
+   configured via Resend, then immediately hedges: "Not yet confirmed by
+   an actual sent [email]." A separate, earlier check (this session's
+   own memory, not independently re-verified this pass — no
+   settings-check tool available here) found SMTP not actually
+   configured, contradicting the README. Not resolved either way.
+6. **Signature block is blank — decision #10.** A DocuSeal envelope
+   needs a named signatory field. Nothing can be prepared until that row
+   is recorded.
+7. **Both addresses sit behind decision #8.** `bran@sgctech.ai` and
+   `john@sgctech.ai` are on the domain the mail-access question (#8,
+   still open) is about. The send mechanism runs directly through the
+   same access question the Gmail path did — moving to DocuSeal doesn't
+   route around it.
+
+All seven are prerequisites, not objections to argue past — none are
+being worked this pass. Decisions #8 and #10 are the two that are
+explicitly yours to clear; the rest (template, HTML render, signer-role
+config, SMTP confirmation) are build/verification work nobody has done
+yet, for Kallat specifically.
 
 ## What this is
 
