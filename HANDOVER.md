@@ -55,6 +55,23 @@ than treating as one-off luck. See
 `04-review/freeze-decision-package-2026-08-08.md` for the first
 deliverable built under this rule.
 
+**Second standing rule, added 2026-08-08 same day, same client (Bran)**:
+**checking the human's own assertions against the actual file/system
+state is standing behavior, not something invoked per instruction.**
+Third instance same session: Bran stated DocuSeal was already set up for
+Kallat; checked live (`search_templates`, a `10-signature/` grep,
+re-reading `freeze_for_docuseal.py`) before writing that into a routing
+statement, and it wasn't true — no Kallat template exists, only two
+Prosper ones, and the closest existing script never calls DocuSeal's API
+at all. Writing the assertion in as fact would have been "the same
+defect class as the unsourced figures" cleared out earlier this session
+(Bran's own framing). Applies symmetrically to the agent's own claims,
+not only the human's — see this file's own repeated practice of running
+code rather than reading it (`review_stamp_check()`, `pre_render_gate()`,
+`gather_draft_files()`) before stating what it does. See
+`02-clients/KP-kallat-properties/04-review/internal-review-request-2026-08-08.md`'s
+"DocuSeal prerequisites" section for the artifact this produced.
+
 ---
 
 ## 1. Per-client status

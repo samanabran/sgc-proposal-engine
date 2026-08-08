@@ -940,6 +940,40 @@ escalations:
       Freeze call remains unmade -- not asserted otherwise anywhere in
       the amendment.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat) -- standing rule, applies beyond Kallat"
+    issue: >
+      Third instance this session of the user's own framing being the
+      unreliable input (after the review_stamp_check() gate location and
+      the 00-knowledge/ write rule): DocuSeal assumed set up for Kallat,
+      wasn't. The attached condition each time was the right instinct
+      but shouldn't need attaching -- checking assertions against files
+      should be standing, not per-instruction. Also flagged: DocuSeal's
+      SMTP status (README hedge vs. an unverified prior "unconfigured"
+      finding) is exactly the shape of thing that gets read as working
+      by whoever builds this next if not re-verified. And: naming
+      DocuSeal as the intended path doesn't resolve anything -- it's a
+      third open item alongside #8 and #10, not a resolution of either.
+    resolution: >
+      Recorded as a second standing rule in HANDOVER.md §0 (same section
+      as the hand-over/objections rule from earlier today): checking the
+      human's own assertions against actual file/system state before
+      writing them in as fact is standing behavior going forward, not
+      something that needs invoking per instruction -- stated explicitly
+      as applying symmetrically to the agent's own claims too, citing
+      this session's repeated practice of running code
+      (review_stamp_check, pre_render_gate, gather_draft_files) rather
+      than reading it before describing what it does.
+      Contested SMTP status: already fully stated as prerequisite #5 in
+      04-review/internal-review-request-2026-08-08.md's DocuSeal
+      prerequisites list (README hedge vs. unverified prior finding,
+      not resolved either way) -- no further action needed, flagged
+      there for whoever eventually builds the Kallat path.
+      DocuSeal-as-third-open-item: already the framing used in this
+      round's amendment (prerequisites listed as unmet, decisions #8/#10
+      named as the two that are Bran's to clear) -- confirmed correct,
+      not restated differently.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
