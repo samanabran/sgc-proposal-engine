@@ -63,6 +63,16 @@ clause was a trailing subclause in the prior version, which quietly
 introduced a second unquantified cost in the same paragraph as the
 correction of the first one.
 
+Fourth pass, 2026-08-08: heading changed from "two corrections" to "two
+corrections, and one thing to check on your side" — the feed/API
+paragraph added in the third pass is a disclosure of something never
+mentioned in July, not a correction of something that was; Sadique will
+count, and the heading should match what he'll read. Accreditation
+paragraph changed "the sync is built" to "the sync would be built" —
+present tense implied a track record that, per the DEFERRED-status
+finding above, doesn't exist for any client. One conditional, but it's
+the tense that has to be right in this letter specifically.
+
 **COMMERCIAL RISK, not just a caveat** — raised to that level 2026-08-08
 per instruction. No file anywhere in this repo records a completed
 portal_sync delivery for any client — VGE, MRD, and PRO all show this
@@ -88,9 +98,15 @@ grep evidence: 03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md:10
 (live, non-quarantined) plus the expected matches in
 04-draft/_quarantine/KP-2026-SUB-01_Rev1_Internal.html:218 and .pdf (via
 pdftotext) — the quarantined copies are already frozen/stale by design,
-the 03-draft instance was the live exposure. That line pairs the AED
-250/user/month rate we're not supposed to charge with the unsourced
-40-headcount figure in one sentence — worse than either alone.
+the 03-draft instance was the live exposure. That line (07-options-
+inclusions.md:10) pairs a per-user rate we're not supposed to charge
+with the unsourced 40-headcount figure in one sentence — worse than
+either alone. Dereferenced to path:line rather than quoted verbatim
+2026-08-08 (fourth pass): the literal string was tripping
+check_20_per_user_rate_leak (validate.py) against this file itself —
+correctly, since it's a true hit, but a permanent self-inflicted one a
+reader would learn to scroll past. The finding is unchanged; only the
+citation method is.
 
 REVIEW GATE — re-verified by actually running the code (not just
 reading it), 2026-08-08:
@@ -169,7 +185,7 @@ On the call we described cyberattacks against our system as "completely
 implausible." That was wrong to say, and we're withdrawing it —
 especially since data security was the first thing you raised.
 
-**3. On portal connections (Bayut, Property Finder, Dubizzle) — two corrections.**
+**3. On portal connections (Bayut, Property Finder, Dubizzle) — two corrections, and one thing to check on your side.**
 First, cost: we told you the only cost involved is the portal's own API
 fee, with the connection itself being "one click" at no charge from us.
 Our current catalogue rate is different: AED 3,900 one-time for
@@ -186,9 +202,9 @@ they don't — that's a question for your own portal account managers,
 not something we can price from our side.
 
 Second, accreditation: we referred to our system as "already accredited
-by" all three portals. That's not something we hold — the sync is built
-against your own portal access, not a partnership status on our side —
-and we shouldn't have described it as an existing accreditation.
+by" all three portals. That's not something we hold — the sync would be
+built against your own portal access, not a partnership status on our
+side — and we shouldn't have described it as an existing accreditation.
 
 We'd rather send you this correction now than have you discover any of
 it after signing. The priced proposal, including how we've structured

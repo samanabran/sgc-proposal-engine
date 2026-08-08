@@ -690,9 +690,12 @@ escalations:
       HTML/PDF it produces, stating in the banner text itself that it
       checks nothing -- no ALLOWED_CLIENTS, no review_stamp_check(), no
       gate -- so any artifact it generates identifies itself without
-      reference to this conversation or HANDOVER.md. Verified: script
-      compiles clean (py_compile); not run end-to-end (Playwright/browser
-      not exercised this pass).
+      reference to this conversation or HANDOVER.md.
+      STATUS: IMPLEMENTED, NOT VERIFIED -- script compiles clean
+      (py_compile) but was never run end-to-end (Playwright/browser not
+      exercised this pass). No artifact carrying the banner has actually
+      been produced. Do not read this as a confirmed control until one
+      has.
       Render-script enumeration (paths only, per instruction -- no
       reading outputs, no grepping drafts, no fixes): MRD has none (the
       one client that actually goes through render_r11_r12.py). VGE has
@@ -703,6 +706,49 @@ escalations:
       render_pdf.py, stamp_watermarks.py. Same script name reused across
       two clients is worth someone's attention on its own -- not
       investigated further this pass, per the explicit boundary.
+
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Item 3 heading still said "two corrections" against three
+      paragraphs, the middle one a new disclosure, not a correction --
+      Sadique will count. Accreditation paragraph's "the sync is built"
+      is present tense about work never performed for any client --
+      needs "would be built." check_20's hit on the letter's own audit
+      note should be fixed by dereferencing to path:line rather than
+      weakening the checker. Coverage question: does check_20 (and
+      check_18/19) see rendered HTML/PDF, or markdown only -- given the
+      ungated parallel render path found this session. Banner status
+      should read implemented-but-unverified, not done, since Playwright
+      was never exercised.
+    resolution: >
+      Heading changed to "two corrections, and one thing to check on
+      your side." Accreditation paragraph changed to "the sync would be
+      built against your own portal access." Internal header's
+      DECISION #9 STATUS paragraph now cites 07-options-inclusions.md:10
+      by path:line instead of quoting "AED 250/user/month" verbatim --
+      re-ran validate.py after the edit: check_20 no longer fires on
+      the correction notice, only on the real defect
+      (07-options-inclusions.md), confirmed live.
+      COVERAGE ANSWER, read from the code, not inferred:
+      gather_draft_files() (validate.py:773-780), which supplies
+      draft_files to check_18/19/20 alike, globs
+      "{03-draft,05-issued}/**/*.md" only -- .md files, nothing else. It
+      does not read 04-draft/ at all (neither _quarantine/ nor a live
+      render), and does not read .html or .pdf under any path. So
+      check_20 sees only markdown source, never anything introduced by
+      assemble_and_render.py at render time or hand-edited into an HTML
+      file afterward -- exactly the population the last two rounds
+      established this repo cannot account for. The check catches a
+      leak before it's rendered; it cannot see one that already was.
+      Not extended this pass -- flagged, not fixed, since widening scope
+      wasn't requested here.
+      Banner entry in the prior round's resolution text reworded to
+      "STATUS: IMPLEMENTED, NOT VERIFIED" -- explicit that no artifact
+      carrying the banner has been produced, not to be read as a
+      confirmed control.
+      Prosper's duplicate-filename finding: left logged, closed, not
+      reopened this pass.
 
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
