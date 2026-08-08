@@ -835,6 +835,33 @@ escalations:
       00-knowledge/ routing as the two instances that motivated stating
       it explicitly.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      "Go ahead and send for internal review" -- ambiguous against three
+      live constraints from the same session (Gmail routing stopped two
+      rounds ago; nothing moves to John until decision #10; freeze/
+      ALLOWED_CLIENTS is Bran's call). Asked which of four readings was
+      meant rather than guessing on an external-facing action; user
+      selected: email the freeze-decision package to bran@sgctech.ai --
+      an explicit, confirmed reversal of the earlier stop-using-Gmail
+      instruction for this specific deliverable.
+    resolution: >
+      Gmail draft created (not sent -- no send tool exists in this
+      session's toolset, only create_draft/update_draft/search_threads/
+      etc., same limitation logged every prior round) to bran@sgctech.ai,
+      subject "[Kallat KP-2026-SUB-01] Internal review -- correction
+      notice + freeze-decision package (2026-08-08)", draft id
+      r4066885540188941194. Body is the full contents of
+      04-review/freeze-decision-package-2026-08-08.md (letter verbatim,
+      number block, freeze_for_docuseal.py findings, 7 objections,
+      standing constraints), plus a short cover note repeating: this is
+      a draft only and needs sending from Bran's own account; the
+      connected account (scholarixglobal@gmail.com) was previously
+      confirmed not to be where this deal's correspondence lives
+      (HANDOVER.md §8.1); decisions #8/#10 remain open; nothing has gone
+      to Sadique or John.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""
