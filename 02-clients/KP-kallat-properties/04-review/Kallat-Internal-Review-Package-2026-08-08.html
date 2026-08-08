@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kallat Properties — Internal Review Package (2026-08-08)</title>
+<style>
+  :root {
+    --ivory: #F7F4EE;
+    --navy: #1C2430;
+    --gold: #B79554;
+    --slate: #5F6775;
+    --champagne: #D9C08A;
+    --parchment: #ECE7DF;
+    --red: #B00020;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    color: var(--navy);
+    background: var(--ivory);
+    line-height: 1.55;
+    margin: 0;
+    padding: 0;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 32px 28px 64px; }
+  .banner {
+    background: var(--red);
+    color: #fff;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  header.cover {
+    text-align: center;
+    padding: 40px 0 28px;
+    border-bottom: 3px solid var(--gold);
+    margin-bottom: 28px;
+  }
+  header.cover h1 { font-size: 26px; margin: 0 0 6px; }
+  header.cover p { margin: 2px 0; color: var(--slate); font-size: 14px; }
+  h2.section-title {
+    font-size: 19px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 6px;
+    margin-top: 40px;
+  }
+  h3 { font-size: 15px; color: var(--slate); margin-top: 22px; }
+  .keypoints {
+    background: var(--parchment);
+    border-left: 4px solid var(--gold);
+    padding: 18px 22px;
+    margin: 18px 0;
+    border-radius: 2px;
+  }
+  .keypoints ul { margin: 0; padding-left: 20px; }
+  .keypoints li { margin-bottom: 10px; }
+  .status-open { color: var(--red); font-weight: 700; }
+  .status-note { color: var(--slate); font-style: italic; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--champagne); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--parchment); font-weight: 600; }
+  .letter-frame {
+    background: #fff;
+    border: 1px solid var(--champagne);
+    border-radius: 4px;
+    padding: 32px 36px;
+    margin-top: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .letter-frame .subject { font-weight: 700; margin-bottom: 18px; color: var(--slate); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .letter-frame p { margin: 0 0 14px; }
+  .letter-frame .item-heading { font-weight: 700; margin-top: 22px; margin-bottom: 8px; }
+  .letter-frame .sig-pending {
+    display: inline-block;
+    background: #fff3f3;
+    color: var(--red);
+    border: 1px dashed var(--red);
+    padding: 2px 8px;
+    font-size: 13px;
+    border-radius: 3px;
+  }
+  .footer-note { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--champagne); color: var(--slate); font-size: 12.5px; }
+  code { background: var(--parchment); padding: 1px 5px; border-radius: 2px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<div class="banner">INTERNAL REVIEW COPY — NOT FOR CLIENT TRANSMISSION — PREPARED FOR BRAN'S REVIEW ONLY</div>
+
+<div class="wrap">
+
+  <header class="cover">
+    <h1>Kallat Properties — KP-2026-SUB-01</h1>
+    <p>Correction notice review package</p>
+    <p>Prepared 2026-08-08 · SGC TECH AI</p>
+  </header>
+
+  <h2 class="section-title">Part 1 — Internal review: key points and summary</h2>
+
+  <div class="keypoints">
+    <ul>
+      <li><strong>What this is.</strong> A written correction to Kallat covering three items from the 16 July discovery call: features demoed live that aren't in the priced package, an overstated security claim, and a portal-connection cost/accreditation correction. Required before or with the priced offer (decision #9).</li>
+      <li><strong>Figures in the letter — fully sourced.</strong> AED 3,900 (Property Finder), AED 3,400 (Bayut/Dubizzle), AED 7,300 (combined) — all traced to <code>phase2-catalogue.yaml</code>, a governed rate card dated 2026-08-03, unchanged since. No rate card existed on 16 July, which is why the letter says "our current position is different" rather than implying retroactive accuracy.</li>
+      <li><strong>Commercial risk, not just a caveat:</strong> no client in this repo (VGE, MRD, Prosper, Kallat) has a recorded completed portal-sync delivery. The figures are a real catalogue rate, not proof the work has ever been performed. Letter frames it as "current catalogue rate," not a claim of prior delivery — still worth knowing before this goes further.</li>
+      <li><strong>Decision #9 (Stage 5 pricing) is reopened, not closed.</strong> A stale per-user rate was found live in the separate proposal draft (<code>07-options-inclusions.md:10</code>) — marked SUPERSEDED in place, not fixed. Stage 5 pricing stays held until that's actually resolved.</li>
+      <li><strong>Signature block is intentionally blank</strong> — <span class="status-open">decision #10 open</span>: whether Johnny Gurrera is the "John" in the internal signing sequence. To be settled by asking him directly, not inferred.</li>
+      <li><strong>Mail access — <span class="status-open">decision #8 open</span>:</strong> the read path to <code>mail.sgctech.ai</code>/SOGo, still the highest-value open item in the register — potentially resolves a separate MRD question and recovers a Prosper document without going through a third party.</li>
+      <li><strong>DocuSeal account identity — <span class="status-open">decision #11 open</span>:</strong> a supplied API token and the already-connected DocuSeal tools resolve to the same host (<code>docuseal.sgctech.ai</code>) but show different accounts (one empty, one with two Prosper templates). Not reconciled — a fact about SGC's own infrastructure to confirm with whoever set it up.</li>
+      <li><strong>No working DocuSeal send path exists for Kallat yet.</strong> No template, no HTML rendering of this letter, no signer-role config, SMTP status contested (a deploy note claims configured but hedges "unconfirmed"). None of this was built this pass — this document is being delivered to you directly instead, exactly to avoid asserting a path that doesn't exist.</li>
+      <li><strong>Nothing has been sent to Sadique, Johnny, or anyone else.</strong> <code>ALLOWED_CLIENTS</code> is unchanged (Kallat deliberately excluded — your own standing decision). This package makes no freeze/send recommendation; that call stays yours.</li>
+    </ul>
+  </div>
+
+  <h3>Open decisions at a glance</h3>
+  <table>
+    <tr><th>#</th><th>Question</th><th>Owner</th></tr>
+    <tr><td>8</td><td>Read path to mail.sgctech.ai/SOGo</td><td>Bran</td></tr>
+    <tr><td>9</td><td>Stage 5 pricing correction (reopened — stale per-user rate found)</td><td>Held</td></tr>
+    <tr><td>10</td><td>Is Johnny Gurrera the "John" in the signing sequence?</td><td>Bran</td></tr>
+    <tr><td>11</td><td>Which DocuSeal account is the real production instance?</td><td>Bran</td></tr>
+  </table>
+
+  <h2 class="section-title">Part 2 — The client-facing letter (verbatim)</h2>
+  <p class="status-note">This is exactly what Sadique would read if and when this is approved and sent — nothing added, nothing summarized.</p>
+
+  <div class="letter-frame">
+    <div class="subject">Subject: Kallat Properties — a few things from our 16 July conversation, before we send pricing</div>
+
+    <p>Dear Sadique,</p>
+
+    <p>Thank you again for the time on 16 July — it was a genuinely useful conversation, and the platform walkthrough clearly landed on the right priorities (property management and portal integration, as you flagged toward the end of the call). Before we come back to you with numbers, we want to put a few things from that conversation in writing, precisely, so nothing is a surprise later.</p>
+
+    <div class="item-heading">1. Three items we demonstrated live aren't in the package we're pricing for you.</div>
+    <p>Commission calculation, automatic reconciliation of client/landlord payments, and client/landlord payment portals all came up in the demo and generated real interest — but none of them are part of our standard real-estate platform configuration today. We got ahead of ourselves showing them working. If you'd like these included, we can scope and price them separately; they won't be bundled into the base offer by default.</p>
+
+    <div class="item-heading">2. On security, we overstated it.</div>
+    <p>On the call we described cyberattacks against our system as "completely implausible." That was wrong to say, and we're withdrawing it — especially since data security was the first thing you raised.</p>
+
+    <div class="item-heading">3. On portal connections (Bayut, Property Finder, Dubizzle) — two corrections, and one thing to check on your side.</div>
+    <p>First, cost: we told you the only cost involved is the portal's own API fee, with the connection itself being "one click" at no charge from us. Our current catalogue rate is different: AED 3,900 one-time for Property Finder, and AED 3,400 one-time for Bayut/Dubizzle together — AED 7,300 one-time in total if you want all three connected. That's for the integration work itself, separate from whatever subscription each portal charges you directly.</p>
+    <p>On that point: connecting any of the three also requires your own portal account to already include feed or API access, not just a standard listing account. We don't know whether your current subscriptions include that, or what each portal charges to add it if they don't — that's a question for your own portal account managers, not something we can price from our side.</p>
+    <p>Second, accreditation: we referred to our system as "already accredited by" all three portals. That's not something we hold — the sync would be built against your own portal access, not a partnership status on our side — and we shouldn't have described it as an existing accreditation.</p>
+
+    <p>We'd rather send you this correction now than have you discover any of it after signing. The priced proposal, including how we've structured the monthly fee, will follow separately once we've confirmed a couple of scoping details with you directly.</p>
+
+    <p>Best regards,<br>
+    <span class="sig-pending">[[signatory pending — decision #10]]</span><br>
+    SGC TECH AI</p>
+  </div>
+
+  <div class="footer-note">
+    Full audit trail (every provenance check, gate re-run, objection, and revision) lives in
+    <code>02-clients/KP-kallat-properties/manifest.yaml</code> and <code>HANDOVER.md</code>.
+    This document is a summary for review, not a replacement for that record.
+  </div>
+
+</div>
+</body>
+</html>
