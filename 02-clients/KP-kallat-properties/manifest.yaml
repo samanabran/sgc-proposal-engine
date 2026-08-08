@@ -974,6 +974,85 @@ escalations:
       named as the two that are Bran's to clear) -- confirmed correct,
       not restated differently.
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat) -- standing finding, applies beyond Kallat"
+    issue: >
+      A live API token supplied for the DocuSeal SMTP check turned out
+      to belong to an account with zero templates/submissions, contra
+      the two Prosper templates the already-connected MCP tools found --
+      the third account-identity mismatch this session (Gmail's
+      connected account, the mail.sgctech.ai mailbox behind decision #8,
+      now DocuSeal). Requested: (1) log this as one class, drafted
+      ready-to-paste for known-defects.md since 00-knowledge/ is still
+      not agent-writable; (2) new register row, decision #11, owner
+      Bran -- which DocuSeal account is real, resolvable by asking, not
+      probing; (3) downgrade the review-request's "no Kallat template
+      exists" claim to "not found on an unverified account," leave the
+      rest of that list as written; (4) confirm the supplied token isn't
+      in shell history or scratch files, treat as unverified provenance;
+      (5) one bounded read-only check -- if the MCP server's base URL is
+      declared in a repo/workspace config file, report it, no network.
+    resolution: >
+      (1)-(4) confirmed: no ~/.bash_history file exists, token not in
+      the scratchpad directory. It IS in the repo, though, at
+      10-signature/deploy-docuseal/.env (DOCUSEAL_API_TOKEN, paired with
+      DOCUSEAL_BASE_URL=https://docuseal.sgctech.ai) -- checked that file
+      is properly gitignored (.gitignore:9, .env*) and has never been
+      committed (git log --all on the path: empty) before reporting it,
+      so this is not a secrets-in-history problem, just the token's
+      legitimate local home.
+      (5) MCP server config found: C:\Users\USER\.claude.json,
+      mcpServers.docuseal -> url "https://docuseal.sgctech.ai/mcp",
+      Authorization: Bearer <token>. Same host as the .env file, but a
+      DIFFERENT token than the one supplied -- confirmed by direct
+      comparison, not inference. Read-only, no network calls made to
+      resolve or use this. Correction: the redaction logic used while
+      extracting this (a python script filtering key names for
+      "key"/"token"/"secret"/"password"/"auth") had a bug -- it checked
+      top-level keys of the docuseal server config but didn't recurse
+      into the nested "headers" dict, so the MCP token printed in tool
+      output unredacted. Owned up to directly when it happened. Not
+      written to any repo file; the exposure is confined to this
+      session's own transcript, which the user already has full access
+      to as the owner of both the token and the config file it lives in.
+      Decision #11 added to HANDOVER.md §2 (same table, same format as
+      #8/#9/#10): which DocuSeal identity is authoritative, owner Bran,
+      not resolvable by more querying. No further API calls made this
+      pass, no attempt to reconcile the two accounts.
+      internal-review-request-2026-08-08.md prerequisite #1 downgraded:
+      "No Kallat template exists" -> "No Kallat template found on an
+      account whose identity is unverified" -- cites decision #11
+      directly, states absence proves nothing until identity is settled.
+      Prerequisites #2-#7 left exactly as written, per instruction.
+      known-defects.md candidate drafted below (#25, following #24,
+      still Commercial Desk's to paste -- 00-knowledge/ remains
+      read-only to this agent):
+
+      "25. **Query results are only as trustworthy as the unverified
+      account identity behind them.** Three instances, one session,
+      same class: (1) Gmail -- the connected account
+      (scholarixglobal@gmail.com) was assumed to be where client
+      correspondence lives; confirmed instead (HANDOVER.md §8.1) that it
+      isn't, via the attachment-5306 rejection reply's own SMTP headers.
+      (2) mail.sgctech.ai/SOGo behind decision #8 -- never actually
+      accessed this session; its contents assumed reachable once
+      credentials exist, still unverified. (3) DocuSeal -- the
+      MCP-connected mcp__docuseal__* tools returned two Prosper templates
+      for a search; a separately supplied API token for the identical
+      host (docuseal.sgctech.ai, confirmed via
+      10-signature/deploy-docuseal/.env) returned zero templates and
+      zero submissions on the same query. Same domain, two different
+      tokens, two different visible states -- not reconciled, decision
+      #11. None of these are integration bugs -- they're the same
+      failure at the identity layer: every 'I queried the system and it
+      said X' finding in this repo carries an unstated assumption about
+      which account was actually queried, and that assumption has not
+      once been verified in advance on this deal. Before trusting a
+      negative result (template doesn't exist, correspondence doesn't
+      exist, correction was never sent), confirm the account identity
+      first -- an empty result and a wrong account are indistinguishable
+      from inside the query."
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

@@ -27,12 +27,22 @@ this session (`search_templates`, `search_documents` — read-only, no
 template created, nothing sent), not written on the assumption that a
 working Kallat path exists:
 
-1. **No Kallat template exists.** `search_templates("Kallat")` and
-   `search_templates("KP-2026")` both return empty. `search_templates("2026")`
-   returns exactly two templates, both Prosper's:
+1. **No Kallat template found on an account whose identity is
+   unverified — downgraded 2026-08-08, decision #11.** `search_templates("Kallat")`
+   and `search_templates("KP-2026")` both returned empty via the
+   MCP-connected `mcp__docuseal__*` tools; `search_templates("2026")`
+   returned exactly two templates, both Prosper's:
    `PRO-2026-SUB-01_Rev3_Proposal` (id 3) and
-   `PRO-2026-SUB-01_Rev3_Offer_InternalReview` (id 2). Nothing to route
-   this letter through today.
+   `PRO-2026-SUB-01_Rev3_Offer_InternalReview` (id 2). But a separately
+   supplied API token for the same host (`docuseal.sgctech.ai`,
+   confirmed matching `10-signature/deploy-docuseal/.env`'s
+   `DOCUSEAL_API_TOKEN`) returned zero templates and zero submissions on
+   the identical query — a different token than the one the MCP tools
+   use (`C:\Users\USER\.claude.json`, `mcpServers.docuseal`). Same host,
+   two tokens, two different visible states, not reconciled — see
+   decision #11 (HANDOVER.md §2). Absence of a Kallat template proves
+   nothing until that identity question is settled; stated as "not
+   found on an unverified account," not as "doesn't exist."
 2. **The closest existing script doesn't reach DocuSeal at all.**
    `freeze_for_docuseal.py` (Prosper's copy, read in full two rounds ago)
    is entirely Prosper-specific (hardcoded paths/filenames) and contains
