@@ -54,6 +54,7 @@ th, td { border: 1px solid #D9C08A; padding: 5px 8px; text-align: left; }
 th { background: #ECE7DF; font-weight: 600; }
 blockquote { border-left: 3px solid #B79554; margin: 10px 0; padding: 6px 14px; background: #F7F4EE; font-style: italic; }
 .internal-banner { background: #1C2430; color: #F7F4EE; padding: 10px 16px; font-weight: 600; text-align: center; margin-bottom: 14px; }
+.ungated-banner { background: #B00020; color: #FFFFFF; padding: 10px 16px; font-weight: 700; text-align: center; margin-bottom: 0; }
 .cover { text-align: center; padding-top: 30mm; }
 .cover h1 { border: none; font-size: 26pt; page-break-before: avoid; }
 section { page-break-after: always; }
@@ -139,6 +140,7 @@ def main() -> int:
 <title>KP-2026-SUB-01_Rev1 — Internal Draft</title>
 <style>{CSS}</style>
 </head><body>
+<div class="ungated-banner">UNGATED RENDER — NOT SEND-READY. Produced by assemble_and_render.py, which reads 03-draft/ directly and checks nothing — no ALLOWED_CLIENTS, no review_stamp_check(), no pre-render gate of any kind. This file identifies its own status; it is not evidence of review or approval.</div>
 <div class="cover">
 <div class="internal-banner">INTERNAL DRAFT — NOT FOR CLIENT TRANSMISSION — SDR REVIEW/SIGNATURE ONLY</div>
 <h1>KP-2026-SUB-01</h1>

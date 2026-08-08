@@ -103,6 +103,25 @@ INTERNAL_VOCABULARY_PHRASES = [
     "placeholder-driven",
 ]
 
+# A currency figure tied directly to a per-user/seat/agent divisor (e.g.
+# "AED 250/user/month") — the exact shape of exposure decision #9
+# (Kallat, manifest.yaml 2026-08-07) ruled must never appear in a
+# client-facing document, even as a labelled illustration. Requires the
+# AED figure, not just the bare phrase "per-user" alone, so correction
+# language like "our pricing isn't per-user" (no figure attached) does
+# not false-positive — found live 2026-08-08 in Kallat's own
+# 03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md:10, stale
+# against the 2026-08-05 v3.0 recompute (see manifest.yaml 2026-08-08
+# entry). Distinct failure mode from check_18 (commercial claims) and
+# check_19 (internal vocabulary) — a pricing-shape leak, not a
+# forbidden word — kept as its own check for the same reason check_19
+# was kept separate from check_18.
+PER_USER_RATE_PATTERN = re.compile(
+    r"AED\s*[\d,]+(?:\.\d+)?\s*/?\s*per[- ]?(?:user|seat|agent)\b"
+    r"|AED\s*[\d,]+(?:\.\d+)?\s*/\s*(?:user|seat|agent)\b",
+    re.IGNORECASE,
+)
+
 # Files where forbidden phrases are EXPECTED to appear (they name the
 # phrases as a reference list) — excluded from check 18.
 FORBIDDEN_PHRASE_EXEMPT_SUFFIXES = (
@@ -428,6 +447,19 @@ def check_19_internal_vocabulary(result, draft_files):
             if p.lower() in text.lower():
                 result.fail("19. internal vocabulary leak", f"'{p}' found in {f}")
     result.ok("19. no internal narration/strategy vocabulary found outside exempt/historical reference files")
+
+
+def check_20_per_user_rate_leak(result, draft_files):
+    """A per-user rate or divisor in client-facing draft prose (e.g.
+    "AED 250/user/month") — see PER_USER_RATE_PATTERN comment above for
+    why this is its own check rather than folded into check_18/19."""
+    for f in draft_files:
+        if any(f.endswith(s) for s in FORBIDDEN_PHRASE_EXEMPT_SUFFIXES) or _is_retracted_historical(f):
+            continue
+        text = open(f, encoding="utf-8").read()
+        for m in PER_USER_RATE_PATTERN.finditer(text):
+            result.fail("20. per-user rate leak", f"{m.group(0)!r} found in {f}")
+    result.ok("20. no per-user rate/divisor found outside exempt/historical reference files")
 
 
 # ---------------------------------------------------------------------
@@ -782,6 +814,7 @@ def run(client_dir):
     check_16_verbal_promises(result, client_dir)
     check_18_forbidden_phrases(result, draft_files, edition)
     check_19_internal_vocabulary(result, draft_files)
+    check_20_per_user_rate_leak(result, draft_files)
 
     # V1-V5 + R1-R12 (additive, D-11/pricing-engine-cost-class-model.md Rev.2)
     check_v1_effort_reconciliation(result, ws)

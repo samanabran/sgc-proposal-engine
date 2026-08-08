@@ -651,6 +651,59 @@ escalations:
       confirming with the person directly, not an inference; signature
       block unchanged (no name).
 
+  - date: "2026-08-08"
+    raised_by: "User (direct instruction, in chat)"
+    issue: >
+      Three hardening items following the ungated-render-script finding:
+      (1) the strikethrough annotation on 07-options-inclusions.md:10
+      degrades to literal tildes on re-render, since
+      assemble_and_render.py's converter doesn't handle that syntax --
+      replace with plain bold text the converter definitely handles; (2)
+      the per-user grep was a one-time snapshot, not a check -- add a
+      sibling to check_19_internal_vocabulary (validate.py:418) that
+      fails loudly on any future per-user rate leak; (3) the script
+      itself should mark its own output, since a code comment won't stop
+      someone running it by hand. Also authorized, strictly bounded:
+      enumerate (paths only, no reading/grepping) whether VGE/MRD/PRO
+      have equivalent standalone render scripts.
+    resolution: >
+      (1) 07-options-inclusions.md:10 rewritten: every cell now leads
+      with plain "**SUPERSEDED -- DO NOT QUOTE**" (bold only, no tilde
+      syntax anywhere in the row).
+      (2) check_20_per_user_rate_leak added to validate.py, sibling to
+      check_19, wired into run() same as check_19. PER_USER_RATE_PATTERN
+      matches an AED figure tied directly to a per-user/seat/agent
+      divisor, not the bare phrase alone, so negation prose ("our
+      pricing isn't per-user") doesn't false-positive. Verified live: `
+      python3 05-ops/validate.py 02-clients/KP-kallat-properties` now
+      shows [FAIL] 20 on both 07-options-inclusions.md (the real defect,
+      correctly caught) and KP-2026-SUB-01_CorrectionNotice_Draft1.md
+      (the internal header's own audit quote of the defect string,
+      inside an HTML comment never sent to the client -- a true
+      literal-text hit, not exempted, consistent with check_18/19's
+      existing exempt-suffix pattern rather than adding comment-stripping
+      logic). Both hits are honest and expected given this letter is
+      already not send-ready for other reasons.
+      (3) assemble_and_render.py now writes an unconditional
+      "UNGATED RENDER -- NOT SEND-READY" banner (red, distinct from the
+      existing navy "INTERNAL DRAFT" banner) at the very top of every
+      HTML/PDF it produces, stating in the banner text itself that it
+      checks nothing -- no ALLOWED_CLIENTS, no review_stamp_check(), no
+      gate -- so any artifact it generates identifies itself without
+      reference to this conversation or HANDOVER.md. Verified: script
+      compiles clean (py_compile); not run end-to-end (Playwright/browser
+      not exercised this pass).
+      Render-script enumeration (paths only, per instruction -- no
+      reading outputs, no grepping drafts, no fixes): MRD has none (the
+      one client that actually goes through render_r11_r12.py). VGE has
+      2: 04-draft/render_pdf.py, 04-draft/stamp_watermarks.py. Prosper
+      has 6, including one with the identical name to Kallat's own:
+      04-draft/assemble_and_render.py, plus render_rev2.py,
+      render_offer.py, render_brand.py, freeze_for_docuseal.py,
+      render_pdf.py, stamp_watermarks.py. Same script name reused across
+      two clients is worth someone's attention on its own -- not
+      investigated further this pass, per the explicit boundary.
+
 revisions:
   - ref: "KP-2026-SUB-01_Rev1"
     issued_date: ""

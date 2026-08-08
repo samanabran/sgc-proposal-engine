@@ -754,7 +754,20 @@ detail: `02-clients/KP-kallat-properties/manifest.yaml`, 2026-08-08
 entry, and `04-review/internal-review-request-2026-08-08.md`. Worth
 checking whether VGE, MRD, or PRO have an equivalent standalone render
 script before assuming R11/R12's gate is the only path to a client-shaped
-artifact anywhere in this repo — not checked this pass.
+artifact anywhere in this repo.
+
+**Enumerated 2026-08-08 (paths only, not investigated further — explicit
+scope boundary)**: MRD has no standalone script (consistent — it's the
+one client actually routed through `render_r11_r12.py`). VGE has two
+(`04-draft/render_pdf.py`, `04-draft/stamp_watermarks.py`). Prosper has
+six, including one with the **identical filename** to Kallat's —
+`04-draft/assemble_and_render.py` — plus `render_rev2.py`,
+`render_offer.py`, `render_brand.py`, `freeze_for_docuseal.py`,
+`render_pdf.py`, `stamp_watermarks.py`. Whether any of these check
+`ALLOWED_CLIENTS` or a stamp themselves (unlike Kallat's, confirmed not
+to) is unknown — contents not read, per the same scope boundary. The
+repeated filename across two clients is itself worth someone's attention
+independent of what's inside either copy.
 
 **Kallat's anchor inverts Prosper's problem, it doesn't repeat it.**
 Prosper's PRJ figure sits *below* what this repo's governed model can
