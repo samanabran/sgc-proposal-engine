@@ -4,14 +4,15 @@
 #
 # This file lives at: .github/workflows/plugin-gates.yml
 # A mirror copy is at plugins/sgc-proposal-engine/ci/github-actions-workflow.yml
-# for inclusion in the plugin bundle.
+# for inclusion in the plugin bundle. The two files must stay
+# byte-identical -- gate 5 (workflow-integrity) enforces this.
 
 name: Plugin gates
 
 on:
   push:
     branches: [main]
-    tags: ["v*"]
+    tags: ["v*", "citest-*"]
     paths:
       - "plugins/sgc-proposal-engine/**"
       - "plugins/sgc-commercial-desk/**"
@@ -33,6 +34,9 @@ concurrency:
   group: plugin-gates-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   PYTHONUNBUFFERED: "1"
 
@@ -43,11 +47,12 @@ jobs:
   diff-redacted-derivatives:
     name: diff-redacted-derivatives
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - name: Install PyYAML
@@ -62,8 +67,9 @@ jobs:
   forbidden-strings:
     name: forbidden-strings
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: Run forbidden-strings gate
@@ -76,8 +82,9 @@ jobs:
   secrets-scan:
     name: secrets-scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: Run secrets-scan gate
@@ -90,11 +97,12 @@ jobs:
   acceptance:
     name: acceptance.sh
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - name: Run acceptance
@@ -102,12 +110,42 @@ jobs:
           bash plugins/sgc-proposal-engine/tests/acceptance.sh
 
   # ----------------------------------------------------------------
-  # Gate 5 — combined status (blocks the PR if any gate fails)
+  # Gate 5 — workflow-integrity: this file and its plugin-bundle
+  # mirror must stay byte-identical, and the old, nonexistent `den`
+  # CLI invocation (removed after `den: command not found` / exit
+  # 127 on a real release run) must never come back.
+  # ----------------------------------------------------------------
+  workflow-integrity:
+    name: workflow-integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: This file and its plugin-bundle mirror must match
+        run: |
+          diff .github/workflows/plugin-gates.yml plugins/sgc-proposal-engine/ci/github-actions-workflow.yml
+      - name: The nonexistent `den` CLI must never return
+        run: |
+          if grep -nE '(^|[^A-Za-z0-9_-])den[[:space:]]+(marketplace|plugin)\b' \
+               .github/workflows/plugin-gates.yml \
+               plugins/sgc-proposal-engine/ci/github-actions-workflow.yml; then
+            echo "Found a 'den <subcommand>' CLI invocation. This CLI is not"
+            echo "publicly distributed -- see PUBLISHING.md. Publish via the"
+            echo "documented Den REST API (release job) instead."
+            exit 1
+          fi
+          echo "No 'den' CLI invocation found."
+
+  # ----------------------------------------------------------------
+  # Gate 6 — combined status (blocks the PR if any gate fails)
   # ----------------------------------------------------------------
   plugin-gate-status:
     name: plugin-gate-status
     runs-on: ubuntu-latest
-    needs: [diff-redacted-derivatives, forbidden-strings, secrets-scan, acceptance]
+    timeout-minutes: 5
+    needs: [diff-redacted-derivatives, forbidden-strings, secrets-scan, acceptance, workflow-integrity]
     if: always()
     steps:
       - name: Check all gates
@@ -115,28 +153,41 @@ jobs:
           if [ "${{ needs.diff-redacted-derivatives.result }}" != "success" ] || \
              [ "${{ needs.forbidden-strings.result }}" != "success" ] || \
              [ "${{ needs.secrets-scan.result }}" != "success" ] || \
-             [ "${{ needs.acceptance.result }}" != "success" ]; then
+             [ "${{ needs.acceptance.result }}" != "success" ] || \
+             [ "${{ needs.workflow-integrity.result }}" != "success" ]; then
             echo "One or more plugin gates failed:"
             echo "  diff-redacted-derivatives: ${{ needs.diff-redacted-derivatives.result }}"
             echo "  forbidden-strings: ${{ needs.forbidden-strings.result }}"
             echo "  secrets-scan: ${{ needs.secrets-scan.result }}"
             echo "  acceptance: ${{ needs.acceptance.result }}"
+            echo "  workflow-integrity: ${{ needs.workflow-integrity.result }}"
             exit 1
           fi
-          echo "All four plugin gates passed."
+          echo "All five plugin gates passed."
 
   # ----------------------------------------------------------------
-  # Release — runs only on tag push, publishes to Den if the
-  # connector is configured. Manual step by default; the desk
-  # authorises each release.
+  # Release — runs only on tag push. Publishes ONLY the SDR-facing
+  # sgc-proposal-engine plugin to Den via the documented REST API
+  # (https://openworklabs.com/docs/api-reference/github/...). It
+  # deliberately does NOT import sgc-commercial-desk: that plugin's
+  # skills (margin floor, cost-to-serve, concession-ladder true
+  # values) must never be published with the API's default
+  # access.orgWide: true. sgc-commercial-desk's import/RBAC
+  # assignment stays a manual, desk-run step -- see PUBLISHING.md's
+  # "den rbac grant --plugin sgc-commercial-desk ... user:ali.iqbal"
+  # section.
+  #
+  # No `den` CLI exists publicly for this. Do not reintroduce one --
+  # see gate 5 (workflow-integrity) above.
   # ----------------------------------------------------------------
   release:
     name: release
     runs-on: ubuntu-latest
     needs: [plugin-gate-status]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: Tag-to-version
@@ -144,19 +195,246 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-      - name: Publish to Den (manual approval)
+      - name: Publish sgc-proposal-engine to Den (REST API)
         env:
           DEN_TOKEN: ${{ secrets.DEN_TOKEN }}
+          DEN_BASE_URL: ${{ vars.DEN_BASE_URL || 'https://den-web-one.vercel.app' }}
+          GITHUB_REPO_URL: https://github.com/${{ github.repository }}
         run: |
-          if [ -z "$DEN_TOKEN" ]; then
+          set -euo pipefail
+
+          if [ -z "${DEN_TOKEN:-}" ]; then
             echo "DEN_TOKEN secret is not configured. Skipping publish."
             echo "Configure the Den token as a repository secret to enable automated publish."
             exit 0
           fi
-          # Manual approval gate: the desk authorises the publish by
-          # approving this workflow run. See PUBLISHING.md.
-          den marketplace publish \
-            --name sgc-proposal-engine-marketplace \
-            --plugin ./plugins/sgc-proposal-engine \
-            --plugin ./plugins/sgc-commercial-desk \
-            --token "$DEN_TOKEN"
+
+          API_ROOT="${DEN_BASE_URL%/}/api/den"
+
+          # Redacts DEN_TOKEN from anything about to be printed, including a
+          # server error body that might echo the request back.
+          redact() {
+            sed "s/${DEN_TOKEN}/[REDACTED]/g"
+          }
+
+          # ---------------------------------------------------------
+          # Harmless auth check + mandatory pre-import validation +
+          # self-diagnosing auth scheme, in one read-only call.
+          #
+          # No whoami/health endpoint is documented for the Den REST
+          # API, so this non-mutating preview call serves double duty.
+          # A masked `DEN_TOKEN: ***` in the job env dump is NOT proof
+          # of successful authentication -- only an HTTP response is.
+          #
+          # DEN_TOKEN has the `den_` prefix, which matches
+          # DEN_API_KEY_DEFAULT_PREFIX in the Den source
+          # (ee/apps/den-api/src/api-keys.ts:7). Den's auth config
+          # (ee/apps/den-api/src/auth.ts:1150-1169) registers Better
+          # Auth's official `apiKey` plugin with `enableSessionForAPIKeys:
+          # true`, which resolves an `x-api-key` header to a full
+          # session during the FIRST session-resolution call
+          # (ee/apps/den-api/src/session.ts:229-257, `getRequestSession`)
+          # -- before the separate `Authorization: Bearer <token>`
+          # fallback path (session.ts:131-217, which looks the token up
+          # directly against the session table, i.e. a browser/app
+          # session token, not an API key) is ever reached. x-api-key is
+          # therefore tried first; Bearer is the fallback in case
+          # DEN_TOKEN turns out to be a raw session token instead.
+          # ---------------------------------------------------------
+          try_preview() {
+            local header="$1"
+            curl -sS -o /tmp/preview.json -w '%{http_code}' \
+              -X POST "${API_ROOT}/v1/plugins/import-mcps-from-github-url/preview" \
+              -H "${header}" \
+              -H "Content-Type: application/json" \
+              -d "{\"githubUrl\": \"${GITHUB_REPO_URL}\"}"
+          }
+
+          echo "Attempting preview with x-api-key..."
+          preview_http_code=$(try_preview "x-api-key: ${DEN_TOKEN}")
+          auth_header=""
+
+          if [ "$preview_http_code" = "200" ]; then
+            auth_header="x-api-key: ${DEN_TOKEN}"
+            echo "Auth scheme that worked: x-api-key"
+          elif [ "$preview_http_code" = "401" ] || [ "$preview_http_code" = "403" ]; then
+            echo "x-api-key: HTTP ${preview_http_code}. Retrying with Authorization: Bearer..."
+            first_code="$preview_http_code"
+            first_body=$(redact < /tmp/preview.json)
+            preview_http_code=$(try_preview "Authorization: Bearer ${DEN_TOKEN}")
+            if [ "$preview_http_code" = "200" ]; then
+              auth_header="Authorization: Bearer ${DEN_TOKEN}"
+              echo "Auth scheme that worked: Authorization: Bearer"
+            else
+              echo "Both auth schemes failed. DEN_TOKEN is not valid for either."
+              echo "x-api-key: HTTP ${first_code}"
+              echo "$first_body"
+              echo "Authorization: Bearer: HTTP ${preview_http_code}"
+              redact < /tmp/preview.json
+              exit 1
+            fi
+          fi
+
+          case "$preview_http_code" in
+            200) echo "Preview: 200 OK" ;;
+            400) echo "Preview: 400 -- invalid payload"; redact < /tmp/preview.json; exit 1 ;;
+            404) echo "Preview: 404 -- GitHub plugin path could not be found"; redact < /tmp/preview.json; exit 1 ;;
+            429) echo "Preview: 429 -- rate limited by Den"; exit 1 ;;
+            5*) echo "Preview: HTTP ${preview_http_code} -- Den service failure"; exit 1 ;;
+            *) echo "Preview: unexpected HTTP ${preview_http_code}"; redact < /tmp/preview.json; exit 1 ;;
+          esac
+
+          if ! jq -e . /tmp/preview.json > /dev/null 2>&1; then
+            echo "Preview response is not valid JSON."
+            exit 1
+          fi
+
+          preview_ok=$(jq -r '.ok' /tmp/preview.json)
+          if [ "$preview_ok" != "true" ]; then
+            echo "Preview response .ok is not true."
+            redact < /tmp/preview.json
+            exit 1
+          fi
+
+          classification=$(jq -r '.item.classification' /tmp/preview.json)
+          echo "Classification: $classification"
+          if [ "$classification" = "unsupported" ]; then
+            echo "Den classified this repo as unsupported for import."
+            exit 1
+          fi
+
+          warning_count=$(jq '.item.warnings | length' /tmp/preview.json)
+          if [ "$warning_count" -gt 0 ]; then
+            echo "Preview warnings ($warning_count):"
+            jq -r '.item.warnings[]' /tmp/preview.json
+          fi
+
+          # Neither plugin declares mcpServers, so any MCP server
+          # Den's preview finds is unexpected -- reject rather than
+          # silently import an unrecognised connector.
+          server_count=$(jq '.item.servers | length' /tmp/preview.json)
+          if [ "$server_count" -gt 0 ]; then
+            echo "Preview found $server_count MCP server(s), but neither plugin declares any mcpServers. Refusing to import an unexpected server."
+            jq '.item.servers' /tmp/preview.json
+            exit 1
+          fi
+
+          total_skill_count=$(jq '.item.skills | length' /tmp/preview.json)
+          echo "Preview found $total_skill_count skill(s) total across the marketplace:"
+          jq -r '.item.skills[] | "  - \(.pluginName)/\(.name) (\(.skillKey)) supported=\(.supported)"' /tmp/preview.json
+
+          # SDR-plugin scope only -- see the job-level comment above
+          # for why sgc-commercial-desk is deliberately excluded here.
+          unrecognised_plugin_count=$(jq '[.item.skills[] | select(.pluginName != "sgc-proposal-engine" and .pluginName != "sgc-commercial-desk")] | length' /tmp/preview.json)
+          if [ "$unrecognised_plugin_count" -gt 0 ]; then
+            echo "Preview returned skills from an unrecognised plugin name -- refusing to guess which ones are SDR-safe."
+            jq '[.item.skills[] | select(.pluginName != "sgc-proposal-engine" and .pluginName != "sgc-commercial-desk")]' /tmp/preview.json
+            exit 1
+          fi
+
+          desk_skill_count=$(jq '[.item.skills[] | select(.pluginName == "sgc-commercial-desk")] | length' /tmp/preview.json)
+          echo "Excluding $desk_skill_count sgc-commercial-desk skill(s) from this automated import (manual RBAC-scoped step, see PUBLISHING.md)."
+
+          selected_skill_keys=$(jq -c '[.item.skills[] | select(.pluginName == "sgc-proposal-engine" and .supported == true) | .skillKey]' /tmp/preview.json)
+          supported_count=$(echo "$selected_skill_keys" | jq 'length')
+
+          if [ "$supported_count" -eq 0 ]; then
+            echo "No supported sgc-proposal-engine skills found in preview response. Nothing to import."
+            exit 1
+          fi
+
+          echo "$supported_count sgc-proposal-engine skill(s) selected for import."
+
+          # ---------------------------------------------------------
+          # No marketplaceId is supplied (none is known -- Den's own
+          # source, ee/apps/den-api/src/routes/org/plugin-system/
+          # store.ts:4730-4737, only calls attachPluginToMarketplace()
+          # when marketplaceId is provided). Omitting it is schema-
+          # valid but means this creates a STANDALONE plugin, not a
+          # marketplace entry -- store.ts:4747 returns
+          # `marketplaceId: input.marketplaceId ?? null` for exactly
+          # this reason. Grouping it into a marketplace afterward is a
+          # separate, manual step once a real marketplaceId is known.
+          #
+          # Idempotency: the Den API does not document what happens on
+          # a repeat import of an already-imported plugin, and no
+          # "does an equivalent plugin already exist" lookup endpoint
+          # is documented either. This step does not attempt to detect
+          # or prevent duplicate plugin creation -- an undocumented
+          # idempotency contract is a documented limitation here, not
+          # something to paper over with unsafe dedup logic. Re-running
+          # this job against an already-imported repo will create a
+          # second, separate plugin in Den. Treat each release tag as
+          # a deliberate, one-shot, human-approved action (the tag
+          # push itself is that approval) until Den documents
+          # otherwise.
+          # ---------------------------------------------------------
+
+          import_body=$(jq -n \
+            --arg githubUrl "$GITHUB_REPO_URL" \
+            --arg name "sgc-proposal-engine" \
+            --argjson selectedSkillKeys "$selected_skill_keys" \
+            '{githubUrl: $githubUrl, name: $name, selectedSkillKeys: $selectedSkillKeys, selectedServerKeys: [], selectedServerNames: []}')
+
+          echo "Calling import endpoint for sgc-proposal-engine (same auth scheme the preview call proved works)..."
+          import_http_code=$(curl -sS -o /tmp/import.json -w '%{http_code}' \
+            -X POST "${API_ROOT}/v1/plugins/import-mcps-from-github-url" \
+            -H "${auth_header}" \
+            -H "Content-Type: application/json" \
+            -d "$import_body")
+
+          case "$import_http_code" in
+            200) echo "Import: 200 OK" ;;
+            400) echo "Import: 400 -- invalid payload"; redact < /tmp/import.json; exit 1 ;;
+            401) echo "Import: 401 -- incorrect or expired authentication (unexpected -- preview just proved this scheme worked; the key may have been revoked mid-run)"; exit 1 ;;
+            403) echo "Import: 403 -- token lacks permission to import/create plugins"; exit 1 ;;
+            404) echo "Import: 404 -- GitHub plugin path or marketplace not found"; redact < /tmp/import.json; exit 1 ;;
+            429) echo "Import: 429 -- rate limited by Den"; exit 1 ;;
+            5*) echo "Import: HTTP ${import_http_code} -- Den service failure"; exit 1 ;;
+            *) echo "Import: unexpected HTTP ${import_http_code}"; redact < /tmp/import.json; exit 1 ;;
+          esac
+
+          if ! jq -e . /tmp/import.json > /dev/null 2>&1; then
+            echo "Import response is not valid JSON."
+            exit 1
+          fi
+
+          import_ok=$(jq -r '.ok' /tmp/import.json)
+          if [ "$import_ok" != "true" ]; then
+            echo "Import response .ok is not true."
+            redact < /tmp/import.json
+            exit 1
+          fi
+
+          # The import response has no top-level .warnings field (unlike
+          # preview) -- ee/apps/den-api/.../store.ts:4744-4751 returns
+          # only {imported, importedSkills, marketplaceId, plugin,
+          # skipped, skippedSkills}. .skipped / .skippedSkills are its
+          # real equivalent: report them unconditionally, and treat any
+          # non-empty skippedSkills as a failure, since every key in
+          # selectedSkillKeys came from a preview response we already
+          # validated as supported==true.
+          skipped_skill_count=$(jq '.item.skippedSkills | length' /tmp/import.json)
+          if [ "$skipped_skill_count" -gt 0 ]; then
+            echo "Den skipped $skipped_skill_count selected skill(s) it had just reported as supported:"
+            jq '.item.skippedSkills' /tmp/import.json
+            exit 1
+          fi
+          skipped_server_count=$(jq '.item.skipped | length' /tmp/import.json)
+          if [ "$skipped_server_count" -gt 0 ]; then
+            echo "Den skipped $skipped_server_count server(s) (expected zero, since selectedServerKeys was empty):"
+            jq '.item.skipped' /tmp/import.json
+            exit 1
+          fi
+
+          imported_skill_count=$(jq '.item.importedSkills | length' /tmp/import.json)
+          if [ "$imported_skill_count" -ne "$supported_count" ]; then
+            echo "Expected $supported_count imported skills, Den reports $imported_skill_count. Reporting what was skipped:"
+            jq '.item.skipped, .item.skippedSkills' /tmp/import.json
+            exit 1
+          fi
+
+          echo "Imported $imported_skill_count skill(s) successfully into a new standalone Den plugin (not attached to a marketplace -- no marketplaceId was supplied):"
+          jq -r '.item.importedSkills[] | "  - \(.name)"' /tmp/import.json
+          plugin_id=$(jq -r '.item.plugin.id // "unknown"' /tmp/import.json)
+          echo "Den plugin ID: $plugin_id"
