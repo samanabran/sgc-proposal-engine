@@ -270,19 +270,34 @@ def check_8_cash_positive(result, ws):
 
 
 def check_9_10_cadence_mobilisation(result, ws):
+    # FAIL-OPEN FIX (audited 2026-08-15, alongside check_13): the original
+    # code silently emitted NO verdict at all for check 10 when mob/build
+    # were falsy (missing figures produced neither ok() nor fail() -- a
+    # worksheet with no mobilisation_aed/build_value_aed passed by simply
+    # never being checked), and check 9 called result.ok() UNCONDITIONALLY
+    # in its else branch -- including when payment_cadence was entirely
+    # absent (None), printing the actively false claim "cadence 'None'
+    # meets or exceeds minimum". Both are now fail-closed: missing input
+    # is reported as a failure requiring verification, never a silent or
+    # fabricated pass.
     policy = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
     min_pct = policy["gates"]["default_mobilisation_pct"]
-    mob = ws.get("number_3_financing", {}).get("mobilisation_aed")
+    mob = ws.get("number_3_financing", {}).get("mobilisation_aed") or ws.get("assembly", {}).get("mobilisation_aed")
     build = ws.get("number_2_build", {}).get("build_value_aed")
-    if mob and build:
+    if mob is None or build is None:
+        result.fail("10. mobilisation floor", f"cannot verify -- mobilisation_aed ({mob}) or build_value_aed ({build}) missing from worksheet")
+    else:
         actual_pct = mob / build
         if actual_pct < min_pct - 0.005:
             result.fail("10. mobilisation floor", f"{actual_pct:.1%} below required {min_pct:.0%}")
         else:
             result.ok("10. mobilisation floor", f"{actual_pct:.1%} >= {min_pct:.0%}")
+
     cadence = ws.get("payment_cadence")
     allowed = {"quarterly_in_advance", "semi_annual_in_advance", "annual_in_advance", "full_prepay_term"}
-    if cadence and cadence not in allowed:
+    if cadence is None:
+        result.fail("9. min cadence", "cannot verify -- payment_cadence not recorded on worksheet")
+    elif cadence not in allowed:
         result.fail("9. min cadence", f"cadence '{cadence}' is below the quarterly-in-advance minimum without a logged exception")
     else:
         result.ok("9. min cadence", f"cadence '{cadence}' meets or exceeds minimum")
@@ -334,13 +349,33 @@ def check_13_clawback(result, ws, current_revision_files):
     # table row referencing "unrecovered clawback balance") without the
     # substantive clause itself being present anywhere in the document.
     clawback_substance = re.compile(r"unrecovered\s+balance.{0,60}(immediately due and payable|becomes)", re.IGNORECASE | re.DOTALL)
-    financing = ws.get("number_3_financing", {})
+    financing = ws.get("number_3_financing", {}) or {}
     # Field was renamed financed_remainder_aed on every worksheet except
-    # MRD (which still uses the original deferred_aed) — this check only
+    # MRD (which still uses the original deferred_aed) -- this check only
     # ever read deferred_aed, so it silently passed "no deferred value"
     # on KP/PRO/VGE/RVN regardless of their real financed remainder.
-    # Found auditing RVN 2026-08-15; fixed to read either key.
-    deferred = financing.get("financed_remainder_aed", financing.get("deferred_aed", 0)) or 0
+    # Found auditing RVN 2026-08-15. Root-cause fix (2026-08-15, same
+    # audit, second pass): the first patch used
+    # `.get(a, .get(b, 0)) or 0`, which still silently treats a GENUINELY
+    # ABSENT field (both keys missing, e.g. a future worksheet shape this
+    # check has never seen) as "0 deferred, clawback not required" -- the
+    # exact fail-open failure class this whole audit is about, just with
+    # different field names. Absence of evidence is not evidence of zero.
+    # Now: if neither key is present, cross-check via
+    # build_value_aed - mobilisation figure instead of assuming 0, and if
+    # that cross-check itself can't be computed, BLOCK rather than pass.
+    deferred = financing.get("financed_remainder_aed", financing.get("deferred_aed"))
+    if deferred is None:
+        build_value = ws.get("number_2_build", {}).get("build_value_aed")
+        mobilisation = financing.get("mobilisation_fee_aed") or ws.get("assembly", {}).get("mobilisation_aed")
+        if build_value is None or mobilisation is None:
+            result.fail("13. clawback present", "cannot verify -- no financed_remainder_aed/deferred_aed field, and build_value_aed/mobilisation figures are also insufficient to cross-check for a deferred remainder")
+            return
+        deferred = build_value - mobilisation
+        if deferred > 0:
+            result.fail("13. clawback present", f"financing field missing but build_value_aed ({build_value}) - mobilisation ({mobilisation}) = {deferred} implies a real deferred remainder -- cross-check surfaced an undisclosed deferred structure")
+            return
+        deferred = 0
     if deferred > 0:
         found = any(clawback_substance.search(open(f, encoding="utf-8").read()) for f in current_revision_files)
         if not found:
@@ -820,8 +855,58 @@ SELFTEST_MUST_FLAG = [
 ]
 
 
+def _regression_check13_catches_missing_clawback():
+    """A4 (audit 2026-08-15): regression test proving check_13 actually
+    catches the failure mode that caused the original bug -- a real
+    deferred remainder with no clawback clause in the deliverable -- not
+    just that it no longer crashes. Writes no files; uses an in-memory
+    fake worksheet + a real temp file for the "current revision" content.
+    Three synthetic cases: (a) deferred present, clause absent -> must
+    FAIL; (b) deferred present, clause present -> must PASS; (c) deferred
+    field genuinely absent, no cross-check data -> must FAIL (BLOCK), not
+    silently pass as 0."""
+    import tempfile
+    failures = []
+
+    def _run_case(financing, build_value_aed, mobilisation_aed, doc_text):
+        r = Result()
+        ws = {
+            "number_3_financing": financing,
+            "number_2_build": {"build_value_aed": build_value_aed},
+            "assembly": {"mobilisation_aed": mobilisation_aed},
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as fh:
+            fh.write(doc_text)
+            path = fh.name
+        try:
+            check_13_clawback(r, ws, [path])
+        finally:
+            os.unlink(path)
+        return r
+
+    clawback_text = ("If this subscription is terminated before the end of the committed "
+                      "term for any reason other than SGC TECH AI's material breach, the "
+                      "unrecovered balance of the implementation value becomes immediately "
+                      "due and payable.")
+
+    r = _run_case({"financed_remainder_aed": 10269}, 15327, 5058, "No clawback language in this document at all.")
+    if not r.gate_failures:
+        failures.append("A4 case (a): deferred present + clause absent should FAIL, but PASSED")
+
+    r = _run_case({"financed_remainder_aed": 10269}, 15327, 5058, clawback_text)
+    if r.gate_failures:
+        failures.append(f"A4 case (b): deferred present + clause present should PASS, but FAILED: {r.gate_failures}")
+
+    r = _run_case({}, 15327, 5058, "No clawback language, and no financed_remainder_aed/deferred_aed field either.")
+    if not r.gate_failures:
+        failures.append("A4 case (c): financing field genuinely absent, build_value > mobilisation implies a real deferred remainder, should BLOCK -- but silently PASSED")
+
+    return failures
+
+
 def self_test():
     failures = []
+    failures += _regression_check13_catches_missing_clawback()
     for label, text in SELFTEST_MUST_NOT_FLAG:
         if label == "VAT-registered":
             hit = bool(CONDITIONAL_FORBIDDEN["VAT-registered"].search(text))

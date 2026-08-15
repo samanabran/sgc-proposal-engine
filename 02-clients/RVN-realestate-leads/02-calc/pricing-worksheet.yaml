@@ -20,6 +20,15 @@ inputs:
 
 risk_assessment_ref: 02-calc/risk-assessment.yaml
 
+# Added 2026-08-15: check_9_10_cadence_mobilisation was fail-open on a
+# missing payment_cadence field (silently reported "meets minimum" on
+# None). Fixing the check surfaced that no worksheet in the repo except
+# MRD ever actually recorded this field, despite the draft prose
+# describing quarterly billing throughout (10-commercial-terms.md:
+# "quarterly_billing_aed"). Recording it explicitly here, matching what
+# the draft already states.
+payment_cadence: quarterly_in_advance
+
 # ---------------------------------------------------------------------------
 # Number 1 — Cost to Serve (CTS), monthly
 # ---------------------------------------------------------------------------

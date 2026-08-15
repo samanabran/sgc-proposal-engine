@@ -20,13 +20,18 @@ see `02-calc/pricing-worksheet.yaml` for the full breakdown.
 
 - Every lead from your Meta/Google ad pipeline is visible and assigned
   in the CRM within your defined SLA, with no manual sheet-copying step.
-- **New-lead notification, day one**: the assigned agent gets an in-app
-  CRM notification the moment a lead is distributed to them — this
-  replaces today's WhatsApp-based instant-lead alerting, so nothing is
-  slower at go-live than it is now. No catalogue entry states a specific
-  notification-latency SLA (e.g. "within N seconds") — that figure is
-  TBD, to be confirmed during discovery, not assumed here. This does not
-  require WhatsApp Business API and does not change Phase 1 pricing.
+- **New-lead notification, day one**: the assigned agent sees the lead
+  in-app as soon as they open or refresh the CRM, or on next login if
+  they're not already in the system — this is an on-refresh notification,
+  not a guaranteed push alert with a stated latency. No catalogue entry
+  exists for a push-notification-with-SLA capability (checked
+  hour-lookup.yaml and saas-modules.yaml — neither has one), so we are
+  not committing to "within N seconds" because that isn't something this
+  build actually delivers. Said plainly rather than left as a vague "TBD":
+  if instant push alerting matters as much as WhatsApp's current behavior,
+  raise it Monday — it's a real, scopeable ask, just not what's priced
+  here. This does not require WhatsApp Business API and does not change
+  Phase 1 pricing.
 - Every call an agent makes is logged against the lead record with an
   outcome and notes — no end-of-day recall required.
 - Management can see, per agent per day, logged call volume against the

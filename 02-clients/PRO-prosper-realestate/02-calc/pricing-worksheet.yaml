@@ -24,6 +24,11 @@ inputs:
 
 risk_assessment_ref: 02-calc/risk-assessment.yaml
 
+# Added 2026-08-15: check_9_10_cadence_mobilisation was fail-open on a
+# missing payment_cadence field. Recording it explicitly, matching what
+# 10-commercial-terms.md already states ("Billed quarterly in advance").
+payment_cadence: quarterly_in_advance
+
 number_1_cost_to_serve:
   licences_aed: 0                    # Community edition
   hosting_allocation_aed: 558         # 360 × (31/20)
