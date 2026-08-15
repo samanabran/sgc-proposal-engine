@@ -1,0 +1,33 @@
+# SGC TECH AI — Support-hours-per-client measurement log (NEW, 2026-08-16 pass)
+#
+# PART 5 of the correction-pass brief: "Track ACTUAL support hours per
+# client from client one -- that single number determines when a second
+# developer must be hired." recurring_support_load_table() in
+# 05-ops/pricing_engine.py takes support_hours_per_client as a REQUIRED
+# parameter with no default, precisely so nobody can silently plug in a
+# guessed 1/2/3h figure and treat it as real. This file is the somewhere-
+# real that measurement lands, starting from the first live client's first
+# go-live. Empty (no entries) as of this pass -- there are no live clients
+# with measured support hours yet. Do NOT seed this with estimated or
+# invented figures; an empty log with a schema is more honest than a
+# populated one with numbers nobody measured (RULE 1).
+version: 1.0
+effective_from: 2026-08-16
+
+schema:
+  client_id: "matches the client folder name under 02-clients/, e.g. RVN-realestate-leads"
+  month: "YYYY-MM, the calendar month the hours were logged against"
+  support_hours_logged: "actual hours spent on this client's support/hypercare this month -- ticket time, calls, fixes, not sales or delivery-build hours"
+  go_live_date: "YYYY-MM-DD, when this client went live -- only needed once per client, repeat on every row or leave blank after the first"
+  logged_by: "who recorded this entry"
+  note: "optional -- anything unusual about this month's support load (e.g. a one-off incident, not representative of steady state)"
+
+entries: []
+
+# Once >= 1 month of real data exists for at least one client, compute a
+# trailing average support_hours_per_client from these entries and pass it
+# into recurring_support_load_table() directly -- do not average this file
+# in pricing_engine.py automatically yet; too few data points to trust an
+# automated read at this pass. Revisit once entries has enough rows to be
+# meaningful (the brief does not specify a threshold; use judgement -- a
+# single month from a single client is a data point, not a trend).

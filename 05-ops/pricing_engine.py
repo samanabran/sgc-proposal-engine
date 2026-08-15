@@ -466,6 +466,208 @@ def commission_released(contract_value_aed, cash_collected_to_date_aed, sales_pc
     }
 
 
+# PART 4/5: RVN's actual mature-build module selection, used only to derive
+# a documented default hours/price-per-build for capacity_table() below --
+# NOT a hardcoded hours figure. Any caller who wants a different build shape
+# passes hours_per_build / price_per_build_aed explicitly and this default is
+# bypassed entirely. Scope per the correction-pass brief: template + lead
+# capture + WhatsApp notification + auto distribution + call logging +
+# attendance + daily reporting; migration 1,000-5,000 records. Matches
+# 02-clients/RVN-realestate-leads (property_portal_feed excluded -- not in
+# RVN's scope).
+RVN_MATURE_MODULES = [
+    "lead_capture_meta_google_ads",
+    "whatsapp_lead_notification",
+    "auto_distribution_manual_reassign",
+    "call_logging_manual_entry",
+    "attendance_in_app_checkin",
+    "daily_reporting_pack",
+]
+
+
+def default_mature_build(cost_basis=None, catalogue=None):
+    """Derives (hours, price) for one mature build from four_component_build()
+    using RVN's real module selection, rather than hardcoding 34h/31,500 --
+    changing template-catalogue.yaml propagates here automatically."""
+    result = four_component_build(
+        modules_selected=RVN_MATURE_MODULES, maturity="mature",
+        migration_band="from_1000_to_5000", cost_basis=cost_basis, catalogue=catalogue,
+    )
+    return result["hours_total"], result["price_ex_vat_aed"]
+
+
+def capacity_table(deals_per_month_range=range(1, 7), hours_per_build=None,
+                    price_per_build_aed=None, cost_basis=None):
+    """PART 4: for N deals/month (1-6 by default), show hours consumed,
+    gross, net after commission, less cash costs, available for owner
+    salary, variance against the owner-salary requirement, and whether it
+    fits inside monthly delivery capacity. Also returns the minimum deal
+    count that both fits capacity AND clears the full owner-salary
+    requirement -- computed from the actual basis figures, never hardcoded
+    to "3"."""
+    basis = cost_basis or business_cost_floor()
+    raw_basis = load_business_cost_basis()
+    owner_salary_required_aed = raw_basis["fixed_monthly_aed"]["owner_salary_monthly_aed"]
+
+    if hours_per_build is None or price_per_build_aed is None:
+        default_hours, default_price = default_mature_build(basis)
+        hours_per_build = hours_per_build if hours_per_build is not None else default_hours
+        price_per_build_aed = price_per_build_aed if price_per_build_aed is not None else default_price
+
+    delivery_hours = basis["delivery_hours_per_month"]
+    commission_rate = (basis["commission_sales_pct"] + basis["commission_delivery_pct"]) / 100.0
+    cash_out_monthly = basis["cash_out_monthly_aed"]
+
+    rows = []
+    min_deals_fits_and_covers = None
+    for n in deals_per_month_range:
+        hours = round(hours_per_build * n, 3)
+        gross_aed = round(price_per_build_aed * n, 2)
+        commission_aed = round(gross_aed * commission_rate, 2)
+        net_aed = round(gross_aed - commission_aed, 2)
+        available_for_owner_salary_aed = round(net_aed - cash_out_monthly, 2)
+        variance_vs_requirement_aed = round(available_for_owner_salary_aed - owner_salary_required_aed, 2)
+        fits_hours = hours <= delivery_hours
+        covers_requirement = available_for_owner_salary_aed >= owner_salary_required_aed
+        if fits_hours and covers_requirement and min_deals_fits_and_covers is None:
+            min_deals_fits_and_covers = n
+        rows.append({
+            "deals_per_month": n,
+            "hours": hours,
+            "hours_pct_of_capacity": round(hours / delivery_hours * 100, 1) if delivery_hours else None,
+            "gross_aed": gross_aed,
+            "commission_aed": commission_aed,
+            "net_aed": net_aed,
+            "available_for_owner_salary_aed": available_for_owner_salary_aed,
+            "variance_vs_requirement_aed": variance_vs_requirement_aed,
+            "fits_hours": fits_hours,
+            "covers_requirement": covers_requirement,
+        })
+
+    return {
+        "hours_per_build": hours_per_build,
+        "price_per_build_aed": price_per_build_aed,
+        "delivery_hours_per_month": delivery_hours,
+        "owner_salary_required_aed": owner_salary_required_aed,
+        "rows": rows,
+        "min_deals_that_fit_and_cover_aed": min_deals_fits_and_covers,
+    }
+
+
+def signed_undelivered_capacity_flag(signed_undelivered_hours, remaining_capacity_hours):
+    """PART 4: 'Flag any pipeline state where signed-but-undelivered work
+    exceeds remaining capacity for the period.' Pure comparison -- callers
+    supply both figures from their own pipeline tracking; this function does
+    not source pipeline data itself (none exists in this repo as of this
+    pass -- RULE V: NOT FOUND, no sgc.pricing.* pipeline model located)."""
+    exceeds = signed_undelivered_hours > remaining_capacity_hours
+    return {
+        "signed_undelivered_hours": signed_undelivered_hours,
+        "remaining_capacity_hours": remaining_capacity_hours,
+        "exceeds_capacity": exceeds,
+        "overage_hours": round(max(0.0, signed_undelivered_hours - remaining_capacity_hours), 3),
+    }
+
+
+RECURRING_COMMISSION_DURATION_OPTIONS = ("perpetual", "12_months_from_go_live", "first_year_revenue")
+
+# RULE V / RULE 1: grepped policy.yaml and payment-plans.yaml for any
+# existing recurring-commission-duration convention before adding this --
+# NOT FOUND. No commission-on-recurring-revenue duration rule exists
+# anywhere in this repo prior to this pass. Defaulting to "perpetual"
+# because that is the only option consistent with the repo's current
+# silence (no cap is implemented anywhere), NOT because perpetual is
+# recommended -- the brief's own framing is explicit that most structures
+# cap at 12 months / first-year revenue and that perpetual should be
+# "clearly labelled as such" precisely because it is the expensive default.
+DEFAULT_RECURRING_COMMISSION_DURATION = "perpetual"
+
+
+def recurring_support_load_table(support_hours_per_client, live_client_counts=(5, 10, 15, 20, 30, 40),
+                                  monthly_fee_aed=1170, recurring_commission_pct=None,
+                                  recurring_commission_duration=DEFAULT_RECURRING_COMMISSION_DURATION,
+                                  cost_basis=None):
+    """PART 5. support_hours_per_client has NO DEFAULT and is a REQUIRED
+    positional argument -- deliberately. The brief is explicit that this
+    number "has to come from measurement once clients are live" and must
+    not be silently assumed; a caller MUST supply either a real measured
+    figure (once available, log at 00-knowledge/pricing/support-hours-log.yaml)
+    or an explicitly-chosen illustrative scenario value (see
+    illustrative_support_load_scenarios() below for the labelled wrapper --
+    do not call this function directly with a guessed number and treat the
+    output as anything but illustrative).
+
+    monthly_fee_aed default (1170) traces to
+    02-clients/RVN-realestate-leads/02-calc/pricing-worksheet.yaml:108
+    (platform_portion_aed_mo) -- the only live recurring-fee figure in the
+    repo as of this pass. Pass a different value explicitly for any other
+    client/segment.
+
+    recurring_commission_duration is a REQUIRED-BY-BRIEF configuration
+    choice, not resolved by this pass -- see RECURRING_COMMISSION_DURATION_OPTIONS
+    and DEFAULT_RECURRING_COMMISSION_DURATION's docstring above for why
+    "perpetual" is the current default and why that default is expensive,
+    not recommended."""
+    if recurring_commission_duration not in RECURRING_COMMISSION_DURATION_OPTIONS:
+        raise ValueError(f"recurring_commission_duration must be one of {RECURRING_COMMISSION_DURATION_OPTIONS}")
+
+    basis = cost_basis or business_cost_floor()
+    commission_pct = (
+        recurring_commission_pct if recurring_commission_pct is not None
+        else basis["commission_sales_pct"] + basis["commission_delivery_pct"]
+    )
+    cost_floor = basis["floor_per_hour_aed"]
+    delivery_hours = basis["delivery_hours_per_month"]
+    default_hours, _ = default_mature_build(basis)
+
+    net_recurring_aed = round(monthly_fee_aed * (1 - commission_pct / 100.0), 2)
+
+    rows = []
+    for n_clients in live_client_counts:
+        support_hours_consumed = round(support_hours_per_client * n_clients, 3)
+        support_cost_aed = round(support_hours_consumed * cost_floor, 2)
+        margin_per_client_aed = round(net_recurring_aed - (support_hours_per_client * cost_floor), 2)
+        delivery_hours_remaining = round(delivery_hours - support_hours_consumed, 3)
+        builds_still_possible = max(0, int(delivery_hours_remaining // default_hours)) if delivery_hours_remaining > 0 else 0
+        rows.append({
+            "live_clients": n_clients,
+            "support_hours_consumed": support_hours_consumed,
+            "support_cost_aed": support_cost_aed,
+            "net_recurring_per_client_aed": net_recurring_aed,
+            "margin_per_client_aed": margin_per_client_aed,
+            "delivery_hours_remaining": delivery_hours_remaining,
+            "builds_still_possible": builds_still_possible,
+        })
+
+    return {
+        "support_hours_per_client": support_hours_per_client,
+        "monthly_fee_aed": monthly_fee_aed,
+        "recurring_commission_pct": commission_pct,
+        "recurring_commission_duration": recurring_commission_duration,
+        "net_recurring_per_client_aed": net_recurring_aed,
+        "rows": rows,
+    }
+
+
+def illustrative_support_load_scenarios(scenario_hours=(1, 2, 3), **kwargs):
+    """Explicitly-labelled wrapper: runs recurring_support_load_table() at
+    the brief's own reference points (1h/2h/3h per client) for illustration
+    ONLY. These are NOT measured figures -- see support-hours-log.yaml for
+    where the real, measured number goes once clients are live. Never treat
+    this function's output as the operating plan; it exists to show the
+    shape of the risk, not to replace measurement."""
+    return {
+        "warning": "ILLUSTRATIVE / UNMEASURED. support_hours_per_client values below (1, 2, 3) are the "
+                   "brief's own reference points, not real measurement. Log actual support hours at "
+                   "00-knowledge/pricing/support-hours-log.yaml from first go-live and call "
+                   "recurring_support_load_table() directly with the real figure once available.",
+        "scenarios": {
+            hours: recurring_support_load_table(support_hours_per_client=hours, **kwargs)
+            for hours in scenario_hours
+        },
+    }
+
+
 if __name__ == "__main__":
     print("This module is imported by validate.py and test_pricing_engine.py.")
     print("Run 'python 05-ops/test_pricing_engine.py' to exercise it directly.")

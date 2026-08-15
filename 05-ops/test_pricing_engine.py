@@ -1318,6 +1318,123 @@ def t16_migration_over_20000_unpriced():
           f"unpriced={result_priced['migration']['unpriced']}, price_ex_vat_aed={result_priced['price_ex_vat_aed']}")
 
 
+def t17_capacity_table():
+    basis = pe.business_cost_floor()
+    table = pe.capacity_table(cost_basis=basis)
+
+    hours_per_build = table["hours_per_build"]
+    delivery_hours = table["delivery_hours_per_month"]
+    row_by_n = {r["deals_per_month"]: r for r in table["rows"]}
+
+    check("T17: hours_per_build is derived from RVN's real module selection via "
+          "four_component_build(), not hardcoded to 34",
+          hours_per_build == pe.default_mature_build(basis)[0],
+          f"hours_per_build={hours_per_build}")
+
+    # NOTE: the brief's own narrative math ("five mature builds at ~25h =
+    # 125h... three builds (~75h) fits") used a rough generic per-build
+    # hours estimate. The REAL RVN-shaped mature build, derived from
+    # four_component_build() with RVN's actual module selection (commit
+    # 5b4c5cd), is 34h -- so 3 real builds = 102h, which does NOT fit 83h.
+    # This is a genuine finding, not a test bug: at RVN's real build shape
+    # the monthly ceiling is 2, not 3. Asserting the true computed value
+    # here rather than forcing the test to match the brief's rough estimate.
+    check("T17: at 2 deals/month (the real ceiling for RVN's actual build shape, "
+          "not the brief's rough ~25h/build estimate), hours fit inside delivery capacity",
+          row_by_n[2]["hours"] <= delivery_hours,
+          f"2 deals = {row_by_n[2]['hours']}h vs {delivery_hours}h capacity")
+    check("T17: at 3 deals/month, hours do NOT fit at RVN's real 34h/build shape "
+          "(differs from the brief's rough ~25h/build illustrative math)",
+          row_by_n[3]["hours"] > delivery_hours,
+          f"3 deals = {row_by_n[3]['hours']}h vs {delivery_hours}h capacity")
+
+    check("T17: at 5 deals/month, hours do NOT fit inside delivery capacity",
+          row_by_n[5]["hours"] > delivery_hours,
+          f"5 deals = {row_by_n[5]['hours']}h vs {delivery_hours}h capacity")
+    check("T17: at 5 deals/month, fits_hours is False",
+          row_by_n[5]["fits_hours"] is False)
+
+    min_n = table["min_deals_that_fit_and_cover_aed"]
+    check("T17: min_deals_that_fit_and_cover_aed is computed (not None) within the 1-6 range tested",
+          min_n is not None,
+          f"min_deals_that_fit_and_cover_aed={min_n}")
+    if min_n is not None:
+        row = row_by_n[min_n]
+        check(f"T17: the computed minimum ({min_n} deals) actually both fits hours AND covers the "
+              f"owner-salary requirement",
+              row["fits_hours"] and row["covers_requirement"],
+              f"row={row}")
+        if min_n > 1:
+            prev_row = row_by_n[min_n - 1]
+            check(f"T17: {min_n - 1} deals (one below the computed minimum) does NOT both fit and cover "
+                  f"-- proves min_n is the true minimum, not an arbitrary pass",
+                  not (prev_row["fits_hours"] and prev_row["covers_requirement"]),
+                  f"prev_row={prev_row}")
+
+    signed_over = pe.signed_undelivered_capacity_flag(signed_undelivered_hours=100, remaining_capacity_hours=83)
+    check("T17: signed_undelivered_capacity_flag flags overage when signed work exceeds remaining capacity",
+          signed_over["exceeds_capacity"] is True and signed_over["overage_hours"] == 17.0,
+          f"signed_over={signed_over}")
+    signed_under = pe.signed_undelivered_capacity_flag(signed_undelivered_hours=50, remaining_capacity_hours=83)
+    check("T17: signed_undelivered_capacity_flag does not flag when signed work fits remaining capacity",
+          signed_under["exceeds_capacity"] is False,
+          f"signed_under={signed_under}")
+
+
+def t18_recurring_support_load_table():
+    import inspect
+    sig = inspect.signature(pe.recurring_support_load_table)
+    check("T18: recurring_support_load_table's support_hours_per_client parameter has NO default "
+          "(forces caller to supply a measured or explicitly-labelled figure, per brief instruction)",
+          sig.parameters["support_hours_per_client"].default is inspect.Parameter.empty,
+          f"default={sig.parameters['support_hours_per_client'].default!r}")
+
+    basis = pe.business_cost_floor()
+
+    with_measured = pe.recurring_support_load_table(support_hours_per_client=1.5, cost_basis=basis)
+    check("T18: recurring_support_load_table accepts an explicit measured-style figure "
+          "and echoes it back unchanged",
+          with_measured["support_hours_per_client"] == 1.5)
+    check("T18: default recurring_commission_duration is 'perpetual' (NOT FOUND elsewhere in repo, "
+          "loudly labelled expensive default per brief instruction)",
+          with_measured["recurring_commission_duration"] == "perpetual")
+
+    row_by_n = {r["live_clients"]: r for r in with_measured["rows"]}
+    check("T18: support hours consumed scale linearly with live client count",
+          row_by_n[10]["support_hours_consumed"] == round(1.5 * 10, 3) and
+          row_by_n[40]["support_hours_consumed"] == round(1.5 * 40, 3),
+          f"10-client row={row_by_n[10]}, 40-client row={row_by_n[40]}")
+
+    try:
+        pe.recurring_support_load_table(support_hours_per_client=2, recurring_commission_duration="bogus")
+        check("T18: an invalid recurring_commission_duration raises ValueError", False,
+              "no exception was raised")
+    except ValueError:
+        check("T18: an invalid recurring_commission_duration raises ValueError", True)
+
+    illustrative = pe.illustrative_support_load_scenarios(cost_basis=basis)
+    check("T18: illustrative_support_load_scenarios carries an explicit unmeasured warning",
+          "ILLUSTRATIVE" in illustrative["warning"] and "UNMEASURED" in illustrative["warning"])
+    check("T18: illustrative_support_load_scenarios covers the brief's 1h/2h/3h reference points",
+          set(illustrative["scenarios"].keys()) == {1, 2, 3})
+
+    scenario_1h = illustrative["scenarios"][1]["rows"]
+    row40_1h = {r["live_clients"]: r for r in scenario_1h}[40]
+    check("T18: at 1h/client support load, delivery hours remain positive at 40 live clients "
+          "(matches the brief's own '~40 clients' reference point)",
+          row40_1h["delivery_hours_remaining"] > 0,
+          f"row40_1h={row40_1h}")
+
+    log_path = os.path.join(pe.REPO_ROOT, "00-knowledge", "pricing", "support-hours-log.yaml")
+    check("T18: support-hours-log.yaml exists as the real measurement destination",
+          os.path.exists(log_path), f"log_path={log_path}")
+    if os.path.exists(log_path):
+        log = pe._load(log_path)
+        check("T18: support-hours-log.yaml starts empty (no fabricated entries), schema present",
+              log.get("entries") == [] and "schema" in log,
+              f"entries={log.get('entries')}, has_schema={'schema' in log}")
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1351,6 +1468,10 @@ if __name__ == "__main__":
     t15_below_floor_quotes_blocked()
     print("\n=== T16: migration over 20,000 renders unpriced (PART 9) ===")
     t16_migration_over_20000_unpriced()
+    print("\n=== T17: capacity table (PART 4) ===")
+    t17_capacity_table()
+    print("\n=== T18: recurring/support-load table (PART 5) ===")
+    t18_recurring_support_load_table()
 
     print()
     if FAILURES:
