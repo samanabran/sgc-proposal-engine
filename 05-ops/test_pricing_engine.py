@@ -21,6 +21,7 @@ import math
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pricing_engine as pe
+import db_guard
 
 REPO_ROOT = pe.REPO_ROOT
 FAILURES = []
@@ -1435,6 +1436,57 @@ def t18_recurring_support_load_table():
               f"entries={log.get('entries')}, has_schema={'schema' in log}")
 
 
+def t19_staging_db_name_guard():
+    """T19 -- Phase 3 of the staging-isolation verification pass
+    (00-intake/staging-isolation-verification-2026-08-16.md). The 6 required
+    self-tests: allowlisted name passes; three near-miss names are each
+    REJECTED (not just "differ" -- must raise DatabaseNameRejected);
+    empty string ABORTS; unset (None) ABORTS."""
+
+    result = db_guard.enforce_staging_db_name("sgc_staging")
+    check("T19: allowlisted db_name 'sgc_staging' passes and is returned unchanged",
+          result == "sgc_staging")
+
+    try:
+        db_guard.enforce_staging_db_name("sgc_staging_old")
+        check("T19: 'sgc_staging_old' is REJECTED (superstring of allowlisted name)", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: 'sgc_staging_old' is REJECTED (superstring of allowlisted name)", True)
+
+    try:
+        db_guard.enforce_staging_db_name("staging")
+        check("T19: 'staging' is REJECTED (substring of allowlisted name)", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: 'staging' is REJECTED (substring of allowlisted name)", True)
+
+    try:
+        db_guard.enforce_staging_db_name("sgc_prod")
+        check("T19: 'sgc_prod' is REJECTED (different name entirely)", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: 'sgc_prod' is REJECTED (different name entirely)", True)
+
+    try:
+        db_guard.enforce_staging_db_name("")
+        check("T19: empty string ABORTS (fail closed on empty input)", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: empty string ABORTS (fail closed on empty input)", True)
+
+    try:
+        db_guard.enforce_staging_db_name(None)
+        check("T19: unset/None db_name ABORTS (fail closed on missing input)", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: unset/None db_name ABORTS (fail closed on missing input)", True)
+
+    # Bonus coverage beyond the 6 required: prefix match must also be
+    # rejected, not just substring -- "sgc_staging2" starts with the
+    # allowlisted name but is not equal to it.
+    try:
+        db_guard.enforce_staging_db_name("sgc_staging2")
+        check("T19: 'sgc_staging2' (prefix match, not exact) is REJECTED", False)
+    except db_guard.DatabaseNameRejected:
+        check("T19: 'sgc_staging2' (prefix match, not exact) is REJECTED", True)
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1472,6 +1524,8 @@ if __name__ == "__main__":
     t17_capacity_table()
     print("\n=== T18: recurring/support-load table (PART 5) ===")
     t18_recurring_support_load_table()
+    print("\n=== T19: staging DB-name guard, fail-closed exact match (Phase 3, staging isolation pass) ===")
+    t19_staging_db_name_guard()
 
     print()
     if FAILURES:
