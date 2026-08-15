@@ -1098,6 +1098,58 @@ def t12_input_provenance_guard():
               + ("verified" if verified else "NOT verified above"))
 
 
+# ---------------------------------------------------------------------
+# T13 — PART 6: commission pro-rata release. commission_released_to_date
+# must never exceed commission_rate * cash_collected_to_date, on any
+# payment structure. Required proof case: financed deal collecting 33%
+# at kickoff, released commission at that moment == 14% of collected,
+# not 14% of contract.
+# ---------------------------------------------------------------------
+def t13_commission_pro_rata():
+    contract_value_aed = 100000.0
+    cash_collected_aed = 33000.0  # 33% at kickoff
+    basis = pe.business_cost_floor()
+    rate = (basis["commission_sales_pct"] + basis["commission_delivery_pct"]) / 100.0
+    check("T13: combined commission rate is sales_pct + delivery_pct = 14%",
+          abs(rate - 0.14) < 1e-9,
+          f"got {rate}")
+
+    result = pe.commission_released(contract_value_aed, cash_collected_aed)
+    expected_commission_on_cash = rate * cash_collected_aed  # 14% of 33,000 = 4,620
+    expected_wrong_if_bugged = rate * contract_value_aed     # 14% of 100,000 = 14,000 -- must NOT equal this
+
+    check("T13: commission calculated on cash collected (33%) equals 14% of COLLECTED, not 14% of CONTRACT",
+          abs(result["commission_earned_on_cash_aed"] - expected_commission_on_cash) < 0.01,
+          f"expected {expected_commission_on_cash}, got {result['commission_earned_on_cash_aed']}")
+
+    check("T13: commission on cash collected does NOT equal 14% of full contract value (the bug this guards against)",
+          abs(result["commission_earned_on_cash_aed"] - expected_wrong_if_bugged) > 0.01,
+          f"commission_earned_on_cash_aed ({result['commission_earned_on_cash_aed']}) must differ from "
+          f"14%-of-contract ({expected_wrong_if_bugged}) -- if equal, release is not pro-rata")
+
+    check("T13: released_aed + retained_aed reconstructs commission_earned_on_cash_aed",
+          abs((result["released_aed"] + result["retained_aed"]) - result["commission_earned_on_cash_aed"]) < 0.01)
+
+    check("T13: 5% retention held back from release",
+          abs(result["retained_aed"] - 0.05 * expected_commission_on_cash) < 0.01,
+          f"expected retained {0.05 * expected_commission_on_cash}, got {result['retained_aed']}")
+
+    # Invariant sweep: commission released can never exceed rate * cash-in, at any collection point,
+    # for both a milestone structure (lumpy collections) and a subscription structure (steady collections).
+    for label, collections in [
+        ("milestone", [10000, 25000, 40000, 25000]),          # lumpy, sums to 100,000
+        ("subscription", [8333.33] * 12),                      # steady monthly, ~100,000/yr
+    ]:
+        cash_to_date = 0.0
+        for c in collections:
+            cash_to_date += c
+            r = pe.commission_released(contract_value_aed, cash_to_date)
+            cap_aed = rate * cash_to_date
+            check(f"T13: {label} structure -- released commission never exceeds rate x cash-in at cash_to_date={cash_to_date:.2f}",
+                  r["commission_earned_on_cash_aed"] <= cap_aed + 0.01,
+                  f"commission_earned_on_cash_aed={r['commission_earned_on_cash_aed']} > cap={cap_aed}")
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1123,6 +1175,8 @@ if __name__ == "__main__":
     t10_client_facing_money_figure_guard()
     print("\n=== T12: input-layer provenance guard ===")
     t12_input_provenance_guard()
+    print("\n=== T13: commission pro-rata release (PART 6) ===")
+    t13_commission_pro_rata()
 
     print()
     if FAILURES:

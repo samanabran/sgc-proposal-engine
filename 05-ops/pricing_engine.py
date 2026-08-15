@@ -435,6 +435,37 @@ def hour_rate_floor_test(price_ex_vat_aed, hours_total, discount_aed=0.0, cost_b
     }
 
 
+def commission_released(contract_value_aed, cash_collected_to_date_aed, sales_pct=None,
+                         delivery_pct=None, retention_pct=None, cost_basis=None):
+    """PART 6: commission is CALCULATED on closed deal value but RELEASED
+    pro-rata against cash actually collected, on any payment structure
+    (milestone or subscription). Invariant this function exists to enforce:
+    commission_released_to_date <= commission_rate * cash_collected_to_date,
+    at every point, for every structure. 5% retention withheld against the
+    release pending clawback -- see 00-knowledge/clause-library/commission-retention.md
+    for the operative clause text (trigger, calc, recovery, time limit,
+    right to net against future commission)."""
+    basis = cost_basis or business_cost_floor()
+    sales = sales_pct if sales_pct is not None else basis["commission_sales_pct"]
+    delivery = delivery_pct if delivery_pct is not None else basis["commission_delivery_pct"]
+    retention = retention_pct if retention_pct is not None else 5.0  # PART 6: 5% retention, held for clawback -- NOT elsewhere documented in this repo as of this pass; introduced here per explicit spec instruction, flagged in report
+
+    rate = (sales + delivery) / 100.0
+    commission_earned_on_cash_aed = contract_value_aed and cash_collected_to_date_aed * rate or 0.0
+    retained_aed = commission_earned_on_cash_aed * (retention / 100.0)
+    released_aed = commission_earned_on_cash_aed - retained_aed
+
+    return {
+        "contract_value_aed": contract_value_aed,
+        "cash_collected_to_date_aed": cash_collected_to_date_aed,
+        "commission_rate_pct": round(rate * 100, 4),
+        "commission_earned_on_cash_aed": round(commission_earned_on_cash_aed, 2),
+        "retention_pct": retention,
+        "retained_aed": round(retained_aed, 2),
+        "released_aed": round(released_aed, 2),
+    }
+
+
 if __name__ == "__main__":
     print("This module is imported by validate.py and test_pricing_engine.py.")
     print("Run 'python 05-ops/test_pricing_engine.py' to exercise it directly.")
