@@ -64,3 +64,46 @@ Checked for the identical pattern: a deferred/financed amount present, paired wi
 - **PRO-prosper-realestate — CLEAN.** `03-draft/PRO-2026-SUB-01_Rev1/09-partnership-terms.md` has the full clause text under `## Clawback`. `05-issued/` is empty — nothing issued. `04-draft/render_offer.py:167` explicitly cites `00-knowledge/clause-library/clawback.md:19-21 -- approved verbatim text` as its source when rendering, i.e. the rendering pipeline itself pulls the real clause rather than a placeholder label.
 
 **VGE is therefore the only client in this repository with (a) documents actually issued to a client, (b) a real deferred/financed amount, (c) no clawback clause text in the issued document, and (d) no existing acknowledgment of the defect anywhere in the repo's own known-defects log.** That combination is what makes it a new finding rather than a repeat of an already-known, already-retracted case.
+
+---
+
+## MRD — second section, same discipline (facts only, no adjudication)
+
+Added 2026-08-15, on request, to sit alongside VGE with matching rigor rather than as a one-line status note above.
+
+**MRD-2026-SUB-01 Rev1** — `02-clients/MRD-meridianview-realty/05-issued/MRD-2026-SUB-01_Rev1/MRD-2026-SUB-01_Rev1.md`
+- Commercial: `"Blended delivery rate: **AED 690/hour**. Total: 33 hours. Recurring subscription: **AED 879/month**, covering platform, hosting, and support. No mobilisation required to start."` (lines 15-17, quoted verbatim). No mobilisation payment of any kind is stated — the full build (33 hours at the quoted rate) was represented as delivered before any invoice. This is a different shape from VGE's partial deferral: here the document itself states zero upfront payment, meaning the full build value is the unsecured amount, not a percentage remainder.
+- Clawback: no occurrence of the word "clawback" anywhere in the document (confirmed by full-text search). Not a label-with-no-body, as at VGE — no reference at all.
+
+**MRD-2026-SUB-01 Rev2** — `02-clients/MRD-meridianview-realty/05-issued/MRD-2026-SUB-01_Rev2/MRD-2026-SUB-01_Rev2.md`
+- Commercial: `"Blended delivery rate: AED 690/hour. Recurring subscription: AED 879/month. No mobilisation required."` (lines 22-23, quoted verbatim). Same zero-mobilisation shape as Rev1.
+- Clawback: same — no occurrence of the word "clawback" anywhere in this document either.
+
+**RETRACTION-NOTICE.md, both revisions** — `02-clients/MRD-meridianview-realty/05-issued/MRD-2026-SUB-01_Rev1/RETRACTION-NOTICE.md` and the Rev2 equivalent. Quoted verbatim, unedited, per instruction not to tidy the phrasing:
+
+> "Retracted as part of the v2 hardening rebuild, logged retrospectively in `manifest.yaml`. This revision's arithmetic and clauses do not reflect current knowledge-layer policy and must never be used as a template." (Rev1, lines 3-5)
+
+> "8. No clawback clause — full build delivered before a single invoice." (Rev1, line 19, one item in a numbered defect list)
+
+> "This revision was never corrected and sent to the client at the time — Rev2 was drafted next and introduced a different VAT error rather than fixing this one. Both are retracted together as part of this rebuild." (Rev1, lines 36-38)
+
+> "Retracted alongside Rev1 as part of the v2 hardening rebuild. Rev2 corrected nothing about the pricing arithmetic, PM/QA/documentation omission, missing clawback, or the go-live-anchored term." (Rev2, lines 3-5)
+
+Both notices are framed throughout as an internal repository record — `manifest.yaml` logging, defect enumeration against `known-defects.md`, instruction not to use as a template. Neither notice states, or implies, that a correction, retraction, or notice of any kind was communicated to the client. The phrase "was never corrected and sent to the client at the time" describes the document's own history, not an outbound communication about the retraction.
+
+**Git history**: both `RETRACTION-NOTICE.md` files, like the revision documents themselves, show a single commit — `a405109 2026-08-03` — the same squashed initial-import pattern as VGE. Git cannot independently corroborate when Rev1/Rev2 were actually issued, retracted, or (if ever) communicated about; only the documents' own text states dates, and the retraction notices state no date for the retraction itself.
+
+**What the repo cannot establish (MRD, mirroring the VGE list)**:
+- Whether either revision was actually transmitted to the client.
+- Whether either revision was countersigned.
+- Whether SGC's accounting recognised revenue against the (here, effectively full) unsecured build value.
+- Whether the client was ever informed that Rev1/Rev2 were retracted, defective, or superseded — the retraction notices read as internal-only artifacts with no addressee.
+- The actual date the retraction occurred (only "as part of the v2 hardening rebuild" is stated, no date).
+
+**Contrast with VGE, stated plainly**: MRD's defect is already named in `known-defects.md` (#8) and the documents carry retraction notices; VGE's does not and do not. But "internally retracted" is not the same fact as "client informed" — the repo has no evidence of the latter for either client. Two clients, not one, currently sit in the state: *issued, deferred/unsecured, defective on clawback, no repo evidence the client was ever told.* That is a pattern, not an isolated incident, and is handed to counsel as such below.
+
+## Three factual questions for counsel — restated to cover both clients
+
+1. Do SGC's records (email, CRM, or signature platform, outside this repository) show that VGE-2026-SUB-01 Rev1/Rev2 and/or MRD-2026-SUB-01 Rev1/Rev2 were transmitted to and/or countersigned by their respective clients, and if so, on what dates?
+2. Has SGC recognised or invoiced any revenue against the deferred/unsecured amounts implied by any of these four documents (VGE: ≈AED 51,903 / ≈AED 81,765; MRD: the full stated build value, ≈33 hours × AED 690/hour ≈ AED 22,770, per each revision), and if so, under what terms was that revenue secured absent visible clause text in the client-held documents?
+3. For MRD specifically: was Von Geyern's counterpart at Meridianview Realty ever informed, in any form, that Rev1 and/or Rev2 had been retracted or superseded — and if not, what is that client's current understanding of which document (if any) governs their relationship with SGC?
