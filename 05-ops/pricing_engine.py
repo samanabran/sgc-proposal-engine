@@ -378,12 +378,20 @@ def four_component_build(modules_selected, maturity, migration_band, enhancement
 
     hours_total = None if migration_unpriced else round(template_hours + modules_hours + migration_hours + enhancement_hours, 3)
 
+    # Derivation labelling (client-facing discipline, per correction pass):
+    # template and modules are FIXED PRODUCT FEES — hours shown for internal
+    # capacity planning only, never implied as rate x hours (12,000 / 6h
+    # would misread as a 2,000/hr rate, which is not the rate card). Only
+    # migration and enhancement are genuine rate x hours derivations.
     return {
-        "template": {"price_aed": template_price_aed, "hours": template_hours, "maturity": maturity},
-        "modules": {"rows": module_rows, "price_aed": round(modules_price_aed, 2), "hours": round(modules_hours, 3)},
+        "template": {"price_aed": template_price_aed, "hours": template_hours, "maturity": maturity,
+                      "derivation": "fixed_fee", "scope": tmpl.get("scope")},
+        "modules": {"rows": module_rows, "price_aed": round(modules_price_aed, 2), "hours": round(modules_hours, 3),
+                     "derivation": "fixed_fee_per_catalogue_row"},
         "migration": {"band": migration_band, "price_aed": migration_price_aed, "hours": migration_hours,
-                       "unpriced": migration_unpriced, "note": mig.get("note")},
-        "enhancement": {"hours": enhancement_hours, "rate_aed_hr": rate, "price_aed": enhancement_price_aed},
+                       "unpriced": migration_unpriced, "note": mig.get("note"), "derivation": "banded_fixed_fee"},
+        "enhancement": {"hours": enhancement_hours, "rate_aed_hr": rate, "price_aed": enhancement_price_aed,
+                         "derivation": "rate_x_hours"},
         "price_ex_vat_aed": price_ex_vat,
         "hours_total": hours_total,
     }

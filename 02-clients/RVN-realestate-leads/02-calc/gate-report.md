@@ -75,6 +75,15 @@ they can be priced (see below).
   (e.g. a concession request against the platform portion), re-derive
   from a higher anchor before conceding — there is currently zero margin
   above G1's own floor to give away.
+  **RESOLVED (2026-08-15):** `policy.gates.platform_floor_multiplier`
+  (1.25) IS the floor value itself — `936 × 1.25 = 1,170` flows directly
+  into `platform_portion_aed_mo` (`pricing-worksheet.yaml`), it is not a
+  margin uplift applied before a separate floor check. So the "zero
+  headroom" language above describes the fee's own margin, not a
+  multiplier's spare capacity — the stronger and correct reading. G23
+  sensitivity figures recorded elsewhere (Option A +18.52%, Option B
+  +14.14% breach) describe cost breach against this same floor, not
+  against multiplier headroom.
 - **Two client-requested capabilities are explicitly NOT priced in this
   worksheet and NOT included in the Phase 1 solution**: (1) automated
   call-analyzer/telephony integration for auto-captured call volume and
