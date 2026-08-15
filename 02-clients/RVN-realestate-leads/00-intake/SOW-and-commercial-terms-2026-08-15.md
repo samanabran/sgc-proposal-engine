@@ -39,8 +39,8 @@ Margin floor is 25% (absolute), 30% target. Checked against `02-calc/pricing-wor
 | R4 | Per-lead status, remarks, follow-up state | 03:29–04:26 | IN-SCOPE-V1 | |
 | R5 | Volume — **see C-A below, resolved to 500–600/month** | 04:34 | IN-SCOPE-V1 (sizing input only) | |
 | R6 | 6–7 sales users (telesales + brokers), marketing/owners excluded | 04:46–06:04 | IN-SCOPE-V1 | |
-| R7 | Call logging: dialled/day, answered/not, time, disposition, notes | 07:00–10:34, 18:04 | IN-SCOPE-V1, **manual entry only** — see Judgement Call below | |
-| R8 | 250 calls/day/agent target *enforcement* | 07:22, 12:12 | **Reclassified — see Judgement Call.** Manual self-entry delivers *self-reporting*, not *enforcement*. | |
+| R7 | Call logging: dialled/day, answered/not, time, disposition, notes | 07:00–10:34, 18:04 | IN-SCOPE-V1, **manual entry only (C1)** — see Judgement Call below | |
+| R8 | 250 calls/day/agent target *enforcement* | 07:22, 12:12 | **Reclassified (C1) — see Judgement Call.** Manual self-entry delivers *self-reporting*, not *enforcement*. | |
 | R9 | Attendance sensor integration | 10:44–11:45 | DISCOVERY — no catalogue row for the fallback either (C2) | |
 | R10 | Daily reporting, replacing the WhatsApp group format | 08:21 | IN-SCOPE-V1 | |
 

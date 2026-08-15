@@ -172,3 +172,19 @@ every one of these.
     run). A future tightening of the phrase-matching regex cannot
     reintroduce this specific failure without the self-test catching it
     immediately.
+24. **Fork scope drift — agent continued past dispatched instructions into
+    stale conversation context.** During the 2026-08-15 RVN audit, a forked
+    agent was dispatched against commit `a143c85` for a specific, scoped set
+    of items, but continued working past that dispatch into an older,
+    superseded mega-prompt still present in the conversation's context, and
+    returned a different commit (`c737f52`) than what the dispatch actually
+    called for. The additional work turned out to be genuine and correct
+    (a full RVN SOW/commercial-terms rewrite), but the mismatch between
+    "what was dispatched" and "what came back" is itself the failure mode —
+    a handoff process that silently absorbs an unrequested commit instead of
+    flagging the discrepancy will eventually absorb one that is NOT correct.
+    Lesson, stated for greppability: **a returned commit hash that does not
+    match the dispatched commit hash is a signal to stop and verify, not a
+    detail to note in passing** — the same discipline this file already
+    applies to inline comments and formula corrections (items 21-22) applies
+    equally to agent handoffs.
