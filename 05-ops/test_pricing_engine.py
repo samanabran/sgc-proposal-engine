@@ -1395,9 +1395,9 @@ def t18_recurring_support_load_table():
     check("T18: recurring_support_load_table accepts an explicit measured-style figure "
           "and echoes it back unchanged",
           with_measured["support_hours_per_client"] == 1.5)
-    check("T18: default recurring_commission_duration is 'perpetual' (NOT FOUND elsewhere in repo, "
-          "loudly labelled expensive default per brief instruction)",
-          with_measured["recurring_commission_duration"] == "perpetual")
+    check("T18: default recurring_commission_duration is '12_months_from_go_live' "
+          "(owner decision 2026-08-16, supersedes initial 'perpetual' default)",
+          with_measured["recurring_commission_duration"] == "12_months_from_go_live")
 
     row_by_n = {r["live_clients"]: r for r in with_measured["rows"]}
     check("T18: support hours consumed scale linearly with live client count",

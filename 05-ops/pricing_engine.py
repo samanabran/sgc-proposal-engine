@@ -574,13 +574,23 @@ RECURRING_COMMISSION_DURATION_OPTIONS = ("perpetual", "12_months_from_go_live", 
 # RULE V / RULE 1: grepped policy.yaml and payment-plans.yaml for any
 # existing recurring-commission-duration convention before adding this --
 # NOT FOUND. No commission-on-recurring-revenue duration rule exists
-# anywhere in this repo prior to this pass. Defaulting to "perpetual"
-# because that is the only option consistent with the repo's current
-# silence (no cap is implemented anywhere), NOT because perpetual is
-# recommended -- the brief's own framing is explicit that most structures
-# cap at 12 months / first-year revenue and that perpetual should be
-# "clearly labelled as such" precisely because it is the expensive default.
-DEFAULT_RECURRING_COMMISSION_DURATION = "perpetual"
+# anywhere in this repo prior to this pass.
+#
+# DECISION (2026-08-16, owner): default set to "12_months_from_go_live",
+# not "perpetual". Perpetual was the initial default only because it was
+# the sole option consistent with the repo's prior silence -- it was never
+# a recommendation, and the owner explicitly chose to close the gap rather
+# than let every deal from here inherit the expensive default by omission.
+# At 14% combined commission, perpetual costs ~164/client/month forever
+# against the same margin line that has to absorb growing support load
+# (see recurring_support_load_table below); at 15 live clients that is
+# ~2,460/month leaking out on revenue closed years earlier. 12 months from
+# go-live is the conventional cap, costs nothing to adopt now, and is far
+# cheaper than renegotiating a perpetual promise after the fact. "perpetual"
+# and "first_year_revenue" remain valid, explicitly-chosen options for any
+# caller who wants them -- this only changes what happens when nobody
+# chooses.
+DEFAULT_RECURRING_COMMISSION_DURATION = "12_months_from_go_live"
 
 
 def recurring_support_load_table(support_hours_per_client, live_client_counts=(5, 10, 15, 20, 30, 40),
@@ -604,10 +614,10 @@ def recurring_support_load_table(support_hours_per_client, live_client_counts=(5
     client/segment.
 
     recurring_commission_duration is a REQUIRED-BY-BRIEF configuration
-    choice, not resolved by this pass -- see RECURRING_COMMISSION_DURATION_OPTIONS
-    and DEFAULT_RECURRING_COMMISSION_DURATION's docstring above for why
-    "perpetual" is the current default and why that default is expensive,
-    not recommended."""
+    choice -- see RECURRING_COMMISSION_DURATION_OPTIONS and
+    DEFAULT_RECURRING_COMMISSION_DURATION's docstring above for the owner's
+    2026-08-16 decision to default to "12_months_from_go_live" over the
+    initially-implemented "perpetual"."""
     if recurring_commission_duration not in RECURRING_COMMISSION_DURATION_OPTIONS:
         raise ValueError(f"recurring_commission_duration must be one of {RECURRING_COMMISSION_DURATION_OPTIONS}")
 
