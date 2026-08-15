@@ -11,10 +11,12 @@ fee.
 (`commission_sales_pct` 7 + `commission_delivery_pct` 7) is documented at
 `00-knowledge/pricing/business-cost-basis.yaml:27-29`. The 5% retention
 figure is NOT independently documented elsewhere in this repo as of this
-pass — it is introduced here per explicit instruction in the correction-pass
-brief ("5% retention held for clawback... confirmed"). Flagged rather than
-silently treated as pre-existing policy: if a different retention figure
-is authoritative elsewhere (verbal agreement, individual contractor
+pass — it is owner-stated (confirmed directly by the business owner during
+the correction-pass conversation, not derived or assumed by any agent) but
+undocumented anywhere else in the repo. Recorded here as owner-stated,
+undocumented, pending confirmation — not treated as pre-existing repo
+policy, and not treated as fork-invented either. If a different retention
+figure is authoritative elsewhere (verbal agreement, individual contractor
 agreement, etc.), that source overrides this document and this file needs
 updating to match, not the reverse.
 
