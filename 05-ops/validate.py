@@ -334,7 +334,13 @@ def check_13_clawback(result, ws, current_revision_files):
     # table row referencing "unrecovered clawback balance") without the
     # substantive clause itself being present anywhere in the document.
     clawback_substance = re.compile(r"unrecovered\s+balance.{0,60}(immediately due and payable|becomes)", re.IGNORECASE | re.DOTALL)
-    deferred = ws.get("number_3_financing", {}).get("deferred_aed", 0) or 0
+    financing = ws.get("number_3_financing", {})
+    # Field was renamed financed_remainder_aed on every worksheet except
+    # MRD (which still uses the original deferred_aed) — this check only
+    # ever read deferred_aed, so it silently passed "no deferred value"
+    # on KP/PRO/VGE/RVN regardless of their real financed remainder.
+    # Found auditing RVN 2026-08-15; fixed to read either key.
+    deferred = financing.get("financed_remainder_aed", financing.get("deferred_aed", 0)) or 0
     if deferred > 0:
         found = any(clawback_substance.search(open(f, encoding="utf-8").read()) for f in current_revision_files)
         if not found:

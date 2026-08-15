@@ -1,0 +1,51 @@
+opportunity_id: "RVN-2026-SUB-01"
+client_legal_name: "RVN (working name — registered legal name not stated on discovery call, confirm before issue)"
+jurisdiction: "mainland"          # ASSUMPTION — see 00-intake/client-brief.yaml
+client_trn: ""
+decision_maker: "Mr. Nazim (Owner)"
+sdr_owner: "SGC SDR (unnamed in source transcript)"
+segment: startup_boutique
+edition: community
+vertical: real-estate-brokerage-uae
+
+stage: review                     # intake -> risk_assessed -> calc -> draft -> review -> issued | won | lost
+current_revision: "RVN-2026-SUB-01_Rev1"
+knowledge_version_used: "pricing v3.1 (2026-08-06)"
+
+risk_band: moderate
+required_security_instruments: [mobilisation_33pct, deposit_1_month]
+
+gates_passed: true
+gate_report: 02-calc/gate-report.md
+walkaway_card_produced: true       # 02-calc/deal-card.md, produced before any pricing conversation (G22)
+
+escalations:
+  - item: "Automated call-analyzer / telephony integration"
+    where_needed: "Client requested on discovery call (06:59-07:37, 08:21-08:39, 12:03-12:34) — auto-captured call volume and pickup-rate metrics"
+    what_blocked: "No catalogue entry in hour-lookup.yaml, saas-modules.yaml, or phase2-catalogue.yaml for telephony/dialer integration. NOT priced, NOT included in Phase 1. Requires Commercial Desk scoping once RVN's phone/telephony stack (currently personal SIM cards, no PBX/VOIP) is known."
+    status: open
+  - item: "Attendance / break-time tracking via existing sensor/badge system"
+    where_needed: "Client requested on discovery call (10:34-11:45) — check-in/check-out and break tracking tied to their existing physical sensor system"
+    what_blocked: "No catalogue entry for third-party sensor/badge system integration. NOT priced, NOT included in Phase 1. Requires Commercial Desk scoping once the sensor vendor/API is identified."
+    status: open
+  - item: "Entity facts unresolved (check-14, by-design administrative block)"
+    where_needed: "06-brand/entity/legal-identity.yaml — licence_authority, licence_number, registered_address, contact fields"
+    what_blocked: "Blocks issue only, per SKILL.md §6. Does not block draft/review. Commercial Desk must supply real entity facts before this proposal can move to 05-issued/."
+    status: resolved
+    resolution_note: "Verified 2026-08-15 by direct read of 06-brand/entity/legal-identity.yaml — all fields (legal_name, licence_authority, licence_number, registered_address, contact block) are real values, not RESOLVE placeholders. Legal name: 'Scholarix Global Consultants FZCO', licence no. 45160, resolved 2026-08-04 per that file's own resolution note. validate.py check 14 confirmed passing, not blocked, on re-run. Prior escalation entry was stale — this repo's entity facts were already settled before this deal's manifest was written."
+  - item: "Client legal name and risk-matrix inputs unconfirmed"
+    where_needed: "00-intake/client-brief.yaml, 02-calc/risk-assessment.yaml"
+    what_blocked: "Registered legal name, entity age, VAT registration status, and trade licence validity were not stated on the discovery call. Scored toward the higher-risk side in risk-assessment.yaml pending confirmation. Not a gate failure — logged for follow-up before issue."
+    status: open
+
+revisions:
+  - ref: "RVN-2026-SUB-01_Rev1"
+    issued_date: ""
+    path: "03-draft/RVN-2026-SUB-01_Rev1/"
+    status: draft
+    notes: "Full pipeline run 2026-08-15 (intake through QA + self-review). All 41 commercial gates pass. validate.py run: clean on every check except R11/R12 (standalone quotation PDF, one-page commercial summary) — a confirmed, repo-wide, pre-existing gap (validate.py's own docstring: 'neither artefact exists for any corpus client'), also failing identically on the issued VGE client. render_r11_r12.py is scoped to MRD-meridianview-realty only per a 2026-08-06 approval, so this client cannot self-resolve R11/R12 — flag to Commercial Desk if these are required before issue. NOT yet through human review — do not move to 05-issued/ until a human reviewer approves per 04-review/reviewer-notes.md."
+
+verbal_promises_logged: true
+adoption_clause_included: true
+clawback_included: true
+evidence_file_complete: false      # per G29, re-verified specifically before go-live — not yet applicable at draft stage

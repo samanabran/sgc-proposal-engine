@@ -1,0 +1,203 @@
+# Pricing Worksheet — RVN-2026-SUB-01_Rev1
+# knowledge_version_used: pricing v3.1 (2026-08-06) — see CHANGELOG.md
+# Computed via 05-ops/pricing_engine.py (b_hours_for_branch, a_hours_for_n,
+# hypercare_hours_for_n/hypercare_cost_aed, b_side_subtotal_aed) with a
+# RVN-specific base_scope_hours (25h, work packages below) rather than the
+# module default (47h, a different vertical's scope) — see number_2_build.
+
+inputs:
+  users_now: 7
+  users_12mo: 7
+  segment: startup_boutique
+  edition: community
+  edition_trigger_reason: null
+  term_months: 24                       # build_value falls in the AED 8,000-20,000 band -> 24 months per runbook §3
+  modules: []                            # N/A on Community
+  work_packages: [discovery, crm_leads, users_roles_agent_perf, reports_dashboard, data_migration_500]
+  incumbent_benchmark_aed_mo: null
+  budget_rejected_aed_low: null
+  budget_rejected_aed_high: null          # client stated no fixed CRM budget — market_test/budget_test not applicable, see gates below
+
+risk_assessment_ref: 02-calc/risk-assessment.yaml
+
+# ---------------------------------------------------------------------------
+# Number 1 — Cost to Serve (CTS), monthly
+# ---------------------------------------------------------------------------
+number_1_cost_to_serve:
+  licences_aed: 0                        # Community edition, zero per-user licence cost
+  hosting_allocation_aed: 126             # 360 x (7/20)
+  tooling_aed: 50
+  support_labour_aed: 560                 # ceil(7/5) x 280 = 2 x 280
+  account_mgmt_aed: 200                    # tier_10 (7 users falls in the 6-10 band, policy.yaml cost_to_serve.account_mgmt_aed)
+  cts_total_aed: 936
+  platform_floor_aed: 1170                 # 936 x 1.25
+
+# ---------------------------------------------------------------------------
+# Number 2 — Build Value, one-time
+# ---------------------------------------------------------------------------
+number_2_build:
+  delivery_hours:
+    - { package: discovery,                band: standard, hours: 5 }
+    - { package: crm_leads,                 band: standard, hours: 6 }
+    - { package: users_roles_agent_perf,     band: standard, hours: 4 }
+    - { package: reports_dashboard,           band: standard, hours: 4 }
+    - { package: data_migration_500,           band: standard, hours: 6 }
+  work_package_hours_subtotal: 25          # base_scope_hours passed to pricing_engine.a_hours_for_n()
+  class_a_additions:
+    - { name: migration_record_validation_signoff, hours: 8, trigger: "users_now(7) > trigger_n(0, hour-lookup.yaml has no explicit trigger_n field for this package; engine defaults to always-applies once any migration scope exists) — genuinely in scope, RVN is migrating from Google Sheets" }
+  a_hours: 33                              # engine: a_hours_for_n(7, base_scope_hours=25) = 25 + 8 (migration_record_validation_signoff; users_above_25 and >10-training triggers do NOT fire at N=7)
+  class_b:
+    engine: "05-ops/pricing_engine.py: b_hours_for_branch(7, 'm')"
+    total_hours: 3.005
+    tasks:
+      - { name: account_creation_credential, hours: 0.562, role: junior_passthrough, rate_aed: 90 }
+      - { name: individual_onboarding,        hours: 1.123, role: junior_passthrough, rate_aed: 90 }
+      - { name: per_agent_signoff,             hours: 0.337, role: junior_passthrough, rate_aed: 90 }
+      - { name: bulk_path_validation,           hours: 0.000, role: junior_passthrough, rate_aed: 90 }
+      - { name: exception_allowance,             hours: 0.233, role: junior_passthrough, rate_aed: 90 }
+      - { name: role_permission_design,           hours: 0.750, role: business_analyst,   rate_aed: 450 }
+    subtotal_aed: 540.43                    # pricing_engine.b_side_subtotal_aed(7), engine-emitted
+    note: "90 AED/hr = midpoint of rate-card.yaml passthrough_band (60-120). 450 AED/hr = rate-card.yaml business_analyst."
+  dev_hours_for_overlays: 36.005            # a_hours(33) + class_b.total_hours(3.005)
+  documentation_hours: 2                     # max(min=2, round(5% of 36.005=1.8)) = 2
+  qa_hours: 3                                 # max(min=3, round(8% of 36.005=2.88)) = 3
+  training_hours: 4                            # 2 sessions x 2h, standard bundled
+  a_side_hours: 42                             # a_hours(33) + qa(3) + doc(2) + training(4)
+  rate_aed: 280                                 # startup_boutique blended_rate_aed, pinned_role startup_consultant — applies to a_side_hours ONLY
+  rate_exists_on_card: true
+  a_side_subtotal_aed: 11760                    # 42 x 280
+  b_side_subtotal_aed: 540.43                    # class_b.subtotal_aed, per-task-role rates (NOT the segment blended rate)
+  subtotal_aed: 12300.43                          # a_side_subtotal_aed + b_side_subtotal_aed
+  pm_aed: 1230.04                                  # subtotal_aed x 0.10 (startup_boutique pm_pct)
+  contingency_aed: 615.02                           # subtotal_aed x 0.05 (startup_boutique contingency_pct)
+  build_value_core_aed: 14207.00                     # subtotal_aed x 1.10 x 1.05
+  hypercare:
+    pods: 2                                            # ceil(7/5)
+    hours: 4                                            # 2 pods x 2h (M-branch)
+    rate_aed: 280                                        # policy.yaml cost_to_serve.support_rate_aed
+    cost_aed: 1120                                        # pricing_engine.hypercare_cost_aed(7)
+  build_value_aed: 15327                       # build_value_core_aed + hypercare.cost_aed, rounded (bankers rounding, non-subscription figure)
+  total_hours_all_in: 49.005                    # a_side_hours(42) + class_b.total_hours(3.005) + hypercare.hours(4)
+  total_hours: 49.005                            # = total_hours_all_in, per validate.py check_4
+  internal_build_cost_aed: 7351                    # total_hours x policy.yaml internal_consultant_cost_aed_hr(150), rounded. Internal-only, never disclosed to client.
+
+# ---------------------------------------------------------------------------
+# Number 3 — Financing uplift on deferred value
+# ---------------------------------------------------------------------------
+number_3_financing:
+  build_value_aed: 15327
+  mobilisation_fee_aed: 5058                # 33% of build_value_aed (default_mobilisation_pct)
+  financed_remainder_aed: 10269               # 15,327 - 5,058
+  uplift_pct: 0.18                             # financing_uplift.months_24
+  recovery_total_aed: 12117                     # 10,269 x 1.18, rounded
+  recovery_monthly_aed: 505                      # 12,117 / 24, rounded
+
+# ---------------------------------------------------------------------------
+# Assembly
+# ---------------------------------------------------------------------------
+assembly:
+  platform_portion_aed_mo: 1170              # max(CTS x 1.25 = 1170, market_defensible_floor) — no market_defensible_floor documented for this vertical/segment beyond the CTS floor; CTS floor governs
+  recovery_component_aed_mo: 505
+  subscription_fee_aed_mo_raw: 1675           # 1,170 + 505, pre-rounding
+  subscription_fee_aed_mo: 1680                # rounded to nearest 10 per policy.yaml: presentation.client_facing_subscription_rounding
+  mobilisation_aed: 5058
+  security_deposit_1mo_aed: 1680               # risk-security-matrix.yaml band=moderate requires deposit_1_month IN ADDITION to mobilisation_33pct — refundable security instrument, not a fee
+  quarterly_billing_aed: 5040                   # 1,680 x 3
+  kickoff_total_payable_aed: 11778               # mobilisation (5,058) + Q1 (5,040) + security deposit (1,680)
+  year1_total_aed: 25218                          # 5,058 + 12 x 1,680 (deposit excluded — refundable, not revenue)
+  full_24mo_commitment_aed: 45378                  # 5,058 + 24 x 1,680
+
+exposure:
+  contractual_peak_aed: 10269               # financed remainder at Kickoff, protected by clawback (G4/G16)
+  cash_peak_aed: 0                            # mobilisation (5,058) + Q1 (5,040) + deposit (1,680) = 11,778 collected at Kickoff covers the internal build cost (7,351)
+  economic_peak_aed: 0                          # staged delivery — later-phase configuration withheld until prior invoices clear
+  cash_positive_by_day: 1
+
+margin_check:
+  revenue_over_term_aed: 45378                  # full_24mo_commitment_aed
+  cost_over_term_aed: 29815                      # internal_build_cost_aed (7,351) + CTS_total (936) x term_months (24) = 22,464
+  gross_margin_pct: 0.343                         # (45,378 - 29,815) / 45,378
+
+# ---------------------------------------------------------------------------
+# Gates — all 41 v2 gates, recorded pass/fail against this worksheet.
+# ---------------------------------------------------------------------------
+gates:
+  G1_platform_floor:         { pass: true, actual: 1170, required: 1170, note: "platform_portion equals the CTS floor exactly — no market_defensible_floor above it is documented for this segment; the floor itself governs (>=, not >), still a pass." }
+  G2_term_ge_recovery:       { pass: true, note: "recovery completes exactly at month 24" }
+  G3_mobilisation_33pct:     { pass: true, actual_pct: 0.330 }
+  G4_clawback_present:       { pass: true }
+  G5_no_post_recovery_drop:   { pass: true }
+  G6_term_at_kickoff:         { pass: true }
+  G7_financing_disclosed:     { pass: true, note: "18% uplift stated in one line per clause-library/financing-disclosure.md" }
+  G8_margin:                   { pass: true, actual_pct: 0.343, required_pct: 0.30 }
+  G9_rate_provenance:         { pass: true, note: "280 AED/hr startup_consultant pin (a-side); 90/450 AED/hr per-task Class B rates, all traced to rate-card.yaml. No forbidden_rates present." }
+  G10_concessions_capped:     { pass: true, note: "no concessions on this deal" }
+  G11_discount_platform_only:  { pass: true, note: "no discount applied" }
+  G12_cadence_ceiling:          { pass: true, note: "quarterly-in-advance meets G33 floor; margin floor binds tighter than any cadence ceiling" }
+  G13_total_give_capped:         { pass: true, note: "0% give" }
+  G14_compensators_logged:        { pass: true, note: "N/A — no concession" }
+  G15_security_sized_to_risk:      { pass: true, note: "moderate band — mobilisation_33pct + deposit_1_month, both present in assembly" }
+  G16_clawback_on_deferred:         { pass: true }
+  G17_guarantees_capped:             { pass: true }
+  G18_data_export_unconditional:      { pass: true }
+  G19_no_hours_pm_qa_docs_cut:          { pass: true }
+  G20_authority_matrix_followed:         { pass: true, note: "standard SDR-level deal, no non-standard structure" }
+  G21_all_exposures_computed:             { pass: true }
+  G22_walkaway_card_produced:              { pass: true, note: "02-calc/deal-card.md, produced before any pricing conversation" }
+  G23_absolute_margin_floor:                { pass: true, actual_pct: 0.343, required_pct: 0.25 }
+  G24_portfolio_limits_checked:              { pass: true, note: "peak cash exposure AED 0" }
+  G25_liability_capped:                       { pass: true, note: "clause drafted, pending counsel review" }
+  G26_ip_data_ownership_correct:               { pass: true, note: "clause drafted, pending counsel review re: LGPL" }
+  G27_no_named_consultant:                      { pass: true }
+  G28_guarantee_exclusions_present:              { pass: true }
+  G29_evidence_file_complete:                     { pass: true, note: "complete for everything obtainable at draft/issue stage" }
+  G30_abort_criteria_checked:                      { pass: true, note: "none triggered" }
+  G31_worst_case_margin:                            { pass: true, worst_case_pct: 0.287, note: "guarantee-credit cap = 10% of annual contract value (year1_total_aed 25,218) = AED 2,522; base-term profit 15,563 - 2,522 = 13,041; worst_case_pct = 13,041 / 45,378 = 28.7%, clears the 25% absolute floor with room. Combined give+guarantee (0% + 10% = 10%) is within the 12% combined cap (G31's own test)." }
+  G32_cash_positive_30_days:                         { pass: true, actual_days: 1 }
+  G33_min_cadence_quarterly:                          { pass: true, note: "quarterly_in_advance meets minimum" }
+  G34_mobilisation_covers_third_party:                 { pass: true, note: "no third-party upfront cost triggered" }
+  G35_no_false_vat_claim:                               { pass: true }
+  G36_edition_not_misdescribed:                          { pass: true }
+  G37_upgrade_policy_stated:                              { pass: true, note: "MSA/Order Form §A.9, not the sales proposal, per G37" }
+  G38_community_exclusions_disclosed:                      { pass: true, note: "MSA/Order Form §A.9, not the sales proposal, per G38" }
+  G39_no_abandoned_modules:                                 { pass: true, note: "no third-party/OCA modules in scope" }
+  G40_enterprise_mobilisation_covers_licence:                { pass: true, applicable: false }
+  G41_demo_matches_edition:                                   { pass: true, note: "demo_environment.url per editions.yaml, edition_shown: community confirmed before the Monday demo — see monday-meeting-flow.md" }
+  market_test:    { pass: true, applicable: false, note: "client stated no incumbent CRM benchmark — gate not applicable" }
+  budget_test:     { pass: true, applicable: false, note: "client explicitly stated no fixed CRM budget ('whatever you are proposing, that will be the first decision') — gate not applicable; AED 15k-60k/mo figures are ad-spend, not a CRM budget anchor, and are not used here" }
+
+# ---------------------------------------------------------------------------
+# Option B — Milestone Payment (full build paid at kickoff, no financing)
+# Derived per payment-plans.yaml: one_time_no_subscription is refused
+# ("hosting and support are recurring costs...") with an explicit counter:
+# "offer build as one-time + platform recurring, minimum 12-month platform
+# term." This is that counter, computed from figures already in this
+# worksheet (build_value_aed, platform_portion_aed_mo) — no new number
+# invented, no discount applied (platform_portion sits exactly at the G1
+# floor with zero headroom, so no cadence discount can be layered on it).
+# True multi-installment milestone billing (split across kickoff/mid-build/
+# go-live rather than one lump sum) is payment-plans.yaml: milestone_or_usage
+# (treatment: escalate, approval: sales_leadership) — NOT offered here
+# without that sign-off; this option is the single-payment-at-kickoff case,
+# which needs no escalation.
+# ---------------------------------------------------------------------------
+option_b_milestone_full_upfront:
+  structure: build_full_upfront_platform_monthly   # payment-plans.yaml: one_time_structures, uplift: 0
+  build_paid_at_kickoff_aed: 15327                   # = number_2_build.build_value_aed, paid in full, no financing
+  financing_uplift_pct: 0.0
+  monthly_platform_fee_aed: 1170                      # = assembly.platform_portion_aed_mo, no recovery component, no discount (G1 floor has zero headroom)
+  minimum_term_months: 12                              # payment-plans.yaml counter-note: "minimum 12-month platform term"
+  security_deposit_1mo_aed: 1680                        # unchanged — risk-band instrument (risk-security-matrix.yaml), independent of payment structure
+  quarterly_billing_aed: 3510                             # 1,170 x 3
+  kickoff_total_payable_aed: 20517                         # 15,327 (build) + 1,680 (deposit) + 3,510 (Q1)
+  minimum_12mo_commitment_aed: 29367                        # 15,327 + 12 x 1,170
+  note: "No G2 term-vs-recovery constraint applies (no deferred/financed remainder to recover), so the runbook's 24-month band default does not bind here; 12 months is the payment-plans.yaml minimum for this structure."
+
+phase2_deferred:
+  - item: "Automated call-analyzer / telephony integration"
+    price: "NOT PRICED — no catalogue entry (see client-brief.yaml: escalated_uncatalogued_requests). Requires Commercial Desk scoping once RVN's telephony stack is known."
+  - item: "Attendance / break-time tracking via existing sensor/badge system"
+    price: "NOT PRICED — no catalogue entry (see client-brief.yaml: escalated_uncatalogued_requests). Requires Commercial Desk scoping once sensor vendor/API is known."
+  - additional_user: "SUPERSEDED CITATION FIXED 2026-08-15 — phase2-catalogue.yaml v2.1 (effective 2026-08-05) replaced the flat AED 250/user/month additional_user rate with two components for growth beyond 7 seats: (1) onboarding_fee_per_marginal_user, one-time, computed via pricing_engine.py: marginal_user_fee(users_now_before_addition), not a fixed figure; (2) platform_capacity_fee, recurring monthly, banded per hosting.yaml Class C steps (1-20/21-50/51+), not per-head — RVN's 7-15 user range stays inside the 1-20 band, so this fee only changes if the band itself moves, not per added user. Neither component is a single quotable AED figure without running the actual formulas for a specific headcount; not computed here since no growth beyond 7 is confirmed."
+
+exclusions_confirmed: true
