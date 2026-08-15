@@ -490,10 +490,23 @@ def check_v2_rate_mix_ceiling(result, ws):
     number_2_build.rollout_hours field (pre-recompute worksheets, e.g.
     Kallat/Prosper before step (h)) against the passthrough ceiling --
     this is the exact check that catches Kallat Rev1's 120h@525."""
+    # FAIL-OPEN FIX (PART 9 pass, 2026-08-15): the original code fell
+    # through to an unconditional result.ok("no Class B task exceeds its
+    # per-task-role ceiling") even when NEITHER the legacy
+    # rollout_hours/rate_aed fields NOR the post-recompute class_b field
+    # were present at all -- printing a pass that implies tasks were
+    # checked when zero tasks existed to check. Now the "nothing to
+    # check" case is its own explicit, honestly-worded branch, and the
+    # final ok() only fires after at least one of the two schemas was
+    # actually present and evaluated.
     build = ws.get("number_2_build", {})
     rollout_hours = build.get("rollout_hours", 0)
     rate = build.get("rate_aed")
+    class_b = build.get("class_b")
+    checked_something = False
+
     if rollout_hours and rate:
+        checked_something = True
         ceiling = pe.junior_passthrough_ceiling_aed_hr()
         if rate > ceiling:
             result.fail("V2. rate-mix ceiling",
@@ -503,8 +516,8 @@ def check_v2_rate_mix_ceiling(result, ws):
             return
     # Post-recompute schema: number_2_build.class_b.tasks[], each with its
     # own role/rate -- checked against rate-card.yaml per task once present.
-    class_b = build.get("class_b")
     if class_b:
+        checked_something = True
         rc = pe.load_rate_card()
         roles = rc.get("roles", {})
         ceiling = pe.junior_passthrough_ceiling_aed_hr(rc)
@@ -522,7 +535,12 @@ def check_v2_rate_mix_ceiling(result, ws):
                 result.fail("V2. rate-mix ceiling",
                             f"task {task.get('name')} billed at {applied_rate} AED/hr, "
                             f"exceeds role '{role}' ceiling {max_rate} AED/hr")
-    result.ok("V2. rate-mix ceiling", "no Class B task exceeds its per-task-role ceiling")
+    if checked_something:
+        result.ok("V2. rate-mix ceiling", "no Class B task exceeds its per-task-role ceiling")
+    else:
+        result.ok("V2. rate-mix ceiling",
+                   "SCOPE: no rollout_hours/rate_aed and no class_b field on this worksheet -- "
+                   "no Class B-shaped work declared, nothing to check (not a claim that Class B work was verified clean)")
 
 
 def check_v3_band_applicability(result, ws):
@@ -530,9 +548,18 @@ def check_v3_band_applicability(result, ws):
     implementation band (benchmarks.yaml market_positioning) is scoped
     10-30 users. Out-of-range N is ANNOTATION ONLY -- never pass, never
     fail."""
+    # FAIL-OPEN FIX (PART 9 pass, 2026-08-15): missing users_now/
+    # build_value_aed previously caused a bare `return` -- no ok(), no
+    # fail(), nothing printed at all. That is silent, not scoped: PART 9
+    # requires every check to fail LOUD on missing data and state its
+    # scope, not go quiet. A genuinely out-of-range user count is still a
+    # legitimate annotation-only case (handled below); a MISSING field is
+    # a different failure mode and must be reported.
     users = ws.get("inputs", {}).get("users_now")
     build_value = ws.get("number_2_build", {}).get("build_value_aed")
     if users is None or build_value is None:
+        result.fail("V3. band check", f"cannot verify -- inputs.users_now ({users}) or "
+                    f"number_2_build.build_value_aed ({build_value}) missing from worksheet")
         return
     if 10 <= users <= 30:
         low, high = 22000, 55000

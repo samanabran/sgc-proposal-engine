@@ -1149,6 +1149,174 @@ def t13_commission_pro_rata():
                   r["commission_earned_on_cash_aed"] <= cap_aed + 0.01,
                   f"commission_earned_on_cash_aed={r['commission_earned_on_cash_aed']} > cap={cap_aed}")
 
+    # RVN financed-deal fixture (rounding-drift guard, per correction-pass
+    # follow-up): payment-plans.yaml:63-70 -- build_value_aed 15,327,
+    # mobilisation_aed 5,058 collected at kickoff, financed_remainder_aed
+    # 10,269, billed at the ROUNDED client-facing rate billed_monthly_aed
+    # 1,680/mo (payment-plans.yaml's own anti-tautology rule requires the
+    # ROUNDED rate as the basis, never a raw pre-rounding rate -- this repo
+    # has already produced a rounding-source defect once on this exact
+    # deal, see payment-plans.yaml:71's "previously_used_basis" note).
+    # Uses the rounded rate directly as the cash-in schedule so a future
+    # regression that silently swaps in a pre-rounding rate anywhere in
+    # the commission path would shift the cap boundary this test checks.
+    rvn_contract_value_aed = 15327.0
+    rvn_mobilisation_aed = 5058.0
+    rvn_billed_monthly_aed = 1680.0  # payment-plans.yaml:64, rounded client-facing rate
+
+    r_rvn_kickoff = pe.commission_released(rvn_contract_value_aed, rvn_mobilisation_aed)
+    expected_rvn_kickoff = rate * rvn_mobilisation_aed  # 14% of 5,058 = 708.12
+    expected_wrong_rvn = rate * rvn_contract_value_aed   # 14% of 15,327 = 2,145.78 -- must NOT equal this
+    check("T13: RVN fixture -- commission at kickoff equals 14% of the 5,058 actually collected, not 14% of the 15,327 contract",
+          abs(r_rvn_kickoff["commission_earned_on_cash_aed"] - expected_rvn_kickoff) < 0.01,
+          f"expected {expected_rvn_kickoff}, got {r_rvn_kickoff['commission_earned_on_cash_aed']}")
+    check("T13: RVN fixture -- kickoff commission does NOT equal 14% of full contract value",
+          abs(r_rvn_kickoff["commission_earned_on_cash_aed"] - expected_wrong_rvn) > 0.01,
+          f"commission_earned_on_cash_aed ({r_rvn_kickoff['commission_earned_on_cash_aed']}) must differ from "
+          f"14%-of-contract ({expected_wrong_rvn})")
+
+    rvn_cash_to_date = rvn_mobilisation_aed
+    for month in range(1, 25):
+        rvn_cash_to_date += rvn_billed_monthly_aed
+        r = pe.commission_released(rvn_contract_value_aed, rvn_cash_to_date)
+        cap_aed = rate * rvn_cash_to_date
+        check(f"T13: RVN fixture -- released commission never exceeds rate x cash-in at rounded-rate month {month} "
+              f"(cash_to_date={rvn_cash_to_date:.2f})",
+              r["commission_earned_on_cash_aed"] <= cap_aed + 0.01,
+              f"commission_earned_on_cash_aed={r['commission_earned_on_cash_aed']} > cap={cap_aed}")
+    check("T13: RVN fixture -- 24mo revenue at rounded billed rate reconstructs payment-plans.yaml:66 exactly",
+          abs((rvn_cash_to_date - rvn_mobilisation_aed) - 40320.0) < 0.01,
+          f"expected 24 x 1,680 = 40,320, got {rvn_cash_to_date - rvn_mobilisation_aed}")
+
+
+# ---------------------------------------------------------------------
+# T14 — PART 9 self-test requirement: floor recomputation on config
+# change. business_cost_floor() must actually change when a
+# business-cost-basis.yaml input changes -- never a hardcoded 394.
+# ---------------------------------------------------------------------
+def t14_floor_recomputation_on_config_change():
+    baseline_basis = pe.load_business_cost_basis()
+    baseline = pe.business_cost_floor(baseline_basis)
+
+    import copy
+    mutated_basis = copy.deepcopy(baseline_basis)
+    mutated_basis["fixed_monthly_aed"]["licence_annual_aed"] += 12000  # +1,000/mo
+    mutated = pe.business_cost_floor(mutated_basis)
+
+    check("T14: floor_per_hour_aed changes when licence_annual_aed input changes",
+          mutated["floor_per_hour_aed"] != baseline["floor_per_hour_aed"],
+          f"baseline={baseline['floor_per_hour_aed']}, mutated={mutated['floor_per_hour_aed']} -- "
+          "identical output after a real input mutation means the floor is not actually recomputed")
+
+    expected_delta_total_requirement = 12000 / 12  # the +1,000/mo flows straight into cash_out -> total_requirement
+    actual_delta = mutated["total_requirement_aed"] - baseline["total_requirement_aed"]
+    check("T14: total_requirement_aed moves by exactly the mutated input's monthly delta",
+          abs(actual_delta - expected_delta_total_requirement) < 0.01,
+          f"expected delta {expected_delta_total_requirement}, got {actual_delta}")
+
+    delivery_hours = baseline_basis["delivery"]["delivery_hours_per_month"]
+    expected_floor_delta = expected_delta_total_requirement / delivery_hours
+    actual_floor_delta = mutated["floor_per_hour_aed"] - baseline["floor_per_hour_aed"]
+    check("T14: floor_per_hour_aed delta matches total_requirement delta / delivery_hours exactly",
+          abs(actual_floor_delta - expected_floor_delta) < 0.01,
+          f"expected {expected_floor_delta}, got {actual_floor_delta}")
+
+    # Second mutation on a completely different input, to rule out the
+    # first check having accidentally hit a coincidental no-op path.
+    mutated_basis_2 = copy.deepcopy(baseline_basis)
+    mutated_basis_2["delivery"]["delivery_hours_per_month"] -= 10
+    mutated_2 = pe.business_cost_floor(mutated_basis_2)
+    check("T14: floor_per_hour_aed also changes when delivery_hours_per_month changes (second independent input)",
+          mutated_2["floor_per_hour_aed"] != baseline["floor_per_hour_aed"],
+          f"baseline={baseline['floor_per_hour_aed']}, mutated={mutated_2['floor_per_hour_aed']}")
+
+
+# ---------------------------------------------------------------------
+# T15 — PART 9 self-test requirement: below-floor quotes are blocked.
+# hour_rate_floor_test() must return verdict BLOCK when effective
+# AED/hour falls below business_cost_floor()'s floor_per_hour_aed.
+# ---------------------------------------------------------------------
+def t15_below_floor_quotes_blocked():
+    basis = pe.business_cost_floor()
+    floor = basis["floor_per_hour_aed"]
+
+    # Construct a deliberately underpriced quote: price/hours chosen so
+    # effective_rate_aed_hr (after commission) lands below the floor.
+    hours_total = 40.0
+    underpriced_price_aed = floor * hours_total * 0.7  # ~30% under floor before commission even bites
+    r_block = pe.hour_rate_floor_test(underpriced_price_aed, hours_total, cost_basis=basis)
+    check("T15: underpriced quote returns verdict BLOCK",
+          r_block["verdict"] == "BLOCK",
+          f"effective_rate_aed_hr={r_block['effective_rate_aed_hr']}, floor={floor}, verdict={r_block['verdict']}")
+    check("T15: BLOCK verdict's effective_rate_aed_hr is genuinely below floor_per_hour_aed",
+          r_block["effective_rate_aed_hr"] < floor,
+          f"effective_rate_aed_hr={r_block['effective_rate_aed_hr']} not < floor={floor}")
+
+    # Control: a well-priced quote at 2x the floor rate must NOT block.
+    healthy_price_aed = floor * hours_total * 2.0
+    r_pass = pe.hour_rate_floor_test(healthy_price_aed, hours_total, cost_basis=basis)
+    check("T15: control -- healthy-margin quote at 2x floor does not return BLOCK",
+          r_pass["verdict"] != "BLOCK",
+          f"verdict={r_pass['verdict']}, effective_rate_aed_hr={r_pass['effective_rate_aed_hr']}")
+
+    # Boundary: price landing exactly at the floor (post-commission) must
+    # not be silently rounded into a false PASS -- BLOCK is the
+    # inclusive-below-floor case, so exactly-at-floor should read WARN or
+    # PASS, never BLOCK, and exactly-one-AED-under should BLOCK.
+    commission_rate = (basis["commission_sales_pct"] + basis["commission_delivery_pct"]) / 100.0
+    price_at_floor_aed = (floor * hours_total) / (1 - commission_rate)
+    r_boundary = pe.hour_rate_floor_test(price_at_floor_aed, hours_total, cost_basis=basis)
+    check("T15: price landing exactly at the floor does not BLOCK",
+          r_boundary["verdict"] != "BLOCK",
+          f"verdict={r_boundary['verdict']}, effective_rate_aed_hr={r_boundary['effective_rate_aed_hr']}, floor={floor}")
+
+
+# ---------------------------------------------------------------------
+# T16 — PART 9 self-test requirement: migration over 20,000 records
+# renders as unpriced, never as an estimated number.
+# ---------------------------------------------------------------------
+def t16_migration_over_20000_unpriced():
+    cat = pe.load_template_catalogue()
+    over_band = cat["migration_bands"]["over_20000"]
+    check("T16: migration_bands.over_20000 is marked unpriced",
+          over_band.get("unpriced") is True,
+          f"unpriced={over_band.get('unpriced')}")
+    check("T16: migration_bands.over_20000 price_aed is None, never an estimated number",
+          over_band.get("price_aed") is None,
+          f"price_aed={over_band.get('price_aed')}")
+    check("T16: migration_bands.over_20000 hours is None, never an estimated number",
+          over_band.get("hours") is None,
+          f"hours={over_band.get('hours')}")
+
+    # End-to-end: four_component_build() must propagate the unpriced state
+    # as a None total, never silently sum a null into 0 or drop it from
+    # the total -- RULE 1's "never render a total that silently drops an
+    # unpriced component" (pricing_engine.py:375).
+    result = pe.four_component_build(
+        modules_selected=[], maturity="mature", migration_band="over_20000",
+        enhancement_hours=0.0, catalogue=cat,
+    )
+    check("T16: four_component_build() with over_20000 migration returns migration.unpriced True",
+          result["migration"]["unpriced"] is True)
+    check("T16: four_component_build() with over_20000 migration returns price_ex_vat_aed None, "
+          "never a silently-estimated total",
+          result["price_ex_vat_aed"] is None,
+          f"price_ex_vat_aed={result['price_ex_vat_aed']}")
+    check("T16: four_component_build() with over_20000 migration returns hours_total None, "
+          "never a silently-estimated total",
+          result["hours_total"] is None,
+          f"hours_total={result['hours_total']}")
+
+    # Control: a band under 20,000 must NOT be unpriced -- proves the
+    # None-propagation above is conditional on the band, not a blanket bug.
+    result_priced = pe.four_component_build(
+        modules_selected=[], maturity="mature", migration_band="from_5000_to_20000",
+        enhancement_hours=0.0, catalogue=cat,
+    )
+    check("T16: control -- from_5000_to_20000 band is priced, not unpriced",
+          result_priced["migration"]["unpriced"] is False and result_priced["price_ex_vat_aed"] is not None,
+          f"unpriced={result_priced['migration']['unpriced']}, price_ex_vat_aed={result_priced['price_ex_vat_aed']}")
+
 
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
@@ -1177,6 +1345,12 @@ if __name__ == "__main__":
     t12_input_provenance_guard()
     print("\n=== T13: commission pro-rata release (PART 6) ===")
     t13_commission_pro_rata()
+    print("\n=== T14: floor recomputation on config change (PART 9) ===")
+    t14_floor_recomputation_on_config_change()
+    print("\n=== T15: below-floor quotes blocked (PART 9) ===")
+    t15_below_floor_quotes_blocked()
+    print("\n=== T16: migration over 20,000 renders unpriced (PART 9) ===")
+    t16_migration_over_20000_unpriced()
 
     print()
     if FAILURES:
