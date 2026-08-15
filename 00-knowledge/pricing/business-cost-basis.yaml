@@ -1,0 +1,65 @@
+# SGC TECH AI — Whole-business operating cost basis (NEW, 2026-08-15 pass)
+#
+# Distinct from cost_to_serve in policy.yaml, which prices ONE client's
+# recurring hosting/support/account-mgmt cost. This file prices SGC's own
+# overall monthly operating floor and the resulting minimum billable hourly
+# rate — used by pricing_engine.py: business_cost_floor() to compute
+# COST_FLOOR_PER_HOUR. Never hardcode 394 (or any derived figure) anywhere
+# else — always call business_cost_floor() and read floor_per_hour_aed from
+# its return value, so a change to any input here propagates automatically
+# (per the correction-pass brief's explicit requirement).
+version: 1.0
+effective_from: 2026-08-15
+source: "New this pass. Verified-current values supplied directly by owner during the 2026-08-15 correction-pass brief — NOT independently re-derived from any prior repo artifact, since no whole-business cost floor concept existed anywhere in this repo before now (confirmed via grep across 00-knowledge/, 05-ops/ — cost_to_serve in policy.yaml is per-client only). Reconcile against actual bank/accounting records before trusting for a real pricing decision — these are the owner's stated figures at time of writing, not audited."
+
+fixed_monthly_aed:
+  licence_annual_aed: 20000            # /12 = 1,667/mo
+  staff_salaries_monthly_aed: 7500      # 5 callers x 1,500
+  office_monthly_aed: 2000
+  phones_monthly_aed: 1200               # 6 lines x 200
+  hosting_ai_monthly_aed: 367             # USD 100
+  other_monthly_aed: 0
+  owner_salary_monthly_aed: 20000          # currently owner's drawings, unpaid 3 months; moves to WPS on visa issue
+
+delivery:
+  delivery_hours_per_month: 83            # 176 gross - 33 caller mgmt - 20 marketing - 10 training - 10 admin/accounts - 20 sales/pre-sales
+
+commission:
+  commission_sales_pct: 7
+  commission_delivery_pct: 7
+
+target_rate_per_hour_aed: 550             # floor + margin for commission, non-billable time, and profit -- a POLICY CHOICE, not derived; kept here as the single value the engine's enhancement-hours pricing (PART 2) reads
+
+# ---------------------------------------------------------------------
+# NOT YET IN THE BASIS -- optional, default OFF. Each toggle name below
+# must be read by business_cost_floor(); flipping any to true changes
+# cash_out_monthly / total_requirement / floor_per_hour_aed automatically.
+# Do not switch any of these on without an explicit decision -- see the
+# brief's own caveats (own-visa workers are NOT sponsored, do not model
+# sponsorship cost for them; work-permit status for own-visa workers is
+# an open compliance question for the free zone authority, unresolved
+# by this engine).
+# ---------------------------------------------------------------------
+optional_extras:
+  owner_visa_eid_medical:
+    enabled: false
+    monthly_aed: 292
+  owner_health_insurance:
+    enabled: false
+    monthly_aed: 250
+  gratuity_accrual:
+    enabled: false
+    pct_of_basic: 0.0583        # 5.83% -- only relevant once/if staff move to sponsored employment
+    basic_monthly_aed: 0        # set when applicable; 0 means the toggle contributes nothing even if enabled
+  device_amortisation:
+    enabled: false
+    monthly_aed: 0               # not yet quantified -- fill in before enabling
+  accounting_vat_ct_filing:
+    enabled: false
+    monthly_aed: 0                # not yet quantified -- fill in before enabling
+  contingency_pct:
+    enabled: false
+    pct_of_total_requirement: 0.0  # set a value before enabling
+
+open_questions:
+  - "Own-visa interns/workers: not sponsored by SGC, so no sponsorship cost is modeled for them here. Work-permit status for own-visa workers doing paid delivery work is an open compliance question for the free zone authority -- this engine does not and cannot resolve that; flag to Commercial Desk / legal."

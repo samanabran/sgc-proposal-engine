@@ -1,0 +1,50 @@
+# SGC TECH AI — Template / Module / Migration catalogue (NEW, 2026-08-15)
+#
+# Replaces the single-fixed-figure build_value_aed model (the defect this
+# correction pass targets, e.g. RVN's build_value_aed=15,327 as one number
+# with no component breakdown) with FOUR SEPARATE, SEPARATELY-QUOTED
+# components: template base, modules, migration, enhancement. Read by
+# pricing_engine.py: four_component_build(). No number here is invented --
+# these are the owner-supplied catalogue values from the 2026-08-15 brief,
+# same provenance caveat as business-cost-basis.yaml: new this pass, not
+# independently re-derived from a prior repo artifact (grepped hour-lookup.yaml,
+# class-b-task-inventory.yaml, saas-modules.yaml first -- none of them price
+# a real-estate-CRM template or this module list; saas-modules.yaml prices a
+# DIFFERENT vertical's module set and is untouched by this file).
+version: 1.0
+effective_from: 2026-08-15
+
+template_base:
+  description: "Real-estate Odoo CRM: pipeline, lead capture, user roles, dashboards, standard reports, standard training."
+  fixed_fee_aed: 12000
+  hours_by_maturity:
+    mature: 6           # 4th build onward
+    building_it: 12       # 2nd/3rd build
+    first_build: 20        # inventing
+
+modules:
+  lead_capture_meta_google_ads:      { price_aed: 3000, hours: 4 }
+  whatsapp_lead_notification:         { price_aed: 2500, hours: 3 }
+  auto_distribution_manual_reassign:   { price_aed: 2000, hours: 3 }
+  call_logging_manual_entry:            { price_aed: 2000, hours: 3 }
+  attendance_in_app_checkin:             { price_aed: 3000, hours: 5 }
+  daily_reporting_pack:                   { price_aed: 2000, hours: 3 }
+  property_portal_feed:                    { price_aed: 4000, hours: 6 }
+
+module_hour_multiplier_by_maturity:
+  mature: 1.0
+  building_it: 1.4
+  first_build: 1.8
+
+migration_bands:
+  none_clean_start:       { price_aed: 0,    hours: 0 }
+  up_to_1000:               { price_aed: 2500, hours: 4 }
+  from_1000_to_5000:         { price_aed: 5000, hours: 7 }
+  from_5000_to_20000:         { price_aed: 8000, hours: 12 }
+  over_20000:                   { price_aed: null, hours: null, unpriced: true, note: "[UNPRICED — Commercial Desk] — never estimate, quote only after seeing the data." }
+
+enhancement:
+  default_rate_aed_hr: 550        # business-cost-basis.yaml: target_rate_per_hour_aed -- SAME value, read from there, not duplicated as a second source of truth. This is DELIBERATELY DIFFERENT from rate-card.yaml's segment blended rates (280/395/525 for startup_boutique/smb/mid_market) -- those price bottom-up A/B-class delivery hours on the EXISTING per-user Class-B engine (pricing_engine.py), whereas 550 is this NEW template-shaped engine's bespoke-enhancement rate, set directly at the whole-business floor(394)+margin target from business-cost-basis.yaml, not derived from a segment. The two rate systems price two different things (per-user SaaS build vs template-shaped CRM build) and are not yet reconciled -- flagged as an open item, not resolved silently.
+  note: "quoted per requirement, hours x rate"
+
+repeat_custom_candidate_rule: "When a second client requests the same custom (non-catalogued) thing, it becomes a catalogue module here. pricing_engine.py: surface_repeat_custom_candidates() should flag bespoke enhancement line items that recur across >=2 clients so the catalogue grows instead of the bespoke pile -- not yet implemented as an automated scan in this pass; flagged as a follow-up, not built."

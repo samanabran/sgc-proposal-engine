@@ -279,6 +279,154 @@ def class_d_hours_or_cost(edition):
     )
 
 
+BUSINESS_COST_BASIS_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "business-cost-basis.yaml")
+TEMPLATE_CATALOGUE_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "template-catalogue.yaml")
+
+
+def load_business_cost_basis():
+    return _load(BUSINESS_COST_BASIS_PATH)
+
+
+def load_template_catalogue():
+    return _load(TEMPLATE_CATALOGUE_PATH)
+
+
+def business_cost_floor(basis=None):
+    """PART 1: whole-business operating cost floor, computed not hardcoded.
+    Every field here is derived from business-cost-basis.yaml -- change any
+    input in that file and this function's output changes with it. Never
+    hardcode 394 (or whatever the current output is) anywhere else; call
+    this function and read floor_per_hour_aed."""
+    b = basis or load_business_cost_basis()
+    fixed = b["fixed_monthly_aed"]
+    cash_out_monthly = (
+        fixed["licence_annual_aed"] / 12
+        + fixed["staff_salaries_monthly_aed"]
+        + fixed["office_monthly_aed"]
+        + fixed["phones_monthly_aed"]
+        + fixed["hosting_ai_monthly_aed"]
+        + fixed["other_monthly_aed"]
+    )
+    extras_total = 0.0
+    for name, extra in b.get("optional_extras", {}).items():
+        if not extra.get("enabled"):
+            continue
+        if name == "gratuity_accrual":
+            extras_total += extra["pct_of_basic"] * extra.get("basic_monthly_aed", 0)
+        elif name == "contingency_pct":
+            continue  # applied after total_requirement below, not a flat monthly add
+        else:
+            extras_total += extra.get("monthly_aed", 0)
+    cash_out_monthly += extras_total
+
+    total_requirement = cash_out_monthly + fixed["owner_salary_monthly_aed"]
+
+    contingency = b.get("optional_extras", {}).get("contingency_pct", {})
+    if contingency.get("enabled"):
+        total_requirement *= (1 + contingency.get("pct_of_total_requirement", 0))
+
+    delivery_hours = b["delivery"]["delivery_hours_per_month"]
+    floor_per_hour_aed = total_requirement / delivery_hours
+
+    return {
+        "cash_out_monthly_aed": round(cash_out_monthly, 2),
+        "total_requirement_aed": round(total_requirement, 2),
+        "delivery_hours_per_month": delivery_hours,
+        "floor_per_hour_aed": round(floor_per_hour_aed, 2),
+        "target_rate_per_hour_aed": b["target_rate_per_hour_aed"],
+        "commission_sales_pct": b["commission"]["commission_sales_pct"],
+        "commission_delivery_pct": b["commission"]["commission_delivery_pct"],
+    }
+
+
+def four_component_build(modules_selected, maturity, migration_band, enhancement_hours=0.0,
+                          enhancement_rate_aed_hr=None, catalogue=None, cost_basis=None):
+    """PART 2: template + modules + migration + enhancement, replacing the
+    single-fixed-figure build_value_aed model. Returns priced components and
+    hours separately so every AED figure traces to a named catalogue row
+    (RULE 1) instead of one asserted total."""
+    cat = catalogue or load_template_catalogue()
+    basis = cost_basis or business_cost_floor()
+
+    tmpl = cat["template_base"]
+    template_price_aed = tmpl["fixed_fee_aed"]
+    template_hours = tmpl["hours_by_maturity"][maturity]
+
+    module_mult = cat["module_hour_multiplier_by_maturity"][maturity]
+    module_rows = []
+    modules_price_aed = 0.0
+    modules_hours = 0.0
+    for name in modules_selected:
+        row = cat["modules"][name]
+        hours = row["hours"] * module_mult
+        module_rows.append({"name": name, "price_aed": row["price_aed"], "hours": round(hours, 3)})
+        modules_price_aed += row["price_aed"]
+        modules_hours += hours
+
+    mig = cat["migration_bands"][migration_band]
+    migration_unpriced = bool(mig.get("unpriced"))
+    migration_price_aed = None if migration_unpriced else mig["price_aed"]
+    migration_hours = None if migration_unpriced else mig["hours"]
+
+    rate = enhancement_rate_aed_hr if enhancement_rate_aed_hr is not None else basis["target_rate_per_hour_aed"]
+    enhancement_price_aed = round(enhancement_hours * rate, 2)
+
+    if migration_unpriced:
+        price_ex_vat = None  # RULE 1 / PART 8: never render a total that silently drops an unpriced component
+    else:
+        price_ex_vat = round(template_price_aed + modules_price_aed + migration_price_aed + enhancement_price_aed, 2)
+
+    hours_total = None if migration_unpriced else round(template_hours + modules_hours + migration_hours + enhancement_hours, 3)
+
+    return {
+        "template": {"price_aed": template_price_aed, "hours": template_hours, "maturity": maturity},
+        "modules": {"rows": module_rows, "price_aed": round(modules_price_aed, 2), "hours": round(modules_hours, 3)},
+        "migration": {"band": migration_band, "price_aed": migration_price_aed, "hours": migration_hours,
+                       "unpriced": migration_unpriced, "note": mig.get("note")},
+        "enhancement": {"hours": enhancement_hours, "rate_aed_hr": rate, "price_aed": enhancement_price_aed},
+        "price_ex_vat_aed": price_ex_vat,
+        "hours_total": hours_total,
+    }
+
+
+def hour_rate_floor_test(price_ex_vat_aed, hours_total, discount_aed=0.0, cost_basis=None,
+                          sales_pct=None, delivery_pct=None):
+    """PART 3 quote-time floor test. NAMED DISTINCTLY from the repo's
+    existing G23 (policy.yaml: gates.absolute_margin_floor, a MARGIN-pct
+    gate already checked per-worksheet) -- this is a different computation
+    (effective AED/hour vs the whole-business cost floor from PART 1), not
+    a redefinition of the existing G23. Do not conflate the two; report
+    both if both are relevant to a deal."""
+    basis = cost_basis or business_cost_floor()
+    sales = sales_pct if sales_pct is not None else basis["commission_sales_pct"]
+    delivery = delivery_pct if delivery_pct is not None else basis["commission_delivery_pct"]
+
+    net_price = price_ex_vat_aed - discount_aed
+    commission_aed = net_price * (sales + delivery) / 100.0
+    net_aed = net_price - commission_aed
+    effective_rate_aed_hr = net_aed / hours_total if hours_total else 0.0
+    floor = basis["floor_per_hour_aed"]
+    cushion_pct = (effective_rate_aed_hr / floor - 1) * 100 if floor else 0.0
+
+    if effective_rate_aed_hr < floor:
+        verdict = "BLOCK"
+    elif cushion_pct < 15:
+        verdict = "WARN"
+    else:
+        verdict = "PASS"
+
+    return {
+        "price_ex_vat_aed": net_price,
+        "hours_total": hours_total,
+        "commission_aed": round(commission_aed, 2),
+        "net_aed": round(net_aed, 2),
+        "effective_rate_aed_hr": round(effective_rate_aed_hr, 2),
+        "floor_per_hour_aed": floor,
+        "cushion_pct": round(cushion_pct, 2),
+        "verdict": verdict,
+    }
+
+
 if __name__ == "__main__":
     print("This module is imported by validate.py and test_pricing_engine.py.")
     print("Run 'python 05-ops/test_pricing_engine.py' to exercise it directly.")
