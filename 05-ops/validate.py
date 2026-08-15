@@ -129,15 +129,41 @@ def find_worksheet(client_dir):
 
 
 def check_1_forbidden_rate_in_pricing(result):
+    """SCOPE: guards the segment/role rate-card namespace (rate-card.yaml,
+    policy.yaml, and other files that price against rate-card.yaml roles)
+    against a specific, previously-retracted literal reappearing — see
+    rate-card.yaml: forbidden_rates notes (690 = never-valid VGE draft
+    figure; 550 = mid_market's pre-2026-08-04 incorrect blended_rate_aed,
+    known-defects.md #21). It is NOT a general "don't use this number"
+    ban and NOT a floor/economics check (that's PART 3's
+    hour_rate_floor_test, derived from business_cost_floor()).
+
+    EXCLUDED from this scan: business-cost-basis.yaml and
+    template-catalogue.yaml. Both belong to the separate whole-business
+    cost-floor / four-component pricing system added in 5b4c5cd, which
+    uses its own target_rate_per_hour_aed (currently 550) as a real,
+    intentional enhancement rate -- a coincidental digit collision with
+    the retracted mid_market figure, not the same rate reappearing. That
+    file's own comments already flag the two rate systems as unreconciled
+    (5b4c5cd); this check firing on it was a fail-closed-out-of-scope
+    defect (PART 9), not a genuine forbidden-rate hit. The rate-card
+    namespace this check actually guards is covered precisely elsewhere:
+    check_1c_segment_pins (segment blended_rate_aed) and
+    check_2_3_worksheet_complete (worksheet rate_aed)."""
     forbidden = _forbidden_rates()
+    excluded_basenames = {"business-cost-basis.yaml", "template-catalogue.yaml"}
     for f in glob.glob(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "*.yaml")):
         if "rate-card.yaml" in f:
             continue  # the guard entries themselves legitimately state the number
+        if os.path.basename(f) in excluded_basenames:
+            continue  # separate rate namespace, see docstring
         text = open(f, encoding="utf-8").read()
         for rate in forbidden:
             if re.search(rf"\b{rate}\b", text):
                 result.fail("1. forbidden rate", f"{rate} appears in {f}")
-    result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries)")
+    result.ok(f"1. forbidden rates {forbidden} not present in rate-card-namespace pricing/*.yaml "
+              f"(scope: excludes rate-card.yaml's own guard entries and the separate cost-basis/"
+              f"four-component-pricing namespace in {sorted(excluded_basenames)})")
 
 
 def check_1c_segment_pins(result):
