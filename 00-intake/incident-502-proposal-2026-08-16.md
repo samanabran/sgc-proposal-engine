@@ -290,22 +290,88 @@ of "fix the 502":
    in `00-intake/staging-isolation-verification-2026-08-16.md`
    §7 remains open).
 
-## 8. Action items for ops (in priority order, unblocking 502 recurrence)
+## 8. Follow-up: distinguishing the boot cause (hand restart vs crash loop)
 
-1. Edit `/etc/odoo/odoo.conf` (in container, persistent path under
-   whatever mount backs `/etc/odoo/odoo.conf`): raise
-   `workers` from `0` to a small positive number consistent with the
-   box's memory. Restart container. Verify entrypoint has no
-   `-u`/`-i` before restart — it does not (verified in §3.2), so the
-   restart is safe and does not advance module state.
-2. Read `/etc/nginx/sites-enabled/stage.sgctech.ai` and set
-   `proxy_read_timeout` to at least 150 s (i.e.
+The 502 footprint is characteristic of a post-restart boot window, but
+nobody has established whether the restart was a deliberate `docker
+restart` or an automatic recovery from a crashed PID-1. With
+`workers = 0` (single-process Odoo), the two stories are materially
+different: a hand-restart is a closed incident; a crash loop is a
+reliability problem that will recur.
+
+Read-only check, captured 2026-08-16:
+
+```
+$ docker inspect odoo19-sgc-staging \
+    --format '{{.RestartCount}} | {{.State.StartedAt}} | {{json .HostConfig.RestartPolicy}}'
+0 | 2026-08-16T07:58:06.443703712Z | {"Name":"no","MaximumRetryCount":0}
+$ docker inspect odoo19-sgc-staging --format '{{.State.FinishedAt}} | {{.State.Error}}'
+2026-08-16T07:57:54.57898904Z |
+```
+
+`RestartCount = 0` and `RestartPolicy.Name = "no"` — Docker is not
+configured to restart the container on exit. The FinishedAt/StartedAt
+gap is 12 seconds. That is consistent with a deliberate `docker stop`
++ `docker start` (or a single `docker restart`) by an operator at
+~07:57:54 UTC, not with a crash loop. The `.State.Error` field is
+empty, so the previous container exited cleanly (exit code 0), not
+from an unhandled crash.
+
+**Conclusion:** the 502 was the boot window of a deliberate, clean
+restart. Not a crash-loop symptom. The incident is genuinely closed at
+the boot-cause level — the remaining residual risk is single-process
+fragility (any future unhandled crash will take the container down
+with no auto-recovery), addressed by §9 item 1 below.
+
+## 9. Action items for ops (in priority order, unblocking 502 recurrence)
+
+**Priority correction from the prior session's note:** Odoo only
+enforces `limit_time_real`, `limit_time_cpu`, and the memory limits
+in `prefork` mode (i.e. with `workers >= 1`). With `workers = 0`
+those limits are **inert**. The 60s nginx `proxy_read_timeout` is
+currently the only effective timeout on the render path — a long
+render hangs the single process until nginx gives up while Odoo
+carries on working. nginx timeout alignment is therefore the parent
+of no useful effect until workers is raised. Setting `workers`
+first.
+
+**Memory arithmetic (for the workers decision, not just a recommendation):**
+box memory: `free -m` reports `total=24031 MiB`, `available=11374 MiB`
+at idle, no swap. Current staging container: `docker stats
+odoo19-sgc-staging --no-stream` reports `MEM USAGE = 240.7 MiB / LIMIT
+23.47 GiB (= 24031 MiB)`, `1.00%`. Odoo's rule of thumb for prefork
+workers is roughly 150–250 MiB per worker at rest, more under PDF
+rendering (wkhtmltopdf is a separate subprocess that can fork
+substantially). Realistic numbers for this box:
+
+- `workers = 2`: headroom ≈ 24031 − (240 + 2 × 250) = 23291 MiB free.
+  Plenty of room for PDF spikes.
+- `workers = 3`: headroom ≈ 24031 − (240 + 3 × 250) = 23041 MiB free.
+  Also fine, more concurrency.
+- `workers = 5`: headroom ≈ 24031 − (240 + 5 × 250) = 22541 MiB free.
+  Still safe but the gap to the 2-worker number is small.
+
+**Recommendation for the ticket: `workers = 2`** — minimum to get
+any prefork benefit, well inside the box's memory, leaves headroom
+for spikes. Bump to 3 if/when concurrency proves it.
+
+**Action items, in priority order:**
+
+1. **Edit `/etc/odoo/odoo.conf` (in container):** raise `workers`
+   from `0` to `2`. Restart container. Verify entrypoint has no
+   `-u`/`-i` before restart — it does not (verified in §3.2), so
+   the restart is safe and does not advance module state. This is
+   the parent change: it makes the `limit_time_*` and memory
+   limits actually enforce, and it removes the single-process
+   failure mode that §8 found.
+2. **Only after step 1: read `/etc/nginx/sites-enabled/stage.sgctech.ai`**
+   and set `proxy_read_timeout` to at least 150 s (i.e.
    `limit_time_real 120s + 30s` headroom) for the upstream
    `odoo_stage` / location `/`. Reload nginx (not the container).
+   Doing this before step 1 would align against nothing.
 3. Optional: add a `HEALTHCHECK` to the `odoo19-sgc-staging` service
    in compose so Docker tracks Odoo's actual HTTP readiness instead of
-   just PID-1 aliveness. Outside this session's current session tool
-   surface area — flag to ops via ticket, do not implement here.
+   just PID-1 aliveness. Flag to ops via ticket, do not implement here.
 4. Long-term (per staging-isolation doc §7): separate staging
    Postgres, distinct role with no production grants, separate
    docker network, `pg_hba.conf` subnet restriction. NOT done here
