@@ -386,6 +386,7 @@ running PDF.
 
 Captured 2026-08-16 via `docker exec odoo19-sgc-staging cat /etc/odoo/odoo.conf`:
 
+- `workers = 0` (line 39, active).
 - `; limit_memory_hard = 2684354560` — **2.5 GiB**, currently commented
   (default).
 - `; limit_memory_soft = 2147483648` — **2.0 GiB**, currently commented
@@ -393,55 +394,96 @@ Captured 2026-08-16 via `docker exec odoo19-sgc-staging cat /etc/odoo/odoo.conf`
 - `; limit_time_cpu = 60` — 60s per request, currently commented.
 - `; limit_time_real = 120` — 120s wall, currently commented.
 - `; limit_request = 8192` — per-worker request slot, currently commented.
-- `max_cron_threads = 0` — no cron threads, so scheduled actions will
-  not run. Likely intentional for staging; flagging anyway.
+- `max_cron_threads = 0` (line 49, active, overrides the commented
+  `= 2` default on line 31). So no cron threads spawn today and
+  none will after step 1 either — the (workers + cron_threads) ×
+  limit_memory calculation resolves to workers × limit only on this
+  config. Worth re-checking the moment any of the three changes,
+  because flipping `max_cron_threads` back to 2 would also flip the
+  memory arithmetic.
 
-**Specific risk under step 1 as drafted:** 2.0 GiB soft / 2.5 GiB
-hard is **tight** for a worker that's about to render a wkhtmltopdf
-PDF. `wkhtmltopdf --version` is present (verified in §3.3) and patches
-its own Qt, but a single PDF render on a non-trivial proposal can
-spend well over 2 GiB transiently and get the worker killed. The fix
-is to raise the limits before step 1, not to discover them after the
-first PDF render trips them.
+**Specific risk under step 1 as drafted:** 2.5 GiB hard / 2.0 GiB
+soft is *generous* for an Odoo worker that only holds the HTML and
+the resulting PDF in its own RSS — heavy proposals still come in
+under a few hundred MB. The earlier recommendation to raise the
+limits to 5/4 GiB was based on a misattribution: `wkhtmltopdf` is
+forked as a separate subprocess, so its memory is NOT counted
+against the Odoo worker's `limit_memory_hard`. The worker only
+holds the HTML input and the resulting PDF bytes — tens of MB for a
+heavy report, not gigabytes. The commented 2.5 GiB default is
+sufficient; the lower value is the safer one on a zero-swap box.
+
+**Why the lower value is the safer one:** zero swap on this box
+(confirmed via `free -m`) means a genuine memory spike goes straight
+to OOM kill rather than a slowdown. Higher per-worker limits increase
+the payload when the OS OOM-killer fires. Keeping the limits at their
+default 2.5/2.0 GiB keeps the failure mode visible per worker
+(graceful recycle via Odoo's memory limit) rather than letting it
+swell into a process-wide OOM kill.
 
 **Recommendation for the same ticket:**
 
-- Edit `/etc/odoo/odoo.conf` to set `workers = 2` AND raise the
-  following commented lines to active values:
-  - `limit_memory_hard = 5368709120` (5 GiB) — max-headroom for a
-    PDF spike without OOM-killing the worker.
-  - `limit_memory_soft = 4294967296` (4 GiB) — soft-kill threshold.
-  - `limit_time_cpu = 120` — doubled from default, lets a heavy
-    render finish.
-  - `limit_time_real = 240` — doubled from default, sanity ceiling.
-  - `limit_request = 8192` — keep as default.
+- Edit `/etc/odoo/odoo.conf` to set `workers = 2`. Leave the
+  commented memory and time limits at their default values (2.5
+  GiB hard, 2.0 GiB soft, 60s CPU, 120s real). Verifying the limits
+  before the restart was the point; the audit concluded the defaults
+  are sufficient and a higher number would be worse on zero-swap.
 - Restart container, verify entrypoint still has no `-u`/`-i`
   (verified in §3.2).
-- Combine with `RestartPolicy: always` (or `unless-stopped`) so the
-  single-process failure mode this incident exposed is mitigated
-  without a separate manual restart. Docker's `Policy.Name = "no"`
-  as configured today means any unhandled crash leaves staging down
-  until someone notices and runs `docker start`. The memory numbers
-  leave room for this; combined with the modest worker count
-  recommended, no additional box budget is consumed.
+- Apply the restart policy as a separate, no-restart change via
+  `docker update --restart=unless-stopped odoo19-sgc-staging`. This
+  is not in `odoo.conf` — it's a container-level Docker setting and
+  can be applied live without a restart. Bundling it into the same
+  maintenance window is reasonable for tidiness; doing it first
+  is not required.
 
-The two changes (workers + limits + restart policy) belong in the
-same edit because they touch the same file and the same restart, and
-because the workers change is unsafe in isolation given the current
-limit values. Not done here — the file is on the staging container
-volume, not in the repo, and the action is ops's under the freeze.
+The bundled edit (workers + restart policy) is safe and conservative.
+Not done here — the file is on the staging container volume, not in
+the repo, and the action is ops's under the freeze.
 
-## 11. Out-of-scope findings noted in passing
+## 11. Out-of-scope findings to escalate now, not file for later
 
-- `admin_passwd` is set in this same `odoo.conf` (plaintext, in the
-  container volume). The file is not in the repo, so the password
-  isn't being committed, but it sits on the staging volume and is
-  readable by anyone with file access to the container. Worth noting
-  to ops but not in scope to fix here — falls under the broader
-  secret-management review, not this incident.
-- `proxy_mode = True` and `list_db = False` are set. Both are
-  reasonable for a reverse-proxied staging instance; flagging only
-  to confirm neither is a workaround for the current incident.
+**`admin_passwd` in plaintext on the staging volume.** This is not a
+generic hygiene item. It is the master password gating
+`/web/database/manager` — create, duplicate, drop, restore. On this
+container those operations execute against production's Postgres
+instance, because `sgc_staging` lives there (per
+`00-intake/staging-isolation-verification-2026-08-16.md` §8). A
+plaintext master password on the staging volume is therefore a
+credential that can drop databases on production, and it sits
+alongside a 2026-08-15 log entry showing exactly that class of
+operation being run (a `DROP DATABASE sgc_staging_restore_test`,
+handled in a prior session's addendum). This needs to be in the
+isolation ticket, not a generic secret-management review.
+
+Cheap container/nginx-level mitigations that touch no database and
+are not blocked by the freeze:
+
+- `list_db = False` is already set in `odoo.conf` (verified §3.7).
+  Stays.
+- Either of the following, applied at the nginx vhost serving
+  `stage.sgctech.ai`:
+  - `location ~ ^/web/database { deny all; return 404; }` — silences
+    the manager UI entirely from the public hostname.
+  - Or: enforce a `REMOTE_USER` / HTTP-auth check at the same
+    location, restricting it to a known ops IP range. More
+    granular; depends on whether ops accesses the manager from a
+    fixed IP.
+- Rotate `admin_passwd` to a value generated and stored in the
+  container's secret manager (or a sibling `.env` file outside the
+  repo — not in the repo regardless). Do not commit any new value
+  to the repo. If no secret manager is in place, at minimum move
+  the value out of the Odoo-readable config dir to a root-only file
+  and reference it via `admin_passwd =` plus a small wrapper.
+- Confirm `/web/database/manager` is unreachable from the public
+  hostname after the nginx change with a single `curl -I` against
+  the public URL. No DB query required.
+
+Out-of-scope flags noted but not fixed here:
+
+- `proxy_mode = True` is set — appropriate for a reverse-proxied
+  staging instance; flagging only to confirm it's not a workaround
+  for the current incident.
 
 ## 9. Reproducibility / commit metadata
 
