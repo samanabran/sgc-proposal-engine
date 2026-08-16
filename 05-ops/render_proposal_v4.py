@@ -469,8 +469,16 @@ def render_internal_worksheet(quote, client_name, reference, fixture_name):
 
 FIXTURES = {
     "F1": {
-        "client_name": "RVN Real Estate Group",
-        "reference": "RVN-2026-V4-01",
+        # RENAMED 2026-08-16: this fixture originally used "RVN" as a
+        # plausible-sounding fictional brokerage name, without knowing
+        # RVN-realestate-leads is a real, in-progress client on origin/main
+        # with three real prices already attached (see the merge-conflict
+        # investigation this session). A synthetic test fixture must never
+        # be named anything a real client could plausibly be — use an
+        # obviously-fake identifier instead, never another brokerage-shaped
+        # name.
+        "client_name": "ZZZ SYNTHETIC TEST FIXTURE (not a real client)",
+        "reference": "ZZZFIXTURE-2026-V4-01",
         "module_names": ["lead_capture_pipeline", "property_listing_management",
                           "commission_and_deals", "multi_agent_access_control",
                           "reporting_and_dashboards"],
