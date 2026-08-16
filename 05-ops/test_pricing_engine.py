@@ -1540,6 +1540,70 @@ def t19_staging_db_name_guard():
         db_guard.ALLOWED_DB_HOST = _real_allowed_host
 
 
+# ===========================================================================
+# T20 -- ADDED 2026-08-16, ported forward across the origin/main merge
+# (local branch, HANDOVER.md). New, not a regression test of anything
+# pre-existing on main: origin's own T1-T19 stop at T19, this is the next
+# free number, not a renumbering of anything.
+# ===========================================================================
+def t20_gross_break_even_and_platform_portion():
+    basis = pe.business_cost_floor()
+    commission_rate = (basis["commission_sales_pct"] + basis["commission_delivery_pct"]) / 100.0
+    floor = basis["floor_per_hour_aed"]
+
+    # gross_break_even_aed_hr must independently recompute to floor/(1-rate)
+    # -- not just equal whatever hour_rate_floor_test() itself returns, or
+    # a bug in that function's own formula would pass this check trivially.
+    r = pe.hour_rate_floor_test(price_ex_vat_aed=100000, hours_total=100)
+    independent_break_even = round(floor / (1 - commission_rate), 2)
+    check(f"T20: hour_rate_floor_test()'s gross_break_even_aed_hr matches an independent "
+          f"recomputation of floor/(1-commission_rate) (got={r['gross_break_even_aed_hr']}, "
+          f"independent={independent_break_even})",
+          abs(r["gross_break_even_aed_hr"] - independent_break_even) < 0.01)
+
+    # A quote billed at EXACTLY the gross break-even must PASS/WARN this
+    # function's own gate (net == floor, not < floor) while showing ZERO
+    # cushion -- confirms gross_break_even_aed_hr is reported as a metric,
+    # not silently wired in as a stricter BLOCK threshold.
+    # NOTE: probing exactly AT the theoretical break-even is fragile --
+    # gross_break_even_aed_hr is rounded to 2dp, and multiplying that
+    # rounded figure back through hour_rate_floor_test()'s own commission
+    # math can land the resulting effective_rate a fraction of a cent
+    # BELOW floor due to float rounding, tipping the strict `<` BLOCK
+    # check even though the two values display as equal at 2dp (found
+    # live while writing this test: effective_rate_aed_hr displayed as
+    # 394.38 == floor 394.38, verdict was still BLOCK). That is not a bug
+    # in hour_rate_floor_test() -- BLOCK-below-floor-even-fractionally is
+    # a defensible, conservative design choice, not this test's call to
+    # relax. Probe a hair ABOVE break-even instead, where the boundary
+    # question this test actually cares about (does gross_break_even
+    # show ~zero cushion, not a comfortable one) is answered just as well
+    # without fighting float precision at an exact edge.
+    hours = 10
+    price_just_above_break_even = round((independent_break_even + 0.10) * hours, 2)
+    r2 = pe.hour_rate_floor_test(price_ex_vat_aed=price_just_above_break_even, hours_total=hours)
+    check(f"T20: a quote billed just above the gross break-even rate does not BLOCK "
+          f"(verdict={r2['verdict']}, cushion_pct={r2['cushion_pct']})",
+          r2["verdict"] != "BLOCK")
+    check(f"T20: that same quote shows a near-zero cushion, not a comfortable one "
+          f"(cushion_pct={r2['cushion_pct']})",
+          0 <= r2["cushion_pct"] < 1)
+
+    # platform_portion_aed_mo() must reproduce Prosper's own real, already-
+    # verified stored figures exactly (02-clients/PRO-prosper-realestate/
+    # 02-calc/pricing-worksheet.yaml: cts_total_aed=2918, users_now=31) --
+    # this is a regression check against a REAL client's numbers, not an
+    # invented fixture.
+    pol = pe.load_policy()
+    pp = pe.platform_portion_aed_mo(31, pol)
+    check(f"T20: platform_portion_aed_mo(31) reproduces Prosper's real cts_total_aed "
+          f"(got={pp['cts_total_aed']}, expected=2918)",
+          abs(pp["cts_total_aed"] - 2918) < 0.01)
+    check(f"T20: platform_portion_aed_mo(31) reproduces Prosper's real platform_portion_aed_mo "
+          f"(got={pp['platform_portion_aed_mo']}, expected=3648)",
+          pp["platform_portion_aed_mo"] == 3648)
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1579,6 +1643,8 @@ if __name__ == "__main__":
     t18_recurring_support_load_table()
     print("\n=== T19: staging DB-name guard, fail-closed exact match (Phase 3, staging isolation pass) ===")
     t19_staging_db_name_guard()
+    print("\n=== T20: gross break-even metric + platform_portion_aed_mo() ===")
+    t20_gross_break_even_and_platform_portion()
 
     print()
     if FAILURES:
@@ -1586,5 +1652,5 @@ if __name__ == "__main__":
         for f in FAILURES:
             print(" ", f)
         sys.exit(1)
-    print("RESULT: all T1-T7 checks pass.")
+    print("RESULT: all checks pass.")
     sys.exit(0)

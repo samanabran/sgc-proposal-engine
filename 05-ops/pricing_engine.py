@@ -281,6 +281,7 @@ def class_d_hours_or_cost(edition):
 
 BUSINESS_COST_BASIS_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "business-cost-basis.yaml")
 TEMPLATE_CATALOGUE_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "template-catalogue.yaml")
+POLICY_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml")
 
 
 def load_business_cost_basis():
@@ -289,6 +290,87 @@ def load_business_cost_basis():
 
 def load_template_catalogue():
     return _load(TEMPLATE_CATALOGUE_PATH)
+
+
+def load_policy():
+    return _load(POLICY_PATH)
+
+
+def contingency_pct_for(categories, policy=None):
+    """LOCAL-ONLY ADDITION, ported forward across the origin/main merge
+    (policy.yaml: contingency_schedule never conflicted -- origin has no
+    equivalent concept). categories: a category name (str) or iterable of
+    category names from policy.yaml: contingency_schedule. Returns the
+    single applicable pct -- the MAX across all supplied categories
+    (combination_rule, "worst-risk-governs"), never a sum. INTERNAL ONLY
+    -- never surface this percentage on a client-facing document."""
+    pol = policy or load_policy()
+    schedule = pol["contingency_schedule"]
+    if isinstance(categories, str):
+        categories = [categories]
+    pcts = [schedule[c]["pct"] for c in categories]
+    return max(pcts)
+
+
+def risk_adjusted_hours(raw_hours, categories, policy=None):
+    """raw_hours * (1 + contingency_pct_for(categories)). Returns
+    (raw_hours, risk_adjusted_hours, pct_applied) -- callers must report
+    BOTH raw and risk-adjusted in internal output, and must use ONLY the
+    risk-adjusted figure in any effective-rate/floor check -- quoting on
+    raw hours is the exact failure mode this function exists to prevent."""
+    pol = policy or load_policy()
+    pct = contingency_pct_for(categories, pol)
+    adjusted = round(raw_hours * (1 + pct), 2)
+    return raw_hours, adjusted, pct
+
+
+def platform_portion_aed_mo(users_now, policy=None):
+    """Formalizes the recurring-subscription platform/CTS floor formula
+    that has been HAND-COMPUTED per client-worksheet since before this
+    repo's pricing-v4 correction pass existed (policy.yaml: cost_to_serve
+    -- see e.g. 02-clients/PRO-prosper-realestate/02-calc/pricing-worksheet.yaml,
+    02-clients/RVN-realestate-leads/02-calc/pricing-worksheet.yaml:108's
+    own inline comment: 'max(CTS x 1.25 = 1170, market_defensible_floor)').
+    Never hand-compute this again in a worksheet or a document -- call
+    this function and read platform_portion_aed_mo from its return value,
+    the same discipline business_cost_floor() already established for the
+    whole-business floor. Formula, unchanged from every worksheet that
+    already computed it by hand:
+        hosting_allocation_aed = hosting_node_true_cost_aed * (users / hosting_node_user_capacity)
+        support_labour_aed = ceil(users / 5) * support_hours_per_5_users * support_rate_aed
+        account_mgmt_aed = tier lookup (account_mgmt_aed tiers, highest tier applies above its own threshold)
+        cts_total_aed = hosting_allocation + support_labour + account_mgmt + tooling_flat_aed
+        platform_portion_aed_mo = round(cts_total_aed * gates.platform_floor_multiplier)
+    """
+    pol = policy or load_policy()
+    cts = pol["cost_to_serve"]
+
+    hosting_allocation_aed = cts["hosting_node_true_cost_aed"] * (users_now / cts["hosting_node_user_capacity"])
+    support_labour_aed = math.ceil(users_now / 5) * cts["support_hours_per_5_users"] * cts["support_rate_aed"]
+
+    tiers = cts["account_mgmt_aed"]
+    sorted_tiers = sorted(((int(k.split("_")[1]), v) for k, v in tiers.items()), key=lambda t: t[0])
+    account_mgmt_aed = sorted_tiers[-1][1]  # default: highest tier, if users exceeds every threshold
+    for threshold, value in sorted_tiers:
+        if users_now <= threshold:
+            account_mgmt_aed = value
+            break
+
+    tooling_aed = cts["tooling_flat_aed"]
+    cts_total_aed = hosting_allocation_aed + support_labour_aed + account_mgmt_aed + tooling_aed
+    platform_floor_multiplier = pol["gates"]["platform_floor_multiplier"]
+    platform_portion_aed_mo_value = round(cts_total_aed * platform_floor_multiplier)
+
+    return {
+        "users_now": users_now,
+        "hosting_allocation_aed": round(hosting_allocation_aed, 2),
+        "support_labour_aed": support_labour_aed,
+        "account_mgmt_aed": account_mgmt_aed,
+        "tooling_aed": tooling_aed,
+        "cts_total_aed": round(cts_total_aed, 2),
+        "platform_floor_multiplier": platform_floor_multiplier,
+        "platform_portion_aed_mo": platform_portion_aed_mo_value,
+    }
 
 
 def business_cost_floor(basis=None):
@@ -404,21 +486,46 @@ def hour_rate_floor_test(price_ex_vat_aed, hours_total, discount_aed=0.0, cost_b
     gate already checked per-worksheet) -- this is a different computation
     (effective AED/hour vs the whole-business cost floor from PART 1), not
     a redefinition of the existing G23. Do not conflate the two; report
-    both if both are relevant to a deal."""
+    both if both are relevant to a deal.
+
+    TWO NUMBERS BELOW LIVE ON DIFFERENT AXES -- reviewed and confirmed
+    2026-08-16, do not collapse them into each other:
+
+    gross_break_even_aed_hr = floor / (1 - commission_rate). This is
+    ARITHMETIC, not a policy choice -- it is the GROSS rate at which NET
+    (after commission) lands EXACTLY on the floor, i.e. ZERO cushion.
+    Netting commission out first (as this function already does) and
+    comparing to `floor` is algebraically identical to comparing a gross
+    rate against this figure -- they are the same test expressed at
+    different points in the arithmetic, not two different tests. Reported
+    below as a METRIC only, never as a second threshold: a quote billed at
+    exactly gross_break_even_aed_hr passes this function's BLOCK/WARN/PASS
+    check (net == floor is not < floor) but earns the business nothing.
+    Printed so whoever is authoring a quote can see that.
+
+    `15` in `cushion_pct < 15` below is a POLICY CHOICE about how much
+    margin the business wants above the floor, chosen directly by the
+    owner -- it is NOT derived from the commission rate, and it is
+    coincidentally close to (but not the same as) commission-rate-implied
+    figures like 1/(1-0.14)-1 = 16.28%. Do not "correct" it to match a
+    derived percentage; that would be changing a deliberate policy choice
+    while believing you found an arithmetic bug."""
     basis = cost_basis or business_cost_floor()
     sales = sales_pct if sales_pct is not None else basis["commission_sales_pct"]
     delivery = delivery_pct if delivery_pct is not None else basis["commission_delivery_pct"]
+    commission_rate = (sales + delivery) / 100.0
 
     net_price = price_ex_vat_aed - discount_aed
-    commission_aed = net_price * (sales + delivery) / 100.0
+    commission_aed = net_price * commission_rate
     net_aed = net_price - commission_aed
     effective_rate_aed_hr = net_aed / hours_total if hours_total else 0.0
     floor = basis["floor_per_hour_aed"]
     cushion_pct = (effective_rate_aed_hr / floor - 1) * 100 if floor else 0.0
+    gross_break_even_aed_hr = round(floor / (1 - commission_rate), 2) if commission_rate < 1 else None
 
     if effective_rate_aed_hr < floor:
         verdict = "BLOCK"
-    elif cushion_pct < 15:
+    elif cushion_pct < 15:  # POLICY CHOICE (owner-chosen), not derived -- see docstring
         verdict = "WARN"
     else:
         verdict = "PASS"
@@ -430,6 +537,7 @@ def hour_rate_floor_test(price_ex_vat_aed, hours_total, discount_aed=0.0, cost_b
         "net_aed": round(net_aed, 2),
         "effective_rate_aed_hr": round(effective_rate_aed_hr, 2),
         "floor_per_hour_aed": floor,
+        "gross_break_even_aed_hr": gross_break_even_aed_hr,
         "cushion_pct": round(cushion_pct, 2),
         "verdict": verdict,
     }

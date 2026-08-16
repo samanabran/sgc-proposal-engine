@@ -188,3 +188,35 @@ every one of these.
     detail to note in passing** — the same discipline this file already
     applies to inline comments and formula corrections (items 21-22) applies
     equally to agent handoffs.
+25. **Two independent sessions found the same commission-retention
+    ambiguity; only one of them left it open.** A local, diverged branch
+    (never merged into this file until the 2026-08-16 origin/main merge)
+    independently flagged that a "5% retention" figure could mean 5% of
+    the commission amount OR 5% of contract value — a ~7x difference —
+    with neither picked anywhere in that branch's own policy file. By the
+    time that branch merged, `00-knowledge/clause-library/commission-retention.md`
+    (built on origin/main, same 2026-08-15 pass, unknown to the local
+    branch at the time) had already resolved the BASE question in its
+    approved operative text: retention is 5% of the commission amount
+    earned on cash collected, not of contract value. What that clause's
+    own provenance note still leaves open is narrower than the local
+    branch's finding: whether 5% itself is the confirmed figure (stated
+    as owner-stated in conversation, "NOT independently documented
+    elsewhere in this repo... pending confirmation") — not which base it
+    applies to. Recorded here because the local branch's finding was real
+    and worth a permanent record, but stating it as still-fully-open
+    after the merge would misrepresent work origin had already done.
+26. **`grep -a` on a rendered PDF is not a text search — it is a coin
+    flip.** Found while fixing a fictional test fixture that had
+    accidentally reused a real client's name (RVN): `grep -a RVN
+    file.pdf` returned no match on a PDF where the client name
+    demonstrably appeared on two pages (cover, signature block) —
+    confirmed only by extracting the text properly (`pypdf`), which found
+    both. PDF text streams are commonly compressed/encoded at the object
+    level; a raw byte-level grep can miss content that is genuinely
+    present and visible when the file is opened. **Any future
+    client-name scrub, credential check, or content audit against a
+    rendered PDF must go through a real text extractor
+    (`pypdf.PdfReader(...).pages[i].extract_text()` or equivalent), never
+    `grep -a`/binary grep alone** — a clean `grep -a` result on a PDF
+    proves nothing and must not be reported as a clean result.

@@ -30,6 +30,16 @@ modules:
   attendance_in_app_checkin:             { price_aed: 3000, hours: 5 }
   daily_reporting_pack:                   { price_aed: 2000, hours: 3 }
   property_portal_feed:                    { price_aed: 4000, hours: 6 }
+  # ADDED 2026-08-16, ported from a local branch during the origin-main
+  # merge (see HANDOVER.md). NOT packaging -- a real build line. Evidence:
+  # 00-intake/demo-presentation-inventory-2026-08-16.md (an estate audit
+  # this branch of the repo never had) found ir_rule (row-level record
+  # rules) on only 18 of ~90 custom Odoo models in a real deployed
+  # estate, and NONE on the commission or deals-management models
+  # specifically -- the two most likely to need per-agent visibility in
+  # a real multi-agent brokerage. ir_model_access (basic CRUD) is
+  # populated everywhere (168 rows) but that is not the same protection.
+  multi_agent_access_control:            { price_aed: 3500, hours: 7 }
 
 module_hour_multiplier_by_maturity:
   mature: 1.0
