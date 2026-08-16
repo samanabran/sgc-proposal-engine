@@ -1,27 +1,17 @@
-# INTERNAL WORKSHEET — F1 — ZZZFIXTURE-2026-V4-01 — ZZZ SYNTHETIC TEST FIXTURE (not a real client)
+# INTERNAL WORKSHEET — F3 — ZZZFIXTURE-2026-V4-03 — ZZZ OVER-CAPACITY SYNTHETIC FIXTURE (not a real client)
 
 **NOT FOR CLIENT TRANSMISSION.**
 
 ## One-time build (pe.four_component_build())
 - template: {'price_aed': 12000, 'hours': 6, 'maturity': 'mature', 'derivation': 'fixed_fee', 'scope': None}
 - modules: {'rows': [{'name': 'lead_capture_meta_google_ads', 'price_aed': 3000, 'hours': 4.0}, {'name': 'whatsapp_lead_notification', 'price_aed': 2500, 'hours': 3.0}, {'name': 'auto_distribution_manual_reassign', 'price_aed': 2000, 'hours': 3.0}, {'name': 'call_logging_manual_entry', 'price_aed': 2000, 'hours': 3.0}, {'name': 'attendance_in_app_checkin', 'price_aed': 3000, 'hours': 5.0}, {'name': 'daily_reporting_pack', 'price_aed': 2000, 'hours': 3.0}, {'name': 'multi_agent_access_control', 'price_aed': 3500, 'hours': 7.0}, {'name': 'property_portal_feed', 'price_aed': 4000, 'hours': 6.0}], 'price_aed': 22000.0, 'hours': 34.0, 'derivation': 'fixed_fee_per_catalogue_row'}
-- migration: {'band': 'from_1000_to_5000', 'price_aed': 5000, 'hours': 7, 'unpriced': False, 'note': None, 'derivation': 'banded_fixed_fee'}
-- price_ex_vat_aed: 39000.0, hours_total: 47.0
+- migration: {'band': 'over_20000', 'price_aed': None, 'hours': None, 'unpriced': True, 'note': '[UNPRICED — Commercial Desk] — never estimate, quote only after seeing the data.', 'derivation': 'banded_fixed_fee'}
+- price_ex_vat_aed: None, hours_total: None
 
 ## Recurring (pe.platform_portion_aed_mo())
 {'users_now': 25, 'hosting_allocation_aed': 450.0, 'support_labour_aed': 1400, 'account_mgmt_aed': 350, 'tooling_aed': 50, 'cts_total_aed': 2250.0, 'platform_floor_multiplier': 1.25, 'platform_portion_aed_mo': 2812}
 
-## Quote-time floor test (pe.hour_rate_floor_test())
-- price_ex_vat_aed: 39000.0
-- hours_total: 47.0
-- commission_aed: 5460.0
-- net_aed: 33540.0
-- effective_rate_aed_hr: 713.62
-- floor_per_hour_aed: 394.38
-- gross_break_even_aed_hr: 458.58
-- cushion_pct: 80.95
-- verdict: PASS
-- NOTE: gross_break_even_aed_hr (458.58) is a REPORTED METRIC, not a threshold -- a quote billed at exactly that gross rate earns zero cushion. The verdict above (BLOCK/WARN/PASS) is the actual gate.
+## Quote-time floor test: not computed -- migration UNPRICED, no total to test.
 
 ## Risk-adjusted hours (contingency schedule, policy.yaml -- local-only addition, survives merge unmodified)
 - lead_capture_meta_google_ads: raw=4h, risk_adjusted=4.6h (contingency 15%)

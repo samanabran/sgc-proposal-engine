@@ -2556,3 +2556,45 @@ decision entries; this is the consolidated summary.
   two-floor model, platform-fee-as-product framing, the five named
   exclusions, the contingency schedule, and the discount-floor gate —
   this entry does not duplicate them.
+
+## origin/main merge and capability reconciliation — 2026-08-16
+
+Full detail: HANDOVER.md decision #20. Summary: origin/main held a
+complete, independent, already-tested pass at the pricing v4 brief
+(28 commits this branch never had, built against a real client,
+02-clients/RVN-realestate-leads/) that this branch had unknowingly
+duplicated under different names. Capability inventory built read-only
+before any file was touched; merge aborted, not resolved live.
+
+- `git checkout --theirs` on all 5 conflicted files -- origin wins
+  wholesale on cost basis, the four-component catalogue, commission/
+  retention, capacity, recurring/support load, and the T1-T19 test
+  suite.
+- Ported forward BY NAME onto origin's functions: `multi_agent_access_control`
+  into `template-catalogue.yaml` (evidence origin never had); a
+  `gross_break_even_aed_hr` REPORTED METRIC on `hour_rate_floor_test()`
+  (not a second threshold -- would have quietly lowered the WARN bar to
+  break-even and called it a fix); `platform_portion_aed_mo()`, a new
+  function formalizing the recurring-subscription formula every client
+  worksheet in this repo has hand-computed since before either
+  pricing-v4 pass existed -- verified against Prosper's own real stored
+  figures exactly (T20).
+- `render_proposal_v4.py` rebuilt as a strict consumer of origin's
+  functions, with a genuine one-time + recurring commercial summary
+  (horizon totals at 12/24/36mo, not compared against each other) --
+  the prior one-time-only model would have omitted a real deal's
+  largest line item.
+- Page-flow defect found and fixed on re-render, not assumed clean:
+  every section was forced onto its own page by construction, making
+  "10 pages" true regardless of content. Real fixtures now render at 4
+  pages, all ten sections present (a real test, `assert_required_sections()`,
+  not a styling convention); the adversarial 22-page overflow proof was
+  re-run under the new layout (27 pages, correctly failed), not assumed
+  to still hold.
+- `known-defects.md` #25 (local retention-base finding, superseded by
+  origin's own clause by merge time) and #26 (`grep -a` on a compressed
+  PDF proves nothing -- found live while fixing the RVN fixture name;
+  use a real text extractor).
+- **Deferred, not done**: `sgc_quotation_proposal/`'s QWeb template
+  still reflects the pre-merge schema and has not been updated to match
+  the rebuilt renderer -- flagged, not silently left to drift further.
