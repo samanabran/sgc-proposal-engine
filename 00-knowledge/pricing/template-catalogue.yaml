@@ -39,18 +39,24 @@ modules:
   lead_capture_pipeline:
     amount_aed: 3000
     scope: "Meta/Google/web lead intake into CRM — see 00-intake/demo-presentation-inventory-2026-08-16.md R1 (crm_lead_ingestion_hub module, class BUILT: code exists, installed, zero rows in its own log table despite an actively-firing retry cron — no evidence any inbound webhook was ever received)."
+    risk_category: [git_untracked, no_persisted_output_evidence]
+    risk_category_basis: "Maps to crm_lead_ingestion_hub — one of the 4 named git-untracked modules (§2 of the inventory) AND its own log table shows 0 persisted rows despite a firing cron (§6.1). Both conditions apply; contingency_pct_for() takes the max (50%, not_persisted_output_evidence), per the combination_rule."
     warrant_tier: T2
     provenance: "Owner-stated 2026-08-16."
 
   property_listing_management:
     amount_aed: 3500
     scope: "Property/unit register, listing status, media — see sgc_offplan_rental_property_management, the largest git-tracked SGC module in the estate inventory (581/584 files tracked)."
+    risk_category: [git_tracked_deployed_before]
+    risk_category_basis: "sgc_offplan_rental_property_management is git-tracked (581/584 files, the 3-file gap is __pycache__/one stray script, verified) and installed with real persisted data (property_project=6, property_sub_project=5, rent_contract=4 rows, per the inventory §5.1)."
     warrant_tier: T2
     provenance: "Owner-stated 2026-08-16."
 
   commission_and_deals:
     amount_aed: 3500
     scope: "Commission calculation, split/clawback, deal pipeline — see sgc_commission and sgc_deals_management, both git-tracked, installed."
+    risk_category: [git_tracked_deployed_before]
+    risk_category_basis: "Both sgc_commission and sgc_deals_management are git-tracked (73/73 and 45/45 files respectively, per the inventory §4.3) and installed. NOTE: this does not cover the ir_rule/multi-agent-visibility gap on these same models — that gap is priced and risk-tagged separately as its own line, multi_agent_access_control, below; not double-counted here."
     warrant_tier: T2
     provenance: "Owner-stated 2026-08-16."
 
@@ -64,12 +70,16 @@ modules:
     evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.4 (Phase 5.5, access control): ir_rule (row-level record rules) exist for only 18 of ~90 custom models/tables in the estate inventory, and are ABSENT from the commission and deals-management models specifically — the two most likely to need per-agent visibility in a real multi-agent brokerage. ir_model_access (basic CRUD) is populated everywhere (168 rows) but that is not the same protection: CRUD access says an agent CAN read/write commission or deal records at all; it says nothing about whether Agent A can see Agent B's."
     internal_build_estimate_hours: 7
     internal_build_estimate_note: "Owner-stated 2026-08-16. Grade D — no delivered actual exists yet for this specific line (writing ir.rule domains on sgc_commission/sgc_deals_management, both already-deployed git-tracked modules). Risk-adjusted per Part 3's contingency schedule before being used in any margin check, never used raw."
+    risk_category: [git_tracked_deployed_before]
+    risk_category_basis: "The WORK (new ir.rule domains) targets sgc_commission/sgc_deals_management, both git-tracked and already deployed — the risk category attaches to where the work lands, not to the fact that the specific rules are new. Risk-adjusted: 7h x 1.15 = 8.05h (pe.risk_adjusted_hours(7, 'git_tracked_deployed_before'))."
     warrant_tier: T2
     provenance: "Owner-stated 2026-08-16; evidence citation is the estate inventory (verified repo artifact, not owner-stated)."
 
   reporting_and_dashboards:
     amount_aed: 2500
     scope: "Standard reports/dashboards on top of the above modules."
+    risk_category: [git_untracked]
+    risk_category_basis: "INFERENCE, not a direct 1:1 repo mapping — stated as such so it can be corrected. The closest evidenced real-estate-inventory capability under this name is sgc_crm_dashboard ('Run scheduled reports' cron, actively firing per §6.1) — but that module is git-untracked (§2), so this line is tagged at that risk level rather than assumed clean. If this module instead means sgc_dynamic_financial_report (git-tracked, but 0 rows across every scheduling table per §5.1 — 'no persisted output evidence,' the same 50% ceiling), the risk category is unaffected either way."
     warrant_tier: T2
     provenance: "Owner-stated 2026-08-16."
 
@@ -79,6 +89,7 @@ modules_subtotal_aed: 16000   # 3000+3500+3500+3500+2500, all five modules — c
 # LINE 3 — MIGRATION (banded by record count)
 # ===========================================================================
 migration_bands:
+  risk_category: [migration]   # flat 50% on every band, per policy.yaml: contingency_schedule.migration — independent of any module's own tracked/untracked status
   band_1: { to_records: 1000,  amount_aed: 2500 }
   band_2: { to_records: 5000,  amount_aed: 5000 }
   band_3: { to_records: 20000, amount_aed: 8000 }

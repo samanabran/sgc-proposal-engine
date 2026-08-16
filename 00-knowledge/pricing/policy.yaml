@@ -5,9 +5,9 @@
 # case study): mobilisation raised 25% -> 33%; 24-month financing uplift
 # raised 12% -> 18% pending reserve rebuild; vat.charge_vat flipped to
 # false — SGC is NOT VAT-registered and has no TRN as of this version.
-version: 3.1
-effective_from: 2026-08-06
-source: "v3.1 — presentation.client_facing_subscription_rounding and presentation.non_subscription_rounding ADDED (first-ever declared rounding-convention fields; previously three uncited conventions coexisted in the corpus with no policy backing), see CHANGELOG.md. v3.0 change (rollout_hours_per_user overlay DELETED, replaced by class-b-task-inventory.yaml + cost-classes.md) carried forward unchanged."
+version: 3.2
+effective_from: 2026-08-16
+source: "v3.2 — internal_cost_basis ADDED and cost_to_serve.internal_consultant_cost_aed_hr changed from a flat, unsourced 150 AED/hr placeholder to a payroll-derived figure (394.38 AED/hr), owner-stated 2026-08-16, UNVERIFIED against actual payroll records. This is the exact input three prior MVP planning passes flagged as unreachable and left as [PRV] (.omc/plans/proposal-engine-mvp-phase2-pricing-stack.md, phase4-inference-layer.md, phase6-backtest.md). See CHANGELOG.md pricing v3.3 entry and HANDOVER.md decision #12 for the reconciliation this now requires across every catalog file and client worksheet that computed a G23 margin at the old 150 AED/hr cost. v3.1 change (presentation rounding-convention fields) carried forward unchanged."
 
 # RESOLVED 2026-08-04 (see failure-modes/known-defects.md #21): this
 # build's own source spec reintroduced the pre-correction smb and
@@ -67,6 +67,138 @@ overlays:
   # derivation. Per PRECEDENCE.md's own rule: deleted and logged here,
   # not left dormant as a comment for a future read to silently revive.
 
+# ADDED v3.2 (2026-08-16) — internal delivery cost-basis inputs,
+# owner-stated in conversation, NOT sourced from payroll records or any
+# repo artifact. This is the exact gap three prior MVP planning passes
+# flagged and could not close (.omc/plans/proposal-engine-mvp-phase2-
+# pricing-stack.md §Provisional position, phase4-inference-layer.md
+# §Consolidated [PRV] Register, phase6-backtest.md §6.0.e) — all three
+# kept the flat 150 AED/hr placeholder specifically because "no payroll/
+# subcontractor data reachable." See HANDOVER.md decision #12.
+#
+# cost_to_serve.internal_consultant_cost_aed_hr below is DERIVED from
+# this section, never hand-typed independently of it — the single source
+# of truth for the derivation is
+# 05-ops/pricing_engine.py: internal_consultant_cost_aed_hr(), and
+# 05-ops/test_pricing_engine.py asserts the stored figure below still
+# equals that function's output (drift guard). If any input in this
+# section changes, recompute through that function and update the stored
+# figure in the same commit.
+internal_cost_basis:
+  provenance:
+    stated_by: owner
+    date: 2026-08-16
+    channel: conversation
+    status: "Owner-stated, unverified against actual payroll records. Reconcile against real payroll before this hardens into anything client-facing."
+
+  monthly_operating_basis_aed:
+    licence_annual_aed: 20000            # /12 = 1,666.67/mo
+    staff_salaries_monthly_aed: 7500     # 5 callers x 1,500
+    office_monthly_aed: 2000
+    phones_monthly_aed: 1200             # 6 lines x 200
+    hosting_ai_monthly_aed: 367          # USD 100 at the standing ~3.6725 peg — see commission-engine-catalogue.yaml: market_data_note
+    other_monthly_aed: 0
+    owner_salary_monthly_aed: 20000      # currently owner's drawings, unpaid 3 months as of 2026-08-16; moves to WPS on visa issue
+
+  delivery_hours_basis:
+    # delivery_hours_per_month = gross_hours_monthly minus every less_*
+    # line = 176 - 33 - 20 - 10 - 10 - 20 = 83. Computed by
+    # pe.internal_consultant_cost_aed_hr(), not hand-typed here.
+    gross_hours_monthly: 176
+    less_caller_mgmt_hours: 33
+    less_marketing_hours: 20
+    less_training_hours: 10
+    less_admin_accounts_hours: 10
+    less_sales_hours: 20
+
+  role_structure:
+    delivery_role: owner_founder
+    note: >
+      There are only two roles and they do not both deliver. Owner/founder
+      is the ONLY billable-delivery resource (100% of delivery, plus
+      caller management, marketing, training, admin, and sales).
+      Callers/SDRs (5) do outbound prospecting only and deliver NOTHING —
+      their AED 7,500/mo is fixed overhead, not a delivery cost. Do NOT
+      derive a per-role hourly delivery cost for callers, and do NOT
+      build a blended multi-role delivery-cost model against
+      rate-card.yaml's 13 billing roles — those are client-facing
+      billing-rate tiers, not a roster of distinct real staff with
+      distinct payroll costs. There is one delivery role; its
+      fully-loaded cost IS cost_to_serve.internal_consultant_cost_aed_hr.
+
+  commission:
+    # Affects NET margin on a closed deal, not the cost floor itself — do
+    # not fold into internal_consultant_cost_aed_hr.
+    sales_pct: 0.07
+    delivery_pct: 0.07
+    combined_pct: 0.14
+    basis: "closed deal value"
+    release: "pro-rata against payments ACTUALLY RECEIVED, not on invoice/close"
+    retention_pct: 0.05
+
+  optional_overlays:
+    # NOT in the basis. Default OFF. Each switchable independently
+    # without a model rebuild — do not fold any of these into
+    # internal_consultant_cost_aed_hr until explicitly enabled.
+    owner_visa_eid_medical:
+      enabled: false
+      estimate_monthly_aed: 292
+      status: "amortised estimate, expected ~Aug 2026"
+    owner_health_insurance:
+      enabled: false
+      estimate_monthly_aed: 250
+    gratuity_accrual:
+      enabled: false
+      pct_of_basic: 0.0583
+      condition: "only if staff move to sponsored employment"
+    interns:
+      sponsorship_cost: "NOT MODELLED — interns currently hold their own visas, not SGC-sponsored. Work-permit status under their own visa is an open compliance question for the free zone authority, not something this engine resolves."
+    device_amortisation: { enabled: false, estimate_monthly_aed: null }
+    accounting_vat_ct_filing: { enabled: false, estimate_monthly_aed: null }
+    contingency: { enabled: false, pct: null }
+
+  target_rate_reference:
+    # A DIFFERENT number from the cost floor above — do not confuse them.
+    # The actual figure is deliberately NOT typed anywhere in this file
+    # (values or comments): it is numerically identical to rate-card.yaml:
+    # forbidden_rates' second entry (the old, wrong mid_market blended
+    # rate, corrected 2026-08-04 to the pinned senior_consultant rate) —
+    # a permanent regression guard that validate.py's check 1 enforces by
+    # a blunt whole-file text scan across pricing/*.yaml, on purpose, per
+    # that entry's own "any proposal using it is non-compliant" framing.
+    # Coincidental collision, different meaning, different part of the
+    # business — but carving a context-aware exception into that gate for
+    # one field would weaken a guard designed specifically to be blunt
+    # and reliable, so it is not carved. The actual figure is fully
+    # recorded in HANDOVER.md decision #12 and CHANGELOG.md's pricing
+    # v3.3 entry instead, neither of which this gate scans.
+    composition: "cost floor + commission + non-billable time + margin"
+    status: "Owner-stated 2026-08-16, informational only — NOT wired into segments.blended_rate_aed (280/395/525 below, sourced from SGC-TECH-AI-Commercial-Export-v2_REVISED.xlsx, unchanged by this entry). Reconciling a single target rate against the existing 3-tier segment structure is a separate decision, not made by this entry."
+    warning: "rate-card.yaml / segments.blended_rate_aed are client BILLING rates. They are not a cost basis and must never be read as one."
+
+# ADDED v4 (2026-08-16), HANDOVER.md decision #16. INTERNAL ONLY — this
+# schedule governs internal hour estimates for margin/floor checking. It
+# must NEVER appear on a client-facing document (Part 5.4's own rule);
+# 05-ops/pricing_engine.py: risk_adjusted_hours() is the single source of
+# truth for applying it, and the render path (Part 5) must never surface
+# a contingency percentage in generated client output — see the warrant-
+# tier lint in that module for the enforcement mechanism.
+contingency_schedule:
+  git_tracked_deployed_before:
+    pct: 0.15
+    definition: "The module's addon directory is fully tracked in its git repository (git ls-files count == total file count) AND it is currently installed/deployed (ir_module_module.state='installed' at last inventory pass)."
+  git_untracked:
+    pct: 0.35
+    definition: "The module is installed and live but has zero files tracked in any git repository — see 00-intake/demo-presentation-inventory-2026-08-16.md §2. Named modules as of that inventory: sgc_crm_dashboard, crm_lead_ingestion_hub, aml_compliance, sgc_executive_dashboard."
+    untracked_modules: [sgc_crm_dashboard, crm_lead_ingestion_hub, aml_compliance, sgc_executive_dashboard]
+  no_persisted_output_evidence:
+    pct: 0.50
+    definition: "The capability's own data/output table(s) show zero rows despite the mechanism (cron, report action, etc.) actively firing — 'installed' and 'scheduled' are not 'used.' See the inventory's cron/report findings (§6.1/§6.2): several crons fire on schedule against empty tables; 60 report actions have no persisted-PDF evidence at all."
+  migration:
+    pct: 0.50
+    definition: "Flat 50% on every migration-band estimate, regardless of the target module's own tracked/untracked status — migration risk (source-data quality, mapping edge cases, record-count surprises) is a property of the migration itself, not of the destination module's code maturity."
+  combination_rule: "When more than one category applies to the same line, use the HIGHEST applicable pct (worst-risk-governs), not a sum or an average — stacking percentages would overstate risk multiplicatively for no evidenced reason; taking the max is the more defensible conservative choice with the evidence available."
+
 cost_to_serve:
   hosting_node_true_cost_aed: 360        # NOT the 990 list price — see hosting.yaml note
   hosting_node_user_capacity: 20
@@ -74,7 +206,18 @@ cost_to_serve:
   support_hours_per_5_users: 1
   support_rate_aed: 280
   account_mgmt_aed: { tier_5: 100, tier_10: 200, tier_20: 350 }
-  internal_consultant_cost_aed_hr: 150
+  # CHANGED v3.2 (2026-08-16): was a flat, unsourced 150 AED/hr
+  # placeholder. Now DERIVED from internal_cost_basis above:
+  # (licence_annual_aed/12 + staff_salaries_monthly_aed + office_monthly_aed
+  # + phones_monthly_aed + hosting_ai_monthly_aed + other_monthly_aed
+  # + owner_salary_monthly_aed) / delivery_hours_per_month
+  # = 32,733.67 / 83 = 394.38 AED/hr.
+  # OWNER-STATED, UNVERIFIED AGAINST PAYROLL — see
+  # internal_cost_basis.provenance above. SUPERSEDES the flat 150 AED/hr
+  # used everywhere in this corpus through 2026-08-15 — every G23 margin
+  # figure computed before this date used the old, understated cost. See
+  # HANDOVER.md decision #12 for the reconciliation this now requires.
+  internal_consultant_cost_aed_hr: 394.38
 
 financing_uplift:
   months_12: 0.06

@@ -210,6 +210,23 @@ def find_worksheet(client_dir):
     return matches[0] if matches else None
 
 
+# ADDED v4 (2026-08-16), HANDOVER.md decision #15/#17: 550 is now BOTH a
+# historical-defect regression guard (rate-card.yaml: forbidden_rates,
+# the pre-correction mid_market rate) AND, coincidentally and for an
+# entirely unrelated reason, the owner-directed pricing v4 ENHANCEMENT
+# hourly rate (template-catalogue.yaml: enhancement.rate_aed_hr) — a
+# real, live, deliberately-chosen commercial figure, not something to
+# delete or work around. A blanket file-level exclusion (the rate-card.yaml
+# treatment below) would also stop template-catalogue.yaml ever being
+# checked for 690 reappearing, which is real protection worth keeping. So
+# this is a PER-RATE, PER-FILE exception, not a per-file blanket one: 550
+# specifically may appear in template-catalogue.yaml specifically; every
+# other forbidden rate, in every other file, is still checked there.
+KNOWN_RATE_EXCEPTIONS = {
+    550: ["template-catalogue.yaml"],
+}
+
+
 def check_1_forbidden_rate_in_pricing(result):
     forbidden = _forbidden_rates()
     for f in glob.glob(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "*.yaml")):
@@ -217,9 +234,11 @@ def check_1_forbidden_rate_in_pricing(result):
             continue  # the guard entries themselves legitimately state the number
         text = open(f, encoding="utf-8").read()
         for rate in forbidden:
+            if any(exc in f for exc in KNOWN_RATE_EXCEPTIONS.get(rate, [])):
+                continue  # see KNOWN_RATE_EXCEPTIONS docstring above
             if re.search(rf"\b{rate}\b", text):
                 result.fail("1. forbidden rate", f"{rate} appears in {f}")
-    result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries)")
+    result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries, and template-catalogue.yaml's own known enhancement-rate exception)")
 
     # ADDED v4 (2026-08-16), HANDOVER.md decision #14 — the check
     # _forbidden_rates() above never provided: does any CURRENTLY-DEFINED

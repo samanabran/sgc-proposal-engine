@@ -452,6 +452,33 @@ def discount_gate_verdict(quoted_total_aed, catalogue=None):
     return "OK"
 
 
+def contingency_pct_for(categories, policy=None):
+    """categories: a category name (str) or iterable of category names
+    from policy.yaml: contingency_schedule. Returns the single applicable
+    pct -- the MAX across all supplied categories (combination_rule,
+    "worst-risk-governs"), never a sum. INTERNAL ONLY -- never surface
+    this percentage on a client-facing document (Part 5.4)."""
+    pol = policy or load_policy()
+    schedule = pol["contingency_schedule"]
+    if isinstance(categories, str):
+        categories = [categories]
+    pcts = [schedule[c]["pct"] for c in categories]
+    return max(pcts)
+
+
+def risk_adjusted_hours(raw_hours, categories, policy=None):
+    """raw_hours * (1 + contingency_pct_for(categories)). Returns
+    (raw_hours, risk_adjusted_hours, pct_applied) -- callers must report
+    BOTH raw and risk-adjusted in internal output (Part 3), and must use
+    ONLY the risk-adjusted figure in any effective-rate/floor check
+    (deal_guard_verdict, breakeven_hours) -- quoting on raw hours is the
+    exact failure mode this function exists to prevent."""
+    pol = policy or load_policy()
+    pct = contingency_pct_for(categories, pol)
+    adjusted = round(raw_hours * (1 + pct), 2)
+    return raw_hours, adjusted, pct
+
+
 def enhancement_net_aed_hr(catalogue=None, policy=None):
     """Enhancement rate net of commission -- 550 * (1 - commission_total).
     Computed, not the catalogue's stored net_after_commission_aed_hr
