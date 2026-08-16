@@ -479,6 +479,21 @@ def risk_adjusted_hours(raw_hours, categories, policy=None):
     return raw_hours, adjusted, pct
 
 
+def commission_release_aed(cash_collected_aed, policy=None):
+    """Commission released against payments ACTUALLY RECEIVED, per
+    internal_cost_basis.commission.release ("pro-rata against payments
+    actually received, not on invoice/close"). = cash_collected_aed *
+    commission_total. Deliberately takes cash COLLECTED, not contract
+    value -- the two produce very different numbers (a small collected
+    amount against a large contract releases a small commission), and
+    conflating them is the exact failure mode this function's signature
+    guards against structurally: there is no contract_value parameter to
+    accidentally pass instead."""
+    pol = policy or load_policy()
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    return round(cash_collected_aed * commission_total, 2)
+
+
 def enhancement_net_aed_hr(catalogue=None, policy=None):
     """Enhancement rate net of commission -- 550 * (1 - commission_total).
     Computed, not the catalogue's stored net_after_commission_aed_hr

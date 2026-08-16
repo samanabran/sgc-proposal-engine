@@ -1164,6 +1164,183 @@ def t12_input_provenance_guard():
               + ("verified" if verified else "NOT verified above"))
 
 
+# ===========================================================================
+# T13 -- commission pro-rata release. ADDED v4 (2026-08-16), HANDOVER.md
+# decision #17. HONESTY DISCLOSURE: no test numbered T13 existed before
+# this pass -- grepped the full suite (T1-T10, T12) and found none. The
+# specific figures below (5,058 collected of 15,327 contract, released
+# 708.12) are internally consistent on their own arithmetic
+# (5058*0.14=708.12 exactly) but were not sourced from any pre-existing
+# repo fixture -- built fresh here, not "preserved."
+# ===========================================================================
+def t13_commission_pro_rata_release():
+    pol = pe.load_policy()
+    contract_value_aed = 15327
+    cash_collected_aed = 5058
+    released_aed = pe.commission_release_aed(cash_collected_aed, pol)
+    check(f"T13: commission_release_aed({cash_collected_aed}) == 708.12 "
+          f"(cash collected, not contract value)",
+          abs(released_aed - 708.12) < 0.01)
+    wrong_basis_if_contract_value = pe.commission_release_aed(contract_value_aed, pol)
+    check(f"T13: released amount computed on cash collected ({released_aed}) is NOT "
+          f"the same as 14% of contract value ({wrong_basis_if_contract_value}) -- "
+          f"commission releases pro-rata against payments received, never against contract value",
+          abs(released_aed - wrong_basis_if_contract_value) > 1)
+
+
+# ===========================================================================
+# T16 -- migration banding, general mechanism. ADDED v4 (2026-08-16),
+# HANDOVER.md decision #15. No test numbered T16 existed before this pass
+# either (same grep as T13 above) -- the "preserve T16 end-to-end" framing
+# in the brief describes a mechanism that is being built for the first
+# time here, not one being protected from regression. T26 below is the
+# specific >20,000-records regression case; this is the general banding
+# correctness check.
+# ===========================================================================
+def t16_migration_banding():
+    cat = pe.load_template_catalogue()
+    cases = [
+        (1, "band_1", 2500), (1000, "band_1", 2500),
+        (1001, "band_2", 5000), (5000, "band_2", 5000),
+        (5001, "band_3", 8000), (20000, "band_3", 8000),
+        (20001, "above_band_3", None), (100000, "above_band_3", None),
+    ]
+    for records, expected_band, expected_amount in cases:
+        band, amount = pe.migration_band_for_records(records, cat)
+        check(f"T16: migration_band_for_records({records}) == ({expected_band!r}, {expected_amount!r}) "
+              f"(got ({band!r}, {amount!r}))",
+              band == expected_band and amount == expected_amount)
+
+
+# ===========================================================================
+# T20-T28 -- pricing v4 acceptance tests, HANDOVER.md decisions #14-#17.
+# Every expected figure below was independently computed and verified by
+# direct execution before being written into this suite (see the pricing
+# v4 Part 1/2/3 commits) -- these checks assert against that verified
+# arithmetic, not against the brief's prose.
+# ===========================================================================
+
+def t20_commission_adjusted_floor():
+    pol = pe.load_policy()
+    floor = pe.billing_floor_aed_hr(pol)
+    check(f"T20: billing_floor_aed_hr() == 458.58 (+/-0.01) from current inputs (got {floor})",
+          abs(floor - 458.58) < 0.01)
+
+
+def t21_reference_quote_margin():
+    cat = pe.load_template_catalogue()
+    pol = pe.load_policy()
+    total = pe.reference_quote_total_aed(cat)
+    check(f"T21: reference quote total == 35,000 (got {total})", total == 35000)
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    net = round(total * (1 - commission_total), 2)
+    check(f"T21: net after 14% commission == 30,100 (got {net})", abs(net - 30100) < 0.01)
+    raw_hours, risk_adjusted, pct = pe.risk_adjusted_hours(49, "git_tracked_deployed_before", pol)
+    # T21's own 49h figure is asserted directly (it is the fixture's input,
+    # not derived from a raw-hours+contingency chain here) -- risk_adjusted_hours
+    # is exercised for its OWN correctness in T3/T25, not re-derived into 49
+    # by this test.
+    eff_rate, verdict = pe.deal_guard_verdict(net, 49, pol)
+    check(f"T21: effective net rate at 49h == 614.29 AED/hr (got {eff_rate})", abs(eff_rate - 614.29) < 0.01)
+    cost_floor = pe.internal_consultant_cost_aed_hr(pol)
+    cushion_pct = round((eff_rate / cost_floor - 1) * 100, 1)
+    check(f"T21: cushion over cost floor == 55.8% (got {cushion_pct}%)", abs(cushion_pct - 55.8) < 0.1)
+    check(f"T21: verdict == PASS (got {verdict})", verdict == "PASS")
+
+
+def t22_breakeven_hours_and_block():
+    pol = pe.load_policy()
+    net = 30100
+    breakeven = pe.breakeven_hours(net, pol)
+    check(f"T22: breakeven_hours(30,100) == 76.32 (got {breakeven})", abs(breakeven - 76.32) < 0.01)
+    # Above breakeven hours, the deal's effective rate has fallen below the
+    # cost floor itself -- BLOCK, not just WARN.
+    eff_rate, verdict = pe.deal_guard_verdict(net, 80, pol)  # 80h > 76.32h breakeven
+    check(f"T22: at 80 risk-adjusted hours (above the 76.32h breakeven), verdict == BLOCK (got {verdict}, eff_rate={eff_rate})",
+          verdict == "BLOCK")
+
+
+def t23_discount_floor_quote():
+    pol = pe.load_policy()
+    cat = pe.load_template_catalogue()
+    total = 31500
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    net = round(total * (1 - commission_total), 2)
+    check(f"T23: net at 31,500 quote == 27,090 (got {net})", abs(net - 27090) < 0.01)
+    breakeven = pe.breakeven_hours(net, pol)
+    check(f"T23: breakeven at 31,500 quote == 68.69h (got {breakeven})", abs(breakeven - 68.69) < 0.01)
+    eff_rate, verdict = pe.deal_guard_verdict(net, 49, pol)
+    check(f"T23: effective rate at 49h == 552.86 AED/hr (got {eff_rate})", abs(eff_rate - 552.86) < 0.01)
+    cost_floor = pe.internal_consultant_cost_aed_hr(pol)
+    cushion_pct = round((eff_rate / cost_floor - 1) * 100, 1)
+    check(f"T23: cushion over cost floor == 40.2% (got {cushion_pct}%)", abs(cushion_pct - 40.2) < 0.1)
+    check(f"T23: verdict == PASS (got {verdict})", verdict == "PASS")
+    gate = pe.discount_gate_verdict(30000, cat)
+    check(f"T23: discount_gate_verdict(30,000) == COMMERCIAL_DESK_APPROVAL_REQUIRED (got {gate})",
+          gate == "COMMERCIAL_DESK_APPROVAL_REQUIRED")
+
+
+def t24_platform_fee_not_hour_derived():
+    cat = pe.load_template_catalogue()
+    fee_a = pe.platform_fee_aed(cat)
+    # Mutate the catalogue's own hour-adjacent fields (module estimate
+    # hours) and confirm the platform fee is completely unaffected --
+    # platform_fee_aed() has no hours parameter at all, so this should
+    # trivially hold; the test exists to catch a FUTURE refactor that
+    # might tempt someone to fold hours in, not to catch a present bug.
+    import copy
+    mutated = copy.deepcopy(cat)
+    mutated["modules"]["multi_agent_access_control"]["internal_build_estimate_hours"] = 999999
+    fee_b = pe.platform_fee_aed(mutated)
+    check(f"T24: platform_fee_aed() unaffected by a mutated hour input elsewhere in the catalogue "
+          f"(before={fee_a}, after 999999h mutation={fee_b})",
+          fee_a == fee_b == 14000)
+    import inspect
+    sig = inspect.signature(pe.platform_fee_aed)
+    check(f"T24: platform_fee_aed() signature carries no hours-shaped parameter (params: {list(sig.parameters)})",
+          not any("hour" in p.lower() for p in sig.parameters))
+
+
+def t25_capacity():
+    pol = pe.load_policy()
+    hrs = pol["internal_cost_basis"]["delivery_hours_basis"]
+    delivery_hours_per_month = (hrs["gross_hours_monthly"] - hrs["less_caller_mgmt_hours"]
+                                 - hrs["less_marketing_hours"] - hrs["less_training_hours"]
+                                 - hrs["less_admin_accounts_hours"] - hrs["less_sales_hours"])
+    check(f"T25: delivery_hours_per_month == 83 (got {delivery_hours_per_month})", delivery_hours_per_month == 83)
+    deals_per_month = round(delivery_hours_per_month / 49, 2)
+    check(f"T25: capacity == 83/49 == 1.69 deals/month (got {deals_per_month})", abs(deals_per_month - 1.69) < 0.01)
+
+
+def t26_migration_over_20000_unpriced_regression():
+    """Regression of T16 (above)."""
+    cat = pe.load_template_catalogue()
+    band, amount = pe.migration_band_for_records(25000, cat)
+    check(f"T26: migration_band_for_records(25,000) stays UNPRICED end-to-end "
+          f"(band={band!r}, amount={amount!r})",
+          band == "above_band_3" and amount is None)
+
+
+def t27_rate_guard_boundaries():
+    pol = pe.load_policy()
+    check(f"T27: rate_guard_verdict(400) == WARN (above cost floor 394.38, below billing floor 458.58)",
+          pe.rate_guard_verdict(400, pol) == "WARN")
+    check(f"T27: rate_guard_verdict(380) == BLOCK (below cost floor 394.38)",
+          pe.rate_guard_verdict(380, pol) == "BLOCK")
+    check(f"T27: rate_guard_verdict(460) == PASS (at/above billing floor 458.58)",
+          pe.rate_guard_verdict(460, pol) == "PASS")
+
+
+def t28_t13_fixture_holds():
+    """Re-asserts T13's own fixture explicitly under the T28 name the
+    brief specified, so both references resolve to a real, passing check."""
+    pol = pe.load_policy()
+    released = pe.commission_release_aed(5058, pol)
+    check(f"T28: T13 pro-rata fixture holds -- 5,058 collected of 15,327 contract -> "
+          f"708.12 released, i.e. 14% of cash collected, never 14% of contract (got {released})",
+          abs(released - 708.12) < 0.01)
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1189,6 +1366,28 @@ if __name__ == "__main__":
     t10_client_facing_money_figure_guard()
     print("\n=== T12: input-layer provenance guard ===")
     t12_input_provenance_guard()
+    print("\n=== T13: commission pro-rata release ===")
+    t13_commission_pro_rata_release()
+    print("\n=== T16: migration banding ===")
+    t16_migration_banding()
+    print("\n=== T20: commission-adjusted billing floor ===")
+    t20_commission_adjusted_floor()
+    print("\n=== T21: reference quote (35,000) margin ===")
+    t21_reference_quote_margin()
+    print("\n=== T22: breakeven hours + BLOCK ===")
+    t22_breakeven_hours_and_block()
+    print("\n=== T23: discount-floor quote (31,500) ===")
+    t23_discount_floor_quote()
+    print("\n=== T24: platform fee not hour-derived ===")
+    t24_platform_fee_not_hour_derived()
+    print("\n=== T25: capacity ===")
+    t25_capacity()
+    print("\n=== T26: migration >20,000 UNPRICED (regression of T16) ===")
+    t26_migration_over_20000_unpriced_regression()
+    print("\n=== T27: rate guard boundaries ===")
+    t27_rate_guard_boundaries()
+    print("\n=== T28: T13 fixture holds ===")
+    t28_t13_fixture_holds()
 
     print()
     if FAILURES:
@@ -1196,5 +1395,5 @@ if __name__ == "__main__":
         for f in FAILURES:
             print(" ", f)
         sys.exit(1)
-    print("RESULT: all T1-T7 checks pass.")
+    print("RESULT: all checks pass.")
     sys.exit(0)
