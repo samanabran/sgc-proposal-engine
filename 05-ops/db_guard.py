@@ -26,51 +26,104 @@ RULE: fail closed. Missing, empty, or unreadable input aborts. A check
 that passes on missing data manufactures assurance -- this repo has
 already produced that exact defect twice (see PART 9 fixes in
 05-ops/validate.py, commits fcfeda4 and 5b66ad6).
+
+SUPERSEDED (2026-08-16 follow-up): the original enforce_staging_db_name(db_name)
+checked database name only. The isolation follow-up pass established, with
+direct evidence (odoo.conf: dbfilter = ^sgc_staging$; no db_host override;
+staging container env: HOST=postgres-prod; postgres-prod resolves inside
+staging to 172.19.0.2, the SAME address as production's odoo-prod-db), that
+the database named "sgc_staging" is NOT hosted on a separate staging
+Postgres instance -- it lives on production's own Postgres server. A
+name-only guard passes cleanly on this exact database while pointing
+straight at the host it exists to protect against: validating the right
+value on the wrong dimension, the same manufactured-assurance failure class
+already fixed twice in validate.py (fail-open / fail-closed-out-of-scope).
+enforce_staging_db_name is REMOVED, not kept as a compatibility wrapper --
+a name-only check that still exists and still passes would be worse than no
+guard, since it would look protective while remaining exploitable exactly
+the way the original bug was. Use enforce_staging_db_pair(host, db_name).
+
+ALLOWED_DB_HOST is deliberately left unset (None) below. No verified-safe,
+dedicated staging Postgres host currently exists in this environment (see
+00-intake/staging-isolation-verification-2026-08-16.md addendum) -- the
+only host staging's Odoo config actually uses is postgres-prod, which is
+production. Fabricating a placeholder "safe" hostname here would be
+guessing, which RULE 1 of this engagement forbids. With ALLOWED_DB_HOST
+unset, enforce_staging_db_pair() fails closed on EVERY call until a human
+completes remediation (see verification doc §7) and sets this value
+deliberately to the real, dedicated staging host that results from it.
 """
 
 ALLOWED_DB_NAME = "sgc_staging"
+ALLOWED_DB_HOST = None  # deliberately unset -- see module docstring
 
 
 class DatabaseNameRejected(Exception):
-    """Raised by enforce_staging_db_name on any non-exact-match or missing
-    input. Callers must let this propagate -- do not catch-and-continue."""
+    """Raised by enforce_staging_db_pair on any non-exact-match or missing
+    input, on either host or database name. Callers must let this
+    propagate -- do not catch-and-continue."""
 
 
-def enforce_staging_db_name(db_name):
-    """The single choke point every DB-touching path in this repo's
-    tooling must call before connect/snapshot/restore/migrate/dump/seed.
-
-    Usage:
-        from db_guard import enforce_staging_db_name
-        enforce_staging_db_name(db_name)   # raises on anything but "sgc_staging"
-        # ... only now is it safe to open a connection / run pg_dump / etc.
-
-    Returns the db_name unchanged on success (so it can be used inline),
-    raises DatabaseNameRejected on any rejection or missing input.
-    """
-    if db_name is None:
+def _require_nonempty_str(value, label, expected):
+    if value is None:
         raise DatabaseNameRejected(
-            f"ABORT: db_name is None (missing). Expected exactly {ALLOWED_DB_NAME!r}. "
+            f"ABORT: {label} is None (missing). Expected exactly {expected!r}. "
             f"Refusing to proceed -- a check that passes on missing input manufactures "
             f"assurance, which this repo treats as worse than no check."
         )
-    if not isinstance(db_name, str):
+    if not isinstance(value, str):
         raise DatabaseNameRejected(
-            f"ABORT: db_name is not a string (got {type(db_name).__name__}: {db_name!r}). "
-            f"Expected exactly {ALLOWED_DB_NAME!r}."
+            f"ABORT: {label} is not a string (got {type(value).__name__}: {value!r}). "
+            f"Expected exactly {expected!r}."
         )
-    if db_name.strip() == "":
+    if value.strip() == "":
         raise DatabaseNameRejected(
-            f"ABORT: db_name is empty or whitespace-only ({db_name!r}). "
-            f"Expected exactly {ALLOWED_DB_NAME!r}."
+            f"ABORT: {label} is empty or whitespace-only ({value!r}). "
+            f"Expected exactly {expected!r}."
         )
-    if db_name != ALLOWED_DB_NAME:
+    return value
+
+
+def enforce_staging_db_pair(host, db_name):
+    """The single choke point every DB-touching path in this repo's
+    tooling must call before connect/snapshot/restore/migrate/dump/seed.
+    Requires BOTH host and db_name to exactly match the allowlisted pair --
+    a correct db_name on the wrong host is REJECTED, not passed, because
+    that is precisely the real-world scenario this guard exists to catch
+    (see module docstring: sgc_staging on postgres-prod).
+
+    Usage:
+        from db_guard import enforce_staging_db_pair
+        enforce_staging_db_pair(host, db_name)   # raises unless both match
+        # ... only now is it safe to open a connection / run pg_dump / etc.
+
+    Returns (host, db_name) unchanged on success, raises
+    DatabaseNameRejected on any rejection or missing input on either side.
+    """
+    _require_nonempty_str(db_name, "db_name", ALLOWED_DB_NAME)
+    _require_nonempty_str(host, "host", ALLOWED_DB_HOST)
+
+    if ALLOWED_DB_HOST is None:
         raise DatabaseNameRejected(
-            f"REJECTED: db_name {db_name!r} is not an exact match for the only "
-            f"allowlisted database ({ALLOWED_DB_NAME!r}). No prefix, substring, "
-            f"or partial match is accepted -- a name merely containing "
-            f"{ALLOWED_DB_NAME!r} is rejected, not approved. If this is a genuine "
-            f"new target, it must be added to this allowlist deliberately, by a "
-            f"human, not inferred from a similar-looking name."
+            f"ABORT: no verified-safe staging Postgres host is configured "
+            f"(ALLOWED_DB_HOST is unset). The isolation verification pass "
+            f"(2026-08-16) found that database {ALLOWED_DB_NAME!r} currently "
+            f"lives on production's Postgres instance, not a separate "
+            f"staging host -- there is no safe value to allowlist yet. "
+            f"Refusing every connection attempt until a human completes "
+            f"remediation (00-intake/staging-isolation-verification-2026-08-16.md "
+            f"section 7) and sets ALLOWED_DB_HOST deliberately."
         )
-    return db_name
+
+    if host != ALLOWED_DB_HOST or db_name != ALLOWED_DB_NAME:
+        raise DatabaseNameRejected(
+            f"REJECTED: (host={host!r}, db_name={db_name!r}) is not an exact "
+            f"match for the only allowlisted pair "
+            f"(host={ALLOWED_DB_HOST!r}, db_name={ALLOWED_DB_NAME!r}). "
+            f"No prefix, substring, or partial match is accepted on either "
+            f"field -- a correct database name on the wrong host is rejected, "
+            f"not approved, and so is the reverse. If this is a genuine new "
+            f"target, it must be added to this allowlist deliberately, by a "
+            f"human, not inferred from a similar-looking name or host."
+        )
+    return (host, db_name)

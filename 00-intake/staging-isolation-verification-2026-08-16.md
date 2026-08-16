@@ -433,3 +433,75 @@ process:**
 
 Name: _______________________  Date: _______________________  Verdict accepted: ☐ Yes ☐ No, needs rework
 Remediation authorized: ☐ Yes, proceed in listed order  ☐ No  ☐ Partial — specify: _______________________
+
+## 8. Addendum, 2026-08-16 (follow-up): where sgc_staging actually lives
+
+Triggered by a direct question: if staging's environment points at
+`postgres-prod`, what has `odoo19-sgc-staging` actually been connecting to?
+
+```
+$ ssh contabo-sgc 'docker exec odoo19-sgc-staging cat /etc/odoo/odoo.conf 2>/dev/null | grep -i "^db_host\|^db_name\|^db_port\|^dbfilter"'
+dbfilter = ^sgc_staging$
+```
+
+`odoo.conf` sets no `db_host` override. Odoo's standard docker convention is
+to fall back to the `HOST` environment variable when `db_host` is absent in
+`odoo.conf` — and §1.7 above already established that variable is
+`HOST=postgres-prod`. Combined with §1.8 (`postgres-prod` resolves inside
+the staging container to `172.19.0.2`, the same address as `odoo-prod-db`),
+the evidence chain is complete:
+
+**Database `sgc_staging` is not hosted on a separate staging Postgres
+instance. It is a database on production's own Postgres server.** This is a
+current state, not a future risk — every prior read of "staging isolation"
+in this engagement understated it. §1.5/§1.6/§1.11 above already noted no
+dedicated staging Postgres container exists on this box; this addendum
+closes the loop on where the database Odoo actually opens actually lives.
+
+Not established, and not guessed at: whether this is long-standing
+configuration (staging has always used production's database) or a more
+recent change. No deployment history was consulted — out of scope for a
+read-only pass.
+
+## 9. Addendum: TraffExcel network exposure
+
+```
+$ ssh contabo-sgc 'docker inspect staging-traffexcel --format "{{json .NetworkSettings.Networks}}"'
+{"odoo-test_odoo-test-network":{...,"Gateway":"172.18.0.1","IPAddress":"172.18.0.3",...,"DNSNames":["staging-traffexcel","2743d001ca45"]}}
+```
+
+`staging-traffexcel` is attached to exactly one network:
+`odoo-test_odoo-test-network`. This is **not**
+`odoo-prod_odoo-prod-network` — TraffExcel's staging container has no
+network-layer path to `odoo-prod` or `odoo-prod-db` by this route. Stated
+as a technical fact only; whether this changes anything about what has been
+represented to that client is not this document's call.
+
+## 10. Addendum: guard corrected from name-only to host+db pair
+
+The Phase 3 guard shipped in this pass (`enforce_staging_db_name`, name-only
+exact match) had a gap exposed directly by §8 above: `sgc_staging` is on the
+allowlist, and `sgc_staging` is also the real database name — but it lives
+on `postgres-prod`. A name-only guard would pass cleanly while pointing at
+exactly the host it exists to protect against. Validating the right value on
+the wrong dimension is the same manufactured-assurance failure class already
+fixed twice in `validate.py` this session (fail-open / fail-closed-out-of-scope).
+
+`05-ops/db_guard.py` was corrected: `enforce_staging_db_name(db_name)` is
+**removed** (not kept as a compatibility wrapper — a name-only check that
+still passes would look protective while remaining exploitable exactly the
+way the original gap was) and replaced with
+`enforce_staging_db_pair(host, db_name)`, requiring exact-match equality on
+BOTH fields. `ALLOWED_DB_HOST` ships as `None` — deliberately unset, since
+no verified-safe, dedicated staging Postgres host currently exists (per §8);
+fabricating a placeholder host would be guessing, which this engagement's
+RULE 1 forbids. With `ALLOWED_DB_HOST` unset, every call to
+`enforce_staging_db_pair` fails closed by default, including with the real,
+correct `db_name` on the real, current (production) host — until a human
+completes remediation and sets `ALLOWED_DB_HOST` deliberately to whatever
+results from it.
+
+T19 in `05-ops/test_pricing_engine.py` was updated to 9 checks (7 required +
+2 bonus), including the specific case this fix targets: `db_name="sgc_staging"`
+on `host="postgres-prod"` (the real scenario found in §8) is REJECTED, not
+passed. All pass; no regressions beyond the pre-existing baseline.

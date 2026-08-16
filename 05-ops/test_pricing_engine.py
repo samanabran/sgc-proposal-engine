@@ -1437,54 +1437,86 @@ def t18_recurring_support_load_table():
 
 
 def t19_staging_db_name_guard():
-    """T19 -- Phase 3 of the staging-isolation verification pass
-    (00-intake/staging-isolation-verification-2026-08-16.md). The 6 required
-    self-tests: allowlisted name passes; three near-miss names are each
-    REJECTED (not just "differ" -- must raise DatabaseNameRejected);
-    empty string ABORTS; unset (None) ABORTS."""
+    """T19 -- Phase 3 of the staging-isolation verification pass, updated by
+    the 2026-08-16 follow-up. enforce_staging_db_name (name-only) was
+    SUPERSEDED by enforce_staging_db_pair(host, db_name) after the isolation
+    follow-up established that database "sgc_staging" actually lives on
+    production's Postgres host (postgres-prod), not a separate staging
+    server -- a name-only guard would pass cleanly while pointing at
+    production. The 7 required self-tests below include the specific bug
+    this fix targets: correct db_name on the WRONG (real, production) host
+    must be REJECTED, not passed."""
 
-    result = db_guard.enforce_staging_db_name("sgc_staging")
-    check("T19: allowlisted db_name 'sgc_staging' passes and is returned unchanged",
-          result == "sgc_staging")
-
+    # ALLOWED_DB_HOST is deliberately unset (None) in the shipped guard --
+    # no verified-safe staging host exists yet, so the guard fails closed
+    # on every real call until a human sets it after remediation. To prove
+    # the exact-match MECHANISM works (not just today's "always fails"
+    # posture), monkeypatch a fixture host for this test only, then restore
+    # the real unset value -- so this test can't accidentally leave a fake
+    # "safe" host configured for any other code path.
+    _real_allowed_host = db_guard.ALLOWED_DB_HOST
     try:
-        db_guard.enforce_staging_db_name("sgc_staging_old")
-        check("T19: 'sgc_staging_old' is REJECTED (superstring of allowlisted name)", False)
-    except db_guard.DatabaseNameRejected:
-        check("T19: 'sgc_staging_old' is REJECTED (superstring of allowlisted name)", True)
+        db_guard.ALLOWED_DB_HOST = "staging-postgres-fixture"
 
-    try:
-        db_guard.enforce_staging_db_name("staging")
-        check("T19: 'staging' is REJECTED (substring of allowlisted name)", False)
-    except db_guard.DatabaseNameRejected:
-        check("T19: 'staging' is REJECTED (substring of allowlisted name)", True)
+        result = db_guard.enforce_staging_db_pair("staging-postgres-fixture", "sgc_staging")
+        check("T19: correct (host, db_name) pair passes and is returned unchanged",
+              result == ("staging-postgres-fixture", "sgc_staging"))
 
-    try:
-        db_guard.enforce_staging_db_name("sgc_prod")
-        check("T19: 'sgc_prod' is REJECTED (different name entirely)", False)
-    except db_guard.DatabaseNameRejected:
-        check("T19: 'sgc_prod' is REJECTED (different name entirely)", True)
+        # The actual bug this fix targets: right db_name, WRONG host --
+        # exactly the real-world postgres-prod/sgc_staging scenario found
+        # by the isolation follow-up.
+        try:
+            db_guard.enforce_staging_db_pair("postgres-prod", "sgc_staging")
+            check("T19: correct db_name 'sgc_staging' on WRONG host 'postgres-prod' "
+                  "is REJECTED (the real scenario this fix targets)", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: correct db_name 'sgc_staging' on WRONG host 'postgres-prod' "
+                  "is REJECTED (the real scenario this fix targets)", True)
 
-    try:
-        db_guard.enforce_staging_db_name("")
-        check("T19: empty string ABORTS (fail closed on empty input)", False)
-    except db_guard.DatabaseNameRejected:
-        check("T19: empty string ABORTS (fail closed on empty input)", True)
+        try:
+            db_guard.enforce_staging_db_pair("staging-postgres-fixture", "sgc_prod")
+            check("T19: correct host, WRONG db_name 'sgc_prod' is REJECTED", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: correct host, WRONG db_name 'sgc_prod' is REJECTED", True)
 
-    try:
-        db_guard.enforce_staging_db_name(None)
-        check("T19: unset/None db_name ABORTS (fail closed on missing input)", False)
-    except db_guard.DatabaseNameRejected:
-        check("T19: unset/None db_name ABORTS (fail closed on missing input)", True)
+        try:
+            db_guard.enforce_staging_db_pair("postgres-prod", "sgc_prod")
+            check("T19: both host and db_name wrong are REJECTED", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: both host and db_name wrong are REJECTED", True)
 
-    # Bonus coverage beyond the 6 required: prefix match must also be
-    # rejected, not just substring -- "sgc_staging2" starts with the
-    # allowlisted name but is not equal to it.
+        try:
+            db_guard.enforce_staging_db_pair(None, "sgc_staging")
+            check("T19: missing (None) host ABORTS (fail closed)", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: missing (None) host ABORTS (fail closed)", True)
+
+        try:
+            db_guard.enforce_staging_db_pair("staging-postgres-fixture", None)
+            check("T19: missing (None) db_name ABORTS (fail closed)", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: missing (None) db_name ABORTS (fail closed)", True)
+
+        try:
+            db_guard.enforce_staging_db_pair("", "sgc_staging")
+            check("T19: empty-string host ABORTS (fail closed)", False)
+        except db_guard.DatabaseNameRejected:
+            check("T19: empty-string host ABORTS (fail closed)", True)
+    finally:
+        db_guard.ALLOWED_DB_HOST = _real_allowed_host
+
+    # Independent of the fixture above: with the REAL shipped ALLOWED_DB_HOST
+    # (unset / None), every call must abort -- this is the live protective
+    # posture today, before any remediation happens.
+    check("T19: real shipped ALLOWED_DB_HOST is still None (ships fail-closed by default)",
+          db_guard.ALLOWED_DB_HOST is None)
     try:
-        db_guard.enforce_staging_db_name("sgc_staging2")
-        check("T19: 'sgc_staging2' (prefix match, not exact) is REJECTED", False)
+        db_guard.enforce_staging_db_pair("postgres-prod", "sgc_staging")
+        check("T19: with no verified-safe host configured, even the correct db_name "
+              "on the real (production) host is REJECTED by default", False)
     except db_guard.DatabaseNameRejected:
-        check("T19: 'sgc_staging2' (prefix match, not exact) is REJECTED", True)
+        check("T19: with no verified-safe host configured, even the correct db_name "
+              "on the real (production) host is REJECTED by default", True)
 
 
 if __name__ == "__main__":
