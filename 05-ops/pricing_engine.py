@@ -21,6 +21,8 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INVENTORY_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "class-b-task-inventory.yaml")
 RATE_CARD_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml")
 HOUR_LOOKUP_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "hour-lookup.yaml")
+POLICY_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml")
+TEMPLATE_CATALOGUE_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "template-catalogue.yaml")
 
 
 def _load(path):
@@ -38,6 +40,14 @@ def load_rate_card():
 
 def load_hour_lookup():
     return _load(HOUR_LOOKUP_PATH)
+
+
+def load_policy():
+    return _load(POLICY_PATH)
+
+
+def load_template_catalogue():
+    return _load(TEMPLATE_CATALOGUE_PATH)
 
 
 def cum_sum(n, b):
@@ -380,6 +390,76 @@ def class_d_hours_or_cost(edition):
         "editions.yaml:36 / saas-modules.yaml for the per-user licence "
         "figures; no corpus client currently uses Enterprise."
     )
+
+
+# ===========================================================================
+# Pricing v4 — template-catalogue.yaml (product-plus-services model)
+# ADDED 2026-08-16, HANDOVER.md decisions #14-#17. See
+# 00-knowledge/pricing/template-catalogue.yaml for the full model and
+# every figure's provenance.
+# ===========================================================================
+
+def platform_fee_aed(catalogue=None):
+    """Fixed platform fee. Deliberately takes NO hours argument at all --
+    that is the mechanism, not a convention, that makes it structurally
+    impossible to derive this figure from an hour count (see T24, which
+    mutates hour inputs elsewhere in the engine and asserts this value is
+    unaffected -- it can't be affected, this function never reads one)."""
+    cat = catalogue or load_template_catalogue()
+    return cat["platform_fee"]["amount_aed"]
+
+
+def modules_subtotal_aed(module_names=None, catalogue=None):
+    """Sum of named modules' fixed prices. module_names=None sums ALL
+    five catalogue modules (the reference-quote case); pass an explicit
+    subset for a partial quote (e.g. F2's platform + lead_capture only)."""
+    cat = catalogue or load_template_catalogue()
+    names = module_names if module_names is not None else list(cat["modules"].keys())
+    return sum(cat["modules"][m]["amount_aed"] for m in names)
+
+
+def migration_band_for_records(record_count, catalogue=None):
+    """Returns (band_name, amount_aed). Above the highest band, returns
+    ("above_band_3", None) -- UNPRICED, routed to Commercial Desk. Never
+    extrapolates a number past the governed bands (T16/T26)."""
+    cat = catalogue or load_template_catalogue()
+    bands = cat["migration_bands"]
+    for band_name in ("band_1", "band_2", "band_3"):
+        band = bands[band_name]
+        if record_count <= band["to_records"]:
+            return band_name, band["amount_aed"]
+    return "above_band_3", None
+
+
+def reference_quote_total_aed(catalogue=None):
+    """Platform + all 5 modules + migration band_2 -- the 35,000
+    reference figure, computed from catalogue line items every call, not
+    read from a stored total."""
+    cat = catalogue or load_template_catalogue()
+    return (platform_fee_aed(cat)
+            + modules_subtotal_aed(catalogue=cat)
+            + cat["migration_bands"]["band_2"]["amount_aed"])
+
+
+def discount_gate_verdict(quoted_total_aed, catalogue=None):
+    """COMMERCIAL_DESK_APPROVAL_REQUIRED below the discount floor (90% of
+    the computed reference quote), OK at or above it. A real gate, called
+    by the render path -- not a comment SDRs are trusted to read."""
+    cat = catalogue or load_template_catalogue()
+    floor = round(reference_quote_total_aed(cat) * 0.90)
+    if quoted_total_aed < floor:
+        return "COMMERCIAL_DESK_APPROVAL_REQUIRED"
+    return "OK"
+
+
+def enhancement_net_aed_hr(catalogue=None, policy=None):
+    """Enhancement rate net of commission -- 550 * (1 - commission_total).
+    Computed, not the catalogue's stored net_after_commission_aed_hr
+    (that field is documentation; this function is the checked source)."""
+    cat = catalogue or load_template_catalogue()
+    pol = policy or load_policy()
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    return round(cat["enhancement"]["rate_aed_hr"] * (1 - commission_total), 2)
 
 
 if __name__ == "__main__":
