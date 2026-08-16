@@ -580,7 +580,47 @@ is too short to establish how long `HOST=postgres-prod` has actually been
 live — this remains **NOT ESTABLISHED**.
 
 **Not established, listed plainly:** exact start date of `HOST=postgres-prod`
-(log retention insufficient); whether the 2026-08-15 restore-test operation
-was planned/routine or itself anomalous; auth-layer outcome (still blocked
-by this session's own tool-safety layer, not worked around, per the standing
+(log retention insufficient); auth-layer outcome (still blocked by this
+session's own tool-safety layer, not worked around, per the standing
 decision in §7).
+
+## 12. Addendum: restore-test cadence check — one-off, not scheduled (2026-08-16, third follow-up)
+
+Checked whether the 2026-08-15 07:01:29 UTC `DROP DATABASE
+sgc_staging_restore_test` is a person or a recurring job, per instruction —
+a scripted create-restore-drop cycle would consume production disk/WAL and
+issue a DROP against the shared instance again tonight, alongside the known
+03:00 backup cron.
+
+Checked, read-only: `crontab -l` (root), `/etc/cron.d/*`, `systemctl
+list-timers --all`, `/root/scripts/` for any restore-named script, root's
+`~/.bash_history`.
+
+**Found:** no cron entry (user or system) references a restore test —
+root's crontab has exactly one relevant line, the known
+`0 3 * * * /root/scripts/backup_sgc_staging.sh`, which only runs `pg_dump`
+and never creates, restores, or drops anything. No systemd timer references
+restore, backup, or sgc (only an unrelated `dpkg-db-backup.timer`). No
+script named `*restore*` exists in `/root/scripts/` — only a single log
+file, `/root/scripts/restore_test.log`, dated **2026-08-14 17:28**, not
+rotated, no sibling files. That log's content is the CREATE/restore side of
+a `pg_restore` run (schema recreation output) and contains zero `DROP
+DATABASE` lines — the drop Postgres logged at 2026-08-15 07:01:29 happened
+~13.5 hours after this log's last write, with no corresponding entry in it.
+Root's bash history has no trace of the restore command.
+
+**Conclusion:** no automation anywhere on this box is configured to run a
+restore-test cycle again. The log file's timing — written ~10 minutes after
+`backup_sgc_staging.sh` itself (17:18 → 17:28) — is most consistent with a
+one-time manual verification that the new backup could actually be
+restored, with the cleanup drop issued as a separate, unlogged manual
+command some hours later. This is a read, not certainty: the specific
+person and command could not be identified from available evidence (no
+bash-history capture, no separate audit log checked beyond Postgres's own
+`docker logs`), so "will not recur" is not proven, only that nothing
+scheduled would cause it to recur.
+
+**Action for ops:** whoever wrote `backup_sgc_staging.sh` and ran the
+restore verification on 2026-08-14 should be told about the freeze
+directly — the two look like the same maintenance effort, and they may not
+know the instance is now flagged NOT ISOLATED.
