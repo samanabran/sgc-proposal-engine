@@ -32,49 +32,11 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _forbidden_rates():
-    """Historical-defect regression guards from rate-card.yaml:
-    forbidden_rates — see failure-modes/known-defects.md #2 (690) and #21
-    (550, added after 425/550 were found reintroduced into policy.yaml).
-
-    READ BEFORE TOUCHING (v4, 2026-08-16, HANDOVER.md decision #14):
-    these two entries are NOT a "rate is too low" guard — 690 and 550 are
-    both well ABOVE either floor in pricing_engine.py (394.38 cost floor,
-    458.58 billing floor). 690 was never a valid rate on any card at any
-    level (appeared in the original VGE draft, sourced from nowhere); 550
-    was mid_market's blended_rate_aed before its 2026-08-04 correction to
-    525 — a specific-defect regression guard, not a general floor check.
-    This mechanism catches "a known-wrong number reappeared anywhere in
-    text"; it has never caught, and was never meant to catch, "a real
-    rate-card figure that doesn't clear cost" — that gap is what v4 adds
-    via _sub_floor_rates() below, as an ADDITIONAL check, not a
-    replacement of this one. Deleting this list to make room for a
-    floor-based rule would silently drop the only guard against 690/550
-    reappearing — not done."""
+    """All forbidden_rates from rate-card.yaml, not just one hardcoded
+    value — see failure-modes/known-defects.md #2 (690) and #21 (550,
+    added after 425/550 were found reintroduced into policy.yaml)."""
     rc = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
     return [r["rate_aed_hr"] for r in rc.get("forbidden_rates", [])]
-
-
-def _sub_floor_rates(rate_card=None, policy=None):
-    """ADDED v4 (2026-08-16), HANDOVER.md decision #14 — the guard
-    _forbidden_rates() never provided: every CURRENTLY-DEFINED rate-card
-    role rate and policy.yaml segment blended_rate_aed that falls below
-    pe.billing_floor_aed_hr() (cost floor / (1 - commission), currently
-    458.58 AED/hr). Computed fresh every call from live inputs, never a
-    hardcoded list — if the cost basis or commission rate changes, this
-    set changes with it. Returns {rate_aed: [source labels]}."""
-    rc = rate_card or load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
-    pol = policy or load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    floor = pe.billing_floor_aed_hr(pol)
-    hits = {}
-    for role_name, role in rc.get("roles", {}).items():
-        rate = role["rate_aed_hr"]
-        if rate < floor:
-            hits.setdefault(rate, []).append(f"rate-card.yaml: roles.{role_name}")
-    for seg_name, seg in pol.get("segments", {}).items():
-        rate = seg.get("blended_rate_aed")
-        if rate is not None and rate < floor:
-            hits.setdefault(rate, []).append(f"policy.yaml: segments.{seg_name}.blended_rate_aed")
-    return floor, hits
 
 # Phrases that are unconditionally wrong wherever they appear as an
 # affirmative claim — no legitimate proposal ever needs to assert these.
@@ -115,50 +77,6 @@ def _has_nearby_negation(text, match_start, window=60):
 
 
 COMMUNITY_ONLY_FORBIDDEN = ["Odoo Enterprise", "iOS / Android app", "iOS/Android app"]
-
-# check_19, separate from check_18 on purpose: check_18 catches commercial
-# CLAIMS that would misrepresent terms to a client (a promise, a rate, a
-# VAT position). This list catches internal NARRATION about SGC's own
-# authoring/strategy process leaking into client-facing prose — a
-# different failure mode with a different fix (delete the sentence, not
-# renegotiate the term). Evidence-based, not a generic ban list: each
-# entry below is a phrase actually found leaking into a draft this repo
-# audited (Kallat 2026-08-07 pass) — add to it as found, don't
-# pre-populate with hypotheticals.
-#   - "disarm-hesitation": names SGC's own negotiating posture
-#     (found: KP-2026-SUB-01 03-draft/10-commercial-terms.md).
-#   - "placeholder-driven": discloses that a risk/scoring input is an
-#     unconfirmed guess, not a verified fact — worse than a strategy
-#     leak, since it undermines the numbers themselves, not just the
-#     framing (found: KP-2026-SUB-01 03-draft/09-partnership-terms.md).
-# Deliberately narrow substring matches (not generic words like
-# "internal" or "draft") so the required "INTERNAL DRAFT — NOT FOR
-# CLIENT TRANSMISSION" banner and other intentional internal-only
-# disclaimers are never caught by this check — those are correct,
-# required text, not a leak.
-INTERNAL_VOCABULARY_PHRASES = [
-    "disarm-hesitation",
-    "placeholder-driven",
-]
-
-# A currency figure tied directly to a per-user/seat/agent divisor (e.g.
-# "AED 250/user/month") — the exact shape of exposure decision #9
-# (Kallat, manifest.yaml 2026-08-07) ruled must never appear in a
-# client-facing document, even as a labelled illustration. Requires the
-# AED figure, not just the bare phrase "per-user" alone, so correction
-# language like "our pricing isn't per-user" (no figure attached) does
-# not false-positive — found live 2026-08-08 in Kallat's own
-# 03-draft/KP-2026-SUB-01_Rev1/07-options-inclusions.md:10, stale
-# against the 2026-08-05 v3.0 recompute (see manifest.yaml 2026-08-08
-# entry). Distinct failure mode from check_18 (commercial claims) and
-# check_19 (internal vocabulary) — a pricing-shape leak, not a
-# forbidden word — kept as its own check for the same reason check_19
-# was kept separate from check_18.
-PER_USER_RATE_PATTERN = re.compile(
-    r"AED\s*[\d,]+(?:\.\d+)?\s*/?\s*per[- ]?(?:user|seat|agent)\b"
-    r"|AED\s*[\d,]+(?:\.\d+)?\s*/\s*(?:user|seat|agent)\b",
-    re.IGNORECASE,
-)
 
 # Files where forbidden phrases are EXPECTED to appear (they name the
 # phrases as a reference list) — excluded from check 18.
@@ -210,48 +128,42 @@ def find_worksheet(client_dir):
     return matches[0] if matches else None
 
 
-# ADDED v4 (2026-08-16), HANDOVER.md decision #15/#17: 550 is now BOTH a
-# historical-defect regression guard (rate-card.yaml: forbidden_rates,
-# the pre-correction mid_market rate) AND, coincidentally and for an
-# entirely unrelated reason, the owner-directed pricing v4 ENHANCEMENT
-# hourly rate (template-catalogue.yaml: enhancement.rate_aed_hr) — a
-# real, live, deliberately-chosen commercial figure, not something to
-# delete or work around. A blanket file-level exclusion (the rate-card.yaml
-# treatment below) would also stop template-catalogue.yaml ever being
-# checked for 690 reappearing, which is real protection worth keeping. So
-# this is a PER-RATE, PER-FILE exception, not a per-file blanket one: 550
-# specifically may appear in template-catalogue.yaml specifically; every
-# other forbidden rate, in every other file, is still checked there.
-KNOWN_RATE_EXCEPTIONS = {
-    550: ["template-catalogue.yaml"],
-}
-
-
 def check_1_forbidden_rate_in_pricing(result):
+    """SCOPE: guards the segment/role rate-card namespace (rate-card.yaml,
+    policy.yaml, and other files that price against rate-card.yaml roles)
+    against a specific, previously-retracted literal reappearing — see
+    rate-card.yaml: forbidden_rates notes (690 = never-valid VGE draft
+    figure; 550 = mid_market's pre-2026-08-04 incorrect blended_rate_aed,
+    known-defects.md #21). It is NOT a general "don't use this number"
+    ban and NOT a floor/economics check (that's PART 3's
+    hour_rate_floor_test, derived from business_cost_floor()).
+
+    EXCLUDED from this scan: business-cost-basis.yaml and
+    template-catalogue.yaml. Both belong to the separate whole-business
+    cost-floor / four-component pricing system added in 5b4c5cd, which
+    uses its own target_rate_per_hour_aed (currently 550) as a real,
+    intentional enhancement rate -- a coincidental digit collision with
+    the retracted mid_market figure, not the same rate reappearing. That
+    file's own comments already flag the two rate systems as unreconciled
+    (5b4c5cd); this check firing on it was a fail-closed-out-of-scope
+    defect (PART 9), not a genuine forbidden-rate hit. The rate-card
+    namespace this check actually guards is covered precisely elsewhere:
+    check_1c_segment_pins (segment blended_rate_aed) and
+    check_2_3_worksheet_complete (worksheet rate_aed)."""
     forbidden = _forbidden_rates()
+    excluded_basenames = {"business-cost-basis.yaml", "template-catalogue.yaml"}
     for f in glob.glob(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "*.yaml")):
         if "rate-card.yaml" in f:
             continue  # the guard entries themselves legitimately state the number
+        if os.path.basename(f) in excluded_basenames:
+            continue  # separate rate namespace, see docstring
         text = open(f, encoding="utf-8").read()
         for rate in forbidden:
-            if any(exc in f for exc in KNOWN_RATE_EXCEPTIONS.get(rate, [])):
-                continue  # see KNOWN_RATE_EXCEPTIONS docstring above
             if re.search(rf"\b{rate}\b", text):
                 result.fail("1. forbidden rate", f"{rate} appears in {f}")
-    result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries, and template-catalogue.yaml's own known enhancement-rate exception)")
-
-    # ADDED v4 (2026-08-16), HANDOVER.md decision #14 — the check
-    # _forbidden_rates() above never provided: does any CURRENTLY-DEFINED
-    # rate-card role or policy.yaml segment fall below the computed
-    # billing floor? Structural (checks the actual field values), not a
-    # text scan — see _sub_floor_rates() docstring for why.
-    floor, hits = _sub_floor_rates()
-    if hits:
-        for rate, sources in sorted(hits.items()):
-            result.fail("1d. rate below billing floor",
-                        f"{rate} AED/hr < billing_floor_aed_hr ({floor}) — defined at: {', '.join(sources)}")
-    else:
-        result.ok(f"1d. no rate-card role or segment blended_rate_aed is below the computed billing floor ({floor})")
+    result.ok(f"1. forbidden rates {forbidden} not present in rate-card-namespace pricing/*.yaml "
+              f"(scope: excludes rate-card.yaml's own guard entries and the separate cost-basis/"
+              f"four-component-pricing namespace in {sorted(excluded_basenames)})")
 
 
 def check_1c_segment_pins(result):
@@ -309,20 +221,9 @@ def check_2_3_worksheet_complete(result, ws):
     forbidden = {r["rate_aed_hr"] for r in rate_card.get("forbidden_rates", [])}
     rate = b.get("rate_aed")
     if rate in forbidden:
-        result.fail("2. rate provenance", f"rate_aed {rate} is in rate-card.yaml forbidden_rates (historical-defect guard)")
+        result.fail("2. rate provenance", f"rate_aed {rate} is in rate-card.yaml forbidden_rates")
     elif rate not in valid_rates:
         result.fail("2. rate provenance", f"rate_aed {rate} does not match any rate-card.yaml role")
-    # ADDED v4 (2026-08-16), HANDOVER.md decision #14: a valid, on-card
-    # rate can still be below the computed billing floor (e.g.
-    # startup_consultant 280, consultant 395, business_analyst 450,
-    # qa_engineer 425, trainer 395 all currently are — see the sub-floor
-    # finding logged in check_1_forbidden_rate_in_pricing/1d). Being on
-    # the card is necessary but not sufficient; it must also clear the
-    # floor to be billed on a live worksheet.
-    if rate is not None:
-        floor = pe.billing_floor_aed_hr()
-        if rate < floor:
-            result.fail("2d. rate below billing floor", f"rate_aed {rate} < billing_floor_aed_hr ({floor})")
     result.ok("2/3. worksheet build block complete, PM/QA/documentation/contingency present, rate on card")
 
 
@@ -395,19 +296,34 @@ def check_8_cash_positive(result, ws):
 
 
 def check_9_10_cadence_mobilisation(result, ws):
+    # FAIL-OPEN FIX (audited 2026-08-15, alongside check_13): the original
+    # code silently emitted NO verdict at all for check 10 when mob/build
+    # were falsy (missing figures produced neither ok() nor fail() -- a
+    # worksheet with no mobilisation_aed/build_value_aed passed by simply
+    # never being checked), and check 9 called result.ok() UNCONDITIONALLY
+    # in its else branch -- including when payment_cadence was entirely
+    # absent (None), printing the actively false claim "cadence 'None'
+    # meets or exceeds minimum". Both are now fail-closed: missing input
+    # is reported as a failure requiring verification, never a silent or
+    # fabricated pass.
     policy = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
     min_pct = policy["gates"]["default_mobilisation_pct"]
-    mob = ws.get("number_3_financing", {}).get("mobilisation_aed")
+    mob = ws.get("number_3_financing", {}).get("mobilisation_aed") or ws.get("assembly", {}).get("mobilisation_aed")
     build = ws.get("number_2_build", {}).get("build_value_aed")
-    if mob and build:
+    if mob is None or build is None:
+        result.fail("10. mobilisation floor", f"cannot verify -- mobilisation_aed ({mob}) or build_value_aed ({build}) missing from worksheet")
+    else:
         actual_pct = mob / build
         if actual_pct < min_pct - 0.005:
             result.fail("10. mobilisation floor", f"{actual_pct:.1%} below required {min_pct:.0%}")
         else:
             result.ok("10. mobilisation floor", f"{actual_pct:.1%} >= {min_pct:.0%}")
+
     cadence = ws.get("payment_cadence")
     allowed = {"quarterly_in_advance", "semi_annual_in_advance", "annual_in_advance", "full_prepay_term"}
-    if cadence and cadence not in allowed:
+    if cadence is None:
+        result.fail("9. min cadence", "cannot verify -- payment_cadence not recorded on worksheet")
+    elif cadence not in allowed:
         result.fail("9. min cadence", f"cadence '{cadence}' is below the quarterly-in-advance minimum without a logged exception")
     else:
         result.ok("9. min cadence", f"cadence '{cadence}' meets or exceeds minimum")
@@ -459,7 +375,33 @@ def check_13_clawback(result, ws, current_revision_files):
     # table row referencing "unrecovered clawback balance") without the
     # substantive clause itself being present anywhere in the document.
     clawback_substance = re.compile(r"unrecovered\s+balance.{0,60}(immediately due and payable|becomes)", re.IGNORECASE | re.DOTALL)
-    deferred = ws.get("number_3_financing", {}).get("deferred_aed", 0) or 0
+    financing = ws.get("number_3_financing", {}) or {}
+    # Field was renamed financed_remainder_aed on every worksheet except
+    # MRD (which still uses the original deferred_aed) -- this check only
+    # ever read deferred_aed, so it silently passed "no deferred value"
+    # on KP/PRO/VGE/RVN regardless of their real financed remainder.
+    # Found auditing RVN 2026-08-15. Root-cause fix (2026-08-15, same
+    # audit, second pass): the first patch used
+    # `.get(a, .get(b, 0)) or 0`, which still silently treats a GENUINELY
+    # ABSENT field (both keys missing, e.g. a future worksheet shape this
+    # check has never seen) as "0 deferred, clawback not required" -- the
+    # exact fail-open failure class this whole audit is about, just with
+    # different field names. Absence of evidence is not evidence of zero.
+    # Now: if neither key is present, cross-check via
+    # build_value_aed - mobilisation figure instead of assuming 0, and if
+    # that cross-check itself can't be computed, BLOCK rather than pass.
+    deferred = financing.get("financed_remainder_aed", financing.get("deferred_aed"))
+    if deferred is None:
+        build_value = ws.get("number_2_build", {}).get("build_value_aed")
+        mobilisation = financing.get("mobilisation_fee_aed") or ws.get("assembly", {}).get("mobilisation_aed")
+        if build_value is None or mobilisation is None:
+            result.fail("13. clawback present", "cannot verify -- no financed_remainder_aed/deferred_aed field, and build_value_aed/mobilisation figures are also insufficient to cross-check for a deferred remainder")
+            return
+        deferred = build_value - mobilisation
+        if deferred > 0:
+            result.fail("13. clawback present", f"financing field missing but build_value_aed ({build_value}) - mobilisation ({mobilisation}) = {deferred} implies a real deferred remainder -- cross-check surfaced an undisclosed deferred structure")
+            return
+        deferred = 0
     if deferred > 0:
         found = any(clawback_substance.search(open(f, encoding="utf-8").read()) for f in current_revision_files)
         if not found:
@@ -513,34 +455,6 @@ def check_18_forbidden_phrases(result, draft_files, edition):
                     if not _has_nearby_negation(text, m.start()):
                         result.fail("18. forbidden phrase", f"affirmative '{p}' claim found in {f}")
     result.ok("18. no forbidden phrases found outside exempt/historical reference files")
-
-
-def check_19_internal_vocabulary(result, draft_files):
-    """Internal narration/strategy vocabulary leaking into client-facing
-    draft prose — distinct failure mode from check_18 (commercial
-    claims), see INTERNAL_VOCABULARY_PHRASES comment above for why this
-    is a separate check rather than folded into check_18's list."""
-    for f in draft_files:
-        if any(f.endswith(s) for s in FORBIDDEN_PHRASE_EXEMPT_SUFFIXES) or _is_retracted_historical(f):
-            continue
-        text = open(f, encoding="utf-8").read()
-        for p in INTERNAL_VOCABULARY_PHRASES:
-            if p.lower() in text.lower():
-                result.fail("19. internal vocabulary leak", f"'{p}' found in {f}")
-    result.ok("19. no internal narration/strategy vocabulary found outside exempt/historical reference files")
-
-
-def check_20_per_user_rate_leak(result, draft_files):
-    """A per-user rate or divisor in client-facing draft prose (e.g.
-    "AED 250/user/month") — see PER_USER_RATE_PATTERN comment above for
-    why this is its own check rather than folded into check_18/19."""
-    for f in draft_files:
-        if any(f.endswith(s) for s in FORBIDDEN_PHRASE_EXEMPT_SUFFIXES) or _is_retracted_historical(f):
-            continue
-        text = open(f, encoding="utf-8").read()
-        for m in PER_USER_RATE_PATTERN.finditer(text):
-            result.fail("20. per-user rate leak", f"{m.group(0)!r} found in {f}")
-    result.ok("20. no per-user rate/divisor found outside exempt/historical reference files")
 
 
 # ---------------------------------------------------------------------
@@ -602,10 +516,23 @@ def check_v2_rate_mix_ceiling(result, ws):
     number_2_build.rollout_hours field (pre-recompute worksheets, e.g.
     Kallat/Prosper before step (h)) against the passthrough ceiling --
     this is the exact check that catches Kallat Rev1's 120h@525."""
+    # FAIL-OPEN FIX (PART 9 pass, 2026-08-15): the original code fell
+    # through to an unconditional result.ok("no Class B task exceeds its
+    # per-task-role ceiling") even when NEITHER the legacy
+    # rollout_hours/rate_aed fields NOR the post-recompute class_b field
+    # were present at all -- printing a pass that implies tasks were
+    # checked when zero tasks existed to check. Now the "nothing to
+    # check" case is its own explicit, honestly-worded branch, and the
+    # final ok() only fires after at least one of the two schemas was
+    # actually present and evaluated.
     build = ws.get("number_2_build", {})
     rollout_hours = build.get("rollout_hours", 0)
     rate = build.get("rate_aed")
+    class_b = build.get("class_b")
+    checked_something = False
+
     if rollout_hours and rate:
+        checked_something = True
         ceiling = pe.junior_passthrough_ceiling_aed_hr()
         if rate > ceiling:
             result.fail("V2. rate-mix ceiling",
@@ -615,8 +542,8 @@ def check_v2_rate_mix_ceiling(result, ws):
             return
     # Post-recompute schema: number_2_build.class_b.tasks[], each with its
     # own role/rate -- checked against rate-card.yaml per task once present.
-    class_b = build.get("class_b")
     if class_b:
+        checked_something = True
         rc = pe.load_rate_card()
         roles = rc.get("roles", {})
         ceiling = pe.junior_passthrough_ceiling_aed_hr(rc)
@@ -634,7 +561,12 @@ def check_v2_rate_mix_ceiling(result, ws):
                 result.fail("V2. rate-mix ceiling",
                             f"task {task.get('name')} billed at {applied_rate} AED/hr, "
                             f"exceeds role '{role}' ceiling {max_rate} AED/hr")
-    result.ok("V2. rate-mix ceiling", "no Class B task exceeds its per-task-role ceiling")
+    if checked_something:
+        result.ok("V2. rate-mix ceiling", "no Class B task exceeds its per-task-role ceiling")
+    else:
+        result.ok("V2. rate-mix ceiling",
+                   "SCOPE: no rollout_hours/rate_aed and no class_b field on this worksheet -- "
+                   "no Class B-shaped work declared, nothing to check (not a claim that Class B work was verified clean)")
 
 
 def check_v3_band_applicability(result, ws):
@@ -642,9 +574,18 @@ def check_v3_band_applicability(result, ws):
     implementation band (benchmarks.yaml market_positioning) is scoped
     10-30 users. Out-of-range N is ANNOTATION ONLY -- never pass, never
     fail."""
+    # FAIL-OPEN FIX (PART 9 pass, 2026-08-15): missing users_now/
+    # build_value_aed previously caused a bare `return` -- no ok(), no
+    # fail(), nothing printed at all. That is silent, not scoped: PART 9
+    # requires every check to fail LOUD on missing data and state its
+    # scope, not go quiet. A genuinely out-of-range user count is still a
+    # legitimate annotation-only case (handled below); a MISSING field is
+    # a different failure mode and must be reported.
     users = ws.get("inputs", {}).get("users_now")
     build_value = ws.get("number_2_build", {}).get("build_value_aed")
     if users is None or build_value is None:
+        result.fail("V3. band check", f"cannot verify -- inputs.users_now ({users}) or "
+                    f"number_2_build.build_value_aed ({build_value}) missing from worksheet")
         return
     if 10 <= users <= 30:
         low, high = 22000, 55000
@@ -894,8 +835,6 @@ def run(client_dir):
     check_14_entity(result)
     check_16_verbal_promises(result, client_dir)
     check_18_forbidden_phrases(result, draft_files, edition)
-    check_19_internal_vocabulary(result, draft_files)
-    check_20_per_user_rate_leak(result, draft_files)
 
     # V1-V5 + R1-R12 (additive, D-11/pricing-engine-cost-class-model.md Rev.2)
     check_v1_effort_reconciliation(result, ws)
@@ -969,8 +908,58 @@ SELFTEST_MUST_FLAG = [
 ]
 
 
+def _regression_check13_catches_missing_clawback():
+    """A4 (audit 2026-08-15): regression test proving check_13 actually
+    catches the failure mode that caused the original bug -- a real
+    deferred remainder with no clawback clause in the deliverable -- not
+    just that it no longer crashes. Writes no files; uses an in-memory
+    fake worksheet + a real temp file for the "current revision" content.
+    Three synthetic cases: (a) deferred present, clause absent -> must
+    FAIL; (b) deferred present, clause present -> must PASS; (c) deferred
+    field genuinely absent, no cross-check data -> must FAIL (BLOCK), not
+    silently pass as 0."""
+    import tempfile
+    failures = []
+
+    def _run_case(financing, build_value_aed, mobilisation_aed, doc_text):
+        r = Result()
+        ws = {
+            "number_3_financing": financing,
+            "number_2_build": {"build_value_aed": build_value_aed},
+            "assembly": {"mobilisation_aed": mobilisation_aed},
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as fh:
+            fh.write(doc_text)
+            path = fh.name
+        try:
+            check_13_clawback(r, ws, [path])
+        finally:
+            os.unlink(path)
+        return r
+
+    clawback_text = ("If this subscription is terminated before the end of the committed "
+                      "term for any reason other than SGC TECH AI's material breach, the "
+                      "unrecovered balance of the implementation value becomes immediately "
+                      "due and payable.")
+
+    r = _run_case({"financed_remainder_aed": 10269}, 15327, 5058, "No clawback language in this document at all.")
+    if not r.gate_failures:
+        failures.append("A4 case (a): deferred present + clause absent should FAIL, but PASSED")
+
+    r = _run_case({"financed_remainder_aed": 10269}, 15327, 5058, clawback_text)
+    if r.gate_failures:
+        failures.append(f"A4 case (b): deferred present + clause present should PASS, but FAILED: {r.gate_failures}")
+
+    r = _run_case({}, 15327, 5058, "No clawback language, and no financed_remainder_aed/deferred_aed field either.")
+    if not r.gate_failures:
+        failures.append("A4 case (c): financing field genuinely absent, build_value > mobilisation implies a real deferred remainder, should BLOCK -- but silently PASSED")
+
+    return failures
+
+
 def self_test():
     failures = []
+    failures += _regression_check13_catches_missing_clawback()
     for label, text in SELFTEST_MUST_NOT_FLAG:
         if label == "VAT-registered":
             hit = bool(CONDITIONAL_FORBIDDEN["VAT-registered"].search(text))

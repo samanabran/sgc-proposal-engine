@@ -1,0 +1,80 @@
+opportunity_id: "RVN-2026-SUB-01"
+client_legal_name: "RVN (legal name to be confirmed — not stated on discovery call)"
+jurisdiction: "mainland"        # ASSUMPTION: Burjuman Business Towers, Dubai — Dubai mainland brokerage inferred, not confirmed. Escalate to confirm at kickoff/contract stage.
+client_trn: ""                   # not stated; do not assume registered — see G35
+decision_maker: "Mr. Nazim (Owner/Boss — final approval for funds and charges, per transcript 13:07-13:27)"
+sdr_owner: "SGC SDR (per call transcript, unnamed in source)"
+segment: startup_boutique        # 6-7 users, under policy.yaml segments.startup_boutique.max_users (10)
+edition: community                # no editions.yaml trigger_conditions met — see below
+vertical: real-estate-brokerage-uae
+
+stage: intake
+current_revision: ""
+knowledge_version_used: "pricing v3.1 (2026-08-06)"
+
+scale:
+  users_now: 7                    # transcript: "1234677 people" = 7; also stated "six or seven max" for CRM users
+  users_12mo: 7                    # no stated growth plan; two bosses/owners explicitly excluded from CRM use
+  segment: startup_boutique
+
+edition_trigger_check:
+  requires_bank_reconciliation: false
+  requires_official_mobile_app: false
+  requires_studio: false
+  requires_vendor_upgrade_sla: false
+  users_above_15: false
+  multi_entity: false
+  multi_currency: false
+  result: "No trigger_conditions met — Community confirmed per editions.yaml default."
+
+scope_signals:
+  work_packages_requested:
+    - discovery
+    - crm_leads                 # lead capture/distribution/assignment, replacing Google Sheet workflow
+    - users_roles_agent_perf     # per-agent roles, activity tracking
+    - reports_dashboard          # call/lead activity reporting vs 250-calls/agent/day target
+    - data_migration_500          # migrate existing Google Sheet lead records into CRM
+  modules_requested: []           # N/A on Community
+  incumbent_system: "Google Sheets (shared intake sheet + per-agent personal sheets) + WhatsApp for instant leads. No CRM, no dialer/telephony platform, no PBX mentioned."
+  incumbent_benchmark_aed_mo: null   # no CRM cost benchmark stated — client compared 5-6 other vendors' packages but was unconvinced, no figures given
+  portal_integrations_requested: []   # none requested this call — leads come from Meta/Google Ads into Sheets, not from a property portal feed
+  migration_records: "400-600 leads/month volume; existing backlog in Google Sheets, exact record count not stated — data_migration_500 package used as nearest catalogue band, flag for confirmation once actual sheet record count is known"
+  migration_files: "Google Sheets (shared intake sheet + individual per-agent sheets)"
+  data_quality_confidence: unknown
+
+escalated_uncatalogued_requests:
+  # Per SKILL.md §7 — these were requested on the call but have NO entry in
+  # hour-lookup.yaml, saas-modules.yaml, or phase2-catalogue.yaml. NOT priced
+  # in this worksheet. Logged here and in manifest.yaml: escalations. Native
+  # Odoo Community CRM activity logging (manual call outcome/notes/follow-up
+  # flag) IS covered under crm_leads scope and is NOT in this escalation list.
+  - item: "Automated call-analyzer / telephony integration (auto-captured call volume, pickup/answer-rate per agent against the stated 250-calls/day target)"
+    why_uncatalogued: "No work package or SaaS module in 00-knowledge/pricing/ covers dialer/telephony/call-analytics integration. Client's current call handling is personal SIM cards / WhatsApp — no PBX or VOIP platform disclosed, so integration surface is unknown."
+    treatment: "Excluded from Phase 1 build. Manual call logging via native CRM activities (crm_leads scope) + reports_dashboard aggregation covers logged-call reporting. Automated capture requires Commercial Desk scoping once RVN's phone/telephony stack is known — do not price by analogy."
+  - item: "Attendance / break-time tracking via RVN's existing physical sensor/badge system"
+    why_uncatalogued: "No work package or module covers third-party sensor/badge system integration. Sensor vendor, API availability, and data format are unknown."
+    treatment: "Excluded from Phase 1 build. Requires Commercial Desk scoping once the sensor vendor/API is identified — do not price by analogy or invent an hours figure."
+
+commercial_signals:
+  budget_rejected_aed_low: null
+  budget_rejected_aed_high: null    # client explicitly stated no fixed CRM budget: "whatever you are proposing, that will be the first decision" (15:31-16:29). AED 15,000-60,000/month figures are AD/LEAD-GEN spend, not CRM budget — do not conflate (see vertical note on installments vs financing terms; same conflation risk applies to ad spend vs subscription price).
+  ad_lead_gen_spend_aed_mo_low: 15000
+  ad_lead_gen_spend_aed_mo_high: 60000
+  preferred_term_months: null        # not discussed; runbook term-selection rule applied based on build value band
+  mobilisation_appetite: unknown       # not discussed; default 33% per G3 applies absent a stated objection
+  prior_alternative_quoted: null        # "5-6 people from India and Dubai" pitched CRM systems; RVN "not convinced about their packages" — no figures given
+  subscription_affinity: unknown
+
+model:
+  proposal_model: SUB
+
+notes:
+  verbal_promises_logged: true
+  call_transcript_ref: "00-intake/call-transcript.md"
+  call_summary_ref: "00-intake/call-summary.md"
+  call_capture_note: "Source files are Otter.ai transcript/summary dated 2026-08-15 (file date). The call itself is explicitly a pre-meeting discovery call ahead of the Monday onsite demo — the transcript's own content (Speaker 2: 'thanks for taking the time for this quick call before the meeting') confirms it predates the Monday, 11:30 AM demo. Exact call date not stated in the source files; treat 2026-08-15 as the capture/intake date, not a confirmed call date — flag for correction if the client folder is later found to need the precise call date."
+  meeting_flow_ref: "00-intake/monday-meeting-flow.md"
+  monday_meeting: "11:30 AM, Burjuman Business Towers, Office 56, 13th floor. Attendees (SGC side): SDR. Attendees (client side): Ms. Dia, Mr. Nazim (final approval authority), possibly a third stakeholder per Dia's 'schedule at least the three of them' (13:12)."
+  crm_users_scope: "Sales/telesales team + brokers only (6-7 people). Marketing team and the two owners/bosses explicitly excluded from CRM usage per Dia (05:06-05:38): 'I don't want there to be CRM [for marketing]... I don't think that they will follow the CRM [bosses].'"
+  implementation_target: "September 2026, contingent on Nazim's approval — 'if everything goes well, then we don't want to lag' (16:44-16:53)."
+  billing_not_required: "Client explicitly stated no billing/invoicing module needed — only call-outcome/analysis reporting (17:44-17:57)."

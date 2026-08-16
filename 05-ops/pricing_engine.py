@@ -21,8 +21,6 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INVENTORY_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "class-b-task-inventory.yaml")
 RATE_CARD_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml")
 HOUR_LOOKUP_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "hour-lookup.yaml")
-POLICY_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml")
-TEMPLATE_CATALOGUE_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "template-catalogue.yaml")
 
 
 def _load(path):
@@ -40,14 +38,6 @@ def load_rate_card():
 
 def load_hour_lookup():
     return _load(HOUR_LOOKUP_PATH)
-
-
-def load_policy():
-    return _load(POLICY_PATH)
-
-
-def load_template_catalogue():
-    return _load(TEMPLATE_CATALOGUE_PATH)
 
 
 def cum_sum(n, b):
@@ -278,109 +268,6 @@ def hypercare_cost_aed(n, policy=None):
     return round(hours * pol["cost_to_serve"]["support_rate_aed"])
 
 
-def internal_consultant_cost_aed_hr(policy=None):
-    """Single source of truth for the internal delivery cost floor
-    (AED/hr) — policy.yaml: cost_to_serve.internal_consultant_cost_aed_hr
-    must equal this function's output; test_pricing_engine.py asserts it
-    (drift guard). Owner-stated cost-basis inputs
-    (policy.yaml: internal_cost_basis), UNVERIFIED against real payroll
-    records — see HANDOVER.md decision #12.
-
-    There is exactly one delivery role (owner/founder); callers/SDRs are
-    fixed overhead, not a per-role delivery cost — see
-    internal_cost_basis.role_structure. Do not derive a per-role cost
-    table from this function's inputs; there is only one delivery role
-    to cost."""
-    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    basis = pol["internal_cost_basis"]
-    ops = basis["monthly_operating_basis_aed"]
-    cash_out_monthly = (
-        ops["licence_annual_aed"] / 12
-        + ops["staff_salaries_monthly_aed"]
-        + ops["office_monthly_aed"]
-        + ops["phones_monthly_aed"]
-        + ops["hosting_ai_monthly_aed"]
-        + ops["other_monthly_aed"]
-    )
-    total_requirement_monthly = cash_out_monthly + ops["owner_salary_monthly_aed"]
-    hrs = basis["delivery_hours_basis"]
-    delivery_hours_per_month = (
-        hrs["gross_hours_monthly"]
-        - hrs["less_caller_mgmt_hours"]
-        - hrs["less_marketing_hours"]
-        - hrs["less_training_hours"]
-        - hrs["less_admin_accounts_hours"]
-        - hrs["less_sales_hours"]
-    )
-    return round(total_requirement_monthly / delivery_hours_per_month, 2)
-
-
-def billing_floor_aed_hr(policy=None):
-    """Commission-adjusted billing floor (AED/hr) -- ADDED v4 (2026-08-16),
-    HANDOVER.md decision #14. This is the actual quoting gate;
-
-    internal_consultant_cost_aed_hr() (aka "cost_floor_per_hour") only
-    recovers SGC's operating cost -- it says nothing about commission.
-    Commission (internal_cost_basis.commission.combined_pct, 14%) is paid
-    OUT OF REVENUE on top of that cost, on every closed deal. A deal billed
-    at exactly cost_floor_per_hour therefore never actually clears the
-    floor once commission is paid out of it -- 14% of revenue billed at
-    cost recovers less than 100% of cost. This function computes the
-    higher, correct number: cost_floor_per_hour / (1 - commission_total).
-
-    Two floors, two jobs, do not conflate them:
-      internal_consultant_cost_aed_hr() -- cost recovery only, reported as
-        a separate metric and used as the WARN threshold.
-      billing_floor_aed_hr() (this function) -- cost recovery AND
-        commission paid -- this is what BLOCK actually gates on.
-    A rate between the two floors "recovers cost, does not pay the
-    owner" -- WARN, not PASS. See rate_guard_verdict()."""
-    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    cost_floor = internal_consultant_cost_aed_hr(pol)
-    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
-    return round(cost_floor / (1 - commission_total), 2)
-
-
-def rate_guard_verdict(rate_aed_hr, policy=None):
-    """BLOCK / WARN / PASS for a single hourly rate against the two floors
-    (see billing_floor_aed_hr() docstring for why there are two).
-      rate < internal_consultant_cost_aed_hr()           -> BLOCK
-      internal_consultant_cost_aed_hr() <= rate < billing_floor_aed_hr() -> WARN
-      rate >= billing_floor_aed_hr()                      -> PASS"""
-    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    cost_floor = internal_consultant_cost_aed_hr(pol)
-    billing_floor = billing_floor_aed_hr(pol)
-    if rate_aed_hr < cost_floor:
-        return "BLOCK"
-    if rate_aed_hr < billing_floor:
-        return "WARN"
-    return "PASS"
-
-
-def breakeven_hours(net_revenue_aed, policy=None):
-    """Hours at which net revenue (after commission) exactly recovers cost
-    -- net_revenue_aed / internal_consultant_cost_aed_hr(). Uses the COST
-    floor, not the billing floor: this answers "how many hours before we
-    lose money outright," a different question from the PASS/WARN/BLOCK
-    effective-rate gate in deal_guard_verdict(), which uses the billing
-    floor. Risk-adjusted hours above this number BLOCK (see T22)."""
-    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    cost_floor = internal_consultant_cost_aed_hr(pol)
-    return round(net_revenue_aed / cost_floor, 2)
-
-
-def deal_guard_verdict(net_revenue_aed, risk_adjusted_hours, policy=None):
-    """Whole-deal BLOCK/WARN/PASS: effective net rate = net_revenue_aed /
-    risk_adjusted_hours, checked against rate_guard_verdict(). Must be
-    called with RISK-ADJUSTED hours (class-b-task-inventory.yaml /
-    contingency-schedule terms), never raw estimated hours -- quoting on
-    raw hours is the exact failure mode this guards against (see Part 3,
-    HANDOVER.md decision #16)."""
-    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
-    effective_rate = round(net_revenue_aed / risk_adjusted_hours, 2)
-    return effective_rate, rate_guard_verdict(effective_rate, pol)
-
-
 def class_d_hours_or_cost(edition):
     """Class D structural guarantee: zero for Community by construction."""
     if edition == "community":
@@ -392,135 +279,403 @@ def class_d_hours_or_cost(edition):
     )
 
 
-# ===========================================================================
-# Pricing v4 — template-catalogue.yaml (product-plus-services model)
-# ADDED 2026-08-16, HANDOVER.md decisions #14-#17. See
-# 00-knowledge/pricing/template-catalogue.yaml for the full model and
-# every figure's provenance.
-# ===========================================================================
+BUSINESS_COST_BASIS_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "business-cost-basis.yaml")
+TEMPLATE_CATALOGUE_PATH = os.path.join(REPO_ROOT, "00-knowledge", "pricing", "template-catalogue.yaml")
 
-def platform_fee_aed(catalogue=None):
-    """Fixed platform fee. Deliberately takes NO hours argument at all --
-    that is the mechanism, not a convention, that makes it structurally
-    impossible to derive this figure from an hour count (see T24, which
-    mutates hour inputs elsewhere in the engine and asserts this value is
-    unaffected -- it can't be affected, this function never reads one)."""
+
+def load_business_cost_basis():
+    return _load(BUSINESS_COST_BASIS_PATH)
+
+
+def load_template_catalogue():
+    return _load(TEMPLATE_CATALOGUE_PATH)
+
+
+def business_cost_floor(basis=None):
+    """PART 1: whole-business operating cost floor, computed not hardcoded.
+    Every field here is derived from business-cost-basis.yaml -- change any
+    input in that file and this function's output changes with it. Never
+    hardcode 394 (or whatever the current output is) anywhere else; call
+    this function and read floor_per_hour_aed."""
+    b = basis or load_business_cost_basis()
+    fixed = b["fixed_monthly_aed"]
+    cash_out_monthly = (
+        fixed["licence_annual_aed"] / 12
+        + fixed["staff_salaries_monthly_aed"]
+        + fixed["office_monthly_aed"]
+        + fixed["phones_monthly_aed"]
+        + fixed["hosting_ai_monthly_aed"]
+        + fixed["other_monthly_aed"]
+    )
+    extras_total = 0.0
+    for name, extra in b.get("optional_extras", {}).items():
+        if not extra.get("enabled"):
+            continue
+        if name == "gratuity_accrual":
+            extras_total += extra["pct_of_basic"] * extra.get("basic_monthly_aed", 0)
+        elif name == "contingency_pct":
+            continue  # applied after total_requirement below, not a flat monthly add
+        else:
+            extras_total += extra.get("monthly_aed", 0)
+    cash_out_monthly += extras_total
+
+    total_requirement = cash_out_monthly + fixed["owner_salary_monthly_aed"]
+
+    contingency = b.get("optional_extras", {}).get("contingency_pct", {})
+    if contingency.get("enabled"):
+        total_requirement *= (1 + contingency.get("pct_of_total_requirement", 0))
+
+    delivery_hours = b["delivery"]["delivery_hours_per_month"]
+    floor_per_hour_aed = total_requirement / delivery_hours
+
+    return {
+        "cash_out_monthly_aed": round(cash_out_monthly, 2),
+        "total_requirement_aed": round(total_requirement, 2),
+        "delivery_hours_per_month": delivery_hours,
+        "floor_per_hour_aed": round(floor_per_hour_aed, 2),
+        "target_rate_per_hour_aed": b["target_rate_per_hour_aed"],
+        "commission_sales_pct": b["commission"]["commission_sales_pct"],
+        "commission_delivery_pct": b["commission"]["commission_delivery_pct"],
+    }
+
+
+def four_component_build(modules_selected, maturity, migration_band, enhancement_hours=0.0,
+                          enhancement_rate_aed_hr=None, catalogue=None, cost_basis=None):
+    """PART 2: template + modules + migration + enhancement, replacing the
+    single-fixed-figure build_value_aed model. Returns priced components and
+    hours separately so every AED figure traces to a named catalogue row
+    (RULE 1) instead of one asserted total."""
     cat = catalogue or load_template_catalogue()
-    return cat["platform_fee"]["amount_aed"]
+    basis = cost_basis or business_cost_floor()
+
+    tmpl = cat["template_base"]
+    template_price_aed = tmpl["fixed_fee_aed"]
+    template_hours = tmpl["hours_by_maturity"][maturity]
+
+    module_mult = cat["module_hour_multiplier_by_maturity"][maturity]
+    module_rows = []
+    modules_price_aed = 0.0
+    modules_hours = 0.0
+    for name in modules_selected:
+        row = cat["modules"][name]
+        hours = row["hours"] * module_mult
+        module_rows.append({"name": name, "price_aed": row["price_aed"], "hours": round(hours, 3)})
+        modules_price_aed += row["price_aed"]
+        modules_hours += hours
+
+    mig = cat["migration_bands"][migration_band]
+    migration_unpriced = bool(mig.get("unpriced"))
+    migration_price_aed = None if migration_unpriced else mig["price_aed"]
+    migration_hours = None if migration_unpriced else mig["hours"]
+
+    rate = enhancement_rate_aed_hr if enhancement_rate_aed_hr is not None else basis["target_rate_per_hour_aed"]
+    enhancement_price_aed = round(enhancement_hours * rate, 2)
+
+    if migration_unpriced:
+        price_ex_vat = None  # RULE 1 / PART 8: never render a total that silently drops an unpriced component
+    else:
+        price_ex_vat = round(template_price_aed + modules_price_aed + migration_price_aed + enhancement_price_aed, 2)
+
+    hours_total = None if migration_unpriced else round(template_hours + modules_hours + migration_hours + enhancement_hours, 3)
+
+    # Derivation labelling (client-facing discipline, per correction pass):
+    # template and modules are FIXED PRODUCT FEES — hours shown for internal
+    # capacity planning only, never implied as rate x hours (12,000 / 6h
+    # would misread as a 2,000/hr rate, which is not the rate card). Only
+    # migration and enhancement are genuine rate x hours derivations.
+    return {
+        "template": {"price_aed": template_price_aed, "hours": template_hours, "maturity": maturity,
+                      "derivation": "fixed_fee", "scope": tmpl.get("scope")},
+        "modules": {"rows": module_rows, "price_aed": round(modules_price_aed, 2), "hours": round(modules_hours, 3),
+                     "derivation": "fixed_fee_per_catalogue_row"},
+        "migration": {"band": migration_band, "price_aed": migration_price_aed, "hours": migration_hours,
+                       "unpriced": migration_unpriced, "note": mig.get("note"), "derivation": "banded_fixed_fee"},
+        "enhancement": {"hours": enhancement_hours, "rate_aed_hr": rate, "price_aed": enhancement_price_aed,
+                         "derivation": "rate_x_hours"},
+        "price_ex_vat_aed": price_ex_vat,
+        "hours_total": hours_total,
+    }
 
 
-def modules_subtotal_aed(module_names=None, catalogue=None):
-    """Sum of named modules' fixed prices. module_names=None sums ALL
-    five catalogue modules (the reference-quote case); pass an explicit
-    subset for a partial quote (e.g. F2's platform + lead_capture only)."""
-    cat = catalogue or load_template_catalogue()
-    names = module_names if module_names is not None else list(cat["modules"].keys())
-    return sum(cat["modules"][m]["amount_aed"] for m in names)
+def hour_rate_floor_test(price_ex_vat_aed, hours_total, discount_aed=0.0, cost_basis=None,
+                          sales_pct=None, delivery_pct=None):
+    """PART 3 quote-time floor test. NAMED DISTINCTLY from the repo's
+    existing G23 (policy.yaml: gates.absolute_margin_floor, a MARGIN-pct
+    gate already checked per-worksheet) -- this is a different computation
+    (effective AED/hour vs the whole-business cost floor from PART 1), not
+    a redefinition of the existing G23. Do not conflate the two; report
+    both if both are relevant to a deal."""
+    basis = cost_basis or business_cost_floor()
+    sales = sales_pct if sales_pct is not None else basis["commission_sales_pct"]
+    delivery = delivery_pct if delivery_pct is not None else basis["commission_delivery_pct"]
+
+    net_price = price_ex_vat_aed - discount_aed
+    commission_aed = net_price * (sales + delivery) / 100.0
+    net_aed = net_price - commission_aed
+    effective_rate_aed_hr = net_aed / hours_total if hours_total else 0.0
+    floor = basis["floor_per_hour_aed"]
+    cushion_pct = (effective_rate_aed_hr / floor - 1) * 100 if floor else 0.0
+
+    if effective_rate_aed_hr < floor:
+        verdict = "BLOCK"
+    elif cushion_pct < 15:
+        verdict = "WARN"
+    else:
+        verdict = "PASS"
+
+    return {
+        "price_ex_vat_aed": net_price,
+        "hours_total": hours_total,
+        "commission_aed": round(commission_aed, 2),
+        "net_aed": round(net_aed, 2),
+        "effective_rate_aed_hr": round(effective_rate_aed_hr, 2),
+        "floor_per_hour_aed": floor,
+        "cushion_pct": round(cushion_pct, 2),
+        "verdict": verdict,
+    }
 
 
-def migration_band_for_records(record_count, catalogue=None):
-    """Returns (band_name, amount_aed). Above the highest band, returns
-    ("above_band_3", None) -- UNPRICED, routed to Commercial Desk. Never
-    extrapolates a number past the governed bands (T16/T26)."""
-    cat = catalogue or load_template_catalogue()
-    bands = cat["migration_bands"]
-    for band_name in ("band_1", "band_2", "band_3"):
-        band = bands[band_name]
-        if record_count <= band["to_records"]:
-            return band_name, band["amount_aed"]
-    return "above_band_3", None
+def commission_released(contract_value_aed, cash_collected_to_date_aed, sales_pct=None,
+                         delivery_pct=None, retention_pct=None, cost_basis=None):
+    """PART 6: commission is CALCULATED on closed deal value but RELEASED
+    pro-rata against cash actually collected, on any payment structure
+    (milestone or subscription). Invariant this function exists to enforce:
+    commission_released_to_date <= commission_rate * cash_collected_to_date,
+    at every point, for every structure. 5% retention withheld against the
+    release pending clawback -- see 00-knowledge/clause-library/commission-retention.md
+    for the operative clause text (trigger, calc, recovery, time limit,
+    right to net against future commission)."""
+    basis = cost_basis or business_cost_floor()
+    sales = sales_pct if sales_pct is not None else basis["commission_sales_pct"]
+    delivery = delivery_pct if delivery_pct is not None else basis["commission_delivery_pct"]
+    retention = retention_pct if retention_pct is not None else 5.0  # PART 6: 5% retention, held for clawback -- NOT elsewhere documented in this repo as of this pass; introduced here per explicit spec instruction, flagged in report
+
+    rate = (sales + delivery) / 100.0
+    commission_earned_on_cash_aed = contract_value_aed and cash_collected_to_date_aed * rate or 0.0
+    retained_aed = commission_earned_on_cash_aed * (retention / 100.0)
+    released_aed = commission_earned_on_cash_aed - retained_aed
+
+    return {
+        "contract_value_aed": contract_value_aed,
+        "cash_collected_to_date_aed": cash_collected_to_date_aed,
+        "commission_rate_pct": round(rate * 100, 4),
+        "commission_earned_on_cash_aed": round(commission_earned_on_cash_aed, 2),
+        "retention_pct": retention,
+        "retained_aed": round(retained_aed, 2),
+        "released_aed": round(released_aed, 2),
+    }
 
 
-def reference_quote_total_aed(catalogue=None):
-    """Platform + all 5 modules + migration band_2 -- the 35,000
-    reference figure, computed from catalogue line items every call, not
-    read from a stored total."""
-    cat = catalogue or load_template_catalogue()
-    return (platform_fee_aed(cat)
-            + modules_subtotal_aed(catalogue=cat)
-            + cat["migration_bands"]["band_2"]["amount_aed"])
+# PART 4/5: RVN's actual mature-build module selection, used only to derive
+# a documented default hours/price-per-build for capacity_table() below --
+# NOT a hardcoded hours figure. Any caller who wants a different build shape
+# passes hours_per_build / price_per_build_aed explicitly and this default is
+# bypassed entirely. Scope per the correction-pass brief: template + lead
+# capture + WhatsApp notification + auto distribution + call logging +
+# attendance + daily reporting; migration 1,000-5,000 records. Matches
+# 02-clients/RVN-realestate-leads (property_portal_feed excluded -- not in
+# RVN's scope).
+RVN_MATURE_MODULES = [
+    "lead_capture_meta_google_ads",
+    "whatsapp_lead_notification",
+    "auto_distribution_manual_reassign",
+    "call_logging_manual_entry",
+    "attendance_in_app_checkin",
+    "daily_reporting_pack",
+]
 
 
-def discount_gate_verdict(quoted_total_aed, catalogue=None, undiscounted_total_aed=None):
-    """COMMERCIAL_DESK_APPROVAL_REQUIRED when quoted_total_aed is a
-    DISCOUNT below 90% of what the SAME scope would otherwise cost
-    (undiscounted_total_aed), OK otherwise. A real gate, called by the
-    render path -- not a comment SDRs are trusted to read.
-
-    BUG FOUND AND FIXED while wiring the Part 5 render path (2026-08-16):
-    the first version of this function compared every quote against the
-    fixed reference-quote floor (31,500, 90% of the 35,000 5-module
-    reference deal) regardless of what was actually being quoted. That is
-    correct for T23's own case (discounting the reference quote itself,
-    35,000 -> 30,000) but wrong in general: a genuinely SMALLER-SCOPE
-    quote (e.g. platform + one module only, F2's fixture, 19,500) is not
-    a discount at all, and was incorrectly triggering
-    COMMERCIAL_DESK_APPROVAL_REQUIRED just for being a smaller number
-    than the unrelated 5-module reference floor. Fixed by comparing
-    quoted_total_aed against 90% of ITS OWN scope's undiscounted total,
-    not a fixed constant. undiscounted_total_aed defaults to
-    reference_quote_total_aed(cat) only to preserve T23's exact existing
-    call signature (discount_gate_verdict(30000, cat)) -- every other
-    caller (the render path) must pass its own fixture's actual
-    undiscounted total explicitly."""
-    cat = catalogue or load_template_catalogue()
-    basis = undiscounted_total_aed if undiscounted_total_aed is not None else reference_quote_total_aed(cat)
-    floor = round(basis * 0.90)
-    if quoted_total_aed < floor:
-        return "COMMERCIAL_DESK_APPROVAL_REQUIRED"
-    return "OK"
+def default_mature_build(cost_basis=None, catalogue=None):
+    """Derives (hours, price) for one mature build from four_component_build()
+    using RVN's real module selection, rather than hardcoding 34h/31,500 --
+    changing template-catalogue.yaml propagates here automatically."""
+    result = four_component_build(
+        modules_selected=RVN_MATURE_MODULES, maturity="mature",
+        migration_band="from_1000_to_5000", cost_basis=cost_basis, catalogue=catalogue,
+    )
+    return result["hours_total"], result["price_ex_vat_aed"]
 
 
-def contingency_pct_for(categories, policy=None):
-    """categories: a category name (str) or iterable of category names
-    from policy.yaml: contingency_schedule. Returns the single applicable
-    pct -- the MAX across all supplied categories (combination_rule,
-    "worst-risk-governs"), never a sum. INTERNAL ONLY -- never surface
-    this percentage on a client-facing document (Part 5.4)."""
-    pol = policy or load_policy()
-    schedule = pol["contingency_schedule"]
-    if isinstance(categories, str):
-        categories = [categories]
-    pcts = [schedule[c]["pct"] for c in categories]
-    return max(pcts)
+def capacity_table(deals_per_month_range=range(1, 7), hours_per_build=None,
+                    price_per_build_aed=None, cost_basis=None):
+    """PART 4: for N deals/month (1-6 by default), show hours consumed,
+    gross, net after commission, less cash costs, available for owner
+    salary, variance against the owner-salary requirement, and whether it
+    fits inside monthly delivery capacity. Also returns the minimum deal
+    count that both fits capacity AND clears the full owner-salary
+    requirement -- computed from the actual basis figures, never hardcoded
+    to "3"."""
+    basis = cost_basis or business_cost_floor()
+    raw_basis = load_business_cost_basis()
+    owner_salary_required_aed = raw_basis["fixed_monthly_aed"]["owner_salary_monthly_aed"]
+
+    if hours_per_build is None or price_per_build_aed is None:
+        default_hours, default_price = default_mature_build(basis)
+        hours_per_build = hours_per_build if hours_per_build is not None else default_hours
+        price_per_build_aed = price_per_build_aed if price_per_build_aed is not None else default_price
+
+    delivery_hours = basis["delivery_hours_per_month"]
+    commission_rate = (basis["commission_sales_pct"] + basis["commission_delivery_pct"]) / 100.0
+    cash_out_monthly = basis["cash_out_monthly_aed"]
+
+    rows = []
+    min_deals_fits_and_covers = None
+    for n in deals_per_month_range:
+        hours = round(hours_per_build * n, 3)
+        gross_aed = round(price_per_build_aed * n, 2)
+        commission_aed = round(gross_aed * commission_rate, 2)
+        net_aed = round(gross_aed - commission_aed, 2)
+        available_for_owner_salary_aed = round(net_aed - cash_out_monthly, 2)
+        variance_vs_requirement_aed = round(available_for_owner_salary_aed - owner_salary_required_aed, 2)
+        fits_hours = hours <= delivery_hours
+        covers_requirement = available_for_owner_salary_aed >= owner_salary_required_aed
+        if fits_hours and covers_requirement and min_deals_fits_and_covers is None:
+            min_deals_fits_and_covers = n
+        rows.append({
+            "deals_per_month": n,
+            "hours": hours,
+            "hours_pct_of_capacity": round(hours / delivery_hours * 100, 1) if delivery_hours else None,
+            "gross_aed": gross_aed,
+            "commission_aed": commission_aed,
+            "net_aed": net_aed,
+            "available_for_owner_salary_aed": available_for_owner_salary_aed,
+            "variance_vs_requirement_aed": variance_vs_requirement_aed,
+            "fits_hours": fits_hours,
+            "covers_requirement": covers_requirement,
+        })
+
+    return {
+        "hours_per_build": hours_per_build,
+        "price_per_build_aed": price_per_build_aed,
+        "delivery_hours_per_month": delivery_hours,
+        "owner_salary_required_aed": owner_salary_required_aed,
+        "rows": rows,
+        "min_deals_that_fit_and_cover_aed": min_deals_fits_and_covers,
+    }
 
 
-def risk_adjusted_hours(raw_hours, categories, policy=None):
-    """raw_hours * (1 + contingency_pct_for(categories)). Returns
-    (raw_hours, risk_adjusted_hours, pct_applied) -- callers must report
-    BOTH raw and risk-adjusted in internal output (Part 3), and must use
-    ONLY the risk-adjusted figure in any effective-rate/floor check
-    (deal_guard_verdict, breakeven_hours) -- quoting on raw hours is the
-    exact failure mode this function exists to prevent."""
-    pol = policy or load_policy()
-    pct = contingency_pct_for(categories, pol)
-    adjusted = round(raw_hours * (1 + pct), 2)
-    return raw_hours, adjusted, pct
+def signed_undelivered_capacity_flag(signed_undelivered_hours, remaining_capacity_hours):
+    """PART 4: 'Flag any pipeline state where signed-but-undelivered work
+    exceeds remaining capacity for the period.' Pure comparison -- callers
+    supply both figures from their own pipeline tracking; this function does
+    not source pipeline data itself (none exists in this repo as of this
+    pass -- RULE V: NOT FOUND, no sgc.pricing.* pipeline model located)."""
+    exceeds = signed_undelivered_hours > remaining_capacity_hours
+    return {
+        "signed_undelivered_hours": signed_undelivered_hours,
+        "remaining_capacity_hours": remaining_capacity_hours,
+        "exceeds_capacity": exceeds,
+        "overage_hours": round(max(0.0, signed_undelivered_hours - remaining_capacity_hours), 3),
+    }
 
 
-def commission_release_aed(cash_collected_aed, policy=None):
-    """Commission released against payments ACTUALLY RECEIVED, per
-    internal_cost_basis.commission.release ("pro-rata against payments
-    actually received, not on invoice/close"). = cash_collected_aed *
-    commission_total. Deliberately takes cash COLLECTED, not contract
-    value -- the two produce very different numbers (a small collected
-    amount against a large contract releases a small commission), and
-    conflating them is the exact failure mode this function's signature
-    guards against structurally: there is no contract_value parameter to
-    accidentally pass instead."""
-    pol = policy or load_policy()
-    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
-    return round(cash_collected_aed * commission_total, 2)
+RECURRING_COMMISSION_DURATION_OPTIONS = ("perpetual", "12_months_from_go_live", "first_year_revenue")
+
+# RULE V / RULE 1: grepped policy.yaml and payment-plans.yaml for any
+# existing recurring-commission-duration convention before adding this --
+# NOT FOUND. No commission-on-recurring-revenue duration rule exists
+# anywhere in this repo prior to this pass.
+#
+# DECISION (2026-08-16, owner): default set to "12_months_from_go_live",
+# not "perpetual". Perpetual was the initial default only because it was
+# the sole option consistent with the repo's prior silence -- it was never
+# a recommendation, and the owner explicitly chose to close the gap rather
+# than let every deal from here inherit the expensive default by omission.
+# At 14% combined commission, perpetual costs ~164/client/month forever
+# against the same margin line that has to absorb growing support load
+# (see recurring_support_load_table below); at 15 live clients that is
+# ~2,460/month leaking out on revenue closed years earlier. 12 months from
+# go-live is the conventional cap, costs nothing to adopt now, and is far
+# cheaper than renegotiating a perpetual promise after the fact. "perpetual"
+# and "first_year_revenue" remain valid, explicitly-chosen options for any
+# caller who wants them -- this only changes what happens when nobody
+# chooses.
+DEFAULT_RECURRING_COMMISSION_DURATION = "12_months_from_go_live"
 
 
-def enhancement_net_aed_hr(catalogue=None, policy=None):
-    """Enhancement rate net of commission -- 550 * (1 - commission_total).
-    Computed, not the catalogue's stored net_after_commission_aed_hr
-    (that field is documentation; this function is the checked source)."""
-    cat = catalogue or load_template_catalogue()
-    pol = policy or load_policy()
-    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
-    return round(cat["enhancement"]["rate_aed_hr"] * (1 - commission_total), 2)
+def recurring_support_load_table(support_hours_per_client, live_client_counts=(5, 10, 15, 20, 30, 40),
+                                  monthly_fee_aed=1170, recurring_commission_pct=None,
+                                  recurring_commission_duration=DEFAULT_RECURRING_COMMISSION_DURATION,
+                                  cost_basis=None):
+    """PART 5. support_hours_per_client has NO DEFAULT and is a REQUIRED
+    positional argument -- deliberately. The brief is explicit that this
+    number "has to come from measurement once clients are live" and must
+    not be silently assumed; a caller MUST supply either a real measured
+    figure (once available, log at 00-knowledge/pricing/support-hours-log.yaml)
+    or an explicitly-chosen illustrative scenario value (see
+    illustrative_support_load_scenarios() below for the labelled wrapper --
+    do not call this function directly with a guessed number and treat the
+    output as anything but illustrative).
+
+    monthly_fee_aed default (1170) traces to
+    02-clients/RVN-realestate-leads/02-calc/pricing-worksheet.yaml:108
+    (platform_portion_aed_mo) -- the only live recurring-fee figure in the
+    repo as of this pass. Pass a different value explicitly for any other
+    client/segment.
+
+    recurring_commission_duration is a REQUIRED-BY-BRIEF configuration
+    choice -- see RECURRING_COMMISSION_DURATION_OPTIONS and
+    DEFAULT_RECURRING_COMMISSION_DURATION's docstring above for the owner's
+    2026-08-16 decision to default to "12_months_from_go_live" over the
+    initially-implemented "perpetual"."""
+    if recurring_commission_duration not in RECURRING_COMMISSION_DURATION_OPTIONS:
+        raise ValueError(f"recurring_commission_duration must be one of {RECURRING_COMMISSION_DURATION_OPTIONS}")
+
+    basis = cost_basis or business_cost_floor()
+    commission_pct = (
+        recurring_commission_pct if recurring_commission_pct is not None
+        else basis["commission_sales_pct"] + basis["commission_delivery_pct"]
+    )
+    cost_floor = basis["floor_per_hour_aed"]
+    delivery_hours = basis["delivery_hours_per_month"]
+    default_hours, _ = default_mature_build(basis)
+
+    net_recurring_aed = round(monthly_fee_aed * (1 - commission_pct / 100.0), 2)
+
+    rows = []
+    for n_clients in live_client_counts:
+        support_hours_consumed = round(support_hours_per_client * n_clients, 3)
+        support_cost_aed = round(support_hours_consumed * cost_floor, 2)
+        margin_per_client_aed = round(net_recurring_aed - (support_hours_per_client * cost_floor), 2)
+        delivery_hours_remaining = round(delivery_hours - support_hours_consumed, 3)
+        builds_still_possible = max(0, int(delivery_hours_remaining // default_hours)) if delivery_hours_remaining > 0 else 0
+        rows.append({
+            "live_clients": n_clients,
+            "support_hours_consumed": support_hours_consumed,
+            "support_cost_aed": support_cost_aed,
+            "net_recurring_per_client_aed": net_recurring_aed,
+            "margin_per_client_aed": margin_per_client_aed,
+            "delivery_hours_remaining": delivery_hours_remaining,
+            "builds_still_possible": builds_still_possible,
+        })
+
+    return {
+        "support_hours_per_client": support_hours_per_client,
+        "monthly_fee_aed": monthly_fee_aed,
+        "recurring_commission_pct": commission_pct,
+        "recurring_commission_duration": recurring_commission_duration,
+        "net_recurring_per_client_aed": net_recurring_aed,
+        "rows": rows,
+    }
+
+
+def illustrative_support_load_scenarios(scenario_hours=(1, 2, 3), **kwargs):
+    """Explicitly-labelled wrapper: runs recurring_support_load_table() at
+    the brief's own reference points (1h/2h/3h per client) for illustration
+    ONLY. These are NOT measured figures -- see support-hours-log.yaml for
+    where the real, measured number goes once clients are live. Never treat
+    this function's output as the operating plan; it exists to show the
+    shape of the risk, not to replace measurement."""
+    return {
+        "warning": "ILLUSTRATIVE / UNMEASURED. support_hours_per_client values below (1, 2, 3) are the "
+                   "brief's own reference points, not real measurement. Log actual support hours at "
+                   "00-knowledge/pricing/support-hours-log.yaml from first go-live and call "
+                   "recurring_support_load_table() directly with the real figure once available.",
+        "scenarios": {
+            hours: recurring_support_load_table(support_hours_per_client=hours, **kwargs)
+            for hours in scenario_hours
+        },
+    }
 
 
 if __name__ == "__main__":

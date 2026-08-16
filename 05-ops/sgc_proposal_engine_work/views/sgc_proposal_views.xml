@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sgc_proposal_list" model="ir.ui.view">
+        <field name="name">sgc.proposal.list</field>
+        <field name="model">sgc.proposal</field>
+        <field name="arch" type="xml">
+            <list string="Proposals">
+                <field name="name"/>
+                <field name="sdr_owner_id"/>
+                <field name="segment"/>
+                <field name="edition"/>
+                <field name="last_risk_band"/>
+                <field name="state" widget="badge" decoration-success="state in ('issued','won')" decoration-danger="state == 'lost'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sgc_proposal_form" model="ir.ui.view">
+        <field name="name">sgc.proposal.form</field>
+        <field name="model">sgc.proposal</field>
+        <field name="arch" type="xml">
+            <form string="Proposal">
+                <header>
+                    <button name="action_to_risk_assessed" string="Mark Risk Assessed" type="object" invisible="state != 'intake'" class="oe_highlight"/>
+                    <button name="action_to_calc" string="Mark Calculated" type="object" invisible="state != 'risk_assessed'" class="oe_highlight"/>
+                    <button name="action_to_draft" string="Mark Draft" type="object" invisible="state != 'calc'" class="oe_highlight"/>
+                    <button name="action_to_review" string="Submit for Review (runs gates)" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_create_quotation" string="Create Quotation" type="object" invisible="state not in ('review','issued') or quotation_id" class="oe_highlight"/>
+                    <button name="action_to_issued" string="Issue (Desk only)" type="object" invisible="state != 'review'" class="oe_highlight"/>
+                    <button name="action_won" string="Mark Won (manual override)" type="object" invisible="state != 'issued'"/>
+                    <button name="action_lost" string="Mark Lost" type="object" invisible="state in ('won','lost')"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state in ('draft','won','lost','superseded','hard_block','cancelled')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('won','lost','superseded','hard_block','cancelled')" confirm="Cancel this proposal? It can be reset back to Draft later if needed."/>
+                    <field name="state" widget="statusbar" statusbar_visible="intake,risk_assessed,calc,draft,review,issued,won"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_quotation" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not quotation_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Quotation</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <p class="text-muted" invisible="not quotation_id">
+                        Sending, portal access, online acceptance, and confirmation all
+                        happen on the Quotation itself (Odoo's native flow) -- confirming
+                        it automatically marks this proposal Won.
+                    </p>
+                    <group>
+                        <group>
+                            <field name="opportunity_id"/>
+                            <field name="partner_id"/>
+                            <field name="client_legal_name"/>
+                            <field name="client_trn"/>
+                            <field name="decision_maker"/>
+                        </group>
+                        <group>
+                            <field name="sdr_owner_id"/>
+                            <field name="jurisdiction"/>
+                            <field name="segment"/>
+                            <field name="edition"/>
+                            <field name="vertical"/>
+                            <field name="last_risk_band"/>
+                            <field name="gates_passed"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Narrative (13 Sections)">
+                            <p class="text-muted">
+                                Ports 01-templates/proposal/_section-map.md. Each field's tooltip quotes the
+                                required contents for that section. Sections 06 and 10 show only a short intro
+                                field here -- their tables are computed from the Worksheets tab. Any section left
+                                empty is skipped in the printed report, not shown as a placeholder.
+                            </p>
+                            <separator string="01. Executive Summary"/>
+                            <field name="narrative_01"/>
+                            <separator string="02. About SGC"/>
+                            <field name="narrative_02"/>
+                            <separator string="03. Understanding Your Business"/>
+                            <field name="narrative_03"/>
+                            <separator string="04. Current State (As-Is)"/>
+                            <field name="narrative_04"/>
+                            <separator string="05. Target State (To-Be)"/>
+                            <field name="narrative_05"/>
+                            <separator string="06. Solution -- Intro"/>
+                            <field name="narrative_06_intro"/>
+                            <separator string="07. Options &amp; Inclusions"/>
+                            <field name="narrative_07"/>
+                            <separator string="08. Implementation &amp; Recovery"/>
+                            <field name="narrative_08"/>
+                            <separator string="09. Partnership Terms"/>
+                            <field name="narrative_09"/>
+                            <separator string="10. Commercial Terms -- Intro"/>
+                            <field name="narrative_10_intro"/>
+                            <separator string="11. Support &amp; SLA"/>
+                            <field name="narrative_11"/>
+                            <separator string="12. Why SGC"/>
+                            <field name="narrative_12"/>
+                            <separator string="13. Next Steps"/>
+                            <field name="narrative_13"/>
+                        </page>
+                        <page string="Risk Assessment">
+                            <field name="risk_assessment_ids">
+                                <list editable="bottom">
+                                    <field name="entity_age_years"/>
+                                    <field name="jurisdiction_risk"/>
+                                    <field name="vat_registered"/>
+                                    <field name="trade_licence_valid"/>
+                                    <field name="payment_history_sgc"/>
+                                    <field name="decision_maker_type"/>
+                                    <field name="incumbent_churn_signal"/>
+                                    <field name="peak_exposure_aed"/>
+                                    <field name="raw_score"/>
+                                    <field name="risk_band" widget="badge"/>
+                                    <field name="required_security_instruments"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Worksheets">
+                            <field name="worksheet_ids">
+                                <list editable="bottom">
+                                    <field name="users_now"/>
+                                    <field name="term_months"/>
+                                    <field name="rate_role_id" readonly="1" force_save="1"/>
+                                    <field name="rate_aed"/>
+                                    <field name="a_hours"/>
+                                    <field name="b_hours"/>
+                                    <field name="qa_hours"/>
+                                    <field name="documentation_hours"/>
+                                    <field name="training_hours"/>
+                                    <field name="hypercare_hours"/>
+                                    <field name="total_hours"/>
+                                    <field name="subtotal_aed"/>
+                                    <field name="pm_aed"/>
+                                    <field name="contingency_aed"/>
+                                    <field name="build_value_aed"/>
+                                    <field name="internal_build_cost_aed"/>
+                                    <field name="cts_total_aed"/>
+                                    <field name="margin_pct" widget="percentage"/>
+                                    <field name="mobilisation_pct" widget="percentage" readonly="1" force_save="1"/>
+                                    <field name="mobilisation_aed" readonly="1" force_save="1"/>
+                                    <field name="financing_uplift_pct" widget="percentage" readonly="1" force_save="1"/>
+                                    <field name="recovery_component_aed_mo" readonly="1" force_save="1"/>
+                                    <field name="subscription_fee_aed_mo" readonly="1" force_save="1"/>
+                                    <field name="cash_positive_by_day"/>
+                                    <field name="payment_cadence"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Gate Report">
+                            <field name="gate_report_ids" readonly="1">
+                                <list decoration-danger="not passed" decoration-success="passed">
+                                    <field name="gate_code"/>
+                                    <field name="label"/>
+                                    <field name="passed"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Revisions">
+                            <field name="revision_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="status"/>
+                                    <field name="issued_date"/>
+                                    <field name="attachment_id"/>
+                                    <field name="content_sha256"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sgc_proposal" model="ir.actions.act_window">
+        <field name="name">Proposals</field>
+        <field name="res_model">sgc.proposal</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Standalone worksheet form. The embedded list in the proposal form
+         covers quick entry; this full form adds cost-to-serve, margin, and
+         the concession/compensator mechanism (concession-ladder.yaml port). -->
+    <record id="view_sgc_proposal_worksheet_form" model="ir.ui.view">
+        <field name="name">sgc.proposal.worksheet.form</field>
+        <field name="model">sgc.proposal.worksheet</field>
+        <field name="arch" type="xml">
+            <form string="Worksheet">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="proposal_id"/>
+                            <field name="users_now"/>
+                            <field name="rate_role_id" readonly="1"/>
+                            <field name="rate_aed" readonly="1"/>
+                            <field name="term_months"/>
+                            <field name="payment_cadence"/>
+                        </group>
+                        <group>
+                            <field name="mobilisation_pct" widget="percentage" readonly="1"/>
+                            <field name="mobilisation_aed" readonly="1"/>
+                            <field name="platform_portion_aed_mo" readonly="1"/>
+                            <field name="financing_uplift_pct" widget="percentage" readonly="1"/>
+                            <field name="recovery_component_aed_mo" readonly="1"/>
+                            <field name="subscription_fee_aed_mo" readonly="1"/>
+                            <field name="cash_positive_by_day"/>
+                        </group>
+                    </group>
+                    <p class="text-muted" invisible="not rate_role_id">
+                        Priced role, mobilisation, and subscription fee are all derived (from segment, risk band,
+                        and term) -- not free entry. Record a Risk Assessment first if mobilisation/subscription
+                        show as 0.
+                    </p>
+                    <notebook>
+                        <page string="Hours">
+                            <group>
+                                <field name="a_hours" readonly="1"/>
+                                <field name="b_hours" readonly="1"/>
+                                <field name="qa_hours" readonly="1"/>
+                                <field name="documentation_hours" readonly="1"/>
+                                <field name="training_hours" readonly="1"/>
+                                <field name="hypercare_hours" readonly="1"/>
+                                <field name="a_side_hours" readonly="1"/>
+                                <field name="total_hours" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Build Value">
+                            <group>
+                                <field name="a_side_subtotal_aed" readonly="1"/>
+                                <field name="b_side_subtotal_aed" readonly="1"/>
+                                <field name="subtotal_aed" readonly="1"/>
+                                <field name="pm_aed" readonly="1"/>
+                                <field name="contingency_aed" readonly="1"/>
+                                <field name="hypercare_cost_aed" readonly="1"/>
+                                <field name="build_value_aed" readonly="1"/>
+                                <field name="internal_build_cost_aed" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Cost to Serve">
+                            <group>
+                                <field name="hosting_allocation_aed" readonly="1"/>
+                                <field name="tooling_aed" readonly="1"/>
+                                <field name="support_labour_aed" readonly="1"/>
+                                <field name="account_mgmt_aed" readonly="1"/>
+                                <field name="cts_total_aed" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Margin">
+                            <group>
+                                <field name="full_term_commitment_aed" readonly="1"/>
+                                <field name="total_cost_aed" readonly="1"/>
+                                <field name="margin_pct" readonly="1" widget="percentage"/>
+                            </group>
+                        </page>
+                        <page string="Concessions">
+                            <field name="concession_ids">
+                                <list editable="bottom">
+                                    <field name="concession_type_id"/>
+                                    <field name="pct"/>
+                                    <field name="manual_value_aed"/>
+                                    <field name="value_aed" readonly="1"/>
+                                    <field name="compensator_value_aed" readonly="1"/>
+                                </list>
+                            </field>
+                            <p class="text-muted" style="margin-top:8px">Open a concession row to attach compensators. Submitting for review re-runs G10/13/14: every concession's compensator_value_aed must be >= its value_aed.</p>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sgc_proposal_concession_form" model="ir.ui.view">
+        <field name="name">sgc.proposal.concession.form</field>
+        <field name="model">sgc.proposal.concession</field>
+        <field name="arch" type="xml">
+            <form string="Concession">
+                <sheet>
+                    <group>
+                        <field name="worksheet_id"/>
+                        <field name="concession_type_id"/>
+                        <field name="pct" invisible="concession_type_id.computation != 'discount_platform'"/>
+                        <field name="manual_value_aed" invisible="concession_type_id.computation != 'manual'"/>
+                        <field name="value_aed" readonly="1"/>
+                        <field name="compensator_value_aed" readonly="1"/>
+                        <field name="notes"/>
+                    </group>
+                    <field name="compensator_ids">
+                        <list editable="bottom">
+                            <field name="compensator_type_id"/>
+                            <field name="manual_value_aed"/>
+                            <field name="value_aed" readonly="1"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sgc_proposal_worksheet" model="ir.actions.act_window">
+        <field name="name">Worksheets</field>
+        <field name="res_model">sgc.proposal.worksheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

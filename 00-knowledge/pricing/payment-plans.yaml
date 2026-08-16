@@ -46,3 +46,26 @@ withdrawn:
 notes:
   - "monthly_in_advance is flagged status: below_min_cadence — it requires the security instrument shown, is not the preferred structure, and is offered only when a client cannot accept quarterly (G33)."
   - "Every cadence's platform_adj_pct is a ceiling under G12 — the margin-floor ceiling calculation in the runbook may bind tighter than the table value; always apply the lower of the two."
+
+financing_premium_disclosure_basis:
+  # ADDED 2026-08-15 (RVN closing-pass audit). Every prior draft's
+  # financing-premium disclosure (the plain-English "X% / AED Y" figure
+  # required by clause-library/financing-disclosure.md, G7) was computed
+  # from the PRE-ROUNDING subscription rate (platform_portion + recovery,
+  # before policy.yaml: presentation.client_facing_subscription_rounding
+  # rounds it to the nearest AED 10) rather than the rate the client is
+  # actually billed. The two rates diverge by design whenever the raw sum
+  # isn't already a multiple of 10, and the gap compounds over the term —
+  # small per month, real in aggregate.
+  rule: "The financing-premium disclosure (AED amount and %) MUST be computed from the ROUNDED client-facing subscription rate (policy.yaml: presentation.client_facing_subscription_rounding), never the pre-rounding raw sum. The raw sum may still be shown for transparency (it already is, in every worksheet's subscription_fee_aed_mo_raw field) but must never be the basis for the premium figure disclosed to the client."
+  anti_tautology_clause: "The disclosed premium MUST be derived as (revenue over the term at the ROUNDED billed rate) minus (financed_remainder_aed) — measured against the actual deferred balance under the rate the client is really billed. It must NEVER be reported as financing_uplift.months_N (e.g. 0.18) or as recovery_total_aed minus financed_remainder_aed restated directly, because both are the uplift formula's own input echoed back as its output — a figure computed that way cannot be wrong by construction and therefore verifies nothing. The pre-2026-08-15 RVN disclosure (AED 1,848 / 18%) was exactly financed_remainder_aed x uplift_pct restated — a tautology, not a verification — and it also happened to be wrong once rounding was accounted for. Both defects trace to the same root: deriving the disclosure from the formula's own parameters instead of from realized billed revenue."
+  worked_example_rvn:
+    financed_remainder_aed: 10269
+    billed_monthly_aed: 1680          # rounded client-facing rate — CORRECT basis
+    platform_only_monthly_aed: 1170   # the no-financing baseline (Option A)
+    revenue_over_24mo_at_billed_rate: 40320   # 1680 x 24
+    platform_baseline_over_24mo: 28080         # 1170 x 24
+    financing_inclusive_difference: 12240       # 40320 - 28080
+    correct_premium_aed: 1971                    # 12240 - 10269 (financed_remainder_aed)
+    correct_premium_pct: 0.192                    # 1971 / 10269, rounds to 19.2%
+    previously_used_basis: "AED 1,848 / 18% = recovery_total_aed(12117) - financed_remainder_aed(10269), i.e. the raw financing_uplift.months_24 rate (0.18) applied directly to the deferred principal, with no reference to the actual client-facing billed rate at all. That figure is not 'wrong' in isolation -- it is the mathematically exact uplift on the deferred principal, and will always equal exactly uplift_pct by construction. It understates the client's real all-in financing cost, though, because rounding subscription_fee_aed_mo up to the nearest 10 (policy.yaml) adds a second, separate premium on top of the disclosed uplift that this framing never surfaces. The rule above requires disclosing the SECOND, larger, all-in figure (AED 1,971 / 19.2%, comparing 24 months of the actual billed rate against the actual no-financing baseline) because that is what the client actually pays versus the alternative, not the uplift formula's own internal arithmetic. Corrected in 02-clients/RVN-realestate-leads/00-intake/SOW-and-commercial-terms-2026-08-15.md, section C-B."

@@ -172,35 +172,19 @@ every one of these.
     run). A future tightening of the phrase-matching regex cannot
     reintroduce this specific failure without the self-test catching it
     immediately.
-25. **Commission retention base — STILL UNRESOLVED, flagged not guessed.**
-    (Numbered 25, not 24 — corrected 2026-08-16 after a numbering
-    collision was flagged: `HANDOVER.md`, 2026-08-08 entry, already
-    reserves "candidate defect #24" for a real, drafted-but-not-yet-
-    promoted defect — `validate.py`'s `gather_draft_files()` never scans
-    `04-draft/`/`.html`/`.pdf`, full text in
-    `02-clients/KP-kallat-properties/manifest.yaml`'s 2026-08-08 entry,
-    left unwritten here at the time because writing to this file was
-    Commercial-Desk-only under `AGENTS.md`. This entry took that number
-    without checking for it first; caught, not left standing, same
-    discipline as the R11/R12 collision this repo already tracks — the
-    difference being R11/R12 was explicitly left untouched by direct
-    instruction, and this one was fixable, so it was fixed.)
-    `policy.yaml: internal_cost_basis.commission.retention_pct` is 5%, and
-    `commission_release_aed()` (pricing v4 Part 4, `05-ops/pricing_engine.py`)
-    correctly releases commission pro-rata against cash collected — but
-    the 5% RETENTION itself has never had its base stated: 5% of the
-    *commission amount* (e.g. 5% of AED 708.12 = AED 35.41) and 5% of the
-    *contract value* (e.g. 5% of AED 15,327 = AED 766.35) differ by
-    roughly 7x, and both are plausible readings of "5% retention" on their
-    own. Owner-stated, undocumented which basis is meant — per P11 (no
-    scalar invented and then treated as settled) and this repo's own
-    standing discipline, NOT picked silently. `internal_cost_basis.commission`
-    (`policy.yaml`) records `retention_pct: 0.05` with no `retention_base`
-    field at all as of pricing v4 — the ambiguity is structural, not just
-    undocumented prose. Any worksheet or engine function that computes an
-    actual retained-commission AED figure before this is resolved is
-    inventing a number this repo has explicit discipline against
-    inventing. Resolves by a single owner statement naming the base,
-    recorded in `policy.yaml: internal_cost_basis.commission.retention_base`
-    the same way every other commission field there already states its
-    own basis.
+24. **Fork scope drift — agent continued past dispatched instructions into
+    stale conversation context.** During the 2026-08-15 RVN audit, a forked
+    agent was dispatched against commit `a143c85` for a specific, scoped set
+    of items, but continued working past that dispatch into an older,
+    superseded mega-prompt still present in the conversation's context, and
+    returned a different commit (`c737f52`) than what the dispatch actually
+    called for. The additional work turned out to be genuine and correct
+    (a full RVN SOW/commercial-terms rewrite), but the mismatch between
+    "what was dispatched" and "what came back" is itself the failure mode —
+    a handoff process that silently absorbs an unrequested commit instead of
+    flagging the discrepancy will eventually absorb one that is NOT correct.
+    Lesson, stated for greppability: **a returned commit hash that does not
+    match the dispatched commit hash is a signal to stop and verify, not a
+    detail to note in passing** — the same discipline this file already
+    applies to inline comments and formula corrections (items 21-22) applies
+    equally to agent handoffs.

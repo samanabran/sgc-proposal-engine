@@ -1,0 +1,52 @@
+# Risk Assessment — RVN
+# Scored against 00-knowledge/pricing/risk-security-matrix.yaml, before any
+# pricing conversation. All inputs where the call transcript is silent are
+# marked ASSUMPTION and scored toward the higher-risk side of the weight
+# band (protective default), never the lower-risk side.
+version: risk-security-matrix v2.0
+
+inputs:
+  entity_age_years:
+    value: "1-2"
+    weight: 12
+    basis: "ASSUMPTION — not stated on the call. Conservative (higher-risk) default per protective-default convention; escalate to confirm actual entity age before issue."
+  jurisdiction:
+    value: mainland_llc
+    weight: 0
+    basis: "ASSUMPTION — Burjuman Business Towers, Dubai; standard Dubai mainland brokerage location inferred, not confirmed."
+  vat_registered:
+    value: "no"
+    weight: 10
+    basis: "ASSUMPTION — not stated; typical for an SMB brokerage of this size to sit under the mandatory registration threshold (policy.yaml: vat.mandatory_threshold_aed 375,000). Consistent with, not proof of, SGC's own vat.registered:false posture — these are independent facts."
+  trade_licence_valid:
+    value: ">6mo"
+    weight: 0
+    basis: "ASSUMPTION — active ad-spend campaigns (AED 15k-60k/mo) and a 7-person operating sales team imply an established, ongoing operation, not a newly licensed entity. Flagged for confirmation before issue."
+  payment_history_sgc:
+    value: none
+    weight: 5
+    basis: "New client — no prior SGC payment history."
+  decision_maker:
+    value: owner
+    weight: 0
+    basis: "Mr. Nazim, 'the boss of the company,' holds final approval for funds and charges (transcript 13:07-13:27)."
+  incumbent_churn_signal:
+    value: none
+    weight: 0
+    basis: "No prior CRM or abandoned system — RVN has never used a CRM (transcript 00:42)."
+  peak_exposure_aed:
+    value: "<5000"
+    weight: 0
+    basis: "Computed cash_peak_aed = 0 in pricing-worksheet.yaml — mobilisation + Q1 collected at kickoff exceeds delivery cost curve."
+
+score_total: 27
+band: moderate    # range [21, 40]
+
+required_instruments:
+  - mobilisation_33pct
+  - deposit_1_month
+
+notes:
+  - "No reject/expired signal on any weight — additive scoring applies in full."
+  - "Three of eight inputs are ASSUMPTIONS (entity_age, jurisdiction, vat_registered, trade_licence_valid — 4 of 8), scored toward the higher-risk band value where the direction was ambiguous (entity_age, vat_registered) and toward the evidence-supported value where the call gave a clear operational signal (jurisdiction, trade_licence_valid). Re-score once these are confirmed at intake/kickoff — a downward re-score to `low` band (if entity_age and VAT status confirm favourably) would drop the deposit_1_month requirement; an upward re-score (e.g. trade_licence issue) would require escalation per protection-guardrails.md G15 before proceeding."
+  - "Moderate band (not low) — deposit_1_month is REQUIRED alongside mobilisation_33pct per risk-security-matrix.yaml bands.moderate.instruments. Reflected in the deal card and gate report."

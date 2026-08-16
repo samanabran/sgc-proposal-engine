@@ -1,214 +1,50 @@
-# SGC TECH AI — Pricing Model v4: Product-Plus-Services Catalogue
-# NEW FILE (2026-08-16). Replaces build-hours pricing with four lines, one
-# of them hourly. Every figure below is owner-stated as of 2026-08-16
-# unless otherwise cited; provenance is stated per line, not assumed.
+# SGC TECH AI — Template / Module / Migration catalogue (NEW, 2026-08-15)
 #
-# This file does NOT replace hour-lookup.yaml / class-b-task-inventory.yaml
-# / cost-classes.md — those remain the INTERNAL cost/effort model (what a
-# capability costs SGC to build). This file is the CLIENT-FACING commercial
-# structure (what a capability is sold for). The two are related but
-# distinct: a fixed line here can, and does, have an internal hour estimate
-# behind it for margin-checking purposes (see internal_build_estimate_hours
-# fields below and 05-ops/pricing_engine.py: deal_guard_verdict()) without
-# the client ever seeing hours × rate.
-version: 4.0
-effective_from: 2026-08-16
-source: "Owner-directed pricing model v4, stated in conversation 2026-08-16. See HANDOVER.md decisions #14-#17 and CHANGELOG.md pricing v4.0 entry."
+# Replaces the single-fixed-figure build_value_aed model (the defect this
+# correction pass targets, e.g. RVN's build_value_aed=15,327 as one number
+# with no component breakdown) with FOUR SEPARATE, SEPARATELY-QUOTED
+# components: template base, modules, migration, enhancement. Read by
+# pricing_engine.py: four_component_build(). No number here is invented --
+# these are the owner-supplied catalogue values from the 2026-08-15 brief,
+# same provenance caveat as business-cost-basis.yaml: new this pass, not
+# independently re-derived from a prior repo artifact (grepped hour-lookup.yaml,
+# class-b-task-inventory.yaml, saas-modules.yaml first -- none of them price
+# a real-estate-CRM template or this module list; saas-modules.yaml prices a
+# DIFFERENT vertical's module set and is untouched by this file).
+version: 1.0
+effective_from: 2026-08-15
 
-# ===========================================================================
-# LINE 1 — PLATFORM FEE (fixed, NOT hour-derived)
-# ===========================================================================
-platform_fee:
-  amount_aed: 14000
-  basis: fixed
-  rationale: >
-    The asset exists, is deployed, and carries first-implementation risk
-    already absorbed — this is a product fee for a working system, not a
-    labour charge for building one from zero. It must be structurally
-    impossible to derive this figure from any hour count anywhere in the
-    engine or the client-facing output — see
-    05-ops/test_pricing_engine.py T24, which asserts the figure is
-    unchanged under a mutated hour input.
-  never_shown_as: "hours × rate — this line prints as a flat product fee on every client document, never as a computed hourly total (Part 5.4)."
-  provenance: "Owner-stated 2026-08-16, conversation. No repo artifact establishes this figure independently — recorded here as the source of truth going forward."
+template_base:
+  description: "Real-estate Odoo CRM: pipeline, lead capture, user roles, dashboards, standard reports, standard training."
+  fixed_fee_aed: 12000
+  hours_by_maturity:
+    mature: 6           # 4th build onward
+    building_it: 12       # 2nd/3rd build
+    first_build: 20        # inventing
 
-# ===========================================================================
-# LINE 2 — MODULES (fixed price each, evidenced scope only)
-# ===========================================================================
 modules:
-  lead_capture_pipeline:
-    amount_aed: 3000
-    scope: "Meta/Google/web lead intake into CRM — see 00-intake/demo-presentation-inventory-2026-08-16.md R1 (crm_lead_ingestion_hub module, class BUILT: code exists, installed, zero rows in its own log table despite an actively-firing retry cron — no evidence any inbound webhook was ever received)."
-    risk_category: [git_untracked, no_persisted_output_evidence]
-    risk_category_basis: "Maps to crm_lead_ingestion_hub — one of the 4 named git-untracked modules (§2 of the inventory) AND its own log table shows 0 persisted rows despite a firing cron (§6.1). Both conditions apply; contingency_pct_for() takes the max (50%, not_persisted_output_evidence), per the combination_rule."
-    warrant_tier: T2
-    provenance: "Owner-stated 2026-08-16."
+  lead_capture_meta_google_ads:      { price_aed: 3000, hours: 4 }
+  whatsapp_lead_notification:         { price_aed: 2500, hours: 3 }
+  auto_distribution_manual_reassign:   { price_aed: 2000, hours: 3 }
+  call_logging_manual_entry:            { price_aed: 2000, hours: 3 }
+  attendance_in_app_checkin:             { price_aed: 3000, hours: 5 }
+  daily_reporting_pack:                   { price_aed: 2000, hours: 3 }
+  property_portal_feed:                    { price_aed: 4000, hours: 6 }
 
-  property_listing_management:
-    amount_aed: 3500
-    scope: "Property/unit register, listing status, media — see sgc_offplan_rental_property_management, the largest git-tracked SGC module in the estate inventory (581/584 files tracked)."
-    risk_category: [git_tracked_deployed_before]
-    risk_category_basis: "sgc_offplan_rental_property_management is git-tracked (581/584 files, the 3-file gap is __pycache__/one stray script, verified) and installed with real persisted data (property_project=6, property_sub_project=5, rent_contract=4 rows, per the inventory §5.1)."
-    warrant_tier: T2
-    provenance: "Owner-stated 2026-08-16."
+module_hour_multiplier_by_maturity:
+  mature: 1.0
+  building_it: 1.4
+  first_build: 1.8
 
-  commission_and_deals:
-    amount_aed: 3500
-    scope: "Commission calculation, split/clawback, deal pipeline — see sgc_commission and sgc_deals_management, both git-tracked, installed."
-    risk_category: [git_tracked_deployed_before]
-    risk_category_basis: "Both sgc_commission and sgc_deals_management are git-tracked (73/73 and 45/45 files respectively, per the inventory §4.3) and installed. NOTE: this does not cover the ir_rule/multi-agent-visibility gap on these same models — that gap is priced and risk-tagged separately as its own line, multi_agent_access_control, below; not double-counted here."
-    warrant_tier: T2
-    provenance: "Owner-stated 2026-08-16."
-
-  multi_agent_access_control:
-    amount_aed: 3500
-    is_a_real_build_line: true
-    note: >
-      NOT packaging. This is real, needed engineering work, priced as such
-      — see the evidence below for why it cannot be sold as "already
-      included."
-    evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.4 (Phase 5.5, access control): ir_rule (row-level record rules) exist for only 18 of ~90 custom models/tables in the estate inventory, and are ABSENT from the commission and deals-management models specifically — the two most likely to need per-agent visibility in a real multi-agent brokerage. ir_model_access (basic CRUD) is populated everywhere (168 rows) but that is not the same protection: CRUD access says an agent CAN read/write commission or deal records at all; it says nothing about whether Agent A can see Agent B's."
-    internal_build_estimate_hours: 7
-    internal_build_estimate_note: "Owner-stated 2026-08-16. Grade D — no delivered actual exists yet for this specific line (writing ir.rule domains on sgc_commission/sgc_deals_management, both already-deployed git-tracked modules). Risk-adjusted per Part 3's contingency schedule before being used in any margin check, never used raw."
-    risk_category: [git_tracked_deployed_before]
-    risk_category_basis: "The WORK (new ir.rule domains) targets sgc_commission/sgc_deals_management, both git-tracked and already deployed — the risk category attaches to where the work lands, not to the fact that the specific rules are new. Risk-adjusted: 7h x 1.15 = 8.05h (pe.risk_adjusted_hours(7, 'git_tracked_deployed_before'))."
-    warrant_tier: T2
-    provenance: "Owner-stated 2026-08-16; evidence citation is the estate inventory (verified repo artifact, not owner-stated)."
-
-  reporting_and_dashboards:
-    amount_aed: 2500
-    scope: "Standard reports/dashboards on top of the above modules."
-    risk_category: [git_untracked]
-    risk_category_basis: "INFERENCE, not a direct 1:1 repo mapping — stated as such so it can be corrected. The closest evidenced real-estate-inventory capability under this name is sgc_crm_dashboard ('Run scheduled reports' cron, actively firing per §6.1) — but that module is git-untracked (§2), so this line is tagged at that risk level rather than assumed clean. If this module instead means sgc_dynamic_financial_report (git-tracked, but 0 rows across every scheduling table per §5.1 — 'no persisted output evidence,' the same 50% ceiling), the risk category is unaffected either way."
-    warrant_tier: T2
-    provenance: "Owner-stated 2026-08-16."
-
-modules_subtotal_aed: 16000   # 3000+3500+3500+3500+2500, all five modules — computed and verified by direct execution (pe.modules_subtotal_aed()) before this file was committed; a standing drift-guard test is added in the pricing v4 Part 4 commit
-
-# ===========================================================================
-# LINE 3 — MIGRATION (banded by record count)
-# ===========================================================================
 migration_bands:
-  risk_category: [migration]   # flat 50% on every band, per policy.yaml: contingency_schedule.migration — independent of any module's own tracked/untracked status
-  band_1: { to_records: 1000,  amount_aed: 2500 }
-  band_2: { to_records: 5000,  amount_aed: 5000 }
-  band_3: { to_records: 20000, amount_aed: 8000 }
-  above_band_3:
-    to_records: null
-    amount_aed: null
-    treatment: UNPRICED
-    routed_to: commercial_desk
-    note: >
-      Above 20,000 records is explicitly UNPRICED, not estimated by
-      extrapolation from the bands above — preserves the existing T16
-      end-to-end behaviour (migration record counts beyond a governed
-      threshold escalate rather than get a fabricated number). NOTE
-      (honesty disclosure, 2026-08-16): no test literally numbered T16
-      existed in 05-ops/test_pricing_engine.py before this pricing v4
-      pass — grepped the full suite (T1-T10, T12) and found no T16. This
-      band's UNPRICED/Commercial-Desk-routing behaviour and its T16 test
-      are both NEW as of this commit, not a pre-existing mechanism being
-      preserved. Built to the same specification the brief described as
-      if it already existed, and will now genuinely exist and be tested
-      as T16/T26 going forward.
-  provenance: "Owner-stated 2026-08-16."
+  none_clean_start:       { price_aed: 0,    hours: 0 }
+  up_to_1000:               { price_aed: 2500, hours: 4 }
+  from_1000_to_5000:         { price_aed: 5000, hours: 7 }
+  from_5000_to_20000:         { price_aed: 8000, hours: 12 }
+  over_20000:                   { price_aed: null, hours: null, unpriced: true, note: "[UNPRICED — Commercial Desk] — never estimate, quote only after seeing the data." }
 
-# ===========================================================================
-# LINE 4 — ENHANCEMENT (hourly — the one hourly line in this model)
-# ===========================================================================
 enhancement:
-  rate_aed_hr: 550
-  net_after_commission_aed_hr: 473    # 550 * (1 - 0.14) = 473, computed
-  note: >
-    Fine for pricing marginal/incremental hours on top of the four fixed
-    lines above (a client wants one more report, one more integration
-    tweak); NOT sufficient to price an entire deal at — a whole deal
-    priced purely on enhancement hours loses the product-fee economics
-    this v4 model exists to capture. See Part 5.4: this rate must show on
-    the client document as "quoted per request," never as the basis for
-    a full-deal total.
-  margin_disclosure_correction: >
-    HONESTY-RULE DISCLOSURE (2026-08-16): the brief this catalogue was
-    built from described 473/hr net as "20% over the commission-adjusted
-    floor." Computed directly: 473 / 394.38 (the COST floor) = 1.1994,
-    i.e. ~20.0% over the COST floor — that part of the framing is
-    arithmetically correct if "the floor" means cost_floor_per_hour.
-    But 473 / 458.58 (the actual BILLING floor, i.e. the one
-    rate_guard_verdict() gates PASS/BLOCK on) = 1.0314, i.e. only ~3.1%
-    over the BILLING floor, not 20%. The two floors were conflated in
-    the brief's own phrasing. Computation wins per the standing honesty
-    rule: 473/hr clears the billing floor (PASS via
-    pe.rate_guard_verdict(473)) but with a genuinely thin ~3% margin, not
-    the comfortable ~20% the original framing implied. Flagged here so
-    nobody prices a deal against enhancement hours believing there is a
-    20% cushion over the gate that actually governs quoting.
-  provenance: "Owner-stated 2026-08-16 (rate); margin analysis computed this session, disagrees with the brief's own framing as disclosed above."
+  default_rate_aed_hr: 550        # business-cost-basis.yaml: target_rate_per_hour_aed -- SAME value, read from there, not duplicated as a second source of truth. This is DELIBERATELY DIFFERENT from rate-card.yaml's segment blended rates (280/395/525 for startup_boutique/smb/mid_market) -- those price bottom-up A/B-class delivery hours on the EXISTING per-user Class-B engine (pricing_engine.py), whereas 550 is this NEW template-shaped engine's bespoke-enhancement rate, set directly at the whole-business floor(394)+margin target from business-cost-basis.yaml, not derived from a segment. The two rate systems price two different things (per-user SaaS build vs template-shaped CRM build) and are not yet reconciled -- flagged as an open item, not resolved silently.
+  note: "quoted per requirement, hours x rate"
 
-# ===========================================================================
-# REFERENCE QUOTE — verified equal to platform + all 5 modules + migration band 2
-# ===========================================================================
-reference_quote:
-  components:
-    platform_fee_aed: 14000
-    modules_subtotal_aed: 16000
-    migration_band: band_2
-    migration_aed: 5000
-  total_aed: 35000    # 14000 + 16000 + 5000 = 35000, computed via pe.reference_quote_total_aed() and verified by direct execution before this file was committed; T20/T21 (pricing v4 Part 4 commit) add the standing regression test
-  discount_floor_aed: 31500    # 35000 * 0.90 (10% discount), computed
-  discount_floor_gate:
-    below_discount_floor: commercial_desk_approval_required
-    implementation: "05-ops/pricing_engine.py: discount_gate_verdict() — a real gate function, not a comment. Any total below discount_floor_aed returns APPROVAL_REQUIRED; validate.py/render path must refuse to issue a quote below the floor without a logged Commercial Desk approval record, same mechanism shape as concession-ladder.yaml's existing G14 logging requirement."
-  provenance: "Owner-stated 2026-08-16; total independently verified by direct computation (14000+3000+3500+3500+3500+2500+5000=35000) before this file was written."
-
-# ===========================================================================
-# EXCLUDED / ENHANCEMENT REGISTER — capabilities with NO fixed price
-# ===========================================================================
-# ADDED 2026-08-16, per Part 2.6. HONESTY DISCLOSURE: the brief this
-# catalogue was built from described two specific rows to "DELETE" —
-# "WhatsApp notification at 2,500/3h" and "call logging at 2,000/3h" — as
-# if they were existing template-catalogue rows. No file in this repo's
-# pricing knowledge layer (grepped 00-knowledge/pricing/*.yaml) contains
-# either of those exact figures. The closest real artifact is
-# growth-automation-catalogue.yaml: whatsapp_business_integration, which
-# is hours-based (9-13h), not a flat "2,500/3h" price, and was written for
-# a DIFFERENT catalogue (custom/on-demand work, not template config).
-# Nothing was deleted, because nothing under those names/prices existed to
-# delete. What this section actually does: establishes, for the first
-# time in this repo, an explicit no-fixed-price register for the five
-# capabilities Part 5.4 requires named exclusions for, each cited against
-# real evidence that the capability does not exist in the addons estate.
-excluded_capabilities:
-  whatsapp_instant_notification:
-    status: excluded
-    fixed_price: null
-    evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.3/R2: class ABSENT — no WhatsApp provider configuration table anywhere in the schema; mail_mail shows only SMTP attempts (31 exception, 1 sent)."
-    alternative_offered: "Email notification via the platform's existing SMTP path (see mail_mail evidence above for its current reliability, disclosed, not oversold)."
-    quotable_as: "enhancement hours (550/hr) after a scoping call, OR a separate WhatsApp Business integration build quoted from growth-automation-catalogue.yaml (9-13h, real hours-based catalogue row) — never a template line."
-
-  automated_call_logging:
-    status: excluded
-    fixed_price: null
-    evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.5/R7: class ABSENT — stock Odoo 'Call' activity type exists but has 0 activities ever logged against it; no SGC-built call-log table found anywhere in the estate."
-    alternative_offered: "Manual call notes via the CRM's existing activity/message log (mail.activity 'Call' type, present but unused today)."
-    quotable_as: "enhancement hours after a scoping call — no existing build to price from."
-
-  call_target_enforcement:
-    status: excluded
-    fixed_price: null
-    evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.5/R8: class ABSENT — sgc_kpi_definition (the only KPI-definition table found) defines revenue/invoicing/pipeline/task/meeting KPIs; no call-count or call-target metric exists in it."
-    alternative_offered: "Generic KPI dashboard rows (reporting_and_dashboards module) can surface whatever numeric field exists — but there is no call-count field to surface until call logging itself is built."
-    quotable_as: "enhancement hours after a scoping call — depends on automated_call_logging existing first."
-
-  biometric_attendance_hardware:
-    status: excluded
-    fixed_price: null
-    evidence: "00-intake/demo-presentation-inventory-2026-08-16.md §6.1/R9: class PARTIAL — Odoo's native hr_attendance module is installed and genuinely active (203 mail_message rows, 2 crons firing on schedule), but that is manual/kiosk attendance, not integration with physical biometric hardware. No hardware-integration table or config found."
-    alternative_offered: "Odoo's native manual/kiosk check-in, already active and evidenced as used — offered as-is, not oversold as hardware integration."
-    quotable_as: "Discovery-first (device vendor/protocol unknown) — no catalogue basis, per this repo's own custom-request-catalog.yaml Band 3 discipline (discovery fee, not a guessed figure)."
-
-  property_portal_feeds:
-    status: excluded
-    fixed_price: null
-    evidence: "Not evidenced as built or active in the estate inventory — no portal-sync table found for demo_presentation; phase2-catalogue.yaml carries real published one-time reference prices for two named portals (Property Finder, Bayut/Dubizzle) in a DIFFERENT catalogue (custom/on-demand work), not this template model."
-    alternative_offered: "Manual listing export/upload to portals, or the client's own existing portal-sync tooling if any."
-    quotable_as: "custom-request-catalog.yaml: additional_portal_connection (12h standard, real governed catalogue row, per-portal) — quoted from THAT catalogue, never as a template-model fixed line."
+repeat_custom_candidate_rule: "When a second client requests the same custom (non-catalogued) thing, it becomes a catalogue module here. pricing_engine.py: surface_repeat_custom_candidates() should flag bespoke enhancement line items that recur across >=2 clients so the catalogue grows instead of the bespoke pile -- not yet implemented as an automated scan in this pass; flagged as a follow-up, not built."
