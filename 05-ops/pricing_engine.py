@@ -268,6 +268,109 @@ def hypercare_cost_aed(n, policy=None):
     return round(hours * pol["cost_to_serve"]["support_rate_aed"])
 
 
+def internal_consultant_cost_aed_hr(policy=None):
+    """Single source of truth for the internal delivery cost floor
+    (AED/hr) — policy.yaml: cost_to_serve.internal_consultant_cost_aed_hr
+    must equal this function's output; test_pricing_engine.py asserts it
+    (drift guard). Owner-stated cost-basis inputs
+    (policy.yaml: internal_cost_basis), UNVERIFIED against real payroll
+    records — see HANDOVER.md decision #12.
+
+    There is exactly one delivery role (owner/founder); callers/SDRs are
+    fixed overhead, not a per-role delivery cost — see
+    internal_cost_basis.role_structure. Do not derive a per-role cost
+    table from this function's inputs; there is only one delivery role
+    to cost."""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    basis = pol["internal_cost_basis"]
+    ops = basis["monthly_operating_basis_aed"]
+    cash_out_monthly = (
+        ops["licence_annual_aed"] / 12
+        + ops["staff_salaries_monthly_aed"]
+        + ops["office_monthly_aed"]
+        + ops["phones_monthly_aed"]
+        + ops["hosting_ai_monthly_aed"]
+        + ops["other_monthly_aed"]
+    )
+    total_requirement_monthly = cash_out_monthly + ops["owner_salary_monthly_aed"]
+    hrs = basis["delivery_hours_basis"]
+    delivery_hours_per_month = (
+        hrs["gross_hours_monthly"]
+        - hrs["less_caller_mgmt_hours"]
+        - hrs["less_marketing_hours"]
+        - hrs["less_training_hours"]
+        - hrs["less_admin_accounts_hours"]
+        - hrs["less_sales_hours"]
+    )
+    return round(total_requirement_monthly / delivery_hours_per_month, 2)
+
+
+def billing_floor_aed_hr(policy=None):
+    """Commission-adjusted billing floor (AED/hr) -- ADDED v4 (2026-08-16),
+    HANDOVER.md decision #14. This is the actual quoting gate;
+
+    internal_consultant_cost_aed_hr() (aka "cost_floor_per_hour") only
+    recovers SGC's operating cost -- it says nothing about commission.
+    Commission (internal_cost_basis.commission.combined_pct, 14%) is paid
+    OUT OF REVENUE on top of that cost, on every closed deal. A deal billed
+    at exactly cost_floor_per_hour therefore never actually clears the
+    floor once commission is paid out of it -- 14% of revenue billed at
+    cost recovers less than 100% of cost. This function computes the
+    higher, correct number: cost_floor_per_hour / (1 - commission_total).
+
+    Two floors, two jobs, do not conflate them:
+      internal_consultant_cost_aed_hr() -- cost recovery only, reported as
+        a separate metric and used as the WARN threshold.
+      billing_floor_aed_hr() (this function) -- cost recovery AND
+        commission paid -- this is what BLOCK actually gates on.
+    A rate between the two floors "recovers cost, does not pay the
+    owner" -- WARN, not PASS. See rate_guard_verdict()."""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    cost_floor = internal_consultant_cost_aed_hr(pol)
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    return round(cost_floor / (1 - commission_total), 2)
+
+
+def rate_guard_verdict(rate_aed_hr, policy=None):
+    """BLOCK / WARN / PASS for a single hourly rate against the two floors
+    (see billing_floor_aed_hr() docstring for why there are two).
+      rate < internal_consultant_cost_aed_hr()           -> BLOCK
+      internal_consultant_cost_aed_hr() <= rate < billing_floor_aed_hr() -> WARN
+      rate >= billing_floor_aed_hr()                      -> PASS"""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    cost_floor = internal_consultant_cost_aed_hr(pol)
+    billing_floor = billing_floor_aed_hr(pol)
+    if rate_aed_hr < cost_floor:
+        return "BLOCK"
+    if rate_aed_hr < billing_floor:
+        return "WARN"
+    return "PASS"
+
+
+def breakeven_hours(net_revenue_aed, policy=None):
+    """Hours at which net revenue (after commission) exactly recovers cost
+    -- net_revenue_aed / internal_consultant_cost_aed_hr(). Uses the COST
+    floor, not the billing floor: this answers "how many hours before we
+    lose money outright," a different question from the PASS/WARN/BLOCK
+    effective-rate gate in deal_guard_verdict(), which uses the billing
+    floor. Risk-adjusted hours above this number BLOCK (see T22)."""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    cost_floor = internal_consultant_cost_aed_hr(pol)
+    return round(net_revenue_aed / cost_floor, 2)
+
+
+def deal_guard_verdict(net_revenue_aed, risk_adjusted_hours, policy=None):
+    """Whole-deal BLOCK/WARN/PASS: effective net rate = net_revenue_aed /
+    risk_adjusted_hours, checked against rate_guard_verdict(). Must be
+    called with RISK-ADJUSTED hours (class-b-task-inventory.yaml /
+    contingency-schedule terms), never raw estimated hours -- quoting on
+    raw hours is the exact failure mode this guards against (see Part 3,
+    HANDOVER.md decision #16)."""
+    pol = policy or _load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    effective_rate = round(net_revenue_aed / risk_adjusted_hours, 2)
+    return effective_rate, rate_guard_verdict(effective_rate, pol)
+
+
 def class_d_hours_or_cost(edition):
     """Class D structural guarantee: zero for Community by construction."""
     if edition == "community":

@@ -32,11 +32,49 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _forbidden_rates():
-    """All forbidden_rates from rate-card.yaml, not just one hardcoded
-    value — see failure-modes/known-defects.md #2 (690) and #21 (550,
-    added after 425/550 were found reintroduced into policy.yaml)."""
+    """Historical-defect regression guards from rate-card.yaml:
+    forbidden_rates — see failure-modes/known-defects.md #2 (690) and #21
+    (550, added after 425/550 were found reintroduced into policy.yaml).
+
+    READ BEFORE TOUCHING (v4, 2026-08-16, HANDOVER.md decision #14):
+    these two entries are NOT a "rate is too low" guard — 690 and 550 are
+    both well ABOVE either floor in pricing_engine.py (394.38 cost floor,
+    458.58 billing floor). 690 was never a valid rate on any card at any
+    level (appeared in the original VGE draft, sourced from nowhere); 550
+    was mid_market's blended_rate_aed before its 2026-08-04 correction to
+    525 — a specific-defect regression guard, not a general floor check.
+    This mechanism catches "a known-wrong number reappeared anywhere in
+    text"; it has never caught, and was never meant to catch, "a real
+    rate-card figure that doesn't clear cost" — that gap is what v4 adds
+    via _sub_floor_rates() below, as an ADDITIONAL check, not a
+    replacement of this one. Deleting this list to make room for a
+    floor-based rule would silently drop the only guard against 690/550
+    reappearing — not done."""
     rc = load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
     return [r["rate_aed_hr"] for r in rc.get("forbidden_rates", [])]
+
+
+def _sub_floor_rates(rate_card=None, policy=None):
+    """ADDED v4 (2026-08-16), HANDOVER.md decision #14 — the guard
+    _forbidden_rates() never provided: every CURRENTLY-DEFINED rate-card
+    role rate and policy.yaml segment blended_rate_aed that falls below
+    pe.billing_floor_aed_hr() (cost floor / (1 - commission), currently
+    458.58 AED/hr). Computed fresh every call from live inputs, never a
+    hardcoded list — if the cost basis or commission rate changes, this
+    set changes with it. Returns {rate_aed: [source labels]}."""
+    rc = rate_card or load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "rate-card.yaml"))
+    pol = policy or load_yaml(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
+    floor = pe.billing_floor_aed_hr(pol)
+    hits = {}
+    for role_name, role in rc.get("roles", {}).items():
+        rate = role["rate_aed_hr"]
+        if rate < floor:
+            hits.setdefault(rate, []).append(f"rate-card.yaml: roles.{role_name}")
+    for seg_name, seg in pol.get("segments", {}).items():
+        rate = seg.get("blended_rate_aed")
+        if rate is not None and rate < floor:
+            hits.setdefault(rate, []).append(f"policy.yaml: segments.{seg_name}.blended_rate_aed")
+    return floor, hits
 
 # Phrases that are unconditionally wrong wherever they appear as an
 # affirmative claim — no legitimate proposal ever needs to assert these.
@@ -183,6 +221,19 @@ def check_1_forbidden_rate_in_pricing(result):
                 result.fail("1. forbidden rate", f"{rate} appears in {f}")
     result.ok(f"1. forbidden rates {forbidden} not present in pricing/*.yaml (outside rate-card.yaml's own guard entries)")
 
+    # ADDED v4 (2026-08-16), HANDOVER.md decision #14 — the check
+    # _forbidden_rates() above never provided: does any CURRENTLY-DEFINED
+    # rate-card role or policy.yaml segment fall below the computed
+    # billing floor? Structural (checks the actual field values), not a
+    # text scan — see _sub_floor_rates() docstring for why.
+    floor, hits = _sub_floor_rates()
+    if hits:
+        for rate, sources in sorted(hits.items()):
+            result.fail("1d. rate below billing floor",
+                        f"{rate} AED/hr < billing_floor_aed_hr ({floor}) — defined at: {', '.join(sources)}")
+    else:
+        result.ok(f"1d. no rate-card role or segment blended_rate_aed is below the computed billing floor ({floor})")
+
 
 def check_1c_segment_pins(result):
     """Structural guard for known-defects.md #21: each segment's
@@ -239,9 +290,20 @@ def check_2_3_worksheet_complete(result, ws):
     forbidden = {r["rate_aed_hr"] for r in rate_card.get("forbidden_rates", [])}
     rate = b.get("rate_aed")
     if rate in forbidden:
-        result.fail("2. rate provenance", f"rate_aed {rate} is in rate-card.yaml forbidden_rates")
+        result.fail("2. rate provenance", f"rate_aed {rate} is in rate-card.yaml forbidden_rates (historical-defect guard)")
     elif rate not in valid_rates:
         result.fail("2. rate provenance", f"rate_aed {rate} does not match any rate-card.yaml role")
+    # ADDED v4 (2026-08-16), HANDOVER.md decision #14: a valid, on-card
+    # rate can still be below the computed billing floor (e.g.
+    # startup_consultant 280, consultant 395, business_analyst 450,
+    # qa_engineer 425, trainer 395 all currently are — see the sub-floor
+    # finding logged in check_1_forbidden_rate_in_pricing/1d). Being on
+    # the card is necessary but not sufficient; it must also clear the
+    # floor to be billed on a live worksheet.
+    if rate is not None:
+        floor = pe.billing_floor_aed_hr()
+        if rate < floor:
+            result.fail("2d. rate below billing floor", f"rate_aed {rate} < billing_floor_aed_hr ({floor})")
     result.ok("2/3. worksheet build block complete, PM/QA/documentation/contingency present, rate on card")
 
 

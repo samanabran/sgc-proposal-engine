@@ -637,11 +637,11 @@ def _derive_mobilisation(ws):
 
 
 def _derive_internal_build_cost(ws):
-    """round(total_hours * 150)."""
+    """round(total_hours * pe.internal_consultant_cost_aed_hr(POLICY))."""
     th = ws.get("number_2_build", {}).get("total_hours")
     if th is None:
         return None
-    return round(th * POLICY["cost_to_serve"]["internal_consultant_cost_aed_hr"])
+    return round(th * pe.internal_consultant_cost_aed_hr(POLICY))
 
 
 def _classify_delta(stored, derived, cited_rule_present):
@@ -768,6 +768,55 @@ def t9_component_level_formulas(policy=None):
     schema is present."""
     pol = policy or pe._load(os.path.join(REPO_ROOT, "00-knowledge", "pricing", "policy.yaml"))
     inv = pe.load_inventory()
+
+    # Drift guard, ADDED 2026-08-16 (HANDOVER.md decision #12): the stored
+    # cost_to_serve.internal_consultant_cost_aed_hr must equal what
+    # internal_cost_basis's own inputs compute to via
+    # pe.internal_consultant_cost_aed_hr() -- catches a hand-edit to
+    # either side (the stored figure, or an input) that isn't carried
+    # through to the other, the same class of defect this repo already
+    # guards for segments.blended_rate_aed vs. its pinned rate-card.yaml
+    # role (policy.yaml: segments comment).
+    stored_cost_hr = pol["cost_to_serve"]["internal_consultant_cost_aed_hr"]
+    computed_cost_hr = pe.internal_consultant_cost_aed_hr(pol)
+    check(f"T9: cost_to_serve.internal_consultant_cost_aed_hr == "
+          f"pe.internal_consultant_cost_aed_hr(policy) "
+          f"(stored={stored_cost_hr}, computed={computed_cost_hr})",
+          abs(stored_cost_hr - computed_cost_hr) < 0.01)
+
+    # Drift guard, ADDED v4 (2026-08-16, HANDOVER.md decision #14):
+    # billing_floor_aed_hr() has no stored counterpart to compare against
+    # (unlike internal_consultant_cost_aed_hr, it is never hand-typed
+    # anywhere in policy.yaml -- that is Part 1's own requirement). The
+    # guard here is therefore (a) an independent recomputation of the
+    # formula, not just a second call to the same function, and (b) a
+    # mutation check confirming the floor actually MOVES when either
+    # input it depends on moves -- a function that silently ignored its
+    # own inputs (e.g. hardcoded 458.58) would pass a same-value check
+    # but fail this one.
+    commission_total = pol["internal_cost_basis"]["commission"]["combined_pct"]
+    independent_billing_floor = round(computed_cost_hr / (1 - commission_total), 2)
+    live_billing_floor = pe.billing_floor_aed_hr(pol)
+    check(f"T9: pe.billing_floor_aed_hr(policy) == cost_floor/(1-commission_total) recomputed independently "
+          f"(live={live_billing_floor}, independent={independent_billing_floor})",
+          abs(live_billing_floor - independent_billing_floor) < 0.01)
+
+    import copy
+    pol_higher_commission = copy.deepcopy(pol)
+    pol_higher_commission["internal_cost_basis"]["commission"]["combined_pct"] = commission_total + 0.05
+    moved_floor = pe.billing_floor_aed_hr(pol_higher_commission)
+    check(f"T9: billing_floor_aed_hr moves when commission_total moves "
+          f"(base={live_billing_floor} at {commission_total}, "
+          f"+5pp={moved_floor} at {commission_total + 0.05})",
+          moved_floor > live_billing_floor)
+
+    pol_higher_cost = copy.deepcopy(pol)
+    pol_higher_cost["internal_cost_basis"]["monthly_operating_basis_aed"]["owner_salary_monthly_aed"] += 1000
+    moved_floor_2 = pe.billing_floor_aed_hr(pol_higher_cost)
+    check(f"T9: billing_floor_aed_hr moves when a cost_floor input moves "
+          f"(base={live_billing_floor}, +1000 owner_salary={moved_floor_2})",
+          moved_floor_2 > live_billing_floor)
+
     for client in CLIENT_WORKSHEETS:
         ws_path = os.path.join(REPO_ROOT, "02-clients", client, "02-calc", "pricing-worksheet.yaml")
         if not os.path.exists(ws_path):
@@ -871,12 +920,16 @@ def t9_worksheet_internal_consistency():
                       stored_hc_cost is not None and abs(stored_hc_cost - expected_hc_cost) < 1)
 
         # Invariant 2 (universal, any schema): internal_build_cost_aed ==
-        # total_hours * policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+        # total_hours * policy.yaml cost_to_serve.internal_consultant_cost_aed_hr
+        # (pe.internal_consultant_cost_aed_hr(POLICY) -- never a hand-typed
+        # literal here; that was itself the exact defect flagged 2026-08-16,
+        # see HANDOVER.md decision #12).
         total_hours = b.get("total_hours")
         internal_cost = b.get("internal_build_cost_aed")
         if total_hours is not None and internal_cost is not None:
-            expected_cost = round(total_hours * 150)
-            check(f"T9: {client} internal_build_cost_aed == total_hours*150 "
+            cost_hr = pe.internal_consultant_cost_aed_hr(POLICY)
+            expected_cost = round(total_hours * cost_hr)
+            check(f"T9: {client} internal_build_cost_aed == total_hours*{cost_hr} "
                   f"(stored={internal_cost}, expected={expected_cost} from total_hours={total_hours})",
                   abs(internal_cost - expected_cost) <= 1)
 
