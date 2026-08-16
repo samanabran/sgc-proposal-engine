@@ -172,3 +172,23 @@ every one of these.
     run). A future tightening of the phrase-matching regex cannot
     reintroduce this specific failure without the self-test catching it
     immediately.
+24. **Commission retention base — STILL UNRESOLVED, flagged not guessed.**
+    `policy.yaml: internal_cost_basis.commission.retention_pct` is 5%, and
+    `commission_release_aed()` (pricing v4 Part 4, `05-ops/pricing_engine.py`)
+    correctly releases commission pro-rata against cash collected — but
+    the 5% RETENTION itself has never had its base stated: 5% of the
+    *commission amount* (e.g. 5% of AED 708.12 = AED 35.41) and 5% of the
+    *contract value* (e.g. 5% of AED 15,327 = AED 766.35) differ by
+    roughly 7x, and both are plausible readings of "5% retention" on their
+    own. Owner-stated, undocumented which basis is meant — per P11 (no
+    scalar invented and then treated as settled) and this repo's own
+    standing discipline, NOT picked silently. `internal_cost_basis.commission`
+    (`policy.yaml`) records `retention_pct: 0.05` with no `retention_base`
+    field at all as of pricing v4 — the ambiguity is structural, not just
+    undocumented prose. Any worksheet or engine function that computes an
+    actual retained-commission AED figure before this is resolved is
+    inventing a number this repo has explicit discipline against
+    inventing. Resolves by a single owner statement naming the base,
+    recorded in `policy.yaml: internal_cost_basis.commission.retention_base`
+    the same way every other commission field there already states its
+    own basis.

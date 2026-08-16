@@ -2125,3 +2125,431 @@ No engine or policy change. No worksheet writes. No repricing. No Stage 5
 work. Files touched: `call-transcript-2026-07-16-internal-prep.md`,
 `call-transcript-2026-07-16-discovery-demo.md`, `HANDOVER.md`,
 `manifest.yaml`.
+
+## pricing v3.2 — 2026-08-12
+
+**`concession-ladder.yaml` v2.0 → v2.1.** Rate card and segment blended
+rates are unchanged — checked against independent UAE market data first
+(`03-library/market-intelligence/uae-pricing-benchmark.md`, 14 sources)
+and found defensible, not moved. What changed is the concession/
+compensator layer, per explicit user direction: SGC is early-stage and
+willing to price below the (now benchmarked) market level in exchange
+for referral and brand-exposure value, structured as a per-deal
+discount any SDR can offer — not a blanket rate cut.
+
+- Added compensator `powered_by_attribution` — "Powered by SGC Tech AI"
+  credit in the client's live Odoo portal for the life of the
+  engagement. `value_formula: 150 * term_months`, `max_per_deal: 1`,
+  explicitly flagged `grade: D` — no market data exists for
+  SaaS co-branding value at SGC's scale; this is a placeholder pending
+  a real attributable lead, same collapse-trigger convention as
+  `class-b-task-inventory.yaml`.
+- Added `standard_plays.below_market_entry_discount`, documenting a
+  worked Prosper-scale example: a 15–25% `discount_platform` concession
+  over a 24-month term costs AED 13,133–21,888, while
+  `referral_commitment_2` + `reference_and_case_study` +
+  `powered_by_attribution` sum to only AED 9,100 — short of even the
+  15% case. On a deal that size, this play needs stacking with at least
+  one more compensator (`annual_prepay` or `extend_term_12mo`
+  recommended — both strengthen SGC's cash position rather than reduce
+  delivered scope) before G1–G41 and the absolute margin floor (G23,
+  25%, unchanged) will actually clear. Smaller deals may clear on
+  referral+brand compensators alone — the arithmetic must be re-run per
+  deal, not assumed by analogy.
+- `procedure` (price concession → select compensators until sum ≥
+  concession value → re-run ALL gates → log both sides in
+  `manifest.yaml` escalations, G14) is unchanged — the new compensator
+  and play use the existing mechanism, not a new one.
+- G23 (absolute margin floor, 25%) confirmed unchanged and still
+  binding regardless of referral/attribution terms, per explicit user
+  decision.
+
+## Phase 12 — on-demand / ad-hoc work pricing — 2026-08-14
+
+Everything before this phase assumed a project or a subscription. This
+adds a third product shape: discrete work requested outside either — "can
+you just do this one thing."
+
+- Added `pricing/on-demand-work.yaml` — on-demand hourly rates
+  (`rate-card.yaml` role rate + 20% premium, `[POLICY]`, rationale stated
+  inline: no discovery amortisation, no scheduling certainty,
+  context-reload cost, no volume commitment), half-day (4h) minimum
+  billing, and all four structures priced: Pay As You Go (full on-demand
+  rate, no SLA), Prepaid Hour Bank (10/25/50h, 5/10/15% off, 6-month
+  expiry, non-refundable, no rollover), Retainer (priced at the BASE
+  rate — a monthly commitment removes the four reasons the premium
+  exists, so this is a derivation, not a discount), and Fixed-Price
+  Micro-Tasks (7-item menu, flat prices, exempt from the half-day
+  minimum since effort is known).
+- G23 (absolute margin floor, 25%) verified against every new rate: all
+  clear by 43–51 percentage points (cost basis: `policy.yaml:
+  cost_to_serve.internal_consultant_cost_aed_hr`, 150 AED/hr — the same
+  figure the engine already uses for `internal_build_cost_aed`, no new
+  cost figure invented). Flagged honestly, `[PRV]`: that cost figure was
+  derived for planned project delivery and has no on-demand-specific
+  loading for context-reload/idle-capacity overhead, because no
+  on-demand work has ever been delivered yet — collapse trigger: revisit
+  after the first 10 delivered requests.
+- Added `commercial-rules/on-demand-guardrails.md` — five new gates,
+  **G54–G58**, next available numbers after G53 (`guardrails-g42-g53.yaml`):
+  G54 (no auto-quote on a third-party/unknown system — paid discovery
+  with the Solution Architect first, mirrors the existing G39
+  third-party/OCA precedent), G55 (no work without a written estimate +
+  logged client acceptance — reuses the existing concession-logging
+  mechanism, not a parallel workflow), G56 (no active subscription → the
+  no-base rate, not yet published, fails closed until it is), G57
+  (anti-cherry-picking: AED 15,000 or 6 requests / trailing 90 days
+  forces conversion to a scoped project or a logged exception), G58
+  (±15% estimate-variance tolerance band; breach stops work and
+  re-quotes, absorption requires logged Commercial Desk sign-off capped
+  at 10%).
+- Extended `04-governance/approval-matrix.md` and `escalation-triggers.md`
+  with on-demand-specific rows/triggers — no separate governance
+  document created, per the existing extend-don't-duplicate convention.
+- Extended `09-agent/question-bank.yaml` with a new `on_demand_routing`
+  section (whose system, subscription status, request type, urgency) —
+  additive; tier_0/1/2 (subscription/project intake) unchanged.
+- Added three SDR scripts to `03-library/objection-handling/`:
+  `can-you-just-do-this-one-thing.md`, `why-hourly-rate-higher.md`,
+  `not-a-system-we-built.md` — same format as the existing
+  `price-too-high.md`.
+- Added `03-library/price-card-on-demand.md` — the first consolidated
+  SDR-facing price card in this repo (none existed before this phase,
+  for any product line); scoped to on-demand as directed. States SDR
+  discount authority explicitly: yes on hour-bank size (published
+  tiers), no on any base/on-demand/no-base hourly rate.
+- Added `03-library/on-demand-worked-examples.md` — three examples: a
+  small menu-priced request from an SGC-built subscriber, a hour-bank
+  purchase, and a third-party-system refusal (G54), shown alongside the
+  live G32 cash-positive refusal already captured for the SDR training
+  video as the same "stops before producing a price" pattern applied to
+  a different gate.
+- Arithmetic correction made during self-review before this entry was
+  written: the fixed micro-task menu's "round to nearest 10" prices were
+  initially miscomputed (474→480, 1422→1450) instead of the correct
+  474→470 and 1422→1420; caught and fixed across `on-demand-work.yaml`,
+  `price-card-on-demand.md`, and `on-demand-worked-examples.md`
+  (Example 1's total corrected from 1,440 to 1,410 AED) before
+  publication — logged here per this repo's own convention of stating a
+  correction rather than leaving a silently-fixed number.
+
+## Phase 13 — common custom request catalog — 2026-08-14
+
+Extends Phase 12's micro-task menu upward into real custom scope: work
+beyond the vertical-packages.yaml default floor, not yet a full re-scoped
+project. Every row banded by evidence strength, per the brief's own
+discipline — an SDR always gets a number, but how binding it is varies.
+
+- Added `pricing/custom-request-catalog.yaml` — 16 rows across all 13
+  mandatory categories (reports/dashboards, approval workflows,
+  commission tiers, document templates, portal connections, two chatbot
+  variants, notification automation incl. WhatsApp, data migration
+  overage, additional role/permission profiles, multi-branch,
+  Arabic/bilingual, mobile-specific, third-party connections). Mined from
+  the five client drafts (ASP/KP/MRD/PRO/VGE), `hour-lookup.yaml`,
+  `vertical-packages.yaml`, `growth-automation-catalogue.yaml`,
+  `commission-engine-catalogue.yaml`, `phase2-catalogue.yaml`, and
+  `class-b-task-inventory.yaml` — not invented categories.
+- **Honest finding, stated plainly rather than smoothed over**: every row
+  in this catalog is Band 2 (indicative range, derived by analogy) or
+  Band 3 (discovery first) — zero rows qualify for Band 1 (fixed price),
+  because no client in this repo's corpus has reached "won," let alone
+  been delivered. This is the accurate state of a pre-launch pricing
+  engine, not a gap in the research.
+- Added the CRM-triggered conversational chatbot (Phase 13 B3, live
+  client request), 43h, with every component of the estimate checked
+  against an existing hour-lookup.yaml/catalogue analogue where one
+  exists, and explicitly flagged where none does (`flow_design_state`,
+  10h, the least-grounded component — no analogue anywhere in this
+  repo). Distinguished in the catalog from the existing inbound
+  `website_chatbot_inbound` row (growth-automation-catalogue.yaml):
+  outbound-initiated, holds multi-turn state, mid-conversation handoff.
+  Pricing-method note added: this row's bespoke 6h testing line
+  supersedes the standard 8% QA overlay for this row specifically — do
+  not stack both, or QA is double-charged.
+- Added `pricing/custom-surface-maintenance.yaml` — L1–L4 recurring
+  custom-surface charge (50/100/250/500 AED/mo by build-hour band). The
+  brief refers to this as "the Phase 10 L1-L4 schedule" as if already
+  governed; it was searched for across the full knowledge layer,
+  `.omc/plans/`, and this changelog, and does not exist under that name
+  or an equivalent one anywhere in the repo. Rather than silently
+  presenting invented numbers as if recovered from a prior phase, this
+  file is built fresh and flagged honestly as new — `[POLICY]` for the
+  L1 anchor (pinned to the existing `cost_to_serve.tooling_flat_aed`, 50),
+  `[PRV]` for L2–L4 (no delivered maintenance-hours data exists yet to
+  derive them from).
+- G23 (absolute margin floor, 25%) verified across every row, computed
+  programmatically and cross-checked against the written figures with a
+  standalone verification script before publication (after Phase 12's
+  hand-arithmetic error, this pass did not repeat that method). Verified
+  at both LIST and SDR FLOOR (list × 0.90, `[POLICY]`, the SDR's
+  no-escalation discretion band), all three segments, every row. Clears
+  by no less than 15.48 percentage points anywhere — same honest finding
+  as Phase 12: G23 is not the binding constraint in this catalog either;
+  the real risk is scope/discovery risk, not margin risk.
+- Added `commercial-rules/custom-catalog-guardrails.md` — **G59–G62**,
+  continuing the sequence after Phase 12's G58: G59 (no custom quote
+  without a catalog row — off-card analogy estimating is never allowed),
+  G60 (uncatalogued request logged BEFORE any number is given to the
+  client), G61 (recurring surface charge disclosed in the same
+  conversation as the build price, never discovered later), G62 (band
+  promotion requires a logged actual-hours event, never a recollection).
+- Built (not just specified) `05-ops/unpriced-request-log.yaml` and
+  `05-ops/unpriced_request_report.py` — a real, working request log and
+  frequency-ranking script, seeded with every uncatalogued-at-time-of-
+  asking request found while researching this phase, and run
+  successfully against that seed data before this entry was written
+  (output: nothing yet reaches the 3-occurrence priority threshold — an
+  honest reflection of the thin five-draft corpus, not a broken report).
+  A UI for this inside the live Proposals module (the Odoo addon) is
+  explicitly out of scope for this pass — that is implementation work
+  against a live system, gated the same way this project has gated every
+  prior engine-code change, not a side effect of a knowledge-layer
+  authoring pass.
+- Added `03-library/price-card-custom-catalog.md` as page 2 of the price
+  card introduced in Phase 12 (`price-card-on-demand.md`, now explicitly
+  labelled page 1 of 2) — full catalog reference pricing at SMB segment,
+  SDR wording for each band (verbatim phrasing for fixed/range/discovery
+  quotes), third-party cost table, and the four new gates.
+- **Gap stated, not silently skipped**: B1 asks for "the live
+  engagement's 20 orders and all change requests" as a source to mine.
+  Searched across the full knowledge layer and, since Phase 11's staging
+  capture infrastructure already existed, checked live against the
+  staging Odoo Sales app directly — it contains only Odoo's stock demo
+  data (Henry Campbell, Thomas Passot, Lorem-ipsum placeholder text), not
+  a real order history. No such dataset was located in either place; the
+  catalog is built from the five drafts and governed catalogues instead.
+  If this data exists elsewhere, point the next catalog pass at it.
+
+## Phase 14 — reconciliation, implementation-state audit — 2026-08-14
+
+**First pass (repo-only) concluded Finding (B) — later corrected to
+Finding (A) once VPS access was obtained. Recorded here in full,
+including the wrong conclusion, rather than quietly overwritten.**
+
+The Phase 14 brief asserted a percentage-based custom-surface schedule
+(L1 8%/yr, L2 12%/yr, L3 18%/yr, L4 25%/yr, worked example 6,175 x 18% /
+12 = 92.62 AED/mo) plus a separate risk-premium schedule (L1 0%, L2 10%,
+L3 20%, L4 30%) as already "reported... as live in [POLICY]" by "Phase
+10." A first search — repo-wide grep for the percentages, "92.62",
+"annual_rate", "risk_premium", plus a scan of every `## Phase N` header
+in this file and every file in `.omc/plans/` — found nothing: no "Phase
+10" CHANGELOG entry, no `phase10*` file in `.omc/plans/` (stops at
+`proposal-engine-mvp-phase7-implementation.md`), and that file's own
+`[PRV] Register` doesn't mention it either. That search concluded Finding
+(B) ("never written to disk") and was explicitly caveated as incomplete,
+since `proposal-engine-mvp-phase7-implementation.md:5-10` states the real
+`sgc_proposal_engine` Odoo module source lives only on the staging VPS,
+not in this repo — a location the first pass had no credentialed access
+to search.
+
+**Corrected finding, with VPS access obtained later the same day: (A) —
+it exists.** Model `sgc.pricing.customisation_level`, seeded by
+`/opt/staging/odoo19-sgc-feature/sgc_proposal_engine/data/phase10_seed_data.xml`
+(records `custom_level_l1`..`l4`, labelled "S10.B1/B2"), rates matching
+the brief exactly (8/12/18/25% + 0/10/20/30% risk premium), flagged
+`[POLICY]` with a stated industry-benchmark rationale — and **wired
+live**: `models/activity_catalog.py:143-144` computes
+`custom_surface_aed_per_month = round(list_price * pct / 12, 2)` on every
+catalog row today. Phase 13 (and Phase 14's own first pass) did not fail
+a search — the artifact was simply never reachable from this repository,
+by the project's own stated architecture. No third exhaustive-search
+claim is being made here; this is a location correction, not a
+diligence upgrade.
+
+**Important nuance the brief's framing did not anticipate**: the real
+mechanism has no flat-floor component at all — it is pure `list_price *
+pct / 12`. A comment at `activity_catalog.py:59-61` records that this
+replaced an even earlier, already-superseded flat AED 150/mo universal
+figure from "Phase 9." Real history: Phase 9 (flat, superseded) -> Phase
+10 (percentage-only, live today). **This repo's own v1.0 (invented flat
+floor, 50/100/250/500 AED/mo) and v2.0 (invented `max(flat, pct)`
+unification, written earlier the same day as this correction) were both
+independently invented in this repo, never wired to anything, and
+conflicted with the real mechanism rather than describing it.**
+
+`00-knowledge/pricing/custom-surface-maintenance.yaml` is now v3.0: a
+passive, non-authoritative mirror of the real server-side config, formula
+corrected to `list_price * annual_rate_pct / 12` (no floor), all four
+tiers' rates recorded with their real values and `[POLICY]` (not `[PRV]`)
+per the model's own evidence notes. Recomputed against the same 3 real
+catalog rows used in the retired v2.0: `custom_report_dashboard` 10.53
+AED/mo, `approval_workflow_automation` 23.70 AED/mo,
+`crm_triggered_chatbot` 353.85 AED/mo — all materially **lower** than
+what v1.0/v2.0 would have charged for the same rows (50/100/500 AED/mo).
+**Any quote generated from this file before this correction (v1.0 or
+v2.0) does not match what the live engine actually computes** and should
+be reconciled if any exist.
+
+**Read-only forensic audit + implementation-state audit performed live on
+staging** (VPS `vps-root`, container `odoo19-sgc-staging`, DB
+`sgc_staging`, module `sgc_proposal_engine` v19.0.2.0.0 installed): full
+findings — what's implemented (G1/G8/G10/G13/G14/G23/G32/G33/G35/G53 only;
+none of G54-G62), what's missing (all Phase 12/13 on-demand structures,
+the 16-row custom catalog, Band 1/2/3 fields, the unpriced-request model),
+the addon's complete lack of version control before this phase (now
+git-initialized in place, baseline commit `d94a518`), and a live security
+finding — `stage.sgctech.ai` was found already publicly enabled
+(contradicting an earlier "not enabled" report caused by `grep -r` not
+following an nginx `sites-enabled` symlink), exposing the DB
+manager/selector with `admin_passwd` at its default value; disabled
+immediately with explicit approval, verified unreachable afterward — are
+recorded in the chat transcript for this phase, not duplicated here.
+
+**Implementation begun, verified, and committed**: added
+`sgc.pricing.unpriced_request` (Phase 13 D1/D2 — request log + frequency
+report), with views, security rows, and a `frequency_report()` method.
+Verified via a live module upgrade (`-u sgc_proposal_engine
+--stop-after-init`, run as a one-off process alongside the running
+container, not a restart) and an `odoo shell` create/report/unlink cycle
+against the real `sgc_staging` DB. Committed to the addon's new git repo
+as `517f090`. Remainder of the Phase 14 implementation plan (Band 1/2/3
+fields, on-demand structures, G54-G62 as enforced code, config hardening,
+re-enabling `stage.sgctech.ai`) is in progress, not yet complete as of
+this entry.
+
+## pricing v3.3 — internal cost basis (payroll-derived) — 2026-08-16
+
+Closes the exact gap three prior MVP planning passes each flagged and
+could not close: `.omc/plans/proposal-engine-mvp-phase2-pricing-stack.md`
+("Role-level cost rates are `[PRV]` — needed: actual loaded cost per
+role... which only exists inside SGC's own payroll/subcontractor
+records, not anywhere I can reach"), `phase4-inference-layer.md` (same
+item, carried forward, still `[PRV]`), and `phase6-backtest.md` ("Cannot
+populate... no payroll/cost data is reachable... inventing figures...
+the rules governing this entire exercise explicitly forbid"). All three
+kept `cost_to_serve.internal_consultant_cost_aed_hr` at a flat,
+unsourced 150 AED/hr specifically because no real cost data existed to
+replace it with.
+
+- **`policy.yaml` v3.1 → v3.2.** Added `internal_cost_basis` — owner-
+  stated in conversation 2026-08-16, explicitly flagged
+  `provenance.status: unverified against actual payroll records`, not
+  sourced from any repo artifact. Inputs: licence AED 20,000/yr, staff
+  salaries AED 7,500/mo (5 callers × 1,500), office AED 2,000/mo, phones
+  AED 1,200/mo (6 × 200), AI hosting AED 367/mo (USD 100 at the standing
+  ~3.6725 peg), owner salary/drawings AED 20,000/mo (unpaid 3 months as
+  of this date, moves to WPS on visa issue), against 83 delivery-
+  hours/month (176 gross − 33 caller-mgmt − 20 marketing − 10 training −
+  10 admin/accounts − 20 sales). `cost_to_serve.internal_consultant_cost_aed_hr`
+  changed from **150 → 394.38 AED/hr** — a 2.63× increase.
+- **Explicit role-structure ruling, stated by the owner and carried into
+  the policy comment verbatim**: there is exactly ONE delivery role
+  (owner/founder — 100% of delivery, plus caller management, marketing,
+  training, admin, sales). The 5 callers/SDRs deliver nothing; their AED
+  7,500/mo is fixed overhead, not a delivery cost. `rate-card.yaml`'s 13
+  billing-rate roles were deliberately NOT built into a per-role internal
+  cost table — the owner's own framing: "a blended multi-role cost model
+  would be fiction here." Those 13 roles remain client-facing billing
+  tiers only; the cost side is now one computed floor.
+- **Computed, not hardcoded, per explicit requirement**: added
+  `05-ops/pricing_engine.py: internal_consultant_cost_aed_hr()`, the
+  single source of truth for this figure, deriving it from
+  `internal_cost_basis` on every call. `05-ops/test_pricing_engine.py`
+  gained a drift-guard check (T9c) asserting the stored
+  `cost_to_serve.internal_consultant_cost_aed_hr` still equals the
+  function's live output — the same structural-check pattern this repo
+  already uses for `segments.blended_rate_aed` vs. its pinned
+  `rate-card.yaml` role. Also fixed, same pass: `test_pricing_engine.py`
+  had one existing check hand-typing `150` as a bare literal
+  (`_derive_internal_build_cost` had already been reading the policy
+  field dynamically; a second T9 invariant check had not) — the exact
+  defect class this change warns against, found live while wiring the
+  fix in, corrected in the same commit rather than left to recur.
+- **A separate, informational-only figure recorded alongside**: the
+  owner also stated a client-facing TARGET rate of AED 550/hr (cost
+  floor + commission + non-billable time + margin) — recorded under
+  `internal_cost_basis.target_rate_reference`, explicitly NOT wired into
+  `segments.blended_rate_aed` (280/395/525, unchanged, sourced from
+  `SGC-TECH-AI-Commercial-Export-v2_REVISED.xlsx`). Reconciling one
+  target rate against the existing 3-tier segment structure is a
+  separate decision this entry does not make.
+- **Blast radius, surfaced structurally by running the test suite
+  immediately after wiring this in, not asserted by hand**: all four
+  corpus clients' `internal_build_cost_aed` (computed at the old 150
+  AED/hr floor) now fail T9/T10 against the real 394.38 floor — Kallat
+  15,710 stored vs. 41,305 expected, Prosper 15,162 vs. 39,864, VGE/MRD
+  7,562 vs. 19,883 each. Every G23 margin percentage published in
+  `commission-engine-catalogue.yaml`, `custom-request-catalog.yaml`,
+  `on-demand-work.yaml`, `growth-automation-catalogue.yaml`, and
+  `custom-surface-maintenance.yaml` was also verified at cost=150 (named
+  explicitly in this file's own Phase 12/13 entries above) and is
+  unverified at the new floor until re-run. **Not recomputed in this
+  pass** — see `HANDOVER.md` decision #13: at least one downstream
+  figure (Prosper's Rev3 offer, AED 4,560/mo) is already in the client's
+  hands, so re-margining across the corpus is a sequencing/priority
+  decision for the owner, not something to run silently without sign-off.
+
+## pricing v4.0 — product-plus-services model, billing floor, proposal template — 2026-08-16
+
+Seven-part pass, HANDOVER.md decisions #14-#19, one commit per part
+(`b8d31a7b` Part 1, `89c21f28` Part 2, `483aaef1` Part 3, `610149c3`
+Part 4, `c8de5a44` Part 5, `9d0d7d94` Part 6). Full detail lives in the
+decision entries; this is the consolidated summary.
+
+- **Part 1 — commission-adjusted billing floor.** `cost_floor_per_hour`
+  (394.38 AED/hr, pricing v3.3) only recovers operating cost; commission
+  (14%) is paid out of revenue on top of it, so a deal billed at that
+  floor never actually clears it. Added
+  `pricing_engine.py: billing_floor_aed_hr()` = cost_floor / (1 -
+  commission_total) = **458.58 AED/hr** — the real BLOCK gate; the band
+  between the two floors is WARN. Real consequence found and logged, not
+  smoothed over: `startup_boutique` (280) and `smb` (395) — two of three
+  pricing segments — now fail against the new floor, along with three
+  rate-card roles. Open decision for Commercial Desk, not resolved by
+  this pass.
+- **Part 2 — `template-catalogue.yaml` (new file), pricing v4 model.**
+  Platform fee AED 14,000 (fixed, structurally hour-independent); 5
+  fixed-price modules (16,000 total); migration bands (2,500/5,000/8,000
+  to 1k/5k/20k records, UNPRICED above 20k); enhancement 550/hr for
+  marginal hours only. Reference quote 35,000, discount floor 31,500 with
+  a real gate function. Two honesty-rule disclosures recorded in the file
+  itself: the brief's "20% cushion" claim for the enhancement rate
+  actually measures against the wrong floor (real cushion ~3%, not
+  ~20%); two specific catalogue rows the brief asked to delete never
+  existed under those names/prices — nothing deleted, a new
+  `excluded_capabilities` register built instead, cited against the
+  demo_presentation estate inventory.
+- **Part 3 — internal contingency schedule.** `policy.yaml:
+  contingency_schedule` (git-tracked 15%, git-untracked 35%, no-persisted-
+  output-evidence 50%, migration 50% flat; max taken when several apply).
+  INTERNAL ONLY, never client-facing.
+- **Part 4 — acceptance tests T13/T16/T20-T28, all new.** Grepped the
+  full suite first: T13 and T16 did not exist despite the brief
+  describing them as standing/pre-existing. Built fresh, 30 checks, all
+  passing. Full-suite result: 16 failures, unchanged from the pre-Part-1
+  baseline (9 T12 + 7 T9/T10) — not the "8" the brief stated; reported as
+  verified, not reconciled to match.
+- **Part 5 — `render_proposal_v4.py` (new), design spec from real
+  Prosper artifacts.** Colour/type from `06-brand/tokens/color.yaml` +
+  `render_brand.py`'s actual-precedent typography; exclusions table
+  extends Prosper's real 3-column shape; signatory fields sourced from
+  `06-brand/entity/legal-identity.yaml`. Bug found and fixed before it
+  shipped further: `discount_gate_verdict()` compared every quote against
+  the fixed reference-quote floor regardless of scope, incorrectly
+  flagging a genuinely smaller deal as needing Commercial Desk approval.
+  Staged (not installed) `sgc_quotation_proposal/` QWeb templates,
+  structural mirror of the standalone generator, one disclosed content
+  divergence (exclusion-name formatting) not yet closed.
+- **Part 6 — production test, no Odoo/DB.** Three fixtures rendered
+  end-to-end via `wkhtmltopdf` on `vps-root` (binary invocation only):
+  F1 35,000, F2 19,500, F3 UNPRICED — all correct, all 10 pages. The
+  10-page result was not trusted on its own (the CSS forces one
+  page-break per section by construction); built
+  `verify_pdf_page_limit.py` and proved it catches a real overflow with
+  a deliberately bloated adversarial fixture (22 pages, correctly
+  FAILed) before trusting the real fixtures' PASS. Real limitation
+  disclosed: F1's floor-guard check only has hour-estimate data for 1 of
+  5 modules, so its "PASS" is not a genuine whole-deal effort check.
+  Full report: `00-intake/proposal-engine-v4-test-2026-08-16.md`.
+- **Part 7 — governance.** `known-defects.md` #24: the 5% commission
+  retention base (5% of commission vs. 5% of contract value, ~7x
+  difference) is owner-stated but the BASE was never stated — flagged,
+  not picked silently. `payment-plans.yaml`: the brief asked to "preserve
+  the anti-tautology clause and the rounding-source rule" in that file —
+  neither exists anywhere in `payment-plans.yaml` or this repo (checked
+  before writing this entry); nothing was regressed because nothing
+  existed to regress. HANDOVER.md decisions #14-#19 already carry the
+  two-floor model, platform-fee-as-product framing, the five named
+  exclusions, the contingency schedule, and the discount-floor gate —
+  this entry does not duplicate them.
