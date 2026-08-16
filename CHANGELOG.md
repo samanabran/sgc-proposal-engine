@@ -2542,9 +2542,12 @@ decision entries; this is the consolidated summary.
   disclosed: F1's floor-guard check only has hour-estimate data for 1 of
   5 modules, so its "PASS" is not a genuine whole-deal effort check.
   Full report: `00-intake/proposal-engine-v4-test-2026-08-16.md`.
-- **Part 7 — governance.** `known-defects.md` #24: the 5% commission
-  retention base (5% of commission vs. 5% of contract value, ~7x
-  difference) is owner-stated but the BASE was never stated — flagged,
+- **Part 7 — governance.** `known-defects.md` #25 (originally numbered
+  #24, corrected 2026-08-16 after a numbering collision was found —
+  `HANDOVER.md`'s 2026-08-08 entry already reserved #24 for a real,
+  drafted-but-unwritten defect; see known-defects.md #25's own note):
+  the 5% commission retention base (5% of commission vs. 5% of contract
+  value, ~7x difference) is owner-stated but the BASE was never stated — flagged,
   not picked silently. `payment-plans.yaml`: the brief asked to "preserve
   the anti-tautology clause and the rounding-source rule" in that file —
   neither exists anywhere in `payment-plans.yaml` or this repo (checked

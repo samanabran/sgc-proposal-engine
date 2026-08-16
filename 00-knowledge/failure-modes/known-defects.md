@@ -172,7 +172,19 @@ every one of these.
     run). A future tightening of the phrase-matching regex cannot
     reintroduce this specific failure without the self-test catching it
     immediately.
-24. **Commission retention base — STILL UNRESOLVED, flagged not guessed.**
+25. **Commission retention base — STILL UNRESOLVED, flagged not guessed.**
+    (Numbered 25, not 24 — corrected 2026-08-16 after a numbering
+    collision was flagged: `HANDOVER.md`, 2026-08-08 entry, already
+    reserves "candidate defect #24" for a real, drafted-but-not-yet-
+    promoted defect — `validate.py`'s `gather_draft_files()` never scans
+    `04-draft/`/`.html`/`.pdf`, full text in
+    `02-clients/KP-kallat-properties/manifest.yaml`'s 2026-08-08 entry,
+    left unwritten here at the time because writing to this file was
+    Commercial-Desk-only under `AGENTS.md`. This entry took that number
+    without checking for it first; caught, not left standing, same
+    discipline as the R11/R12 collision this repo already tracks — the
+    difference being R11/R12 was explicitly left untouched by direct
+    instruction, and this one was fixable, so it was fixed.)
     `policy.yaml: internal_cost_basis.commission.retention_pct` is 5%, and
     `commission_release_aed()` (pricing v4 Part 4, `05-ops/pricing_engine.py`)
     correctly releases commission pro-rata against cash collected — but
