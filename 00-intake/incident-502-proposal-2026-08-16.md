@@ -377,6 +377,72 @@ for spikes. Bump to 3 if/when concurrency proves it.
    docker network, `pg_hba.conf` subnet restriction. NOT done here
    and not achievable without DB writes — explicitly out of scope.
 
+## 10. Pre-restart checklist: read the limits that step 1 will activate
+
+With `workers = 0` the Odoo-side limits are inert. Step 1 raises
+workers, which activates them. Read what is currently configured
+**before** the restart, not after the first worker dies underneath a
+running PDF.
+
+Captured 2026-08-16 via `docker exec odoo19-sgc-staging cat /etc/odoo/odoo.conf`:
+
+- `; limit_memory_hard = 2684354560` — **2.5 GiB**, currently commented
+  (default).
+- `; limit_memory_soft = 2147483648` — **2.0 GiB**, currently commented
+  (default).
+- `; limit_time_cpu = 60` — 60s per request, currently commented.
+- `; limit_time_real = 120` — 120s wall, currently commented.
+- `; limit_request = 8192` — per-worker request slot, currently commented.
+- `max_cron_threads = 0` — no cron threads, so scheduled actions will
+  not run. Likely intentional for staging; flagging anyway.
+
+**Specific risk under step 1 as drafted:** 2.0 GiB soft / 2.5 GiB
+hard is **tight** for a worker that's about to render a wkhtmltopdf
+PDF. `wkhtmltopdf --version` is present (verified in §3.3) and patches
+its own Qt, but a single PDF render on a non-trivial proposal can
+spend well over 2 GiB transiently and get the worker killed. The fix
+is to raise the limits before step 1, not to discover them after the
+first PDF render trips them.
+
+**Recommendation for the same ticket:**
+
+- Edit `/etc/odoo/odoo.conf` to set `workers = 2` AND raise the
+  following commented lines to active values:
+  - `limit_memory_hard = 5368709120` (5 GiB) — max-headroom for a
+    PDF spike without OOM-killing the worker.
+  - `limit_memory_soft = 4294967296` (4 GiB) — soft-kill threshold.
+  - `limit_time_cpu = 120` — doubled from default, lets a heavy
+    render finish.
+  - `limit_time_real = 240` — doubled from default, sanity ceiling.
+  - `limit_request = 8192` — keep as default.
+- Restart container, verify entrypoint still has no `-u`/`-i`
+  (verified in §3.2).
+- Combine with `RestartPolicy: always` (or `unless-stopped`) so the
+  single-process failure mode this incident exposed is mitigated
+  without a separate manual restart. Docker's `Policy.Name = "no"`
+  as configured today means any unhandled crash leaves staging down
+  until someone notices and runs `docker start`. The memory numbers
+  leave room for this; combined with the modest worker count
+  recommended, no additional box budget is consumed.
+
+The two changes (workers + limits + restart policy) belong in the
+same edit because they touch the same file and the same restart, and
+because the workers change is unsafe in isolation given the current
+limit values. Not done here — the file is on the staging container
+volume, not in the repo, and the action is ops's under the freeze.
+
+## 11. Out-of-scope findings noted in passing
+
+- `admin_passwd` is set in this same `odoo.conf` (plaintext, in the
+  container volume). The file is not in the repo, so the password
+  isn't being committed, but it sits on the staging volume and is
+  readable by anyone with file access to the container. Worth noting
+  to ops but not in scope to fix here — falls under the broader
+  secret-management review, not this incident.
+- `proxy_mode = True` and `list_db = False` are set. Both are
+  reasonable for a reverse-proxied staging instance; flagging only
+  to confirm neither is a workaround for the current incident.
+
 ## 9. Reproducibility / commit metadata
 
 This document, plus no code changes, constitutes the only modification
