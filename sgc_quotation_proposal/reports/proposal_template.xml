@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Structural mirror of 05-ops/render_proposal_v4.py — same 10 sections,
+  same field names, same content rules (no floor/commission/hours/
+  contingency/capacity figures ever bound into this template; exclusions
+  always paired with an alternative; platform fee always a flat line,
+  never hours x rate). Context variable `doc` is expected to carry the
+  exact same keys build_quote()/render_client_html() use in the
+  standalone generator: platform_fee_aed, modules_total_aed, module_names,
+  migration_band, migration_amount_aed, migration_unpriced,
+  quoted_total_aed, enhancement_rate_aed_hr, excluded_capabilities,
+  client_name, reference, legal (dict from legal-identity.yaml).
+
+  NOT INSTALLED — staged only. This file has never been rendered by
+  Odoo's QWeb engine; content/structure parity with the standalone
+  generator is by construction (same section list, same field names,
+  authored side by side), not verified by an actual render pass.
+-->
+<odoo>
+  <template id="proposal_document" name="SGC Quotation Proposal v4">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="doc">
+        <div class="page-section" style="page-break-after: always;">
+          <!-- 1. Cover -->
+          <div class="masthead">
+            <div class="prepared-for">Prepared for <t t-esc="doc.client_name"/></div>
+            <div class="reference">Reference: <t t-esc="doc.reference"/></div>
+          </div>
+          <h1 class="cover-title"><t t-esc="doc.legal.trading_as"/></h1>
+          <p style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);">Real Estate Growth Platform — Proposal</p>
+        </div>
+
+        <!-- 2. Understanding of requirement -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Understanding Your Requirement</h1>
+          <p>This proposal is scoped to the modules selected, priced on a fixed
+          product-plus-services basis rather than estimated build hours.</p>
+        </div>
+
+        <!-- 3. What the system does -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">What This Delivers</h1>
+          <table>
+            <tr><th>Capability</th><th>Included</th></tr>
+            <tr><td>Platform</td><td>AED <t t-esc="doc.platform_fee_aed"/></td></tr>
+            <t t-foreach="doc.module_names" t-as="m">
+              <tr><td><t t-esc="m"/></td><td>—</td></tr>
+            </t>
+          </table>
+          <p class="caption">Odoo 19 Community — version lock. A different Odoo version is a separate engagement.</p>
+        </div>
+
+        <!-- 4. Scope + acceptance -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Scope &amp; Acceptance</h1>
+          <table>
+            <tr><th>Requirement</th><th>Acceptance Criterion</th></tr>
+            <tr><td>Lead capture</td><td>Inbound lead creates a CRM record within the platform, visible to an assigned user.</td></tr>
+            <tr><td>Property/listing management</td><td>A property record can be created, listed, and its status updated by an authorised user.</td></tr>
+            <tr><td>Commission &amp; deals</td><td>A closed deal computes commission per the configured scheme and is visible on the deal record.</td></tr>
+            <tr><td>Multi-agent access control</td><td>Agent A cannot view Agent B's commission or deal records; record-rule enforced, not UI-hidden only.</td></tr>
+            <tr><td>Reporting &amp; dashboards</td><td>Configured reports return live data from the modules above.</td></tr>
+          </table>
+        </div>
+
+        <!-- 5. Exclusions + alternatives -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">What Is Not Included — Named Directly</h1>
+          <p>Not "coming soon," not bundled under a different name — genuinely
+          not available to quote as a fixed line today. Each has a stated
+          alternative.</p>
+          <table>
+            <tr><th>Capability</th><th>Status</th><th>Alternative Offered</th></tr>
+            <t t-foreach="doc.excluded_capabilities" t-as="excl">
+              <tr>
+                <td><t t-esc="excl['name']"/></td>
+                <td>Not included</td>
+                <td><t t-esc="excl['alternative_offered']"/></td>
+              </tr>
+            </t>
+          </table>
+        </div>
+
+        <!-- 6. Commercial summary -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Commercial Summary</h1>
+          <table>
+            <tr><td>Platform fee (fixed)</td><td>AED <t t-esc="doc.platform_fee_aed"/></td></tr>
+            <tr><td>Modules</td><td>AED <t t-esc="doc.modules_total_aed"/></td></tr>
+            <t t-if="not doc.migration_unpriced">
+              <tr><td>Migration</td><td>AED <t t-esc="doc.migration_amount_aed"/></td></tr>
+              <tr><td><strong>Total</strong></td><td><strong>AED <t t-esc="doc.quoted_total_aed"/></strong></td></tr>
+            </t>
+            <t t-if="doc.migration_unpriced">
+              <tr><td>Migration</td><td class="open-flag">UNPRICED — routed to Commercial Desk</td></tr>
+              <tr><td><strong>Total</strong></td><td class="open-flag"><strong>[OPEN — migration UNPRICED]</strong></td></tr>
+            </t>
+          </table>
+          <p class="caption">All figures AED, exclusive of VAT (5% standard rate where applicable).</p>
+          <p class="caption">Enhancement hours: AED <t t-esc="doc.enhancement_rate_aed_hr"/>/hr, quoted per request — not a basis for pricing a whole deal.</p>
+          <p class="caption">Quotation validity: [OPEN — no policy.yaml value exists for a standard validity period; see internal worksheet.]</p>
+        </div>
+
+        <!-- 7. Payment terms -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Payment Terms</h1>
+          <p>Platform fee and modules due at kickoff. Migration (where priced)
+          due on data-quality sign-off, before configuration/migration
+          begins. Enhancement hours invoiced per completed request.</p>
+        </div>
+
+        <!-- 8. Timeline -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Timeline</h1>
+          <table>
+            <tr><th>Week</th><th>Milestone</th></tr>
+            <tr><td>1</td><td>Kickoff</td></tr>
+            <tr><td>1–2</td><td>Discovery + data-quality sign-off</td></tr>
+            <tr><td>3–4</td><td>Configuration + migration</td></tr>
+            <tr><td>5</td><td>Training</td></tr>
+            <tr><td>5–6</td><td>Go-live</td></tr>
+            <tr><td>8</td><td>Hypercare</td></tr>
+          </table>
+        </div>
+
+        <!-- 9. Client dependencies + assumptions -->
+        <div class="page-section" style="page-break-after: always;">
+          <h1 class="section">Client Dependencies &amp; Assumptions</h1>
+          <ul>
+            <li>[PRV] Source data for migration is clean and exported in a supported format by the data-quality sign-off date.</li>
+            <li>[PRV] A named client contact is available for discovery and UAT.</li>
+            <li>[PRV] Client holds any third-party accounts required for integrations in scope.</li>
+          </ul>
+        </div>
+
+        <!-- 10. Change control + acceptance/signature -->
+        <div class="page-section">
+          <h1 class="section">Change Control &amp; Acceptance</h1>
+          <p>Any change to scope after acceptance is a standalone change-control
+          instrument — a new signed line item, not a verbal variation to this
+          document.</p>
+          <div class="sig-block">
+            <p><strong><t t-esc="doc.legal.trading_as"/></strong> (<t t-esc="doc.legal.legal_name"/>)</p>
+            <p><t t-esc="doc.legal.contact.actual_signer"/> — acting on behalf of <t t-esc="doc.legal.contact.named_approver"/></p>
+            <div class="sig-line">Signature &amp; date</div>
+          </div>
+          <div class="sig-block">
+            <p><strong><t t-esc="doc.client_name"/></strong></p>
+            <div class="sig-line">Signature &amp; date</div>
+          </div>
+          <p class="footnote"><t t-esc="doc.legal.registered_address"/></p>
+        </div>
+      </t>
+    </t>
+  </template>
+</odoo>

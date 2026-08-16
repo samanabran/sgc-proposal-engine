@@ -441,12 +441,31 @@ def reference_quote_total_aed(catalogue=None):
             + cat["migration_bands"]["band_2"]["amount_aed"])
 
 
-def discount_gate_verdict(quoted_total_aed, catalogue=None):
-    """COMMERCIAL_DESK_APPROVAL_REQUIRED below the discount floor (90% of
-    the computed reference quote), OK at or above it. A real gate, called
-    by the render path -- not a comment SDRs are trusted to read."""
+def discount_gate_verdict(quoted_total_aed, catalogue=None, undiscounted_total_aed=None):
+    """COMMERCIAL_DESK_APPROVAL_REQUIRED when quoted_total_aed is a
+    DISCOUNT below 90% of what the SAME scope would otherwise cost
+    (undiscounted_total_aed), OK otherwise. A real gate, called by the
+    render path -- not a comment SDRs are trusted to read.
+
+    BUG FOUND AND FIXED while wiring the Part 5 render path (2026-08-16):
+    the first version of this function compared every quote against the
+    fixed reference-quote floor (31,500, 90% of the 35,000 5-module
+    reference deal) regardless of what was actually being quoted. That is
+    correct for T23's own case (discounting the reference quote itself,
+    35,000 -> 30,000) but wrong in general: a genuinely SMALLER-SCOPE
+    quote (e.g. platform + one module only, F2's fixture, 19,500) is not
+    a discount at all, and was incorrectly triggering
+    COMMERCIAL_DESK_APPROVAL_REQUIRED just for being a smaller number
+    than the unrelated 5-module reference floor. Fixed by comparing
+    quoted_total_aed against 90% of ITS OWN scope's undiscounted total,
+    not a fixed constant. undiscounted_total_aed defaults to
+    reference_quote_total_aed(cat) only to preserve T23's exact existing
+    call signature (discount_gate_verdict(30000, cat)) -- every other
+    caller (the render path) must pass its own fixture's actual
+    undiscounted total explicitly."""
     cat = catalogue or load_template_catalogue()
-    floor = round(reference_quote_total_aed(cat) * 0.90)
+    basis = undiscounted_total_aed if undiscounted_total_aed is not None else reference_quote_total_aed(cat)
+    floor = round(basis * 0.90)
     if quoted_total_aed < floor:
         return "COMMERCIAL_DESK_APPROVAL_REQUIRED"
     return "OK"
