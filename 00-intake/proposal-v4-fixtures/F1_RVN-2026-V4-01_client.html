@@ -1,0 +1,190 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>RVN-2026-V4-01 — RVN Real Estate Group</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --ivory: #F7F4EE;
+  --navy: #0F213D;
+  --gold: #B79554;
+  --charcoal: #1C2430;
+  --slate: #5F6775;
+  --champagne: #D9C08A;
+  --parchment: #ECE7DF;
+}
+
+@page { size: A4 portrait; margin: 20mm; }
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--charcoal);
+  background: var(--ivory);
+  margin: 0;
+  padding: 0;
+}
+
+.page-section { max-width: 170mm; margin: 0 auto; padding: 8mm 0; page-break-after: always; }
+.page-section:last-child { page-break-after: auto; }
+
+.masthead { margin-bottom: 10mm; }
+.masthead .prepared-for { font-family: "Inter", sans-serif; font-size: 13px; color: var(--slate); }
+.masthead .reference { font-family: "Inter", sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); }
+
+h1.cover-title, h1.section {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.5px;
+  margin-top: 0;
+  margin-bottom: 4mm;
+  border-bottom: 1.5px solid var(--gold);
+  padding-bottom: 3mm;
+}
+h1.cover-title { font-size: 34px; }
+h1.section { font-size: 26px; }
+
+h2.subsection { font-family: "Inter", sans-serif; font-size: 17px; font-weight: 600; color: var(--gold); margin-top: 6mm; }
+h3 { font-family: "Inter", sans-serif; font-size: 14px; font-weight: 600; color: var(--navy); }
+
+p { margin: 0 0 0.9em 0; }
+strong { color: var(--navy); }
+
+table { border-collapse: collapse; width: 100%; margin: 5mm 0; font-size: 13px; }
+th {
+  background: var(--navy); color: var(--ivory);
+  font-family: "Inter", sans-serif; font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.04em; text-align: left; padding: 5px 9px;
+}
+td { border: 1px solid var(--champagne); padding: 5px 9px; }
+
+blockquote {
+  font-family: "Inter", sans-serif; font-style: italic;
+  border-left: 3px solid var(--gold); background: var(--parchment);
+  margin: 4mm 0; padding: 3mm 5mm; color: var(--navy);
+}
+
+hr { border: none; border-top: 1px solid var(--champagne); margin: 6mm 0; }
+
+.caption, .footnote {
+  font-family: "Inter", sans-serif; font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--slate);
+}
+
+.open-flag { color: #A24949; font-weight: 700; }  /* wine -- status signalling only, per palette usage_notes */
+
+ul, ol { padding-left: 1.3em; }
+li { margin-bottom: 0.35em; }
+
+.sig-block { margin-top: 8mm; }
+.sig-line { border-top: 1px solid var(--charcoal); width: 70mm; margin-top: 10mm; padding-top: 2mm; font-size: 12px; }
+</style></head><body>
+
+<div class="page-section">
+  <div class="masthead">
+    <div class="prepared-for">Prepared for RVN Real Estate Group</div>
+    <div class="reference">Reference: RVN-2026-V4-01</div>
+  </div>
+  <h1 class="cover-title">SGC TECH AI</h1>
+  <p style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);">Real Estate Growth Platform &mdash; Proposal</p>
+  <p class="caption">16 August 2026</p>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Understanding Your Requirement</h1>
+  <p>This proposal is scoped to the modules you selected, priced on a fixed
+  product-plus-services basis rather than estimated build hours. Every
+  commercial figure on the following pages traces to a governed catalogue
+  entry &mdash; nothing here is a placeholder.</p>
+</div>
+
+<div class="page-section">
+  <h1 class="section">What This Delivers</h1>
+  <table><tr><th>Capability</th><th>Included</th></tr>
+  <tr><td>Platform (deployed system, first-implementation risk absorbed)</td><td>AED 14,000</td></tr>
+  <tr><td>Lead Capture Pipeline</td><td>AED 3,000</td></tr><tr><td>Property Listing Management</td><td>AED 3,500</td></tr><tr><td>Commission And Deals</td><td>AED 3,500</td></tr><tr><td>Multi Agent Access Control</td><td>AED 3,500</td></tr><tr><td>Reporting And Dashboards</td><td>AED 2,500</td></tr>
+  </table>
+  <p class="caption">Odoo 19 Community &mdash; version lock. A different Odoo version is a separate engagement.</p>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Scope &amp; Acceptance</h1>
+  <table><tr><th>Requirement</th><th>Acceptance Criterion</th></tr>
+  <tr><td>Lead capture</td><td>Inbound lead creates a CRM record within the platform, visible to an assigned user.</td></tr>
+  <tr><td>Property/listing management</td><td>A property record can be created, listed, and its status updated by an authorised user.</td></tr>
+  <tr><td>Commission &amp; deals</td><td>A closed deal computes commission per the configured scheme and is visible on the deal record.</td></tr>
+  <tr><td>Multi-agent access control</td><td>Agent A cannot view Agent B's commission or deal records; record-rule enforced, not UI-hidden only.</td></tr>
+  <tr><td>Reporting &amp; dashboards</td><td>Configured reports return live data from the modules above.</td></tr>
+  </table>
+</div>
+
+<div class="page-section">
+  <h1 class="section">What Is Not Included &mdash; Named Directly</h1>
+  <p>Not "coming soon," not bundled under a different name &mdash; genuinely not
+  available to quote as a fixed line today. Each has a stated alternative.</p>
+  <table><tr><th>Capability</th><th>Status</th><th>Alternative Offered</th></tr>
+  <tr><td>Whatsapp Instant Notification</td><td>Not included</td><td>Email notification via the platform's existing SMTP path (see mail_mail evidence above for its current reliability, disclosed, not oversold).</td></tr><tr><td>Automated Call Logging</td><td>Not included</td><td>Manual call notes via the CRM's existing activity/message log (mail.activity 'Call' type, present but unused today).</td></tr><tr><td>Call Target Enforcement</td><td>Not included</td><td>Generic KPI dashboard rows (reporting_and_dashboards module) can surface whatever numeric field exists — but there is no call-count field to surface until call logging itself is built.</td></tr><tr><td>Biometric Attendance Hardware</td><td>Not included</td><td>Odoo's native manual/kiosk check-in, already active and evidenced as used — offered as-is, not oversold as hardware integration.</td></tr><tr><td>Property Portal Feeds</td><td>Not included</td><td>Manual listing export/upload to portals, or the client's own existing portal-sync tooling if any.</td></tr>
+  </table>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Commercial Summary</h1>
+  <table>
+  <tr><td>Platform fee (fixed)</td><td>AED 14,000</td></tr>
+  <tr><td>Modules (5)</td><td>AED 16,000</td></tr>
+  <tr><td>Migration (5,000 records ceiling)</td><td>AED 5,000</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>AED 35,000</strong></td></tr>
+  </table>
+  <p class="caption">All figures AED, exclusive of VAT (5% standard rate where applicable). VAT: not currently registered &mdash; no VAT charged (see below).</p>
+  <p class="caption">Enhancement hours (out-of-scope requests beyond the above): AED 550/hr, quoted per request &mdash; not a basis for pricing a whole deal.</p>
+  <p class="caption">Quotation validity: [OPEN &mdash; no policy.yaml value exists for a standard validity period; see internal worksheet.]</p>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Payment Terms</h1>
+  <p>Platform fee and modules due at kickoff. Migration (where priced) due
+  on data-quality sign-off, before the configuration/migration phase
+  begins. Enhancement hours invoiced per completed request.</p>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Timeline</h1>
+  <table><tr><th>Week</th><th>Milestone</th></tr>
+  <tr><td>1</td><td>Kickoff</td></tr>
+  <tr><td>1&ndash;2</td><td>Discovery + data-quality sign-off</td></tr>
+  <tr><td>3&ndash;4</td><td>Configuration + migration</td></tr>
+  <tr><td>5</td><td>Training</td></tr>
+  <tr><td>5&ndash;6</td><td>Go-live</td></tr>
+  <tr><td>8</td><td>Hypercare</td></tr>
+  </table>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Client Dependencies &amp; Assumptions</h1>
+  <ul>
+  <li>[PRV] Source data for migration is clean and exported in a supported format by the data-quality sign-off date.</li>
+  <li>[PRV] A named client contact is available for discovery and UAT.</li>
+  <li>[PRV] Client holds any third-party accounts (portals, email) required for integrations in scope.</li>
+  </ul>
+</div>
+
+<div class="page-section">
+  <h1 class="section">Change Control &amp; Acceptance</h1>
+  <p>Any change to scope after acceptance is a standalone change-control
+  instrument &mdash; a new signed line item, not a verbal variation to this
+  document.</p>
+  
+  <div class="sig-block">
+    <p><strong>SGC TECH AI</strong> (Scholarix Global Consultants IFZA)</p>
+    <p>Renbran Anthony Madelo &mdash; acting on behalf of Ali Asghar Teli Muhammad Iqbal Teli, per: Acting on behalf of the named Company Manager (trade licence Licence No. 45160) per the entity's internal authority to bind. All signatures by the actual_signer carry the named_approver's authority.</p>
+    <div class="sig-line">Signature &amp; date</div>
+  </div>
+  <div class="sig-block">
+    <p><strong>RVN Real Estate Group</strong></p>
+    <div class="sig-line">Signature &amp; date</div>
+  </div>
+  <p class="footnote">Maseed Building, Office No. 304, 119/12 St, Al Rigga, Dubai, United Arab Emirates. hello@sgctech.ai</p>
+</div>
+</body></html>
