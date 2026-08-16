@@ -57,6 +57,18 @@ deliberately to the real, dedicated staging host that results from it.
 ALLOWED_DB_NAME = "sgc_staging"
 ALLOWED_DB_HOST = None  # deliberately unset -- see module docstring
 
+# HARD DENYLIST -- checked before anything else, unconditionally, and NOT
+# overridable by setting ALLOWED_DB_HOST to one of these values. These are
+# the exact identifiers the 2026-08-16 isolation pass confirmed point at
+# production: the env var value staging's own Odoo config actually uses
+# (postgres-prod), the production Postgres container's real name
+# (odoo-prod-db), and the IP that name resolves to on the shared docker
+# network (172.19.0.2). The most likely mistake once this tooling is
+# unfrozen is someone pasting in the value they see in the staging env var
+# as if it were the fix -- that is precisely the one input this guard must
+# refuse outright, deliberately or not.
+DENIED_HOSTS = frozenset({"postgres-prod", "odoo-prod-db", "172.19.0.2"})
+
 
 class DatabaseNameRejected(Exception):
     """Raised by enforce_staging_db_pair on any non-exact-match or missing
@@ -102,6 +114,19 @@ def enforce_staging_db_pair(host, db_name):
     """
     _require_nonempty_str(db_name, "db_name", ALLOWED_DB_NAME)
     _require_nonempty_str(host, "host", ALLOWED_DB_HOST)
+
+    if host in DENIED_HOSTS:
+        raise DatabaseNameRejected(
+            f"ABORT: host {host!r} is on the hard denylist {sorted(DENIED_HOSTS)} "
+            f"and is refused unconditionally -- this is not affected by "
+            f"ALLOWED_DB_HOST and cannot be bypassed by setting ALLOWED_DB_HOST "
+            f"to this value. {host!r} is confirmed (2026-08-16 isolation pass) "
+            f"to be, or resolve to, production's Postgres server. If staging "
+            f"gets its own dedicated host later, that new host will not be on "
+            f"this list -- this denylist exists specifically to catch the "
+            f"known-dangerous values, not as a general substitute for the "
+            f"allowlist below."
+        )
 
     if ALLOWED_DB_HOST is None:
         raise DatabaseNameRejected(

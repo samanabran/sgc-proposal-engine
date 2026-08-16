@@ -505,3 +505,82 @@ T19 in `05-ops/test_pricing_engine.py` was updated to 9 checks (7 required +
 2 bonus), including the specific case this fix targets: `db_name="sgc_staging"`
 on `host="postgres-prod"` (the real scenario found in §8) is REJECTED, not
 passed. All pass; no regressions beyond the pre-existing baseline.
+
+## 11. Addendum: hard denylist, ops action scoping, backup/log checks (2026-08-16, second follow-up)
+
+**Guard hardening.** `db_guard.py` now carries a `DENIED_HOSTS` frozenset
+(`postgres-prod`, `odoo-prod-db`, `172.19.0.2`) checked before the allowlist
+logic, unconditionally, and NOT overridable by setting `ALLOWED_DB_HOST` to
+one of these values. Rationale: the likely mistake once this tooling is
+unfrozen is someone pasting the value they see in staging's own env var into
+`ALLOWED_DB_HOST` as if it were the fix — that is precisely the one input
+this guard must refuse outright, deliberately or not. T19 extended: for each
+denied host, `ALLOWED_DB_HOST` is deliberately set to that same value and
+`enforce_staging_db_pair` is confirmed to still reject it. All pass.
+
+**Ops ticket scoping note (action item, not performed here).** "Revoke the
+staging role's grants" must be written in any ticket as scoped to specific
+grants held by that role, NOT a blanket revoke on the `postgres-prod`
+instance — `sgc_staging` is confirmed (§8) to be hosted on that same
+instance, so a blanket revoke would take staging down along with cutting the
+cross-database exposure. Whoever files the remediation ticket should state
+this explicitly rather than relying on "revoke the staging role's grants"
+being read narrowly by default.
+
+**Shared-instance resource risk (beyond access control).** `sgc_staging` and
+production databases share one Postgres instance: same connection pool,
+memory, disk, WAL, and backup process. Ordinary staging load can degrade
+production with no access-control violation involved. This is the argument
+for treating the structural fix (separate instance) as dated work rather
+than indefinite "eventually" — access-control fixes (grant revocation,
+network detachment) do not address this resource-sharing exposure at all.
+
+**Backup/restore runbook check (read-only).** Production's installed
+`auto_database_backup` Odoo module targets `odoo19-sgc` (production) only —
+confirmed via `/root/scripts/backup_sgc_staging.sh`'s own header comment,
+which states that module "targets production odoo19-sgc, not staging, and
+its only active job is failing on an expired OAuth token anyway." A
+SEPARATE, dedicated script exists: `/root/scripts/backup_sgc_staging.sh`,
+run daily at 03:00 via root's crontab (`0 3 * * * /root/scripts/backup_sgc_staging.sh`),
+which runs:
+
+```
+docker exec odoo-prod-db pg_dump -U odoo -d sgc_staging | gzip > "$FILE"
+```
+
+This is independent, direct confirmation of §8's finding — the backup
+script itself executes against the `odoo-prod-db` container, naming
+`sgc_staging` explicitly. Scope is a targeted single-database dump, not an
+instance-wide sweep, so it does not clobber or intermix with production's
+own backup set. Output written to `/root/db-backups/sgc_staging/`, 14-day
+retention, confirmed present with backups dated 2026-08-14 and 2026-08-15.
+Script itself dated 2026-08-14 (per `stat`); staging container created
+2026-07-31; production Postgres container (`odoo-prod-db`) created
+2026-06-21 — read-only, no queries beyond `stat`/`docker inspect`, no writes.
+
+**Log dating check (read-only, `docker logs`, no queries).** Grepped
+`odoo-prod-db`'s container logs (`docker logs odoo-prod-db --since
+2026-06-21T00:00:00`, the container's creation date) for `sgc_staging`.
+Log retention did not reach back to container creation — only 15 matching
+lines total were available, dominated by routine autovacuum entries on
+`sgc_staging.public.*` tables. One notable non-routine entry, dated
+**2026-08-15 07:01:29 UTC**:
+
+```
+STATEMENT:  DROP DATABASE sgc_staging_restore_test;
+```
+
+This shows a restore-test database (`sgc_staging_restore_test`) was created
+and dropped on this same shared production Postgres instance on 2026-08-15
+— an existing operational fact discovered by this read-only check, not an
+action taken by this pass. Whether this restore test was routine, planned,
+or itself worth investigating is an ops decision, not established further
+here (no additional log queries run beyond the single grep). Log retention
+is too short to establish how long `HOST=postgres-prod` has actually been
+live — this remains **NOT ESTABLISHED**.
+
+**Not established, listed plainly:** exact start date of `HOST=postgres-prod`
+(log retention insufficient); whether the 2026-08-15 restore-test operation
+was planned/routine or itself anomalous; auth-layer outcome (still blocked
+by this session's own tool-safety layer, not worked around, per the standing
+decision in §7).

@@ -1518,6 +1518,27 @@ def t19_staging_db_name_guard():
         check("T19: with no verified-safe host configured, even the correct db_name "
               "on the real (production) host is REJECTED by default", True)
 
+    # T19 hard denylist: the denylist must reject a denied host even when
+    # ALLOWED_DB_HOST is deliberately (mis)configured to that same denied
+    # value -- this is the exact failure mode flagged as the likely mistake
+    # once this tooling is unfrozen: someone pasting the value they see in
+    # the staging env var into ALLOWED_DB_HOST as if it were the fix.
+    check("T19: postgres-prod, odoo-prod-db, 172.19.0.2 are all on DENIED_HOSTS",
+          db_guard.DENIED_HOSTS == frozenset({"postgres-prod", "odoo-prod-db", "172.19.0.2"}))
+    _real_allowed_host = db_guard.ALLOWED_DB_HOST
+    try:
+        for denied_host in sorted(db_guard.DENIED_HOSTS):
+            db_guard.ALLOWED_DB_HOST = denied_host  # simulate the mistake
+            try:
+                db_guard.enforce_staging_db_pair(denied_host, "sgc_staging")
+                check(f"T19: denylist rejects {denied_host!r} even when ALLOWED_DB_HOST "
+                      f"is (mis)configured to that exact same value", False)
+            except db_guard.DatabaseNameRejected:
+                check(f"T19: denylist rejects {denied_host!r} even when ALLOWED_DB_HOST "
+                      f"is (mis)configured to that exact same value", True)
+    finally:
+        db_guard.ALLOWED_DB_HOST = _real_allowed_host
+
 
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
