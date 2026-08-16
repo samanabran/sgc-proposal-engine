@@ -441,6 +441,18 @@ The bundled edit (workers + restart policy) is safe and conservative.
 Not done here — the file is on the staging container volume, not in
 the repo, and the action is ops's under the freeze.
 
+**Why `max_cron_threads = 0` should stay at 0:** the value is set
+explicitly (line 49, not relying on a commented default) and given
+that `sgc_staging` lives on production's Postgres instance, this is
+plausibly deliberate protection — cron workers are also subject to
+`limit_memory_hard`, run scheduled actions that touch the same DB
+host, and would otherwise be a second class of process capable of
+issuing writes against production. The ticket should call this out
+so a future edit doesn't helpfully re-enable cron on the assumption
+the value was default-or-forgetten. If cron actions are ever needed
+on staging, the right fix is moving the database off production first
+(per the isolation ticket), not re-enabling cron against it.
+
 ## 11. Out-of-scope findings to escalate now, not file for later
 
 **`admin_passwd` in plaintext on the staging volume.** This is not a
