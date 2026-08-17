@@ -1322,6 +1322,19 @@ module docstring and `05-ops/verify_pdf_page_limit.py`'s docstring now
 state this and give the exact `docker exec` command, so this isn't only
 written down here.
 
+**Network dependency, flagged for whenever ops isolation remediation
+reaches this container**: `demo_presentation` is dual-homed onto
+`odoo-prod_odoo-prod-network` at `172.19.0.7` (per the estate inventory).
+Nothing about rendering touches a database, so this is not a freeze
+violation today — but it means the canonical render path for issued
+documents currently runs on a container sitting on the production
+network. If that network gets detached or the container gets rebuilt
+during isolation work, the render path breaks with it. Re-point
+`verify_pdf_page_limit.py`'s docstring and `render_proposal_v4.py`'s
+module docstring to whatever replaces it when that happens — don't
+let the canonical-path pointer go stale the same way #29's page counts
+did.
+
 **4. Recurring-fee margin fidelity — named, not fixed, per explicit
 "not urgent" direction.** Confirmed directly from source: `gates.platform_floor_multiplier: 1.25`
 in `policy.yaml` and `platform_portion_aed_mo()`'s actual code

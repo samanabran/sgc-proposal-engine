@@ -389,3 +389,35 @@ every one of these.
     entries, or once any segment gets a documented `market_defensible_floor`,
     recompute `platform_portion_aed_mo()`'s formula fidelity against both
     before treating the recurring line as settled.
+31. **A gate specified since the original brief, believed present, was
+    silently vacuous — the third instance of that exact shape in this
+    thread, and the third one found by looking rather than by anything
+    failing.** `_deciding_human()` was specified, in the original
+    mega-prompt and every brief since, to render `[BLOCKS ISSUE]` and
+    exit non-zero if the signer/approver chain could not be resolved.
+    `contact.get("named_approver")` and `contact.get("signer_authority")`
+    were never actually validated — only `actual_signer` was — so a
+    missing approver or authority field would have rendered "acting on
+    behalf of None, per: None" directly into the change-control section's
+    signature-authority sentence on an issued document, and the generator
+    would have exited 0. Populated correctly in `legal-identity.yaml`
+    today, so this never fired in practice — found by reading the
+    function during the `.get()` sweep that followed #28, not by a test
+    failing or a document going out wrong. Fixed alongside that sweep:
+    both fields now raise `BlocksIssue` if empty, same as `actual_signer`
+    always did. **The pattern, named because this is its third occurrence
+    in this one thread and worth carrying into whatever comes next**: a
+    validator's cadence check believed to enforce a minimum (`validate.py`
+    check 9) turned out not to be the whole enforcement it was assumed to
+    be; the exclusions register (#28) was specified as mandatory and
+    rendered empty for two full commits without any check catching it;
+    and now a legally operative signature line had the same shape. None
+    of the three were caught by a test failing, a gate tripping, or a
+    validator flagging anything — every one was found by a human actually
+    reading the function or the rendered output and asking "does this
+    really do what it says," not by trusting that the absence of a
+    failure meant the absence of a defect. **A specification is not an
+    implementation, and "nothing failed" is not evidence that nothing is
+    silently vacuous — it may only mean nobody has looked yet.** Whatever
+    else changes about how this repo is audited, keep looking rather than
+    waiting for red.
