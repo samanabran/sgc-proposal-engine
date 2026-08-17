@@ -373,6 +373,27 @@ def platform_portion_aed_mo(users_now, policy=None):
     }
 
 
+def horizon_totals(one_time_aed, recurring_aed_mo, months_list=(12, 24, 36)):
+    """One-time + (recurring x months) at each named horizon, independently
+    -- never as a comparison between horizons (see known-defects.md #16:
+    a "which term is the better deal" framing was already a defect once).
+    Moved here from render_proposal_v4.py 2026-08-16: multiplying a
+    monthly figure by a month count is still commercial arithmetic, and
+    the renderer's own stated rule is that it computes no AED figure of
+    its own, ever -- see that module's docstring. This keeps that rule
+    literally true instead of "true except for one multiplication"."""
+    horizons = {}
+    for months in months_list:
+        recurring_total_aed = round(recurring_aed_mo * months, 2)
+        horizons[months] = {
+            "months": months,
+            "one_time_aed": one_time_aed,
+            "recurring_total_aed": recurring_total_aed,
+            "total_aed": round(one_time_aed + recurring_total_aed, 2),
+        }
+    return horizons
+
+
 def business_cost_floor(basis=None):
     """PART 1: whole-business operating cost floor, computed not hardcoded.
     Every field here is derived from business-cost-basis.yaml -- change any

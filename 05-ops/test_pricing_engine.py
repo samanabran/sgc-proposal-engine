@@ -872,12 +872,28 @@ def t9_worksheet_internal_consistency():
                       stored_hc_cost is not None and abs(stored_hc_cost - expected_hc_cost) < 1)
 
         # Invariant 2 (universal, any schema): internal_build_cost_aed ==
-        # total_hours * policy.yaml cost_to_serve.internal_consultant_cost_aed_hr (150)
+        # total_hours * the ONE governed cost-per-hour figure,
+        # pe.business_cost_floor()["floor_per_hour_aed"] -- read live from
+        # policy.yaml: internal_cost_basis, never a second hardcoded copy
+        # of that rate. THIS LINE WAS ITSELF A REGRESSION ONCE: a prior
+        # branch (this session, pre-origin-merge) had edited the literal
+        # here from 150 to 394.38 after the payroll-based cost-basis
+        # reconciliation; `git checkout --theirs` during the merge took
+        # origin's whole file back to the stale hardcoded 150, silently
+        # turning 4 real failures (worksheets still priced at the old,
+        # wrong 150/hr placeholder) into 4 passes -- not because the
+        # worksheets got fixed, but because the test started checking
+        # against the wrong number again. See known-defects.md for the
+        # generalised entry. Reading the rate live from
+        # business_cost_floor() instead of a literal makes that class of
+        # regression structurally impossible: there is no second copy of
+        # the number left to go stale.
         total_hours = b.get("total_hours")
         internal_cost = b.get("internal_build_cost_aed")
         if total_hours is not None and internal_cost is not None:
-            expected_cost = round(total_hours * 150)
-            check(f"T9: {client} internal_build_cost_aed == total_hours*150 "
+            floor_per_hour = pe.business_cost_floor()["floor_per_hour_aed"]
+            expected_cost = round(total_hours * floor_per_hour)
+            check(f"T9: {client} internal_build_cost_aed == total_hours*{floor_per_hour} "
                   f"(stored={internal_cost}, expected={expected_cost} from total_hours={total_hours})",
                   abs(internal_cost - expected_cost) <= 1)
 
@@ -1603,6 +1619,64 @@ def t20_gross_break_even_and_platform_portion():
           f"(got={pp['platform_portion_aed_mo']}, expected=3648)",
           pp["platform_portion_aed_mo"] == 3648)
 
+    # Second real-client cross-check, RVN (02-clients/RVN-realestate-leads/
+    # 02-calc/pricing-worksheet.yaml: users_now=7, cts_total_aed=936 --
+    # "936 x 1.25" per that file's own inline comment -- platform_portion_
+    # aed_mo=1170, hand-computed there before this function existed). RVN's
+    # AED 1,170/month figure was carried through this whole session's
+    # discussion without a formula to check it against; this closes that
+    # loop against a second, independent real deal rather than trusting
+    # the Prosper match alone.
+    pp_rvn = pe.platform_portion_aed_mo(7, pol)
+    check(f"T20: platform_portion_aed_mo(7) reproduces RVN's real cts_total_aed "
+          f"(got={pp_rvn['cts_total_aed']}, expected=936)",
+          abs(pp_rvn["cts_total_aed"] - 936) < 0.01)
+    check(f"T20: platform_portion_aed_mo(7) reproduces RVN's real platform_portion_aed_mo "
+          f"(got={pp_rvn['platform_portion_aed_mo']}, expected=1170)",
+          pp_rvn["platform_portion_aed_mo"] == 1170)
+
+
+def t21_qweb_schema_parity_guard():
+    """GUARD, not documentation: sgc_quotation_proposal/ is a QWeb mirror of
+    05-ops/render_proposal_v4.py that has never been installed into Odoo
+    (see that module's __manifest__.py). It went stale on 2026-08-16 when
+    the standalone generator was rebuilt (recurring/horizon commercial
+    model, exclusions-clause fix, scope-table fix -- known-defects.md #27)
+    and the QWeb template was not. The manifest's 'installable' flag is the
+    actual install-time guard (Odoo will not install a module with
+    installable=False, full stop). This test is the guard THAT guard --
+    it fails loudly if the two ever drift into a dangerous combination:
+    installable=True while the schema pin doesn't match the current
+    renderer. It intentionally does NOT fail on the current, expected
+    state (installable=False, pin stale) -- that combination is the
+    guard correctly doing its job, not a defect -- but it prints that
+    state so it stays visible in every test run rather than fading into
+    an unread HANDOVER.md paragraph."""
+    manifest_path = os.path.join(REPO_ROOT, "sgc_quotation_proposal", "__manifest__.py")
+    if not os.path.exists(manifest_path):
+        check("T21: sgc_quotation_proposal/__manifest__.py exists", False)
+        return
+    import ast
+    tree = ast.parse(open(manifest_path, encoding="utf-8").read(), manifest_path)
+    dict_node = next(n.value for n in tree.body if isinstance(n, ast.Expr) and isinstance(n.value, ast.Dict))
+    manifest = ast.literal_eval(dict_node)
+
+    sys.path.insert(0, os.path.join(REPO_ROOT, "05-ops"))
+    import render_proposal_v4 as rv
+    current_schema = rv.RENDERER_SCHEMA_VERSION
+    pinned_schema = manifest.get("RENDERER_SCHEMA_VERSION_PINNED")
+    installable = manifest.get("installable")
+
+    reconciled = pinned_schema == current_schema
+    check(f"T21: sgc_quotation_proposal is not installable while its QWeb schema pin "
+          f"({pinned_schema!r}) does not match the current renderer schema "
+          f"({current_schema!r}) -- installable={installable}",
+          reconciled or installable is False)
+    if not reconciled:
+        print(f"    [OPEN] sgc_quotation_proposal/reports/proposal_template.xml is stale "
+              f"against render_proposal_v4.py (pinned={pinned_schema!r}, "
+              f"current={current_schema!r}) -- correctly blocked from install, not yet fixed.")
+
 
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
@@ -1645,6 +1719,8 @@ if __name__ == "__main__":
     t19_staging_db_name_guard()
     print("\n=== T20: gross break-even metric + platform_portion_aed_mo() ===")
     t20_gross_break_even_and_platform_portion()
+    print("\n=== T21: QWeb schema parity guard ===")
+    t21_qweb_schema_parity_guard()
 
     print()
     if FAILURES:
