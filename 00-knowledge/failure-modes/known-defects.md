@@ -336,7 +336,17 @@ every one of these.
     adversarial file) is renderer-specific and provisional until re-proven
     against wkhtmltopdf specifically** — wkhtmltopdf 0.12.6.1 is an old
     WebKit engine with materially different flow/pagination behaviour
-    from a modern Chrome build, and this is not the first time in this
+    from a modern Chrome build. **Policy going forward, stated once here
+    so it doesn't have to be re-derived: `wkhtmltopdf 0.12.6.1` inside the
+    `demo_presentation` container is the canonical render path for any
+    page count cited in a client-facing decision. Chrome headless is a
+    local convenience for fast iteration only, never a substitute for the
+    final check.** "A non-production container that happened to have
+    0.12.6.1" is not by itself a reproducible render path — naming it
+    (`demo_presentation`, an `odoo:19.0` image, no relation to
+    `odoo-prod`/`sgc_staging`) and writing the exact command down
+    (`05-ops/verify_pdf_page_limit.py`'s docstring) is what makes it one;
+    this is not the first time in this
     repo's history that a page count looked stable across variants only
     because the wrong renderer was asked (see #26's `grep -a`-on-a-PDF
     lesson for the same shape of "the tool answered, but not the question

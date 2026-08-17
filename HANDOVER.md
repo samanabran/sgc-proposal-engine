@@ -1312,6 +1312,16 @@ PDFs, the VPS-side scratch directories) were deleted after verification;
 the two pre-existing adversarial HTML files on the VPS were left in
 place, not created or removed by this pass.
 
+**Policy, stated once so it doesn't drift**: `wkhtmltopdf 0.12.6.1`
+inside the `demo_presentation` container (an `odoo:19.0` image on the ops
+VPS, unrelated to `odoo-prod`/`sgc_staging` — no `-u`/`-i`, no DB touched)
+is the canonical render path for any page count cited in a client-facing
+decision. Chrome headless is a local convenience for fast iteration only
+and must never be the final check. Both `05-ops/render_proposal_v4.py`'s
+module docstring and `05-ops/verify_pdf_page_limit.py`'s docstring now
+state this and give the exact `docker exec` command, so this isn't only
+written down here.
+
 **4. Recurring-fee margin fidelity — named, not fixed, per explicit
 "not urgent" direction.** Confirmed directly from source: `gates.platform_floor_multiplier: 1.25`
 in `policy.yaml` and `platform_portion_aed_mo()`'s actual code

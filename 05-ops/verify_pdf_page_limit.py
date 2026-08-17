@@ -6,9 +6,23 @@ which means "exactly 10 pages" for the real fixtures is partly a product
 of that construction, not solely proof the enforcement mechanism would
 catch a genuine overflow. This script is the actual enforcement point:
 it reads a real rendered PDF's page count (pypdf, no wkhtmltopdf needed
-locally) and exits non-zero if it exceeds the limit -- run after the
-VPS-side wkhtmltopdf render, since wkhtmltopdf itself is not available
-on this machine.
+locally) and exits non-zero if it exceeds the limit.
+
+CANONICAL RENDER PATH (known-defects.md #29): page counts must be
+verified against a real `wkhtmltopdf 0.12.6.1` render before they are
+quoted anywhere -- run it inside the `demo_presentation` Docker container
+on the ops VPS (a non-production Odoo 19 container; distinct from
+`odoo-prod`/`sgc_staging`, no DB touched, no -u/-i, a stateless
+HTML-to-PDF convert only: `docker exec -u root demo_presentation
+wkhtmltopdf --disable-smart-shrinking in.html out.pdf`). Chrome headless
+(`chrome --headless --print-to-pdf`) is a local convenience for quick
+iteration ONLY -- it is a different, modern WebKit engine with materially
+different flow/pagination behaviour, confirmed to disagree with
+wkhtmltopdf by a full page on a near-boundary fixture (F2:
+ZZZFIXTURE-2026-V4-02, 5 pages under Chrome vs. 4 under wkhtmltopdf).
+Any page count produced by Chrome is provisional until re-confirmed
+against the container above; only a wkhtmltopdf-derived count may be
+cited as final in a client-facing decision.
 
 Usage:
     python verify_pdf_page_limit.py <pdf_path> [max_pages]
