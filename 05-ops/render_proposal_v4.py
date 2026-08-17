@@ -12,16 +12,18 @@ see 05-ops/pricing_engine.py: four_component_build(), business_cost_floor(),
 hour_rate_floor_test(), platform_portion_aed_mo().
 
 STRICT RULE, the reason this file was rebuilt rather than patched: THIS
-FILE COMPUTES NO AED FIGURE OF ITS OWN, EVER. It calls
-four_component_build(), platform_portion_aed_mo(), hour_rate_floor_test(),
-risk_adjusted_hours() and prints what they return. The only arithmetic
-performed directly in this file is PRESENTATIONAL aggregation of
-already-computed figures (e.g. recurring_aed_mo * 12 for a horizon total)
--- never a floor, a rate, or a commission calculation. If a commercial
-figure appears in a rendered document that does not trace to a specific
-pe.* function call, that is a defect in this file, not a acceptable
-shortcut. Two vocabularies for the same number is exactly how this
-session's merge conflict happened in the first place.
+FILE COMPUTES NO AED FIGURE OF ITS OWN, EVER, NOT EVEN PRESENTATIONALLY.
+It calls four_component_build(), platform_portion_aed_mo(),
+hour_rate_floor_test(), risk_adjusted_hours(), horizon_totals() and prints
+what they return. An earlier version of this rule carved out an exception
+for "presentational aggregation" (recurring_aed_mo * months for a horizon
+total) computed inline here -- that exception was itself a small instance
+of the same defect class this file exists to prevent, so horizon_totals()
+was moved into pricing_engine.py on 2026-08-16 and the carve-out removed.
+If a commercial figure appears in a rendered document that does not trace
+to a specific pe.* function call, that is a defect in this file, not an
+acceptable shortcut. Two vocabularies for the same number is exactly how
+this session's merge conflict happened in the first place.
 
 Design spec (Prosper's real conventions), unchanged from the prior
 version -- see 02-clients/PRO-prosper-realestate/04-draft/render_brand.py,
@@ -65,6 +67,14 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pricing_engine as pe  # noqa: E402
 
+# Bump this any time REQUIRED_SECTIONS, a section's field/context shape, or
+# the commercial model (one-time vs recurring, horizons) changes here.
+# sgc_quotation_proposal/__manifest__.py pins the last version it was
+# reconciled against and stays installable=False until that pin matches --
+# see check_qweb_schema_parity() in 05-ops/test_pricing_engine.py, the
+# actual enforcement point (not just this comment).
+RENDERER_SCHEMA_VERSION = "v4.1-recurring"
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(REPO_ROOT, "00-intake", "proposal-v4-fixtures")
 
@@ -89,6 +99,29 @@ def _deciding_human():
     if not signer:
         raise BlocksIssue("legal-identity.yaml: contact.actual_signer is empty")
     return signer, contact.get("named_approver"), contact.get("signer_authority")
+
+
+def _load_exclusions_clause():
+    """Verbatim text ONLY -- 00-knowledge/clause-library/exclusions-standard.md
+    is a governed clause file, "requires_counsel_review: false" but still
+    "never trim this list without Commercial Desk sign-off." Loaded here,
+    not paraphrased or invented, because the previous version of this
+    section read a template-catalogue.yaml key (`excluded_capabilities`)
+    that has never existed in that file -- every fixture rendered an
+    exclusions section present-but-empty (a table with headers and zero
+    rows), silently omitting a clause AGENTS.md marks mandatory on every
+    proposal (see clause-library file, "When mandatory: every proposal,
+    section 07 Options & Inclusions"). Raises BlocksIssue rather than
+    falling back to any placeholder text if the clause file's shape ever
+    changes -- an empty exclusions section must never render silently."""
+    path = os.path.join(REPO_ROOT, "00-knowledge", "clause-library", "exclusions-standard.md")
+    if not os.path.exists(path):
+        raise BlocksIssue(f"clause-library file missing: {path}")
+    lines = open(path, encoding="utf-8").read().splitlines()
+    quote_lines = [ln[2:] for ln in lines if ln.startswith("> ")]
+    if not quote_lines:
+        raise BlocksIssue(f"{path}: no '> ' verbatim block found -- clause file shape changed")
+    return " ".join(quote_lines)
 
 
 def _warrant_tier_lint(html_text):
@@ -225,19 +258,13 @@ def build_quote(module_names, maturity, migration_band, users_now, enhancement_h
             price_ex_vat_aed=one_time["price_ex_vat_aed"], hours_total=one_time["hours_total"], cost_basis=basis,
         )
 
-    # PRESENTATIONAL aggregation only (horizon totals) -- not a pricing
-    # decision, just multiplying two already-computed figures by a month
-    # count. See module docstring.
+    # Horizon totals: pe.horizon_totals(), not computed here -- see module
+    # docstring's strict-consumer rule. Multiplying a monthly figure by a
+    # month count is still commercial arithmetic, not formatting.
     recurring_aed_mo = recurring["platform_portion_aed_mo"]
     horizons = {}
     if not one_time["migration"]["unpriced"]:
-        for months in (12, 24, 36):
-            horizons[months] = {
-                "months": months,
-                "one_time_aed": one_time["price_ex_vat_aed"],
-                "recurring_total_aed": round(recurring_aed_mo * months, 2),
-                "total_aed": round(one_time["price_ex_vat_aed"] + recurring_aed_mo * months, 2),
-            }
+        horizons = pe.horizon_totals(one_time["price_ex_vat_aed"], recurring_aed_mo)
 
     return {
         "one_time": one_time,
@@ -245,7 +272,6 @@ def build_quote(module_names, maturity, migration_band, users_now, enhancement_h
         "floor_test": floor_test,
         "horizons": horizons,
         "unpriced": one_time["migration"]["unpriced"],
-        "excluded_capabilities": cat.get("excluded_capabilities", {}),
         "enhancement_rate_aed_hr": cat["enhancement"]["default_rate_aed_hr"],
     }
 
@@ -299,29 +325,32 @@ def render_client_html(quote, client_name, reference):
   <p class="caption">Odoo 19 Community &mdash; version lock. A different Odoo version is a separate engagement.</p>
 </div>""")
 
-    sections.append("""
+    # Scope table derived from what was actually SELECTED (template_base +
+    # ot["modules"]["rows"], already computed by four_component_build()) --
+    # not a fixed list. The previous version of this table was five
+    # hardcoded rows claiming acceptance criteria (including a specific
+    # ir_rule-enforcement claim for multi-agent access control) regardless
+    # of which modules a given quote actually included -- correct for F1/F3
+    # by coincidence, but for F2's single-module quote it claimed acceptance
+    # criteria for commission handling, multi-agent access control, and
+    # reporting that F2 never purchased. See known-defects.md #27.
+    scope_rows = "<tr><td>Platform template</td><td>Configured and demonstrated per the platform template's standard scope during UAT.</td></tr>"
+    for m in ot["modules"]["rows"]:
+        scope_rows += (f"<tr><td>{m['name'].replace('_',' ').title()}</td>"
+                        f"<td>Configured and demonstrated per this module's catalogue scope during UAT.</td></tr>")
+    sections.append(f"""
 <div id="section-scope" class="page-section">
   <h1 class="section">Scope &amp; Acceptance</h1>
   <table><tr><th>Requirement</th><th>Acceptance Criterion</th></tr>
-  <tr><td>Lead capture</td><td>Inbound lead creates a CRM record within the platform, visible to an assigned user.</td></tr>
-  <tr><td>Property/listing management</td><td>A property record can be created, listed, and its status updated by an authorised user.</td></tr>
-  <tr><td>Commission &amp; deals</td><td>A closed deal computes commission per the configured scheme and is visible on the deal record.</td></tr>
-  <tr><td>Multi-agent access control</td><td>Agent A cannot view Agent B's commission or deal records; record-rule enforced, not UI-hidden only.</td></tr>
-  <tr><td>Reporting &amp; dashboards</td><td>Configured reports return live data from the modules above.</td></tr>
+  {scope_rows}
   </table>
 </div>""")
 
-    excl_rows = ""
-    for key, row in quote["excluded_capabilities"].items():
-        name = key.replace("_", " ").title()
-        excl_rows += f"<tr><td>{name}</td><td>Not included</td><td>{row.get('alternative_offered','See scoping call.')}</td></tr>"
+    exclusions_text = _load_exclusions_clause()
     sections.append(f"""
 <div id="section-exclusions" class="page-section">
   <h1 class="section">What Is Not Included &mdash; Named Directly</h1>
-  <p>Not "coming soon," not bundled under a different name. Each has a stated alternative.</p>
-  <table><tr><th>Capability</th><th>Status</th><th>Alternative Offered</th></tr>
-  {excl_rows}
-  </table>
+  <p>{exclusions_text}</p>
 </div>""")
 
     vat_line = ("VAT: not currently registered &mdash; no VAT charged"
