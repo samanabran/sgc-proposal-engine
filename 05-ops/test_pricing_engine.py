@@ -638,7 +638,12 @@ def _derive_mobilisation(ws):
 
 
 def _derive_internal_build_cost(ws):
-    """round(total_hours * 150)."""
+    """round(total_hours * POLICY['cost_to_serve']['internal_consultant_cost_aed_hr']),
+    read live below -- not a hardcoded rate. Stale docstring (previously
+    said "* 150" after the rate had already been corrected to 394.38 in
+    the code) is exactly the kind of drift that caused known-defects.md
+    #27's T9 regression; fixed here as part of the same repo-wide sweep
+    for hardcoded copies of a computed cost-floor value."""
     th = ws.get("number_2_build", {}).get("total_hours")
     if th is None:
         return None
