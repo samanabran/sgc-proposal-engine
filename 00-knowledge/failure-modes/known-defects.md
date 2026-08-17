@@ -220,3 +220,59 @@ every one of these.
     (`pypdf.PdfReader(...).pages[i].extract_text()` or equivalent), never
     `grep -a`/binary grep alone** — a clean `grep -a` result on a PDF
     proves nothing and must not be reported as a clean result.
+27. **A merge silently reverted a test's already-fixed hardcoded rate back
+    to stale, and the resulting drop in failure count was reported as "the
+    same baseline."** `test_pricing_engine.py`'s `t9_worksheet_internal_consistency()`
+    had, in an earlier session, been edited to check worksheet floors
+    against `394.38`. It carried that value as a second, undeclared literal
+    copy of `business_cost_floor()["floor_per_hour_aed"]` rather than
+    reading the rate live — the same duplicate-implementation defect class
+    as #2 and #21, just inside a test instead of a config. When the
+    2026-08-16 origin-merge resolved this file via `git checkout --theirs`,
+    origin's copy of the test still had the pre-fix literal (`150`), so the
+    merge silently reverted the fix. Four T9 assertions that had correctly
+    been failing against `394.38` started passing against `150` instead —
+    not because the underlying worksheets got healthier, but because the
+    check itself got weaker. The failure count dropped from 16 to 12 and
+    was reported as an unchanged baseline. It was not: the same four
+    assertions were still running, now checking the wrong number, and a
+    drop in failures immediately after a `--theirs` merge is exactly the
+    direction a genuine regression would produce — it should have been the
+    first thing treated as suspicious, not the thing waved through as
+    coincidental. Caught only by isolating the pre-merge commit in a `git
+    worktree` and diffing its actual failure list line-by-line against the
+    post-merge run, not by comparing summary counts. **Fixed at the root**:
+    the test now reads `floor_per_hour = pe.business_cost_floor()["floor_per_hour_aed"]`
+    live instead of carrying its own copy, so a future merge cannot revert
+    it to a stale number without the test itself changing. **Lesson: a
+    failure count that moves during an "origin wins wholesale" merge is not
+    automatically explained by the merge — name which specific checks
+    changed and why, especially when the count moves in the direction a
+    regression would produce.**
+28. **A renderer shipped an empty mandatory clause and an overclaiming
+    fixed-list table, and both were masked by the document still "looking
+    complete."** Found investigating why two independently-generated
+    fixture proposals landed on an identical page count. `render_proposal_v4.py`'s
+    exclusions section looped over `doc.get("excluded_capabilities", {})` —
+    a key that has never existed in `template-catalogue.yaml` — silently
+    rendering an empty table where `clause-library/exclusions-standard.md`'s
+    mandatory verbatim clause was supposed to appear. Separately, the Scope
+    & Acceptance table was five hardcoded rows claiming acceptance criteria
+    for capabilities (lead capture, property/listing, commission & deals,
+    multi-agent access control, reporting) regardless of which modules the
+    client had actually bought — the same overclaiming-fixed-list shape as
+    the QWeb mirror in `sgc_quotation_proposal/reports/proposal_template.xml`
+    (see that module's manifest guard, same date). Neither defect broke a
+    gate check or threw an error; the document rendered, passed
+    section-presence assertions, and produced a plausible-looking page
+    count both times, which is exactly why an identical page count across
+    two different fixtures was the signal worth chasing rather than
+    dismissing. **Fixed**: exclusions now load the governed clause file's
+    verbatim `"> "` blockquote text via `_load_exclusions_clause()`,
+    raising `BlocksIssue` rather than rendering empty if the clause file's
+    shape ever changes; the Scope & Acceptance table now derives its rows
+    from the actual quoted module list. **Lesson: "the document has a
+    section with that heading" is not the same claim as "the section
+    contains the governed content" — an empty or overclaiming section
+    under a correct heading passes exactly the checks that look for the
+    heading, not the content.**

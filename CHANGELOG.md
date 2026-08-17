@@ -2598,3 +2598,48 @@ before any file was touched; merge aborted, not resolved live.
 - **Deferred, not done**: `sgc_quotation_proposal/`'s QWeb template
   still reflects the pre-merge schema and has not been updated to match
   the rebuilt renderer -- flagged, not silently left to drift further.
+
+## Post-merge reconciliation pass -- failure-count root cause, RVN cross-check, renderer content defects, horizon centralization, QWeb guard -- 2026-08-16
+
+Full detail: HANDOVER.md §15. Answers the five-part pushback on the
+merge/rebuild entry directly above -- each item re-derived, not
+re-asserted.
+
+- Failure count drop (16→12) reported as "unchanged baseline" was a
+  merge-reverted test defect, not a smaller failure population: `git
+  checkout --theirs` silently reverted `t9_worksheet_internal_consistency()`'s
+  cost-floor check from a fixed `394.38` back to origin's stale hardcoded
+  `150`. Root-caused via a `git worktree`-isolated diff of the actual
+  pre-merge failure list, not inferred. Fixed to read the rate live from
+  `business_cost_floor()`; true 16-failure baseline restored.
+  `known-defects.md` #27.
+- `platform_portion_aed_mo(7)` reproduces RVN's real, previously
+  hand-computed 1,170/mo (and its 936 `cts_total_aed`) exactly -- second
+  real-client exact match alongside Prosper's 3,648/mo. Permanent
+  regression check, T20 extension.
+- Two real content defects found and fixed in `render_proposal_v4.py`,
+  surfaced while checking whether an identical F1/F2/F3 page count was a
+  layout fixed-point (it wasn't -- per-page text genuinely differs):
+  exclusions section was silently empty (looped over a catalogue key,
+  `excluded_capabilities`, that has never existed, instead of the
+  mandatory `clause-library/exclusions-standard.md` clause); Scope &
+  Acceptance table was five hardcoded rows overclaiming acceptance
+  criteria regardless of modules actually quoted. Both now derive from
+  governed sources. `known-defects.md` #28. Fixture page counts rose 4→5
+  as a direct, disclosed result -- still shorter than Prosper's real
+  issued Rev3 offer, a disclosed gap, not claimed parity.
+- `pricing_engine.py`: added `horizon_totals()` -- the renderer's own
+  12/24/36-month multiplication moved into the engine so the renderer
+  computes zero AED figures of its own, no exception.
+- `sgc_quotation_proposal/__manifest__.py`: `installable` set to `False`
+  (mechanical, loader-enforced block, not just a HANDOVER note) plus a
+  `RENDERER_SCHEMA_VERSION_PINNED` key; `test_pricing_engine.py`'s new
+  `t21_qweb_schema_parity_guard()` fails the suite if `installable` is
+  ever flipped back without that pin being reconciled.
+  `reports/proposal_template.xml` itself remains unedited -- deferred,
+  same item flagged in the entry above, now guarded mechanically as well
+  as noted.
+- Verification used Chrome headless in place of wkhtmltopdf (neither a
+  local install nor VPS/SSH access was available this session) --
+  disclosed substitution, not a claim of parity with the production
+  render path.

@@ -1148,3 +1148,88 @@ superseded stub with no visible history knows what it was and that no
 further action is needed on it. Internal review requests for this deal
 now go into the repo as files
 (`02-clients/KP-kallat-properties/04-review/`), not Gmail drafts.
+
+## 15. Post-origin-merge reconciliation pass — failure-count root cause, RVN cross-check, renderer content defects, horizon centralization, QWeb guard (2026-08-16)
+
+Five-part pushback on the prior merge/rebuild report (commits `c519b518`,
+`8b562941`, `66d3d2f7`), each item resolved with evidence, not asserted.
+`known-defects.md` #27-28 carry the permanent record; this entry is the
+decision log.
+
+**1. Failure-count discrepancy — root-caused, not hand-waved.** The report
+had described 16 pre-merge failures dropping to 12 post-merge as the same
+baseline. It was not. `git worktree add --detach` isolated the actual
+pre-merge commit; diffing its failure list line-by-line against the
+post-merge run identified the exact four T9 assertions that changed
+status. Root cause: `t9_worksheet_internal_consistency()` carried a
+second, undeclared copy of the cost floor (`394.38`, itself a prior-session
+fix) as a hardcoded literal instead of reading `business_cost_floor()`
+live; `git checkout --theirs` on the merge silently reverted that literal
+back to origin's stale `150`, which made the same four checks pass against
+the wrong number rather than removing them. Fixed at the root (test now
+reads the rate live) and the failure set restored to the true 16.
+`known-defects.md` #27.
+
+**2. RVN recurring-fee reconciliation — clean, exact match.**
+`pe.platform_portion_aed_mo(7)` reproduces RVN's real, hand-carried
+`platform_portion_aed_mo` of 1,170/mo exactly (and its underlying
+`cts_total_aed` of 936 exactly). The formula is now cross-validated
+against the two real deals it has ever been checked against — Prosper
+(3,648/mo, 31 users) and RVN (1,170/mo, 7 users) — both exact. Added
+as a permanent regression check, T20 extension in
+`05-ops/test_pricing_engine.py`, not left as a one-off manual confirmation.
+
+**3. Page-count coincidence — investigated, found two real content
+defects, not a rendering fixed-point.** F1/F2/F3 landing on an identical
+page count post-fix was chased down rather than assumed benign. Per-page
+`pypdf` text extraction confirmed the underlying content genuinely differs
+across fixtures at the page level. The investigation surfaced two real
+defects in `render_proposal_v4.py`, both now fixed and recorded as
+`known-defects.md` #28: (a) the exclusions section looped over a
+catalogue key (`excluded_capabilities`) that has never existed, silently
+rendering the mandatory `clause-library/exclusions-standard.md` clause as
+an empty table; (b) the Scope & Acceptance table was five hardcoded rows
+claiming acceptance criteria regardless of which modules were actually
+quoted. Both replaced with governed-source-derived content. Fixture word
+counts rose (F1: 984→1167, F2: 945→1033, F3: →1078) and PDF page counts
+rose 4→5 across all three as a direct result — not padding, a real
+content restoration. **Still below Prosper's real issued Rev3 offer**
+(1,576 words, §10 above) even after this fix — the v4 10-section schema
+is more compact than Prosper's older format. Disclosed gap, not claimed
+parity; not chased further this pass.
+
+**4. Horizon arithmetic moved into the engine.** `render_proposal_v4.py`
+was multiplying recurring-by-12/24/36 itself — presentational-looking but
+still commercial arithmetic, and the renderer's own stated rule is that it
+computes zero AED figures of its own. Added `pe.horizon_totals()` to
+`05-ops/pricing_engine.py`; the renderer now calls it and no longer
+carries an exception to its own no-arithmetic rule.
+
+**5. QWeb template staleness — guarded, not fixed.**
+`sgc_quotation_proposal/reports/proposal_template.xml` was already known
+stale against the pre-merge schema and remains unreconciled against the
+post-merge one (no recurring/horizon section, `doc.excluded_capabilities`
+bound to the same nonexistent key just fixed in the Python generator, the
+same hardcoded five-row Scope & Acceptance table). Rather than leave this
+as a HANDOVER note alone, `sgc_quotation_proposal/__manifest__.py` now
+sets `'installable': False` — a hard, mechanical block Odoo's addon
+loader respects unconditionally, stronger than a comment or a hook — plus
+a machine-readable `RENDERER_SCHEMA_VERSION_PINNED` key pinned to the
+pre-recurring version. `05-ops/test_pricing_engine.py`'s new
+`t21_qweb_schema_parity_guard()` fails the suite if `installable` is ever
+flipped back to `True` without that pin matching the current
+`RENDERER_SCHEMA_VERSION`. `proposal_template.xml` itself was **not
+edited** — DB freeze plus the schema drift are two independent reasons
+it stays staged, and reconciling the QWeb file itself is explicitly
+deferred, not silently dropped.
+
+**Verification substitution, disclosed**: neither a local `wkhtmltopdf`
+install nor VPS/SSH access was available this session to regenerate the
+fixture PDFs through the repo's established production pipeline. Chrome
+headless (`--headless --print-to-pdf`) was used instead, for verification
+purposes only — explicitly not a claim that this is now the production
+rendering path. Both `python3 05-ops/test_pricing_engine.py` (16
+failures, confirmed matching the true pre-merge baseline) and
+`python3 05-ops/validate.py "02-clients/PRO-prosper-realestate/"` (3
+gate/content failures, unchanged) were re-run clean of new regressions
+after all fixes in this entry.
