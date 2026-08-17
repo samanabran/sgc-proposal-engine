@@ -249,30 +249,133 @@ every one of these.
     automatically explained by the merge — name which specific checks
     changed and why, especially when the count moves in the direction a
     regression would produce.**
-28. **A renderer shipped an empty mandatory clause and an overclaiming
-    fixed-list table, and both were masked by the document still "looking
-    complete."** Found investigating why two independently-generated
-    fixture proposals landed on an identical page count. `render_proposal_v4.py`'s
-    exclusions section looped over `doc.get("excluded_capabilities", {})` —
-    a key that has never existed in `template-catalogue.yaml` — silently
-    rendering an empty table where `clause-library/exclusions-standard.md`'s
-    mandatory verbatim clause was supposed to appear. Separately, the Scope
-    & Acceptance table was five hardcoded rows claiming acceptance criteria
-    for capabilities (lead capture, property/listing, commission & deals,
-    multi-agent access control, reporting) regardless of which modules the
-    client had actually bought — the same overclaiming-fixed-list shape as
-    the QWeb mirror in `sgc_quotation_proposal/reports/proposal_template.xml`
-    (see that module's manifest guard, same date). Neither defect broke a
-    gate check or threw an error; the document rendered, passed
-    section-presence assertions, and produced a plausible-looking page
-    count both times, which is exactly why an identical page count across
-    two different fixtures was the signal worth chasing rather than
-    dismissing. **Fixed**: exclusions now load the governed clause file's
+28. **A rebuild silently destroyed a real, evidence-based governed
+    register, converted a fail-loud read into a fail-silent one in the
+    same edit, and the report written immediately after did not catch
+    either.** Found investigating why two independently-generated fixture
+    proposals landed on an identical page count. The pre-merge local
+    branch's own `template-catalogue.yaml` carried a genuine, non-fabricated
+    `excluded_capabilities` register — 5 entries, each with a real evidence
+    citation against `00-intake/demo-presentation-inventory-2026-08-16.md`'s
+    audit of SGC's own demo Odoo instance (WhatsApp notification, automated
+    call logging, call-target enforcement, biometric attendance hardware,
+    portal feeds) — and `render_proposal_v4.py` read it with direct dict
+    access, `cat["excluded_capabilities"]`, which would raise `KeyError`
+    the instant the key went missing. The 2026-08-16 "origin wins
+    wholesale" merge (`known-defects.md` #27's same merge) overwrote
+    `template-catalogue.yaml` with origin's real-estate-vertical version,
+    which has never had this key at all — a legitimate content change,
+    since the real-estate catalogue's exclusions are a different, real
+    register. But the SAME-DAY renderer rebuild (`66d3d2f7`) that ported
+    the generator onto origin's schema also silently changed the access
+    pattern to `doc.get("excluded_capabilities", {})` — swallowing the
+    now-inevitable missing key into an empty table instead of the loud
+    crash the original code would have produced, and masking the fact
+    that `clause-library/exclusions-standard.md`'s mandatory verbatim
+    clause (the thing that should have replaced the old register for this
+    vertical) was never wired in at all. The report written immediately
+    after that rebuild then asserted the exclusions table was populated
+    with alternatives per row — true of the pre-merge branch's own
+    rendering, verified in `00-intake/proposal-engine-v4-test-2026-08-16.md`
+    §6, but not re-checked against the rebuilt output before being
+    reported clean. Separately, the same rebuild's Scope & Acceptance
+    table was five hardcoded rows claiming acceptance criteria for
+    capabilities (lead capture, property/listing, commission & deals,
+    multi-agent access control, reporting) regardless of which modules
+    the client had actually bought — the same overclaiming-fixed-list
+    shape as the QWeb mirror in
+    `sgc_quotation_proposal/reports/proposal_template.xml` (see that
+    module's manifest guard, same date). None of this broke a gate check,
+    threw an error, or failed `assert_required_sections()` — the document
+    rendered, every heading was present, and the page count looked
+    plausible both times, which is exactly why an identical page count
+    across two different fixtures was the signal worth chasing rather
+    than dismissing. Confirmed by walking the actual git history
+    (`ba834cb0` vs `66d3d2f7`) rather than assuming either report was
+    right. **Fixed**: exclusions now load the governed clause file's
     verbatim `"> "` blockquote text via `_load_exclusions_clause()`,
     raising `BlocksIssue` rather than rendering empty if the clause file's
     shape ever changes; the Scope & Acceptance table now derives its rows
-    from the actual quoted module list. **Lesson: "the document has a
-    section with that heading" is not the same claim as "the section
-    contains the governed content" — an empty or overclaiming section
-    under a correct heading passes exactly the checks that look for the
-    heading, not the content.**
+    from the actual quoted module list. **Two lessons, not one: (1)
+    "the document has a section with that heading" is not the same claim
+    as "the section contains the governed content" — a check for the
+    heading alone passes an empty or overclaiming section underneath it.
+    (2) Changing a dict access from `d[key]` to `d.get(key, default)`
+    during an otherwise-unrelated rebuild is itself a content-loss risk,
+    not a defensive improvement — it converts a bug that would have
+    crashed the very next run into one that renders silently forever;
+    prefer the loud form unless the missing case is genuinely expected
+    and handled, not merely tolerated.**
+29. **A page-limit ceiling proven against Chrome headless is a different
+    claim than a page-limit ceiling proven against the renderer this repo
+    actually ships with.** Following #27/#28's reconciliation pass, the
+    regenerated fixtures and a fresh adversarial overflow proof were
+    verified with Chrome headless (`--headless --print-to-pdf`) because
+    neither a local `wkhtmltopdf` install nor VPS/SSH access was available
+    that session — disclosed at the time as a substitution, not silently
+    presented as equivalent. On the next pass, VPS/SSH access and a real
+    `wkhtmltopdf 0.12.6.1` binary (inside the `demo_presentation` Odoo
+    container, unrelated to the frozen `sgc_staging` production database —
+    no `-u`/`-i`, no DB touched, purely a stateless HTML-to-PDF convert)
+    were both available, and the same fixtures were re-rendered through
+    it. The page counts moved: F2 (`ZZZFIXTURE-2026-V4-02`) rendered at 5
+    pages under Chrome and 4 pages under wkhtmltopdf — a real, measured
+    discrepancy, not a hypothetical one. A fresh 150-row synthetic
+    overflow injection was ALSO not decisive at this size — Chrome
+    rendered it at exactly 10 pages and wkhtmltopdf at 9, both under the
+    `>10` ceiling in `verify_pdf_page_limit.py`, proving nothing about
+    whether the ceiling actually fires. The two adversarial files already
+    staged from the prior overflow proof (`ADVERSARIAL_overflow_test.html`,
+    `ADVERSARIAL_v2_test.html`) were re-rendered instead: 26 and 34 pages
+    under real wkhtmltopdf (vs. 27 reported under Chrome for the same
+    overflow file previously) — both correctly fail the 10-page check.
+    **The enforcement mechanism itself is now confirmed live under the
+    renderer this repo actually ships with, not only under a substitute.
+    But any page count quoted for a document that is NOT decisively over
+    or under the limit (a 4-vs-5-page fixture, unlike a 26-vs-34-page
+    adversarial file) is renderer-specific and provisional until re-proven
+    against wkhtmltopdf specifically** — wkhtmltopdf 0.12.6.1 is an old
+    WebKit engine with materially different flow/pagination behaviour
+    from a modern Chrome build, and this is not the first time in this
+    repo's history that a page count looked stable across variants only
+    because the wrong renderer was asked (see #26's `grep -a`-on-a-PDF
+    lesson for the same shape of "the tool answered, but not the question
+    that mattered").
+30. **A recurring fee formalized to a formula still carries a fidelity
+    gap the hand-computed version never surfaced this precisely: the
+    engine function only implements half of its own documented formula,
+    and every recurring line it has ever priced sits exactly on a floor
+    with zero cushion.** `pricing_engine.platform_portion_aed_mo()`
+    reproduces both real client figures it has been checked against
+    exactly (Prosper 3,648/mo, RVN 1,170/mo, both #27's T20 checks) — but
+    both of those figures are `cost_to_serve × gates.platform_floor_multiplier`
+    (1.25) with nothing added, confirmed by reading the function directly
+    (`round(cts_total_aed * platform_floor_multiplier)`). The governed
+    formula everywhere else in this repo (`runbook/subscription-proposal-runbook.md`,
+    `.opencode/skills/sgc-proposal-engine/SKILL.md`, RVN's own worksheet
+    and `gate-report.md`) is `max(CTS × 1.25, market_defensible_floor)` —
+    a second, higher floor candidate the function has no parameter or
+    code path for at all. This has produced no wrong number yet only
+    because `market_defensible_floor` has never been populated with a
+    real value anywhere in this repo for any segment (grepped in full);
+    the moment one is, `platform_portion_aed_mo()` will silently ignore
+    it rather than take the max, because the max was never coded, not
+    because it evaluated to a smaller number. Separately, and more
+    consequential day-to-day: `cost_to_serve.support_hours_per_5_users: 1`
+    in `policy.yaml` is a bare, uncited policy assumption, not a measured
+    figure — `00-knowledge/pricing/support-hours-log.yaml` exists
+    specifically to hold real measurements and is deliberately empty
+    (`entries: []`) by design, "do not seed with estimated or invented
+    figures" stated in its own header. Every recurring fee quoted to date
+    is therefore cost-plus-zero-cushion against an *assumed* support-hours
+    figure that the repo's own measurement mechanism has not yet
+    validated. **Not fixed, not urgent per explicit direction — named for
+    the record.** The build-side floor (`business_cost_floor()`,
+    `known-defects.md` #27's subject) had the same shape one layer up:
+    a governed number with no margin above it, discovered only once
+    someone re-derived it independently instead of trusting that a
+    formalized formula automatically means a safe one. Re-derive before
+    trusting, one layer down: once `support-hours-log.yaml` has real
+    entries, or once any segment gets a documented `market_defensible_floor`,
+    recompute `platform_portion_aed_mo()`'s formula fidelity against both
+    before treating the recurring line as settled.

@@ -2643,3 +2643,42 @@ re-asserted.
   local install nor VPS/SSH access was available this session) --
   disclosed substitution, not a claim of parity with the production
   render path.
+
+## Real wkhtmltopdf re-verification, repo-wide literal sweep, recurring-margin fidelity gap named -- 2026-08-17
+
+Full detail: HANDOVER.md §16. Follow-up pass on the entry directly above.
+
+- VPS/SSH access was available this pass; found and used a real
+  `wkhtmltopdf 0.12.6.1` binary inside the `demo_presentation` Odoo
+  container (non-production, no `-u`/`-i`, stateless HTML-to-PDF convert
+  only) to re-render F1/F2/F3. Page counts moved: F2 renders at 4 pages
+  under wkhtmltopdf vs. 5 under the earlier Chrome-headless substitution
+  -- confirms page counts from the entry above were provisional, as
+  disclosed. The two adversarial overflow files from the prior proof
+  re-rendered at 26 and 34 pages under real wkhtmltopdf (vs. 27 reported
+  under Chrome) -- both still correctly fail the 10-page
+  `verify_pdf_page_limit.py` check, so the enforcement mechanism itself
+  is now confirmed live under the renderer this repo actually ships
+  with, not only under a substitute. `known-defects.md` #29.
+- Repo-wide grep for other hardcoded copies of a computed value (the
+  defect class behind #27): no other functional duplicate found. Fixed
+  one stale docstring in `test_pricing_engine.py`
+  (`_derive_internal_build_cost()` still said "* 150" though the code
+  already read the rate live).
+- `known-defects.md` #28 rewritten with the full causal chain, confirmed
+  by diffing `ba834cb0` against `66d3d2f7`: the pre-merge branch had a
+  real, evidence-cited exclusions register read via loud direct dict
+  access; the merge legitimately replaced the catalogue file, but the
+  same-day rebuild also silently changed the access pattern to a
+  fail-silent `.get(key, {})` -- a second, distinct defect from "the
+  section was empty," now named as its own lesson.
+- Recurring-fee margin fidelity gap named, not fixed (explicit "not
+  urgent" direction): `platform_portion_aed_mo()` is cost-to-serve times
+  the 1.25 floor multiplier with zero cushion on every real figure
+  checked so far, and the function has no code path for the second,
+  higher `market_defensible_floor` term the governed formula names
+  everywhere else in this repo -- harmless only because no segment has
+  ever populated that value. `cost_to_serve.support_hours_per_5_users: 1`
+  confirmed to be an uncited policy assumption, not a measurement;
+  `support-hours-log.yaml` confirmed empty by design. `known-defects.md`
+  #30.

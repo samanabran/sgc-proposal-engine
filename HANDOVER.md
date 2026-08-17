@@ -1179,24 +1179,41 @@ against the two real deals it has ever been checked against — Prosper
 as a permanent regression check, T20 extension in
 `05-ops/test_pricing_engine.py`, not left as a one-off manual confirmation.
 
-**3. Page-count coincidence — investigated, found two real content
-defects, not a rendering fixed-point.** F1/F2/F3 landing on an identical
-page count post-fix was chased down rather than assumed benign. Per-page
-`pypdf` text extraction confirmed the underlying content genuinely differs
-across fixtures at the page level. The investigation surfaced two real
-defects in `render_proposal_v4.py`, both now fixed and recorded as
-`known-defects.md` #28: (a) the exclusions section looped over a
-catalogue key (`excluded_capabilities`) that has never existed, silently
-rendering the mandatory `clause-library/exclusions-standard.md` clause as
-an empty table; (b) the Scope & Acceptance table was five hardcoded rows
-claiming acceptance criteria regardless of which modules were actually
-quoted. Both replaced with governed-source-derived content. Fixture word
-counts rose (F1: 984→1167, F2: 945→1033, F3: →1078) and PDF page counts
-rose 4→5 across all three as a direct result — not padding, a real
-content restoration. **Still below Prosper's real issued Rev3 offer**
-(1,576 words, §10 above) even after this fix — the v4 10-section schema
-is more compact than Prosper's older format. Disclosed gap, not claimed
-parity; not chased further this pass.
+**3. Page-count coincidence — investigated, found the rebuild actually
+destroyed real content, not just a rendering fixed-point.** F1/F2/F3
+landing on an identical page count post-fix was chased down rather than
+assumed benign. Per-page `pypdf` text extraction confirmed the underlying
+content genuinely differs across fixtures at the page level. The
+investigation surfaced two real defects in `render_proposal_v4.py`, both
+now fixed and recorded as `known-defects.md` #28, with the full causal
+chain confirmed by walking the actual git history (`ba834cb0` vs.
+`66d3d2f7`), not assumed: the pre-merge local branch's own
+`template-catalogue.yaml` carried a genuine, evidence-cited
+`excluded_capabilities` register (5 rows, each backed by real
+demo-instance audit evidence), read via direct dict access
+(`cat["excluded_capabilities"]`, would `KeyError` loudly if missing). The
+merge legitimately replaced that catalogue file with origin's
+real-estate-vertical version, which has never had that key — but the
+SAME-DAY renderer rebuild also silently changed the access pattern to
+`.get(key, {})`, converting the now-inevitable missing key into a silent
+empty table instead of a loud crash, and never wiring in
+`clause-library/exclusions-standard.md`'s mandatory clause that should
+have replaced the old register. The report written immediately after
+that rebuild asserted the table was populated — true of the pre-merge
+render, not re-checked against the actual rebuilt output. Separately, the
+Scope & Acceptance table was five hardcoded rows claiming acceptance
+criteria regardless of which modules were actually quoted — same
+overclaiming-fixed-list shape as the QWeb mirror. Both replaced with
+governed-source-derived content. Fixture word counts rose (F1: 984→1167,
+F2: 945→1033, F3: →1078) and PDF page counts rose 4→5 across all three as
+a direct result — not padding, a real content restoration. **Still below
+Prosper's real issued Rev3 offer** (1,576 words, §10 above) even after
+this fix — the v4 10-section schema is more compact than Prosper's older
+format. Disclosed gap, not claimed parity; not chased further this pass.
+The `_warrant_tier_lint()` check that already exists in this file only
+scans for T1-vs-T2 phrasing ("proven in production" etc.) — it was never
+built to catch a scope/exclusions-content mismatch, so this wasn't a lint
+that failed to fire, it's a defect class this repo has no lint for yet.
 
 **4. Horizon arithmetic moved into the engine.** `render_proposal_v4.py`
 was multiplying recurring-by-12/24/36 itself — presentational-looking but
@@ -1233,3 +1250,93 @@ failures, confirmed matching the true pre-merge baseline) and
 `python3 05-ops/validate.py "02-clients/PRO-prosper-realestate/"` (3
 gate/content failures, unchanged) were re-run clean of new regressions
 after all fixes in this entry.
+
+## 16. Re-verification against real wkhtmltopdf, repo-wide literal sweep, and the recurring-margin fidelity gap (2026-08-17)
+
+Follow-up pushback on §15, four items, each re-checked with evidence
+rather than accepted or waved off.
+
+**1. Repo-wide sweep for other hardcoded copies of a computed value.**
+Grepped `05-ops/*.py` and `plugins/*/ci/*.py` for the literals `150`,
+`280`, `394.38`. `t9_worksheet_internal_consistency()`'s already-fixed
+literal (#27) was the only functional duplicate found. One cosmetic
+issue found and fixed: `_derive_internal_build_cost()`'s docstring still
+read `"""round(total_hours * 150)."""` even though the function body
+already reads the rate live from `POLICY["cost_to_serve"]` — stale
+documentation of exactly the kind that caused #27's confusion in the
+first place, fixed to describe the live read. `validate.py`'s `280`/`450`
+references (mid-tier positioning-claim threshold) checked and ruled
+out as a different shape: there is no live function computing a
+mid-tier midpoint to shadow, only a market-band description in a
+`rate-card.yaml` comment — nothing for a hardcoded copy to drift against.
+
+**2. Exclusions defect (§15 item 3) re-investigated with git history,
+not assumption.** Confirmed by directly diffing `ba834cb0` (pre-rebuild)
+against `66d3d2f7` (the rebuild): the pre-merge local branch's
+`template-catalogue.yaml` had a real, evidence-cited `excluded_capabilities`
+register, read via `cat["excluded_capabilities"]` (would `KeyError`
+loudly if missing). The merge legitimately replaced the catalogue file
+(origin's real-estate version never had that key) — but the same-day
+rebuild also changed the read to `.get(key, {})`, turning an inevitable
+loud crash into a silent empty table, and never wired in the governed
+clause that should have replaced the old register. `known-defects.md`
+#28 rewritten with the full chain and a second lesson: changing `d[key]`
+to `d.get(key, default)` during a rebuild is a content-loss risk, not a
+defensive improvement, unless the missing case is genuinely handled, not
+just tolerated. `_warrant_tier_lint()` confirmed to exist and be wired
+into every fixture build, but it only checks T1-vs-T2 phrasing — it was
+never built to catch a scope/content mismatch; this defect class has no
+lint yet, not a lint that failed to fire.
+
+**3. Real wkhtmltopdf re-render — page counts did move, exactly as
+predicted, but the ceiling itself holds.** VPS/SSH access was available
+this pass (unlike the prior one); found a genuine `wkhtmltopdf 0.12.6.1`
+binary inside the `demo_presentation` Odoo container — a non-production
+container, no `-u`/`-i`, no database touched, a stateless HTML-to-PDF
+convert only. Re-rendered F1/F2/F3: F2 came out at **4 pages under
+wkhtmltopdf vs. 5 under Chrome** — a real, measured discrepancy, not a
+hypothetical one. A fresh 150-row overflow injection was tried first and
+was NOT decisive at that size (Chrome: exactly 10 pages, wkhtmltopdf: 9,
+both under the `>10` ceiling — proved nothing). The two adversarial files
+already staged from the prior overflow proof were re-rendered instead:
+26 and 34 pages under real wkhtmltopdf (vs. 27 reported under Chrome for
+the overflow file previously) — **both still correctly fail the 10-page
+check.** Conclusion, recorded as `known-defects.md` #29: the
+ceiling-enforcement mechanism is now confirmed live under the renderer
+this repo actually ships with, not only under a Chrome substitute — but
+any page count for a fixture that isn't decisively over or under the
+limit (a 4-vs-5-page document, unlike a 26-vs-34-page adversarial one) is
+renderer-specific and provisional until checked against wkhtmltopdf
+specifically. All temporary files (the ad-hoc overflow HTML, the copied
+PDFs, the VPS-side scratch directories) were deleted after verification;
+the two pre-existing adversarial HTML files on the VPS were left in
+place, not created or removed by this pass.
+
+**4. Recurring-fee margin fidelity — named, not fixed, per explicit
+"not urgent" direction.** Confirmed directly from source: `gates.platform_floor_multiplier: 1.25`
+in `policy.yaml` and `platform_portion_aed_mo()`'s actual code
+(`round(cts_total_aed * platform_floor_multiplier)`) together mean every
+recurring fee this repo has ever quoted is cost-to-serve times the floor
+multiplier with nothing added — zero cushion, confirmed exactly on both
+real client figures (Prosper 3,648, RVN 1,170). A second, real fidelity
+gap found in the same function: the governed formula everywhere else in
+this repo is `max(CTS × 1.25, market_defensible_floor)`, and
+`platform_portion_aed_mo()` has no parameter or code path for the second
+term at all — harmless today only because `market_defensible_floor` has
+never been populated with a real value for any segment (grepped
+repo-wide, confirmed), but silently wrong the moment one is added,
+since the function was never built to take a max. Confirmed
+`support-hours-log.yaml` is empty by design (`entries: []`, its own
+header explicitly forbids seeding it with estimated figures) while
+`policy.yaml: cost_to_serve.support_hours_per_5_users: 1` — the number
+that drives the support-labour term of cost-to-serve, and therefore the
+recurring fee itself — is a bare, uncited policy assumption. Recorded as
+`known-defects.md` #30. **Not fixed this pass** — the user's own framing
+governs: not urgent, recurring is driven by users not build value (so
+the Prosper build re-price to 35,000 doesn't touch it, and RVN's 1,170
+stays correct for its 7 users), and no invented `market_defensible_floor`
+value should be coded in without a real one to plug in. Re-derive
+`platform_portion_aed_mo()`'s formula fidelity once either
+`support-hours-log.yaml` gets real entries or any segment gets a
+documented market floor — until then this is a named, open risk, not a
+silent one.
