@@ -18,6 +18,7 @@ import os
 import sys
 import glob
 import math
+import copy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pricing_engine as pe
@@ -1683,6 +1684,103 @@ def t21_qweb_schema_parity_guard():
               f"current={current_schema!r}) -- correctly blocked from install, not yet fixed.")
 
 
+def t22_market_defensible_floor_guard():
+    """GUARD, not documentation: platform_portion_aed_mo() only implements
+    the CTS-floor term of the governed formula
+    max(CTS x 1.25, market_defensible_floor) -- known-defects.md #30. That
+    is harmless today only because market_defensible_floor has never been
+    populated anywhere in policy.yaml; it would be silently wrong the
+    moment someone adds it, since the function has no code path to honor
+    it. Proves the loud-raise guard added alongside #30 actually fires,
+    not just that the comment describing it reads correctly."""
+    pol = copy.deepcopy(pe.load_policy())
+    pol["cost_to_serve"]["market_defensible_floor"] = 5000
+    raised = False
+    try:
+        pe.platform_portion_aed_mo(7, pol)
+    except ValueError as e:
+        raised = "market_defensible_floor" in str(e)
+    check("T22: platform_portion_aed_mo() raises ValueError the moment "
+          "market_defensible_floor appears in cost_to_serve, rather than "
+          "silently ignoring it", raised)
+
+    pol2 = copy.deepcopy(pe.load_policy())
+    pol2["gates"]["market_defensible_floor"] = 5000
+    raised2 = False
+    try:
+        pe.platform_portion_aed_mo(7, pol2)
+    except ValueError as e:
+        raised2 = "market_defensible_floor" in str(e)
+    check("T22: same guard fires if market_defensible_floor is added under "
+          "gates: instead of cost_to_serve:", raised2)
+
+    # Unpolluted real policy must NOT raise -- the guard must not become a
+    # false-positive trap on the actual governed file.
+    no_false_positive = True
+    try:
+        pe.platform_portion_aed_mo(7)
+    except ValueError:
+        no_false_positive = False
+    check("T22: the real, current policy.yaml (no market_defensible_floor "
+          "defined) does not trip the guard", no_false_positive)
+
+
+def t23_required_section_content_gate():
+    """GUARD, not documentation: assert_required_sections() used to prove
+    only that a <div id="section-..."> marker existed, which is exactly
+    what let known-defects.md #28's defect through -- a table with a
+    header row and zero data rows, sitting under a heading and an intro
+    paragraph, looked structurally complete. Proves the strengthened
+    check (module docstring, render_proposal_v4.py) actually catches
+    both the header-only-table shape and a heading-with-nothing-under-it
+    shape, using synthetic HTML fragments, not by waiting for a real
+    fixture to regress."""
+    sys.path.insert(0, os.path.join(REPO_ROOT, "05-ops"))
+    import render_proposal_v4 as rv
+
+    good = """<div id="section-cover"><h1>Cover</h1><p>real content</p></div>
+<div id="section-understanding"><h1>Understanding</h1><p>real content</p></div>
+<div id="section-capability"><h1>Capability</h1><table><tr><th>A</th></tr><tr><td>x</td></tr></table></div>
+<div id="section-scope"><h1>Scope</h1><table><tr><th>A</th></tr><tr><td>x</td></tr></table></div>
+<div id="section-exclusions"><h1>Exclusions</h1><p>real content</p></div>
+<div id="section-commercial-summary"><h1>Commercial</h1><p>real content</p></div>
+<div id="section-payment-terms"><h1>Payment</h1><p>real content</p></div>
+<div id="section-timeline"><h1>Timeline</h1><table><tr><th>A</th></tr><tr><td>x</td></tr></table></div>
+<div id="section-dependencies"><h1>Dependencies</h1><p>real content</p></div>
+<div id="section-change-control"><h1>Change Control</h1><p>real content</p></div>"""
+    good_passed = True
+    try:
+        rv.assert_required_sections(good)
+    except AssertionError:
+        good_passed = False
+    check("T23: a genuinely complete fixture passes the strengthened check", good_passed)
+
+    header_only = good.replace(
+        '<div id="section-exclusions"><h1>Exclusions</h1><p>real content</p></div>',
+        '<div id="section-exclusions"><h1>Exclusions</h1><p>Not "coming soon."</p>'
+        '<table><tr><th>Capability</th><th>Status</th><th>Alternative</th></tr></table></div>',
+    )
+    caught_header_only = False
+    try:
+        rv.assert_required_sections(header_only)
+    except AssertionError as e:
+        caught_header_only = "exclusions" in str(e) and "header row but zero data rows" in str(e)
+    check("T23: a header-only table (known-defects.md #28's exact shape) "
+          "is caught, not just a missing section", caught_header_only)
+
+    heading_only = good.replace(
+        '<div id="section-dependencies"><h1>Dependencies</h1><p>real content</p></div>',
+        '<div id="section-dependencies"><h1>Dependencies</h1></div>',
+    )
+    caught_heading_only = False
+    try:
+        rv.assert_required_sections(heading_only)
+    except AssertionError as e:
+        caught_heading_only = "dependencies" in str(e) and "no content beyond their heading" in str(e)
+    check("T23: a section with a heading and nothing else is caught",
+          caught_heading_only)
+
+
 if __name__ == "__main__":
     print("=== T1: boundary fixtures ===")
     t1_boundary_fixtures()
@@ -1726,6 +1824,10 @@ if __name__ == "__main__":
     t20_gross_break_even_and_platform_portion()
     print("\n=== T21: QWeb schema parity guard ===")
     t21_qweb_schema_parity_guard()
+    print("\n=== T22: market_defensible_floor guard ===")
+    t22_market_defensible_floor_guard()
+    print("\n=== T23: required-section content gate ===")
+    t23_required_section_content_gate()
 
     print()
     if FAILURES:

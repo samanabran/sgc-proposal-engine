@@ -54,6 +54,16 @@ acceptance are exactly the sections a small deal would be tempted to
 compress away, and they are the three sections that protect the seller
 in a dispute.
 
+PAGE COUNT IS RENDERER-SPECIFIC -- this HTML is not itself a page count.
+The canonical render path is `wkhtmltopdf 0.12.6.1` inside the
+`demo_presentation` Docker container on the ops VPS (05-ops/
+verify_pdf_page_limit.py's docstring has the exact command; that
+container is a non-production Odoo 19 instance, distinct from
+`odoo-prod`/`sgc_staging`, and rendering to it touches no database).
+Chrome headless is a local convenience only -- confirmed to disagree
+with wkhtmltopdf by a full page on a near-boundary fixture
+(known-defects.md #29). Never cite a Chrome-derived page count as final.
+
 Usage:
     python render_proposal_v4.py <fixture_name>
     fixture_name in {F1, F2, F3}
@@ -94,11 +104,26 @@ class BlocksIssue(Exception):
 
 
 def _deciding_human():
+    """All three fields feed directly into the change-control section's
+    signature-authority sentence ("{signer} -- acting on behalf of
+    {approver}, per: {authority}"). Only actual_signer used to be
+    validated; named_approver/signer_authority fell through .get()'s
+    implicit None default, which would have rendered "acting on behalf
+    of None, per: None" silently into a legally operative sentence on an
+    issued document -- the same shape as known-defects.md #28's
+    excluded_capabilities defect, caught by the sweep #28's lesson called
+    for rather than by this specific field ever actually going missing."""
     contact = LEGAL.get("contact", {})
     signer = contact.get("actual_signer")
     if not signer:
         raise BlocksIssue("legal-identity.yaml: contact.actual_signer is empty")
-    return signer, contact.get("named_approver"), contact.get("signer_authority")
+    approver = contact.get("named_approver")
+    if not approver:
+        raise BlocksIssue("legal-identity.yaml: contact.named_approver is empty")
+    authority = contact.get("signer_authority")
+    if not authority:
+        raise BlocksIssue("legal-identity.yaml: contact.signer_authority is empty")
+    return signer, approver, authority
 
 
 def _load_exclusions_clause():
@@ -138,14 +163,59 @@ def _warrant_tier_lint(html_text):
 
 
 def assert_required_sections(html_text, section_ids=REQUIRED_SECTIONS):
-    """THE section-presence gate, not a convention. Every fixture, at any
-    page count, must carry all ten <div id="section-..."> markers below --
-    a page-count fix that drops a section instead of reflowing it is the
-    defect this function exists to catch. Raises AssertionError (loud,
-    not a silent False) naming exactly which section is missing."""
+    """THE section-presence-AND-content gate, not a convention. Presence
+    alone used to be the whole check, and it passed known-defects.md #28's
+    defect straight through: the exclusions section carried its heading
+    and intro paragraph, but its required table had a header row and zero
+    data rows -- structurally present, substantively empty. Two checks
+    now, both loud (AssertionError, never a silent False), both naming
+    exactly which section failed:
+      1. every section carries real text beyond its own <h1> heading;
+      2. every <table> inside a required section that has a header row
+         also has at least one non-header data row -- a header-only table
+         is exactly the shape #28's defect took, a table that LOOKS
+         structurally complete with nothing in it.
+    Not a full HTML parser -- relies on this generator's own structure
+    (a section never contains another id="section-..." marker, so the
+    next marker reliably bounds the current section's content)."""
     missing = [s for s in section_ids if f'id="section-{s}"' not in html_text]
     if missing:
         raise AssertionError(f"Required section(s) missing from rendered output: {missing}")
+
+    # Anchor on '<div id="section-X"', not just 'id="section-X"' -- cutting
+    # a chunk mid-tag left a dangling, unclosed '<div ' fragment at the far
+    # end of each chunk that survived the tag-stripping regex below as
+    # stray leftover text, which made an actually-empty section look
+    # non-empty (caught by T23 while testing this check, not in production
+    # -- see t23_required_section_content_gate()).
+    marker_positions = sorted(
+        ((s, html_text.index(f'<div id="section-{s}"')) for s in section_ids),
+        key=lambda t: t[1],
+    )
+
+    empty, header_only_tables = [], []
+    for i, (s, start) in enumerate(marker_positions):
+        end = marker_positions[i + 1][1] if i + 1 < len(marker_positions) else len(html_text)
+        chunk = html_text[start:end]
+
+        body = re.sub(r"<h1[^>]*>.*?</h1>", "", chunk, count=1, flags=re.DOTALL)
+        text_only = re.sub(r"&\w+;", "", re.sub(r"<[^>]+>", "", body)).strip()
+        if not text_only:
+            empty.append(s)
+
+        for table in re.findall(r"<table[^>]*>.*?</table>", chunk, flags=re.DOTALL):
+            rows = re.findall(r"<tr\b.*?</tr>", table, flags=re.DOTALL)
+            data_rows = [r for r in rows if "<th" not in r]
+            if rows and not data_rows:
+                header_only_tables.append(s)
+
+    problems = []
+    if empty:
+        problems.append(f"present but no content beyond their heading: {empty}")
+    if header_only_tables:
+        problems.append(f"contain a table with a header row but zero data rows: {header_only_tables}")
+    if problems:
+        raise AssertionError("Required section content check failed -- " + "; ".join(problems))
     return True
 
 
@@ -284,6 +354,13 @@ def render_client_html(quote, client_name, reference):
     signer, approver, authority = _deciding_human()
     vat_registered = LEGAL["vat_registered"]
     trn = LEGAL.get("trn")
+    if vat_registered and not trn:
+        # A missing TRN alone doesn't misrender blank -- it prints the
+        # literal string "TRN None" on an issued document, which is a
+        # visible defect rather than a silent one, but still exactly the
+        # "governed value went missing and nothing noticed" shape this
+        # sweep was for. Loud failure, not a printed "None".
+        raise BlocksIssue("legal-identity.yaml: vat_registered is True but trn is empty")
     today = datetime.date(2026, 8, 16)
     ot = quote["one_time"]
 
@@ -494,7 +571,13 @@ def render_internal_worksheet(quote, client_name, reference, fixture_name, modul
     cat = pe.load_template_catalogue()
     for m in module_names:
         mod = cat["modules"][m]
-        raw_h = mod.get("hours", 0)
+        # Direct index, not .get("hours", 0) -- 0 is a real, legitimate
+        # value elsewhere in this catalogue (e.g. migration_bands.
+        # none_clean_start), so a missing key defaulting to 0 would be
+        # indistinguishable from a genuinely zero-hour module instead of
+        # raising loudly. Internal-only, but the same shape known-defects
+        # #28's sweep was for: a silent default that looks like real data.
+        raw_h = mod["hours"]
         # Modules ported from this repo's own git history are git-tracked-
         # and-deployed-before by construction; multi_agent_access_control
         # explicitly is (see its own catalogue comment) -- others are

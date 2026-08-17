@@ -345,6 +345,23 @@ def platform_portion_aed_mo(users_now, policy=None):
     pol = policy or load_policy()
     cts = pol["cost_to_serve"]
 
+    # This function implements only the CTS-floor term of the governed
+    # formula (max(CTS x 1.25, market_defensible_floor) -- see runbook,
+    # SKILL.md, known-defects.md #30). Harmless while no segment has a
+    # real market_defensible_floor value; silently wrong the moment one
+    # is added, since whoever adds it will reasonably assume the governed
+    # max() already applies here. Raise loudly instead of quoting the
+    # lower number: a crash that sends someone to implement the second
+    # term is cheaper than a quote nobody knows is short.
+    if "market_defensible_floor" in cts or "market_defensible_floor" in pol.get("gates", {}):
+        raise ValueError(
+            "policy.yaml now defines market_defensible_floor, but "
+            "platform_portion_aed_mo() only implements the CTS-floor term "
+            "of max(CTS x 1.25, market_defensible_floor) -- known-defects.md "
+            "#30. Implement the max() here before this value can be trusted; "
+            "do not remove this guard without doing so."
+        )
+
     hosting_allocation_aed = cts["hosting_node_true_cost_aed"] * (users_now / cts["hosting_node_user_capacity"])
     support_labour_aed = math.ceil(users_now / 5) * cts["support_hours_per_5_users"] * cts["support_rate_aed"]
 
